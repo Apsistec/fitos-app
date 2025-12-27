@@ -1,0 +1,34 @@
+{
+  "name": "fitos-app",
+  "version": "0.1.0",
+  "description": "FitOS - AI-Powered Fitness Coaching Platform",
+  "private": true,
+  "scripts": {
+    "start": "nx serve mobile",
+    "start:landing": "nx serve landing",
+    "build": "nx build mobile",
+    "build:landing": "nx build landing",
+    "build:all": "nx run-many --target=build --all",
+    "test": "nx test",
+    "lint": "nx lint",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:migrate": "supabase migration up",
+    "db:gen-types": "supabase gen types typescript --local > libs/shared/src/lib/database.types.ts",
+    "ai:dev": "cd apps/ai-backend && poetry run python -m uvicorn main:app --reload"
+  },
+  "workspaces": [
+    "apps/*",
+    "libs/*"
+  ],
+  "devDependencies": {
+    "@nx/angular": "^19.0.0",
+    "@nx/workspace": "^19.0.0",
+    "nx": "^19.0.0",
+    "typescript": "~5.4.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
