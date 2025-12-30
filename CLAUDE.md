@@ -5,21 +5,32 @@
 FitOS is an AI-powered fitness coaching platform for solo trainers. This monorepo contains:
 
 - `apps/mobile` - Ionic Angular mobile app (iOS, Android, PWA)
-- `apps/landing` - Marketing landing page (Angular)
+- `apps/landing` - Marketing landing page (Angular SSR)
 - `apps/ai-backend` - LangGraph Python backend for AI agents
 - `libs/shared` - Shared TypeScript types and utilities
 - `supabase/` - Database migrations and configuration
 
-## Tech Stack
+## Tech Stack (Latest Versions as of December 2025)
 
 | Layer | Technology |
 |-------|------------|
-| Frontend | Ionic 8 + Angular 18 + TypeScript |
+| Frontend | Ionic 8.7 + Angular 20 + TypeScript 5.8 |
+| Native | Capacitor 8 |
 | Backend | Supabase (PostgreSQL + pgvector + Auth) |
 | AI | LangGraph (Python) on Cloud Run |
 | Payments | Stripe Connect |
 | Wearables | Terra API |
 | Voice (Phase 2) | Deepgram Nova-3 / Aura-2 |
+
+## Version Requirements
+
+- **Node.js**: >=20.11.0 (Angular 20 dropped Node 18 support)
+- **npm**: >=10.0.0
+- **Angular**: 20.x
+- **Ionic**: 8.7.x
+- **Capacitor**: 8.x
+- **TypeScript**: 5.8.x
+- **ESLint**: 9.x (flat config)
 
 ## Key Commands
 
@@ -41,6 +52,9 @@ npm run db:gen-types
 
 # Start AI backend (Phase 2)
 npm run ai:dev
+
+# Lint code
+npm run lint
 ```
 
 ## Database
@@ -53,10 +67,19 @@ npm run ai:dev
 ## Code Style
 
 - Strict TypeScript (`strict: true`)
-- Angular standalone components preferred
+- Angular 20 standalone components (default)
+- Angular Signals for reactive state
 - Ionic components for UI
 - Tailwind CSS for custom styling
+- ESLint 9 with flat config
 - Follow Angular style guide
+
+## Angular 20 Features to Use
+
+- **Signals**: Use `signal()`, `computed()`, `effect()` for state management
+- **Control Flow**: Use `@if`, `@for`, `@switch` (not `*ngIf`, `*ngFor`)
+- **Zoneless** (experimental): Can enable for better performance
+- **Standalone Components**: Default, no NgModules needed
 
 ## File Structure
 
@@ -87,6 +110,22 @@ const supabase = createClient<Database>(
   environment.supabaseUrl,
   environment.supabaseAnonKey
 );
+```
+
+### Angular Signals (Angular 20)
+```typescript
+import { signal, computed, effect } from '@angular/core';
+
+// State
+const count = signal(0);
+
+// Derived state
+const doubled = computed(() => count() * 2);
+
+// Side effects
+effect(() => {
+  console.log(`Count changed to: ${count()}`);
+});
 ```
 
 ### RLS Policies
@@ -138,11 +177,13 @@ npm test
 npm run e2e
 ```
 
+Note: Angular 20 supports Vitest (experimental) as an alternative to Karma.
+
 ## Deployment
 
-- **Mobile**: Capacitor builds → App Store / Play Store
+- **Mobile**: Capacitor 8 builds → App Store / Play Store
 - **PWA**: Vercel or Firebase Hosting
-- **Landing**: Vercel or Firebase Hosting
+- **Landing**: Vercel (SSR) or Firebase Hosting
 - **AI Backend**: Google Cloud Run
 - **Database**: Supabase Cloud
 
@@ -165,3 +206,11 @@ Key research informing design decisions:
 5. **Gamification**: Hedge's g=0.42 initially, declines over time
 
 See the strategy document for full citations.
+
+## Capacitor 8 Notes
+
+Capacitor 8 changes:
+- Swift Package Manager (SPM) is now default for iOS (CocoaPods still supported)
+- iOS minimum deployment target: 15.0
+- Android minimum SDK: 24
+- New SystemBars API replaces StatusBar plugin for Android edge-to-edge

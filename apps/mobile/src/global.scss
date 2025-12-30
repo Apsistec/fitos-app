@@ -1,0 +1,221 @@
+/*
+ * FitOS Global Styles
+ */
+
+// Import Ionic styles
+@import '@ionic/angular/css/core.css';
+@import '@ionic/angular/css/normalize.css';
+@import '@ionic/angular/css/structure.css';
+@import '@ionic/angular/css/typography.css';
+@import '@ionic/angular/css/display.css';
+
+// Optional Ionic CSS utilities
+@import '@ionic/angular/css/padding.css';
+@import '@ionic/angular/css/float-elements.css';
+@import '@ionic/angular/css/text-alignment.css';
+@import '@ionic/angular/css/text-transformation.css';
+@import '@ionic/angular/css/flex-utils.css';
+
+// ===========================================
+// FitOS Custom Global Styles
+// ===========================================
+
+// Safe area padding for notched devices
+ion-content {
+  --padding-top: env(safe-area-inset-top);
+  --padding-bottom: env(safe-area-inset-bottom);
+}
+
+// Card styling
+ion-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+// Button styling
+ion-button {
+  --border-radius: 8px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+// Input styling
+ion-input, ion-textarea {
+  --border-radius: 8px;
+}
+
+// List styling
+ion-item {
+  --border-radius: 8px;
+}
+
+// ===========================================
+// Nutrition Colors (Adherence Neutral)
+// ===========================================
+.calories-color {
+  color: var(--fitos-calories);
+}
+
+.protein-color {
+  color: var(--fitos-protein);
+}
+
+.carbs-color {
+  color: var(--fitos-carbs);
+}
+
+.fat-color {
+  color: var(--fitos-fat);
+}
+
+// Use neutral gray for "over target" - NOT red
+.over-target {
+  color: var(--fitos-neutral);
+}
+
+// ===========================================
+// Progress Bars (Nutrition)
+// ===========================================
+.nutrition-progress {
+  --background: var(--ion-color-light);
+  --progress-background: var(--fitos-calories);
+  height: 8px;
+  border-radius: 4px;
+
+  &.protein {
+    --progress-background: var(--fitos-protein);
+  }
+
+  &.carbs {
+    --progress-background: var(--fitos-carbs);
+  }
+
+  &.fat {
+    --progress-background: var(--fitos-fat);
+  }
+}
+
+// ===========================================
+// Workout Logging
+// ===========================================
+.set-complete {
+  background-color: var(--ion-color-success);
+  color: white;
+  border-radius: 8px;
+}
+
+.set-pending {
+  background-color: var(--ion-color-light);
+  border-radius: 8px;
+}
+
+// Rest timer
+.rest-timer {
+  font-size: 3rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--ion-color-primary);
+}
+
+// ===========================================
+// Avatar
+// ===========================================
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+
+  &.small {
+    width: 32px;
+    height: 32px;
+  }
+
+  &.large {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+// ===========================================
+// Status Badges
+// ===========================================
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  &.active {
+    background-color: rgba(34, 197, 94, 0.1);
+    color: var(--ion-color-success);
+  }
+
+  &.pending {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--ion-color-warning);
+  }
+
+  &.inactive {
+    background-color: rgba(107, 114, 128, 0.1);
+    color: var(--ion-color-medium);
+  }
+}
+
+// ===========================================
+// Empty States
+// ===========================================
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+
+  ion-icon {
+    font-size: 64px;
+    color: var(--ion-color-medium);
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    margin: 0 0 8px;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0 0 24px;
+    color: var(--ion-color-medium);
+  }
+}
+
+// ===========================================
+// Utility Classes
+// ===========================================
+.text-center {
+  text-align: center;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.text-muted {
+  color: var(--ion-color-medium);
+}
+
+.mb-0 {
+  margin-bottom: 0;
+}
+
+.mt-0 {
+  margin-top: 0;
+}
