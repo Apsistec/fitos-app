@@ -1,10 +1,10 @@
-import { enableProdMode, isDevMode } from '@angular/core';
+import { enableProdMode } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { 
-  RouteReuseStrategy, 
-  provideRouter, 
-  withPreloading, 
+import {
+  RouteReuseStrategy,
+  provideRouter,
+  withPreloading,
   PreloadAllModules,
   withComponentInputBinding,
 } from '@angular/router';
@@ -23,7 +23,6 @@ import {
   loadingInterceptor,
   analyticsInterceptor,
 } from './app/core/interceptors';
-import { provideServiceWorker } from '@angular/service-worker';
 
 if (environment.production) {
   enableProdMode();
@@ -49,9 +48,12 @@ bootstrapApplication(AppComponent, {
         analyticsInterceptor,  // Log API performance metrics
         errorInterceptor,      // Handle errors last (after retries)
       ])
-    ), provideServiceWorker('ngsw-worker.js', {
-            enabled: !isDevMode(),
-            registrationStrategy: 'registerWhenStable:30000'
-          }),
+    ),
+    // TODO: Re-enable service worker after resolving @angular/service-worker package dependencies
+    // PWA configuration files are in place (manifest.webmanifest, ngsw-config.json, UpdateService)
+    // provideServiceWorker('ngsw-worker.js', {
+    //   enabled: !isDevMode(),
+    //   registrationStrategy: 'registerWhenStable:30000'
+    // }),
   ],
 });
