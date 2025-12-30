@@ -49,7 +49,7 @@ export class ClientService {
         .from('client_profiles')
         .select(`
           *,
-          profile:profiles!client_profiles_user_id_fkey(*)
+          profile:profiles!client_profiles_id_fkey(*)
         `)
         .eq('trainer_id', userId)
         .order('created_at', { ascending: false });
@@ -74,9 +74,9 @@ export class ClientService {
         .from('client_profiles')
         .select(`
           *,
-          profile:profiles!client_profiles_user_id_fkey(*)
+          profile:profiles!client_profiles_id_fkey(*)
         `)
-        .eq('user_id', clientId)
+        .eq('id', clientId)
         .single();
 
       if (error) throw error;
