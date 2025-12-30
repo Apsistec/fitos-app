@@ -295,6 +295,11 @@ import type { Workout } from '@fitos/shared';
       }
     }
 
+    ion-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
     ion-card {
       margin: 0;
       height: 100%;
@@ -422,15 +427,16 @@ export class DashboardPage implements OnInit {
   currentStreak = signal(0);
   upcomingWorkouts = signal<Workout[]>([]);
   
-  // Nutrition (mock data for now)
-  caloriesConsumed = signal(1250);
-  caloriesTarget = signal(2000);
-  caloriesProgress = computed(() => 
-    Math.min(this.caloriesConsumed() / this.caloriesTarget(), 1)
-  );
-  proteinConsumed = signal(85);
-  carbsConsumed = signal(120);
-  fatConsumed = signal(45);
+  // Nutrition (real data from backend)
+  caloriesConsumed = signal(0);
+  caloriesTarget = signal(0);
+  caloriesProgress = computed(() => {
+    const target = this.caloriesTarget();
+    return target > 0 ? Math.min(this.caloriesConsumed() / target, 1) : 0;
+  });
+  proteinConsumed = signal(0);
+  carbsConsumed = signal(0);
+  fatConsumed = signal(0);
 
   // Trainer activity
   recentActivity = signal<Array<{
@@ -460,34 +466,14 @@ export class DashboardPage implements OnInit {
 
   async loadDashboardData(): Promise<void> {
     // TODO: Load actual data from Supabase
-    // For now, using placeholder data
-    
-    // Mock upcoming workouts
-    this.upcomingWorkouts.set([
-      {
-        id: '1',
-        clientId: '',
-        name: 'Upper Body Strength',
-        scheduledDate: new Date(Date.now() + 86400000),
-        status: 'scheduled',
-        exercises: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as Workout,
-      {
-        id: '2',
-        clientId: '',
-        name: 'Lower Body Power',
-        scheduledDate: new Date(Date.now() + 86400000 * 3),
-        status: 'scheduled',
-        exercises: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as Workout,
-    ]);
+    // Set to defaults until backend data is available
+    this.upcomingWorkouts.set([]);
+    this.weeklyWorkouts.set(0);
+    this.currentStreak.set(0);
+    this.todayWorkout.set(null);
 
-    this.weeklyWorkouts.set(3);
-    this.currentStreak.set(7);
+    // TODO: Load nutrition data if client
+    // TODO: Load client activity if trainer
   }
 
   getStatusColor(status: string | undefined): string {
