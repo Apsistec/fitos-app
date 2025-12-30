@@ -124,7 +124,7 @@ import { WorkoutService } from '../../../../core/services/workout.service';
               >
                 @for (client of clientService.activeClients(); track client.id) {
                   <ion-select-option [value]="client.id">
-                    {{ client.profile?.first_name }} {{ client.profile?.last_name }}
+                    {{ client.profile?.full_name || client.profile?.email }}
                   </ion-select-option>
                 }
               </ion-select>
@@ -362,7 +362,7 @@ export class AssignWorkoutPage implements OnInit {
 
     if (!client) return '';
 
-    return `${client.profile?.first_name || ''} ${client.profile?.last_name || ''}`.trim();
+    return client.profile?.full_name || client.profile?.email || 'Unknown Client';
   }
 
   async assignWorkout() {

@@ -34,6 +34,64 @@ export type Database = {
   }
   public: {
     Tables: {
+      assigned_workouts: {
+        Row: {
+          assigned_by: string
+          client_id: string
+          created_at: string | null
+          id: string
+          scheduled_date: string
+          status: Database["public"]["Enums"]["workout_status"] | null
+          template_id: string
+          trainer_notes: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_by: string
+          client_id: string
+          created_at?: string | null
+          id?: string
+          scheduled_date: string
+          status?: Database["public"]["Enums"]["workout_status"] | null
+          template_id: string
+          trainer_notes?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_by?: string
+          client_id?: string
+          created_at?: string | null
+          id?: string
+          scheduled_date?: string
+          status?: Database["public"]["Enums"]["workout_status"] | null
+          template_id?: string
+          trainer_notes?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assigned_workouts_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assigned_workouts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assigned_workouts_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "workout_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_profiles: {
         Row: {
           created_at: string | null
@@ -291,6 +349,60 @@ export type Database = {
             columns: ["trainer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      logged_sets: {
+        Row: {
+          created_at: string | null
+          exercise_id: string
+          id: string
+          notes: string | null
+          reps: number
+          rpe: number | null
+          session_id: string
+          set_number: number
+          updated_at: string | null
+          weight: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          exercise_id: string
+          id?: string
+          notes?: string | null
+          reps: number
+          rpe?: number | null
+          session_id: string
+          set_number: number
+          updated_at?: string | null
+          weight?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          exercise_id?: string
+          id?: string
+          notes?: string | null
+          reps?: number
+          rpe?: number | null
+          session_id?: string
+          set_number?: number
+          updated_at?: string | null
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "logged_sets_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "logged_sets_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "workout_sessions"
             referencedColumns: ["id"]
           },
         ]
@@ -873,6 +985,63 @@ export type Database = {
             columns: ["workout_id"]
             isOneToOne: false
             referencedRelation: "workouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workout_sessions: {
+        Row: {
+          assigned_workout_id: string
+          client_notes: string | null
+          client_rating: number | null
+          completed_at: string | null
+          created_at: string | null
+          duration_seconds: number | null
+          id: string
+          started_at: string
+          status: Database["public"]["Enums"]["workout_status"] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          assigned_workout_id: string
+          client_notes?: string | null
+          client_rating?: number | null
+          completed_at?: string | null
+          created_at?: string | null
+          duration_seconds?: number | null
+          id?: string
+          started_at: string
+          status?: Database["public"]["Enums"]["workout_status"] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          assigned_workout_id?: string
+          client_notes?: string | null
+          client_rating?: number | null
+          completed_at?: string | null
+          created_at?: string | null
+          duration_seconds?: number | null
+          id?: string
+          started_at?: string
+          status?: Database["public"]["Enums"]["workout_status"] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_sessions_assigned_workout_id_fkey"
+            columns: ["assigned_workout_id"]
+            isOneToOne: false
+            referencedRelation: "assigned_workouts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workout_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]

@@ -54,7 +54,7 @@ export class AssignmentService {
         assigned_by: userId,
         scheduled_date: assignment.scheduledDate,
         trainer_notes: assignment.trainerNotes || null,
-        status: 'pending'
+        status: 'scheduled'
       };
 
       const { data, error } = await this.supabase.client
@@ -92,7 +92,7 @@ export class AssignmentService {
         assigned_by: userId,
         scheduled_date: a.scheduledDate,
         trainer_notes: a.trainerNotes || null,
-        status: 'pending'
+        status: 'scheduled'
       }));
 
       const { error } = await this.supabase.client

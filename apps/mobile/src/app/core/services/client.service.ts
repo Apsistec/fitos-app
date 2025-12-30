@@ -98,7 +98,7 @@ export class ClientService {
 
     const searchLower = query.toLowerCase();
     return this.clients().filter(client => {
-      const fullName = `${client.profile?.first_name || ''} ${client.profile?.last_name || ''}`.toLowerCase();
+      const fullName = (client.profile?.full_name || '').toLowerCase();
       const email = client.profile?.email?.toLowerCase() || '';
 
       return fullName.includes(searchLower) || email.includes(searchLower);
