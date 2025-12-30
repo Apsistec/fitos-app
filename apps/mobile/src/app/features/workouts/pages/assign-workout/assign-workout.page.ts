@@ -122,9 +122,9 @@ import { WorkoutService } from '../../../../core/services/workout.service';
                 placeholder="Select a client"
                 interface="action-sheet"
               >
-                @for (client of clientService.activeClients(); track client.user_id) {
-                  <ion-select-option [value]="client.user_id">
-                    {{ client.profile?.first_name }} {{ client.profile?.last_name }}
+                @for (client of clientService.activeClients(); track client.id) {
+                  <ion-select-option [value]="client.id">
+                    {{ client.profile.full_name }}
                   </ion-select-option>
                 }
               </ion-select>
@@ -216,7 +216,7 @@ import { WorkoutService } from '../../../../core/services/workout.service';
                 @if (assignMultipleDates) {
                   <div class="summary-item">
                     <span class="label">Dates:</span>
-                    <span class="value">{{ selectedDates?.length }} workouts</span>
+                    <span class="value">{{ selectedDates.length }} workouts</span>
                   </div>
                 } @else {
                   <div class="summary-item">
@@ -357,12 +357,12 @@ export class AssignWorkoutPage implements OnInit {
 
   getSelectedClientName(): string {
     const client = this.clientService.activeClients().find(
-      c => c.user_id === this.selectedClientId
+      c => c.id === this.selectedClientId
     );
 
     if (!client) return '';
 
-    return `${client.profile?.first_name || ''} ${client.profile?.last_name || ''}`.trim();
+    return client.profile?.full_name || '';
   }
 
   async assignWorkout() {

@@ -64,7 +64,7 @@ export interface ExerciseConfig {
             </ion-card-title>
             @if (config.exercise?.primary_muscle) {
               <ion-badge color="primary" class="muscle-badge">
-                {{ config.exercise.primary_muscle }}
+                {{ config.exercise?.primary_muscle }}
               </ion-badge>
             }
           </div>

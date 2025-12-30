@@ -1,0 +1,22 @@
+import { HttpInterceptorFn } from '@angular/common/http';
+import { retry, timer } from 'rxjs';
+
+export const retryInterceptor: HttpInterceptorFn = (req, next) => {
+  // Only retry GET requests
+  if (req.method !== 'GET') {
+    return next(req);
+  }
+
+  return next(req).pipe(
+    retry({
+      count: 3,
+      delay: (error, retryCount) => {
+        // Exponential backoff: 1s, 2s, 4s
+        const delayMs = Math.pow(2, retryCount) * 1000;
+        console.log(`[Retry Interceptor] Retrying request (${retryCount}/3) after ${delayMs}ms - ${req.url}`);
+        return timer(delayMs);
+      },
+      resetOnSuccess: true
+    })
+  );
+};

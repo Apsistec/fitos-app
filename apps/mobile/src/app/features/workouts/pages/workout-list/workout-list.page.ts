@@ -16,10 +16,8 @@ import {
   IonCardSubtitle,
   IonCardContent,
   IonButton,
-  IonButtons,
   IonSearchbar,
   IonSpinner,
-  IonBadge,
   IonRefresher,
   IonRefresherContent,
   IonText,
@@ -65,14 +63,12 @@ type WorkoutTemplateWithExercises = Database['public']['Tables']['workout_templa
     IonCardSubtitle,
     IonCardContent,
     IonButton,
-    IonButtons,
     IonSearchbar,
     IonSpinner,
-    IonBadge,
     IonRefresher,
     IonRefresherContent,
     IonText
-  ],
+],
   template: `
     <ion-header>
       <ion-toolbar>
@@ -151,12 +147,12 @@ type WorkoutTemplateWithExercises = Database['public']['Tables']['workout_templa
                   <div class="workout-meta">
                     <div class="meta-item">
                       <ion-icon name="barbell-outline"></ion-icon>
-                      <span>{{ workout.exercises?.length || 0 }} exercises</span>
+                      <span>{{ workout.exercises.length || 0 }} exercises</span>
                     </div>
-                    @if (workout.estimated_duration) {
+                    @if (workout.estimated_duration_minutes) {
                       <div class="meta-item">
                         <ion-icon name="time-outline"></ion-icon>
-                        <span>{{ formatDuration(workout.estimated_duration) }}</span>
+                        <span>{{ formatDuration(workout.estimated_duration_minutes) }}</span>
                       </div>
                     }
                   </div>

@@ -4,15 +4,10 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { RouterLink } from '@angular/router';
 import {
   IonContent,
-  IonHeader,
-  IonTitle,
-  IonToolbar,
   IonButton,
   IonInput,
   IonItem,
-  IonLabel,
   IonList,
-  IonText,
   IonSpinner,
   IonIcon,
   IonNote,
@@ -29,19 +24,14 @@ import { AuthService } from '@app/core/services/auth.service';
     ReactiveFormsModule,
     RouterLink,
     IonContent,
-    IonHeader,
-    IonTitle,
-    IonToolbar,
     IonButton,
     IonInput,
     IonItem,
-    IonLabel,
     IonList,
-    IonText,
     IonSpinner,
     IonIcon,
-    IonNote,
-  ],
+    IonNote
+],
   template: `
     <ion-content class="ion-padding">
       <div class="login-container">

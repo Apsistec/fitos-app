@@ -10,8 +10,6 @@ import {
   IonSearchbar,
   IonRefresher,
   IonRefresherContent,
-  IonList,
-  IonItem,
   IonLabel,
   IonSelect,
   IonSelectOption,
@@ -21,7 +19,10 @@ import {
   IonSpinner,
   IonChip,
   IonFab,
-  IonFabButton
+  IonFabButton,
+  IonGrid,
+  IonRow,
+  IonCol
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { filterOutline, addOutline, closeCircle } from 'ionicons/icons';
@@ -44,8 +45,6 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
     IonSearchbar,
     IonRefresher,
     IonRefresherContent,
-    IonList,
-    IonItem,
     IonLabel,
     IonSelect,
     IonSelectOption,
@@ -56,6 +55,9 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
     IonChip,
     IonFab,
     IonFabButton,
+    IonGrid,
+    IonRow,
+    IonCol,
     ExerciseCardComponent
   ],
   template: `
@@ -185,15 +187,21 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
               <p>{{ exerciseService.filteredExercises().length }} exercises</p>
             </div>
 
-            @for (exercise of exerciseService.filteredExercises(); track exercise.id) {
-              <app-exercise-card
-                [exercise]="exercise"
-                [showAddButton]="selectionMode()"
-                (detailClick)="onExerciseDetail($event)"
-                (videoClick)="onExerciseVideo($event)"
-                (addClick)="onExerciseAdd($event)"
-              ></app-exercise-card>
-            }
+            <ion-grid>
+              <ion-row>
+                @for (exercise of exerciseService.filteredExercises(); track exercise.id) {
+                  <ion-col size="12" sizeMd="6" sizeLg="4" sizeXl="3">
+                    <app-exercise-card
+                      [exercise]="exercise"
+                      [showAddButton]="selectionMode()"
+                      (detailClick)="onExerciseDetail($event)"
+                      (videoClick)="onExerciseVideo($event)"
+                      (addClick)="onExerciseAdd($event)"
+                    ></app-exercise-card>
+                  </ion-col>
+                }
+              </ion-row>
+            </ion-grid>
           }
         </div>
       }

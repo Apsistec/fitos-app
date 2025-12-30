@@ -1,6 +1,102 @@
-# FitOS Phase 1 Feature Backlog
+# FitOS Phase 1 Feature Backlog (Updated)
 
-This document outlines the complete feature set for Phase 1 MVP (Months 1-3), broken down into user stories and implementation tasks.
+This document outlines the complete feature set for Phase 1 MVP, broken down into user stories and implementation tasks. Updated to include Sprint 0 foundation work and reflect the three-role architecture (Client, Trainer, Gym Owner).
+
+---
+
+## Sprint 0: Foundation & Architecture Setup (Current Sprint)
+
+### 0.1 Authentication Guards & State Management
+**Priority:** P0 (Critical)
+**Status:** IN PROGRESS
+
+**Implementation Tasks:**
+- [x] Create auth service with signals
+- [x] Create basic auth guard
+- [ ] Fix auth guard to properly wait for initialization
+- [ ] Create no-auth guard (redirects authenticated users away from auth pages)
+- [ ] Create role-based guards (trainer, client, gym_owner)
+- [ ] Implement auth state persistence across refreshes
+- [ ] Add loading state during auth check
+- [ ] Create RoleRedirectComponent for automatic routing based on role
+
+### 0.2 HTTP Interceptors
+**Priority:** P0 (Critical)
+**Status:** NOT STARTED
+
+**Implementation Tasks:**
+- [ ] Create auth interceptor (add Bearer token to requests)
+- [ ] Create error interceptor (handle 401, 403, 500 errors)
+- [ ] Create retry interceptor (exponential backoff for GET requests)
+- [ ] Create loading interceptor (show/hide loading indicator)
+- [ ] Create analytics interceptor (log API performance)
+- [ ] Register all interceptors in app.config.ts
+- [ ] Test interceptor chain order
+
+### 0.3 Responsive Layout Fixes
+**Priority:** P0 (Critical)
+**Status:** NOT STARTED
+
+**Known Issues:**
+- Settings page not responsive on tablet/desktop
+- Home page cards layout broken (workouts/streak cards misaligned)
+- Cards too large on desktop viewports
+- "No workout scheduled" card oversized on tablet
+- Cards not horizontally centered in grid
+
+**Implementation Tasks:**
+- [ ] Fix IonGrid usage in dashboard components
+- [ ] Add proper size/sizeMd/sizeLg attributes to all ion-col elements
+- [ ] Create responsive card styles with max-width constraints
+- [ ] Center card grid on all breakpoints
+- [ ] Fix settings page layout for tablet/desktop
+- [ ] Test on mobile (375px), tablet (768px), desktop (1200px+) viewports
+- [ ] Add container max-width for large screens
+
+### 0.4 Route Protection
+**Priority:** P0 (Critical)
+**Status:** PARTIAL
+
+**Known Issues:**
+- Workouts page shows "not logged in" but is still viewable
+- Signout button visible/active when not logged in
+- No redirect to login for protected routes
+
+**Implementation Tasks:**
+- [ ] Ensure ALL routes except /auth/* require authentication
+- [ ] Add redirect to /auth/login for unauthenticated users
+- [ ] Store intended route for post-login redirect (returnUrl)
+- [ ] Fix "not logged in" message - should redirect, not display
+- [ ] Conditionally show/hide signout button based on auth state
+- [ ] Add proper loading states during route transitions
+- [ ] Implement canMatch guards for lazy-loaded routes
+
+### 0.5 PWA Setup
+**Priority:** P1 (High)
+**Status:** NOT STARTED
+
+**Implementation Tasks:**
+- [ ] Run `ng add @angular/pwa` in apps/mobile
+- [ ] Configure ngsw-config.json for app assets (prefetch)
+- [ ] Configure data caching strategies (performance vs freshness)
+- [ ] Create manifest.webmanifest with FitOS branding
+- [ ] Generate PWA icons (all required sizes: 72, 96, 128, 144, 192, 512)
+- [ ] Create UpdateService for app update handling
+- [ ] Add update available prompt/modal
+- [ ] Test offline functionality
+- [ ] Test install experience on iOS and Android
+
+### 0.6 Animations
+**Priority:** P2 (Medium)
+**Status:** NOT STARTED
+
+**Implementation Tasks:**
+- [ ] Add fade-in animations for page loads
+- [ ] Add list stagger animations for workout/exercise lists
+- [ ] Add card entrance animations for dashboard cards
+- [ ] Configure Ionic page transitions (IonicRouteStrategy)
+- [ ] Add loading skeleton animations
+- [ ] Create shared animation triggers file
 
 ---
 
@@ -9,6 +105,7 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 ### 1.1 Supabase Auth Integration
 **Priority:** P0 (Critical)
 **Sprint:** 1
+**Status:** IN PROGRESS
 
 **User Stories:**
 - As a user, I can sign up with email/password so I can create an account
@@ -18,36 +115,41 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 - As a user, I can sign out of my account
 
 **Implementation Tasks:**
-- [ ] Configure Supabase Auth in project
-- [ ] Create auth service with login/logout/register methods
-- [ ] Implement email/password authentication
+- [x] Configure Supabase Auth in project
+- [x] Create auth service with login/logout/register methods
+- [x] Implement email/password authentication
 - [ ] Configure Google OAuth provider
-- [ ] Configure Apple OAuth provider
-- [ ] Create password reset flow
-- [ ] Implement auth guards for protected routes
-- [ ] Add auth state management (NgRx or signals)
-- [ ] Create login page UI
-- [ ] Create registration page UI
-- [ ] Handle auth errors gracefully
+- [ ] Configure Apple OAuth provider (requires Apple Developer account)
+- [x] Create password reset flow
+- [x] Implement auth guards for protected routes
+- [x] Add auth state management (signals)
+- [ ] Improve login page UI styling
+- [ ] Improve registration page UI styling
+- [x] Handle auth errors gracefully
 
-### 1.2 Role-Based Access
+### 1.2 Role-Based Access Control
 **Priority:** P0 (Critical)
 **Sprint:** 1
+**Status:** NEEDS UPDATE
 
 **User Stories:**
-- As a new user, I can choose whether I'm a trainer or client during signup
+- As a new user, I can choose whether I'm a trainer, client, or gym owner during signup
 - As a trainer, I see a trainer-specific dashboard
 - As a client, I see a client-specific dashboard
+- As a gym owner, I see an owner-specific dashboard
 
 **Implementation Tasks:**
-- [ ] Add role selection to registration flow
-- [ ] Create trainer_profiles record on trainer signup
-- [ ] Create client_profiles record on client signup
-- [ ] Implement role-based route guards
-- [ ] Create separate navigation for trainer/client
-- [ ] Add role check utilities
+- [ ] Add role selection step to registration flow
+- [ ] Update database schema for roles (add user_role enum)
+- [ ] Create RoleRedirectComponent that routes to correct dashboard
+- [ ] Implement role-based route guards (trainerGuard, clientGuard, ownerGuard)
+- [ ] Create separate tab navigation for each role
+- [ ] Add role check utilities (isTrainer(), isClient(), isOwner())
+- [ ] Create facilities table for gym owners
+- [ ] Create facility_trainers junction table
+- [ ] Add facility_id to profiles table
 
-### 1.3 Trainer Onboarding
+### 1.3 Onboarding Flow
 **Priority:** P1 (High)
 **Sprint:** 2
 
@@ -55,12 +157,21 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 - As a new trainer, I can complete my business profile
 - As a trainer, I can add my certifications and specializations
 - As a trainer, I can upload a profile photo
+- As a new client, I can enter my fitness goals
+- As a client, I can enter basic health information
 
 **Implementation Tasks:**
-- [ ] Create onboarding wizard component
-- [ ] Build business info form (name, bio, timezone)
-- [ ] Build certifications input (multi-select/tags)
-- [ ] Build specializations input
+- [ ] Create multi-step onboarding wizard component
+- [ ] Build trainer onboarding steps:
+  - Business info (name, bio, timezone)
+  - Certifications (multi-select)
+  - Specializations (tags)
+  - Avatar upload
+- [ ] Build client onboarding steps:
+  - Fitness goals (multi-select)
+  - Experience level (beginner/intermediate/advanced)
+  - Availability preferences
+  - Basic measurements (optional)
 - [ ] Implement avatar upload to Supabase Storage
 - [ ] Create onboarding progress indicator
 - [ ] Add skip/complete later option
@@ -78,19 +189,88 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 
 **Implementation Tasks:**
 - [ ] Create invitations table in database
-- [ ] Build invite generation API (email + link)
+- [ ] Build invite generation API (email + shareable link)
 - [ ] Create invite email template
-- [ ] Integrate email sending (Supabase/Resend)
+- [ ] Integrate email sending (Supabase email or Resend)
 - [ ] Build invite acceptance flow
 - [ ] Auto-associate client with trainer on acceptance
 - [ ] Create pending invites list UI for trainers
 - [ ] Add invite expiration (7 days default)
+- [ ] Allow resending expired invites
 
 ---
 
-## Epic 2: Exercise Library
+## Epic 2: Dashboard System
 
-### 2.1 Exercise Database
+### 2.1 Client Dashboard
+**Priority:** P0 (Critical)
+**Sprint:** 1
+**Status:** NOT STARTED
+
+**User Stories:**
+- As a client, I see my today's workout prominently
+- As a client, I see my weekly progress at a glance
+- As a client, I can quickly start my workout
+- As a client, I see my nutrition summary (if tracking)
+- As a client, I see unread messages from my trainer
+
+**Implementation Tasks:**
+- [ ] Create ClientDashboardPage component
+- [ ] Build today's workout hero card with quick-start button
+- [ ] Build stats row (workouts this week, current streak)
+- [ ] Build nutrition summary card (conditional on nutrition tracking)
+- [ ] Build upcoming workouts list
+- [ ] Build wearable data card (conditional on connected devices)
+- [ ] Implement pull-to-refresh
+- [ ] Add loading skeletons for all sections
+- [ ] Make fully responsive (mobile-first)
+
+### 2.2 Trainer Dashboard
+**Priority:** P0 (Critical)
+**Sprint:** 1
+**Status:** PARTIAL (current dashboard needs role-specific updates)
+
+**User Stories:**
+- As a trainer, I see an overview of all my clients
+- As a trainer, I see clients who need my attention
+- As a trainer, I see today's scheduled sessions
+- As a trainer, I can quickly take common actions
+
+**Implementation Tasks:**
+- [ ] Create TrainerDashboardPage component
+- [ ] Build client overview stats card (total, active, new this month)
+- [ ] Build "needs attention" section (missed workouts, unread messages)
+- [ ] Build today's schedule section
+- [ ] Build recent activity feed
+- [ ] Build quick action buttons (new workout, invite client, etc.)
+- [ ] Add revenue summary card (if payments enabled)
+- [ ] Implement pull-to-refresh
+- [ ] Add loading skeletons
+- [ ] Make fully responsive
+
+### 2.3 Gym Owner Dashboard
+**Priority:** P2 (Medium)
+**Sprint:** 6
+
+**User Stories:**
+- As a gym owner, I see facility-wide metrics
+- As a gym owner, I see trainer performance
+- As a gym owner, I see revenue summary
+- As a gym owner, I can manage trainers
+
+**Implementation Tasks:**
+- [ ] Create OwnerDashboardPage component
+- [ ] Build facility stats card (total clients, trainers, retention)
+- [ ] Build revenue overview card
+- [ ] Build trainer performance table
+- [ ] Build client acquisition metrics
+- [ ] Build pending actions list
+
+---
+
+## Epic 3: Exercise Library
+
+### 3.1 Exercise Database
 **Priority:** P0 (Critical)
 **Sprint:** 1
 
@@ -98,21 +278,22 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 - As a trainer, I can browse a library of exercises
 - As a trainer, I can search for exercises by name
 - As a trainer, I can filter exercises by muscle group and equipment
+- As a client, I can view exercise demonstrations during workouts
 
 **Implementation Tasks:**
 - [ ] Seed database with 200+ common exercises
 - [ ] Create exercise search API endpoint
 - [ ] Implement full-text search on exercise names
-- [ ] Create filter by category endpoint
 - [ ] Create filter by muscle group endpoint
 - [ ] Create filter by equipment endpoint
 - [ ] Build exercise library page UI
-- [ ] Implement search input with debounce
-- [ ] Build filter chips/dropdown UI
+- [ ] Implement search input with debounce (300ms)
+- [ ] Build filter chips UI
 - [ ] Create exercise card component
-- [ ] Add infinite scroll or pagination
+- [ ] Add infinite scroll or pagination (20 per page)
+- [ ] Create exercise detail modal with video
 
-### 2.2 Custom Exercises
+### 3.2 Custom Exercises
 **Priority:** P2 (Medium)
 **Sprint:** 3
 
@@ -120,22 +301,23 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 - As a trainer, I can create custom exercises
 - As a trainer, I can edit my custom exercises
 - As a trainer, I can delete my custom exercises
+- As a trainer, I can add video demonstrations
 
 **Implementation Tasks:**
 - [ ] Create exercise form component
 - [ ] Implement create exercise API
 - [ ] Implement update exercise API
-- [ ] Implement delete exercise API
+- [ ] Implement delete exercise API (soft delete)
 - [ ] Add video URL field (YouTube/Vimeo embed)
-- [ ] Add thumbnail upload
-- [ ] Show custom exercises in library with badge
+- [ ] Add thumbnail upload to Supabase Storage
+- [ ] Show custom exercises in library with "Custom" badge
 - [ ] Add edit/delete buttons for own exercises
 
 ---
 
-## Epic 3: Workout Builder (Trainer)
+## Epic 4: Workout Builder (Trainer)
 
-### 3.1 Workout Template Creation
+### 4.1 Workout Template Creation
 **Priority:** P0 (Critical)
 **Sprint:** 2
 
@@ -156,8 +338,9 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 - [ ] Create save template API
 - [ ] Add template validation
 - [ ] Implement auto-save draft
+- [ ] Add supersets/circuits support
 
-### 3.2 Template Management
+### 4.2 Template Management
 **Priority:** P1 (High)
 **Sprint:** 2
 
@@ -166,16 +349,18 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 - As a trainer, I can duplicate a template
 - As a trainer, I can edit an existing template
 - As a trainer, I can delete a template
+- As a trainer, I can organize templates by category
 
 **Implementation Tasks:**
 - [ ] Create template list page
-- [ ] Build template card component with actions
+- [ ] Build template card component with actions menu
 - [ ] Implement template duplicate API
 - [ ] Pre-populate builder when editing
 - [ ] Implement template delete with confirmation
 - [ ] Add template search/filter
+- [ ] Add template categories/tags
 
-### 3.3 Program Assignment
+### 4.3 Program Assignment
 **Priority:** P0 (Critical)
 **Sprint:** 3
 
@@ -193,13 +378,13 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 - [ ] Add trainer notes field (private)
 - [ ] Create assigned workouts API
 - [ ] Show assignment confirmation
-- [ ] Send notification to client (optional)
+- [ ] Send push notification to client (optional)
 
 ---
 
-## Epic 4: Workout Logging (Client)
+## Epic 5: Workout Logging (Client)
 
-### 4.1 Today's Workout
+### 5.1 Today's Workout
 **Priority:** P0 (Critical)
 **Sprint:** 3
 
@@ -211,18 +396,18 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 - As a client, I can complete a workout
 
 **Implementation Tasks:**
-- [ ] Create workout dashboard showing today's workout
-- [ ] Build workout detail page
+- [ ] Create workout player page
+- [ ] Build workout detail view
 - [ ] Create exercise card with logging inputs
 - [ ] Implement one-tap set completion (match prescription)
 - [ ] Add quick adjust for different weight/reps
 - [ ] Implement set logging API
 - [ ] Add workout start timestamp
 - [ ] Add workout completion flow
-- [ ] Calculate workout duration
-- [ ] Show completion summary
+- [ ] Calculate workout duration automatically
+- [ ] Show completion summary screen
 
-### 4.2 Rest Timer
+### 5.2 Rest Timer
 **Priority:** P1 (High)
 **Sprint:** 3
 
@@ -234,12 +419,12 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 **Implementation Tasks:**
 - [ ] Create rest timer component
 - [ ] Auto-start timer after set completion
-- [ ] Show countdown with visual progress
+- [ ] Show countdown with circular progress
 - [ ] Implement skip button
-- [ ] Add audio/vibration notification
-- [ ] Use exercise-specific rest time
+- [ ] Add audio/vibration notification on completion
+- [ ] Use exercise-specific rest time from workout
 
-### 4.3 Workout History
+### 5.3 Workout History
 **Priority:** P1 (High)
 **Sprint:** 4
 
@@ -256,7 +441,7 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 - [ ] Add filter by date range
 - [ ] Implement trainer view of client history
 
-### 4.4 Progress Charts
+### 5.4 Progress Charts
 **Priority:** P2 (Medium)
 **Sprint:** 4
 
@@ -266,7 +451,7 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 - As a trainer, I can view a client's progress charts
 
 **Implementation Tasks:**
-- [ ] Integrate charting library (ngx-charts or Chart.js)
+- [ ] Integrate charting library (ngx-charts or recharts via React wrapper)
 - [ ] Create exercise progress query (max weight over time)
 - [ ] Build strength progress chart component
 - [ ] Create volume progress query
@@ -276,9 +461,9 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 
 ---
 
-## Epic 5: Nutrition Tracking
+## Epic 6: Nutrition Tracking
 
-### 5.1 Food Database Integration
+### 6.1 Food Database Integration
 **Priority:** P1 (High)
 **Sprint:** 4
 
@@ -296,7 +481,7 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 - [ ] Show serving size options
 - [ ] Handle API rate limits gracefully
 
-### 5.2 Nutrition Logging
+### 6.2 Nutrition Logging
 **Priority:** P1 (High)
 **Sprint:** 5
 
@@ -316,7 +501,7 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 - [ ] Show progress bars for each macro
 - [ ] Implement quick re-log recent foods
 
-### 5.3 Adherence-Neutral UI
+### 6.3 Adherence-Neutral UI
 **Priority:** P1 (High)
 **Sprint:** 5
 
@@ -325,13 +510,14 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 - As a client, I see neutral, non-judgmental presentation of my intake
 
 **Implementation Tasks:**
-- [ ] Design neutral color palette (no red)
+- [ ] Design neutral color palette (no red for "over")
 - [ ] Show targets as reference, not limits
 - [ ] Use encouraging language in UI copy
 - [ ] Avoid "good/bad" food labeling
 - [ ] Show weekly averages (more forgiving than daily)
+- [ ] Use neutral progress indicators (blue/gray palette)
 
-### 5.4 Nutrition Targets
+### 6.4 Nutrition Targets
 **Priority:** P2 (Medium)
 **Sprint:** 5
 
@@ -343,15 +529,15 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 **Implementation Tasks:**
 - [ ] Create target setting form for trainers
 - [ ] Build target management API
-- [ ] Show current targets on client dashboard
+- [ ] Show current targets on client nutrition page
 - [ ] Track target history (when changed)
 - [ ] Allow client to view but not edit targets
 
 ---
 
-## Epic 6: Payment Integration
+## Epic 7: Payment Integration
 
-### 6.1 Stripe Connect Onboarding
+### 7.1 Stripe Connect Onboarding
 **Priority:** P0 (Critical)
 **Sprint:** 5
 
@@ -361,118 +547,58 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 - As a trainer, I can see my Stripe connection status
 
 **Implementation Tasks:**
-- [ ] Set up Stripe Connect in test mode
-- [ ] Create Stripe Connect onboarding flow
-- [ ] Generate OAuth link for trainer onboarding
-- [ ] Handle OAuth callback
+- [ ] Set up Stripe Connect (Standard accounts)
+- [ ] Create Stripe connect onboarding flow
 - [ ] Store Stripe account ID in trainer profile
-- [ ] Check onboarding completion status
-- [ ] Show connected/pending status in settings
+- [ ] Create connect/disconnect Stripe UI
+- [ ] Handle Stripe webhooks for account updates
+- [ ] Show connection status on settings page
 
-### 6.2 Subscription Management
-**Priority:** P1 (High)
+### 7.2 Subscription Management
+**Priority:** P0 (Critical)
 **Sprint:** 6
 
 **User Stories:**
-- As a trainer, I can create subscription plans
-- As a trainer, I can assign a plan to a client
-- As a client, I can view my active subscription
-- As a client, I can update my payment method
+- As a trainer, I can create subscription tiers
+- As a client, I can subscribe to a trainer's service
+- As a client, I can manage my subscription
+- As a trainer, I can see my active subscriptions
 
 **Implementation Tasks:**
-- [ ] Create Stripe products/prices for trainer
-- [ ] Build plan creation UI for trainers
-- [ ] Create subscription assignment flow
-- [ ] Implement Stripe Checkout for client payment
-- [ ] Handle successful subscription webhook
-- [ ] Store subscription in database
-- [ ] Build client subscription view
-- [ ] Add update payment method (Customer Portal)
+- [ ] Create subscription products in Stripe
+- [ ] Build trainer pricing configuration UI
+- [ ] Implement client subscription checkout
+- [ ] Handle subscription webhooks (created, updated, cancelled)
+- [ ] Store subscription status in database
+- [ ] Build subscription management UI for clients
+- [ ] Create subscription revenue dashboard for trainers
 
-### 6.3 Invoice & Payment Status
+### 7.3 Payment History
 **Priority:** P2 (Medium)
 **Sprint:** 6
 
 **User Stories:**
-- As a trainer, I can see all invoices for my clients
-- As a trainer, I can see payment status (paid, overdue)
-- As a client, I can view my invoice history
+- As a trainer, I can view my payment history
+- As a client, I can view my payment history
 
 **Implementation Tasks:**
-- [ ] Sync invoices via Stripe webhooks
-- [ ] Create invoice list page for trainers
-- [ ] Build invoice detail view
+- [ ] Fetch payments from Stripe API
+- [ ] Build payment history list UI
+- [ ] Add date range filter
 - [ ] Show payment status badges
-- [ ] Add overdue payment alerts
-- [ ] Create client invoice history view
+- [ ] Generate basic revenue reports
 
 ---
 
-## Epic 7: Wearable Integration
-
-### 7.1 Terra API Setup
-**Priority:** P1 (High)
-**Sprint:** 6
-
-**User Stories:**
-- As a client, I can connect my wearable device
-- As a client, I can choose from popular wearable brands
-
-**Implementation Tasks:**
-- [ ] Set up Terra API account
-- [ ] Implement Terra widget for device connection
-- [ ] Handle Terra OAuth callback
-- [ ] Store Terra user ID and provider
-- [ ] Create wearable connections list UI
-- [ ] Add disconnect option
-
-### 7.2 Health Data Sync
-**Priority:** P1 (High)
-**Sprint:** 7
-
-**User Stories:**
-- As a client, my sleep data syncs automatically
-- As a client, my step count syncs automatically
-- As a client, my heart rate data syncs automatically
-
-**Implementation Tasks:**
-- [ ] Set up Terra webhook endpoint
-- [ ] Handle daily data webhook
-- [ ] Parse and store sleep metrics
-- [ ] Parse and store step count
-- [ ] Parse and store resting heart rate
-- [ ] Parse and store HRV (if available)
-- [ ] Create data sync status indicator
-- [ ] Handle sync errors gracefully
-
-### 7.3 Wearable Dashboard
-**Priority:** P2 (Medium)
-**Sprint:** 7
-
-**User Stories:**
-- As a client, I can see my wearable data summary
-- As a trainer, I can see a client's wearable data
-
-**Implementation Tasks:**
-- [ ] Create wearable data dashboard
-- [ ] Build sleep summary card
-- [ ] Build steps summary card
-- [ ] Build heart rate/HRV card
-- [ ] Add weekly trends view
-- [ ] Create trainer view of client wearables
-- [ ] **DO NOT show calorie burn** (intentional - research shows inaccuracy)
-
----
-
-## Epic 8: Client Management
+## Epic 8: Client Management (Trainer)
 
 ### 8.1 Client List
 **Priority:** P0 (Critical)
-**Sprint:** 4
+**Sprint:** 1
 
 **User Stories:**
-- As a trainer, I can see all my clients
-- As a trainer, I can search for a client
+- As a trainer, I can view all my clients
+- As a trainer, I can search/filter clients
 - As a trainer, I can see client status at a glance
 
 **Implementation Tasks:**
@@ -481,7 +607,7 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 - [ ] Add search input with filter
 - [ ] Show subscription status badge
 - [ ] Show last activity indicator
-- [ ] Add quick actions (message, view profile)
+- [ ] Add quick actions menu (message, view profile)
 
 ### 8.2 Client Profile View
 **Priority:** P1 (High)
@@ -518,13 +644,48 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 - [ ] Implement secure photo upload (Supabase Storage)
 - [ ] Build progress photo gallery
 - [ ] Add photo comparison view (side by side)
-- [ ] Ensure photos are private (RLS)
+- [ ] Ensure photos are private (RLS policies)
 
 ---
 
-## Epic 9: Communication
+## Epic 9: Wearable Integration
 
-### 9.1 In-App Messaging
+### 9.1 Terra API Setup
+**Priority:** P2 (Medium)
+**Sprint:** 6
+
+**User Stories:**
+- As a client, I can connect my wearable device
+- As a client, I see my wearable data on my dashboard
+
+**Implementation Tasks:**
+- [ ] Set up Terra API account
+- [ ] Create Terra webhook endpoint
+- [ ] Build device connection flow
+- [ ] Store device connections in database
+- [ ] Process incoming wearable data
+- [ ] Display wearable data on client dashboard
+
+### 9.2 Wearable Data Display
+**Priority:** P2 (Medium)
+**Sprint:** 7
+
+**User Stories:**
+- As a client, I can see my steps, heart rate, and sleep data
+- As a trainer, I can view a client's wearable data
+
+**Implementation Tasks:**
+- [ ] Create wearable data card component
+- [ ] Display steps, resting HR, sleep hours
+- [ ] Add HRV display (if available)
+- [ ] Create wearable data charts
+- [ ] Build trainer view of client wearable data
+
+---
+
+## Epic 10: Communication
+
+### 10.1 In-App Messaging
 **Priority:** P2 (Medium)
 **Sprint:** 8
 
@@ -534,13 +695,13 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 - As a user, I can see unread message count
 
 **Implementation Tasks:**
-- [ ] Create messages table (already in schema)
+- [ ] Create messages table (verify schema)
 - [ ] Build conversation list page
 - [ ] Create chat interface
 - [ ] Implement real-time updates (Supabase Realtime)
 - [ ] Add unread badge to navigation
 - [ ] Mark messages as read on view
-- [ ] Add message notifications
+- [ ] Add message push notifications
 
 ---
 
@@ -548,13 +709,14 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 
 | Sprint | Duration | Focus |
 |--------|----------|-------|
-| 1 | 2 weeks | Auth, Exercise Library, Project Setup |
-| 2 | 2 weeks | Trainer Onboarding, Workout Builder |
+| 0 | 1 week | Foundation (Guards, Interceptors, Layout, PWA) |
+| 1 | 2 weeks | Auth, Exercise Library, Dashboards, Client List |
+| 2 | 2 weeks | Onboarding, Workout Builder, Client Invites |
 | 3 | 2 weeks | Program Assignment, Client Workout Logging |
-| 4 | 2 weeks | Workout History, Client Management, Charts |
+| 4 | 2 weeks | Workout History, Client Management, Charts, Nutrition DB |
 | 5 | 2 weeks | Nutrition Tracking, Stripe Connect |
-| 6 | 2 weeks | Subscriptions, Terra Setup |
-| 7 | 2 weeks | Wearable Data, Measurements |
+| 6 | 2 weeks | Subscriptions, Terra Setup, Owner Dashboard |
+| 7 | 2 weeks | Wearable Data, Measurements, Progress Photos |
 | 8 | 2 weeks | Messaging, Polish, Bug Fixes |
 
 ---
@@ -564,12 +726,14 @@ This document outlines the complete feature set for Phase 1 MVP (Months 1-3), br
 For each feature to be considered complete:
 
 - [ ] Code implemented and working
+- [ ] TypeScript strict mode passing
 - [ ] Unit tests written (>80% coverage for services)
-- [ ] E2E tests for critical paths
+- [ ] E2E tests for critical user paths
 - [ ] Code reviewed
 - [ ] Documentation updated
 - [ ] Accessible (WCAG 2.1 AA)
-- [ ] Responsive (mobile-first)
-- [ ] Error handling implemented
-- [ ] Loading states added
-- [ ] Deployed to staging
+- [ ] Responsive (mobile-first, tested at 375px, 768px, 1200px)
+- [ ] Error handling implemented with user-friendly messages
+- [ ] Loading states added (skeletons or spinners)
+- [ ] OnPush change detection used
+- [ ] Deployed to staging environment

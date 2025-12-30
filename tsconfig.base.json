@@ -23,7 +23,8 @@
     "resolveJsonModule": true,
     "paths": {
       "@fitos/shared": ["libs/shared/src/index.ts"],
-      "@fitos/shared/*": ["libs/shared/src/lib/*"]
+      "@fitos/shared/*": ["libs/shared/src/lib/*"],
+      "@env/*": ["apps/mobile/src/environments/*"]
     }
   },
   "exclude": ["node_modules", "tmp"]

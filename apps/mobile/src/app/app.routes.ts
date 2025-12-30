@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/auth.guard';
-import { noAuthGuard } from './core/guards/no-auth.guard';
+import { authGuard, noAuthGuard, trainerOrOwnerGuard, onboardingCompleteGuard } from './core/guards';
 
 export const routes: Routes = [
   {
@@ -44,7 +43,7 @@ export const routes: Routes = [
   },
   {
     path: 'tabs',
-    canActivate: [authGuard],
+    canActivate: [authGuard, onboardingCompleteGuard],
     loadComponent: () => import('./features/tabs/tabs.page').then((m) => m.TabsPage),
     children: [
       {
@@ -68,34 +67,43 @@ export const routes: Routes = [
               ),
           },
           {
+            // Exercise library - trainers and gym owners only
             path: 'exercises',
+            canActivate: [trainerOrOwnerGuard],
             loadComponent: () =>
               import('./features/workouts/pages/exercise-library/exercise-library.page').then(
                 (m) => m.ExerciseLibraryPage
               ),
           },
           {
+            // Workout builder - trainers and gym owners only
             path: 'builder',
+            canActivate: [trainerOrOwnerGuard],
             loadComponent: () =>
               import('./features/workouts/pages/workout-builder/workout-builder.page').then(
                 (m) => m.WorkoutBuilderPage
               ),
           },
           {
+            // Edit workout - trainers and gym owners only
             path: 'builder/:id',
+            canActivate: [trainerOrOwnerGuard],
             loadComponent: () =>
               import('./features/workouts/pages/workout-builder/workout-builder.page').then(
                 (m) => m.WorkoutBuilderPage
               ),
           },
           {
+            // Assign workout - trainers and gym owners only
             path: 'assign',
+            canActivate: [trainerOrOwnerGuard],
             loadComponent: () =>
               import('./features/workouts/pages/assign-workout/assign-workout.page').then(
                 (m) => m.AssignWorkoutPage
               ),
           },
           {
+            // Active workout - everyone (clients do workouts)
             path: 'active/:id',
             loadComponent: () =>
               import('./features/workouts/pages/active-workout/active-workout.page').then(
@@ -103,6 +111,7 @@ export const routes: Routes = [
               ),
           },
           {
+            // Workout history/detail - everyone
             path: 'history/:id',
             loadComponent: () =>
               import('./features/workouts/pages/workout-detail/workout-detail.page').then(
@@ -131,7 +140,9 @@ export const routes: Routes = [
         ],
       },
       {
+        // Clients - trainers and gym owners only
         path: 'clients',
+        canActivate: [trainerOrOwnerGuard],
         children: [
           {
             path: '',

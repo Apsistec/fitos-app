@@ -12,7 +12,6 @@ import {
   IonItem,
   IonLabel,
   IonList,
-  IonText,
   IonSpinner,
   IonIcon,
   IonNote,
@@ -48,15 +47,14 @@ import type { UserRole } from '@fitos/shared';
     IonItem,
     IonLabel,
     IonList,
-    IonText,
     IonSpinner,
     IonIcon,
     IonNote,
     IonSegment,
     IonSegmentButton,
     IonBackButton,
-    IonButtons,
-  ],
+    IonButtons
+],
   template: `
     <ion-header>
       <ion-toolbar>

@@ -28,13 +28,13 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
           <div class="title-section">
             <ion-card-title>{{ exercise.name }}</ion-card-title>
             <ion-card-subtitle>
-              {{ exercise.primary_muscle_group }}
-              @if (exercise.secondary_muscle_groups && exercise.secondary_muscle_groups.length > 0) {
-                <span> + {{ exercise.secondary_muscle_groups.length }} more</span>
+              {{ exercise.primary_muscle }}
+              @if (exercise.secondary_muscles && exercise.secondary_muscles.length > 0) {
+                <span> + {{ exercise.secondary_muscles.length }} more</span>
               }
             </ion-card-subtitle>
           </div>
-          @if (exercise.is_custom) {
+          @if (!exercise.is_system) {
             <ion-badge color="primary">Custom</ion-badge>
           }
         </div>
@@ -52,16 +52,8 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
           </div>
           <div class="metadata-item">
             <span class="label">Equipment:</span>
-            <span class="value">{{ exercise.equipment_required || 'None' }}</span>
+            <span class="value">{{ exercise.equipment?.join(', ') || 'None' }}</span>
           </div>
-          @if (exercise.difficulty_level) {
-            <div class="metadata-item">
-              <span class="label">Difficulty:</span>
-              <span class="value difficulty" [attr.data-level]="exercise.difficulty_level">
-                {{ exercise.difficulty_level }}
-              </span>
-            </div>
-          }
         </div>
 
         <div class="actions">

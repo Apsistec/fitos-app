@@ -3,10 +3,10 @@ import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
 import { Database } from '@fitos/shared';
 
-type WorkoutSession = Database['public']['Tables']['workout_sessions']['Row'];
-type WorkoutSessionInsert = Database['public']['Tables']['workout_sessions']['Insert'];
-type LoggedSet = Database['public']['Tables']['logged_sets']['Row'];
-type LoggedSetInsert = Database['public']['Tables']['logged_sets']['Insert'];
+type WorkoutSession = Database['public']['Tables']['workouts']['Row'];
+type WorkoutSessionInsert = Database['public']['Tables']['workouts']['Insert'];
+type LoggedSet = Database['public']['Tables']['workout_sets']['Row'];
+type LoggedSetInsert = Database['public']['Tables']['workout_sets']['Insert'];
 
 export interface SetLog {
   exerciseId: string;
@@ -52,16 +52,14 @@ export class WorkoutSessionService {
       const userId = this.auth.user()?.id;
       if (!userId) throw new Error('User not authenticated');
 
-      const sessionData: WorkoutSessionInsert = {
-        assigned_workout_id: assignedWorkoutId,
-        user_id: userId,
-        started_at: new Date().toISOString(),
-        status: 'in_progress'
-      };
-
+      // Update the existing workout to mark it as started
       const { data, error } = await this.supabase.client
-        .from('workout_sessions')
-        .insert(sessionData)
+        .from('workouts')
+        .update({
+          started_at: new Date().toISOString(),
+          status: 'in_progress'
+        })
+        .eq('id', assignedWorkoutId)
         .select()
         .single();
 
@@ -136,17 +134,16 @@ export class WorkoutSessionService {
 
     try {
       const setData: LoggedSetInsert = {
-        session_id: session.session.id,
-        exercise_id: setLog.exerciseId,
+        workout_exercise_id: setLog.exerciseId,
         set_number: setLog.setNumber,
-        reps: setLog.reps,
-        weight: setLog.weight || null,
+        reps_completed: setLog.reps,
+        weight_used: setLog.weight || null,
         rpe: setLog.rpe || null,
         notes: setLog.notes || null
       };
 
       const { data, error } = await this.supabase.client
-        .from('logged_sets')
+        .from('workout_sets')
         .insert(setData)
         .select()
         .single();
@@ -247,29 +244,24 @@ export class WorkoutSessionService {
 
     try {
       const completedAt = new Date().toISOString();
-      const duration = Math.floor(
-        (new Date(completedAt).getTime() - new Date(session.session.started_at).getTime()) / 1000
-      );
+      const startedAt = session.session.started_at;
+      const duration = startedAt ? Math.floor(
+        (new Date(completedAt).getTime() - new Date(startedAt).getTime()) / 1000
+      ) : null;
 
       const { error: sessionError } = await this.supabase.client
-        .from('workout_sessions')
+        .from('workouts')
         .update({
           completed_at: completedAt,
-          duration_seconds: duration,
           status: 'completed',
-          client_rating: rating || null,
-          client_notes: notes || null
+          rating: rating || null,
+          notes: notes || null
         })
         .eq('id', session.session.id);
 
       if (sessionError) throw sessionError;
 
       // Update assignment status to completed
-      await this.supabase.client
-        .from('assigned_workouts')
-        .update({ status: 'completed' })
-        .eq('id', session.session.assigned_workout_id);
-
       this.activeSessionSignal.set(null);
 
       return true;
@@ -289,7 +281,7 @@ export class WorkoutSessionService {
     const session = this.activeSessionSignal();
     if (!session) return [];
 
-    return session.loggedSets.filter(set => set.exercise_id === exerciseId);
+    return session.loggedSets.filter(set => set.workout_exercise_id === exerciseId);
   }
 
   /**
