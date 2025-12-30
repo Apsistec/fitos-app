@@ -1,0 +1,142 @@
+// Ionic Variables and Theming
+// FitOS Custom Theme
+
+:root {
+  // Primary - Indigo (used throughout the app)
+  --ion-color-primary: #6366F1;
+  --ion-color-primary-rgb: 99, 102, 241;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #575ad4;
+  --ion-color-primary-tint: #737af2;
+
+  // Secondary - Slate
+  --ion-color-secondary: #64748B;
+  --ion-color-secondary-rgb: 100, 116, 139;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #58667a;
+  --ion-color-secondary-tint: #748297;
+
+  // Tertiary - Violet
+  --ion-color-tertiary: #8B5CF6;
+  --ion-color-tertiary-rgb: 139, 92, 246;
+  --ion-color-tertiary-contrast: #ffffff;
+  --ion-color-tertiary-contrast-rgb: 255, 255, 255;
+  --ion-color-tertiary-shade: #7a51d8;
+  --ion-color-tertiary-tint: #976cf7;
+
+  // Success - Green (protein, positive)
+  --ion-color-success: #22C55E;
+  --ion-color-success-rgb: 34, 197, 94;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: #1ead53;
+  --ion-color-success-tint: #38cb6e;
+
+  // Warning - Amber (carbs, alerts)
+  --ion-color-warning: #F59E0B;
+  --ion-color-warning-rgb: 245, 158, 11;
+  --ion-color-warning-contrast: #000000;
+  --ion-color-warning-contrast-rgb: 0, 0, 0;
+  --ion-color-warning-shade: #d88b0a;
+  --ion-color-warning-tint: #f6a823;
+
+  // Danger - Rose (NOT for nutrition "over" - use for errors only)
+  --ion-color-danger: #F43F5E;
+  --ion-color-danger-rgb: 244, 63, 94;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #d73753;
+  --ion-color-danger-tint: #f5526e;
+
+  // Medium - Gray
+  --ion-color-medium: #6B7280;
+  --ion-color-medium-rgb: 107, 114, 128;
+  --ion-color-medium-contrast: #ffffff;
+  --ion-color-medium-contrast-rgb: 255, 255, 255;
+  --ion-color-medium-shade: #5e6470;
+  --ion-color-medium-tint: #7a808d;
+
+  // Light
+  --ion-color-light: #F3F4F6;
+  --ion-color-light-rgb: 243, 244, 246;
+  --ion-color-light-contrast: #000000;
+  --ion-color-light-contrast-rgb: 0, 0, 0;
+  --ion-color-light-shade: #d6d7d8;
+  --ion-color-light-tint: #f4f5f7;
+
+  // Dark
+  --ion-color-dark: #1F2937;
+  --ion-color-dark-rgb: 31, 41, 55;
+  --ion-color-dark-contrast: #ffffff;
+  --ion-color-dark-contrast-rgb: 255, 255, 255;
+  --ion-color-dark-shade: #1b2430;
+  --ion-color-dark-tint: #353e4b;
+
+  // ===========================================
+  // FitOS Custom Colors (Nutrition - Adherence Neutral)
+  // ===========================================
+  --fitos-calories: #6366F1;    // Indigo
+  --fitos-protein: #22C55E;     // Green
+  --fitos-carbs: #F59E0B;       // Amber
+  --fitos-fat: #EC4899;         // Pink
+  --fitos-neutral: #6B7280;     // Gray (for "over" instead of red)
+
+  // ===========================================
+  // Global Styling
+  // ===========================================
+  --ion-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+// Dark Mode
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ion-color-primary: #818CF8;
+    --ion-color-primary-rgb: 129, 140, 248;
+    --ion-color-primary-contrast: #000000;
+    --ion-color-primary-contrast-rgb: 0, 0, 0;
+    --ion-color-primary-shade: #727bda;
+    --ion-color-primary-tint: #8e98f9;
+
+    --ion-background-color: #111827;
+    --ion-background-color-rgb: 17, 24, 39;
+
+    --ion-text-color: #F9FAFB;
+    --ion-text-color-rgb: 249, 250, 251;
+
+    --ion-card-background: #1F2937;
+
+    --ion-item-background: #1F2937;
+
+    --ion-toolbar-background: #1F2937;
+
+    --ion-tab-bar-background: #1F2937;
+  }
+}
+
+// iOS Dark Mode
+.ios body.dark {
+  --ion-background-color: #000000;
+  --ion-background-color-rgb: 0, 0, 0;
+
+  --ion-text-color: #ffffff;
+  --ion-text-color-rgb: 255, 255, 255;
+
+  --ion-card-background: #1c1c1d;
+  --ion-item-background: #1c1c1d;
+}
+
+// Material Design Dark Mode
+.md body.dark {
+  --ion-background-color: #121212;
+  --ion-background-color-rgb: 18, 18, 18;
+
+  --ion-text-color: #ffffff;
+  --ion-text-color-rgb: 255, 255, 255;
+
+  --ion-border-color: #222222;
+
+  --ion-card-background: #1e1e1e;
+  --ion-item-background: #1e1e1e;
+}
