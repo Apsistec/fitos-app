@@ -6,7 +6,6 @@ import {
   IonTabButton,
   IonIcon,
   IonLabel,
-  IonBadge,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -33,7 +32,6 @@ import { AuthService } from '@app/core/services/auth.service';
     IonTabButton,
     IonIcon,
     IonLabel,
-    IonBadge,
   ],
   template: `
     <ion-tabs>
