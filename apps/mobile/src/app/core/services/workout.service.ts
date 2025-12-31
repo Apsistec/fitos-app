@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
 import { Database } from '@fitos/shared';
@@ -6,8 +6,8 @@ import { Database } from '@fitos/shared';
 type WorkoutTemplate = Database['public']['Tables']['workout_templates']['Row'];
 type WorkoutTemplateInsert = Database['public']['Tables']['workout_templates']['Insert'];
 type WorkoutTemplateUpdate = Database['public']['Tables']['workout_templates']['Update'];
-type TemplateExercise = Database['public']['Tables']['template_exercises']['Row'];
-type TemplateExerciseInsert = Database['public']['Tables']['template_exercises']['Insert'];
+type TemplateExercise = Database['public']['Tables']['workout_template_exercises']['Row'];
+type TemplateExerciseInsert = Database['public']['Tables']['workout_template_exercises']['Insert'];
 
 export interface WorkoutTemplateWithExercises extends WorkoutTemplate {
   exercises: TemplateExercise[];
@@ -29,6 +29,10 @@ export interface ExerciseConfiguration {
   providedIn: 'root'
 })
 export class WorkoutService {
+  // Services
+  private supabase = inject(SupabaseService);
+  private auth = inject(AuthService);
+
   // State
   private templatesSignal = signal<WorkoutTemplateWithExercises[]>([]);
   private currentTemplateSignal = signal<WorkoutTemplateWithExercises | null>(null);
@@ -40,11 +44,6 @@ export class WorkoutService {
   currentTemplate = computed(() => this.currentTemplateSignal());
   loading = computed(() => this.loadingSignal());
   error = computed(() => this.errorSignal());
-
-  constructor(
-    private supabase: SupabaseService,
-    private auth: AuthService
-  ) {}
 
   /**
    * Load all workout templates for the current trainer
@@ -271,16 +270,24 @@ export class WorkoutService {
       const original = await this.loadTemplate(id);
       if (!original) return null;
 
-      const exercises: ExerciseConfiguration[] = original.exercises.map((ex) => ({
-        exerciseId: ex.exercise_id,
-        order: ex.order_index,
-        sets: ex.sets,
-        reps: ex.reps,
-        restSeconds: ex.rest_seconds,
-        notes: ex.notes || undefined,
-        rpe: ex.rpe_target || undefined,
-        tempo: ex.tempo || undefined
-      }));
+      const exercises: ExerciseConfiguration[] = original.exercises.map((ex) => {
+        // Format reps as a range if both min and max are provided
+        let reps: string;
+        if (ex.reps_min && ex.reps_max && ex.reps_min !== ex.reps_max) {
+          reps = `${ex.reps_min}-${ex.reps_max}`;
+        } else {
+          reps = String(ex.reps_max || ex.reps_min || 10);
+        }
+
+        return {
+          exerciseId: ex.exercise_id,
+          order: ex.order_index,
+          sets: ex.sets || 3,
+          reps,
+          restSeconds: ex.rest_seconds || 60,
+          notes: ex.notes || undefined
+        };
+      });
 
       return await this.createTemplate(
         `${original.name} (Copy)`,

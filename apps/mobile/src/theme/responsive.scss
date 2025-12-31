@@ -1,0 +1,199 @@
+/**
+ * Responsive Design Utilities for FitOS
+ *
+ * Ionic Breakpoints:
+ * - xs: 0-575px (phones portrait)
+ * - sm: 576-767px (phones landscape, small tablets)
+ * - md: 768-991px (tablets portrait)
+ * - lg: 992-1199px (tablets landscape, small desktops)
+ * - xl: 1200px+ (desktops)
+ */
+
+// Breakpoint variables
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 992px;
+$breakpoint-xl: 1200px;
+
+// Mixins for responsive design
+@mixin mobile-only {
+  @media (max-width: #{$breakpoint-md - 1}) {
+    @content;
+  }
+}
+
+@mixin tablet-up {
+  @media (min-width: $breakpoint-md) {
+    @content;
+  }
+}
+
+@mixin tablet-only {
+  @media (min-width: $breakpoint-md) and (max-width: #{$breakpoint-lg - 1}) {
+    @content;
+  }
+}
+
+@mixin desktop-up {
+  @media (min-width: $breakpoint-lg) {
+    @content;
+  }
+}
+
+@mixin desktop-large {
+  @media (min-width: $breakpoint-xl) {
+    @content;
+  }
+}
+
+// Container utilities
+.container-responsive {
+  width: 100%;
+  padding: 0 16px;
+  margin: 0 auto;
+
+  @include tablet-up {
+    padding: 0 24px;
+    max-width: 960px;
+  }
+
+  @include desktop-up {
+    padding: 0 32px;
+    max-width: 1200px;
+  }
+
+  @include desktop-large {
+    max-width: 1400px;
+  }
+}
+
+.container-narrow {
+  width: 100%;
+  padding: 0 16px;
+  margin: 0 auto;
+  max-width: 600px;
+
+  @include tablet-up {
+    padding: 0 24px;
+  }
+}
+
+.container-wide {
+  width: 100%;
+  padding: 0 16px;
+  margin: 0 auto;
+
+  @include tablet-up {
+    padding: 0 24px;
+    max-width: 1400px;
+  }
+
+  @include desktop-up {
+    padding: 0 40px;
+    max-width: 1600px;
+  }
+}
+
+// Grid utilities
+.responsive-grid-2 {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+
+  @include tablet-up {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+.responsive-grid-3 {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+
+  @include tablet-up {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  @include desktop-up {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+}
+
+.responsive-grid-4 {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+
+  @include tablet-up {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  @include desktop-up {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+}
+
+// Card grid with auto-fit
+.card-grid-auto {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+
+  @include tablet-up {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+
+  @include desktop-up {
+    gap: 24px;
+  }
+}
+
+// Spacing utilities
+.spacing-mobile {
+  padding: 16px;
+
+  @include tablet-up {
+    padding: 24px;
+  }
+
+  @include desktop-up {
+    padding: 32px;
+  }
+}
+
+.spacing-vertical {
+  padding: 16px 0;
+
+  @include tablet-up {
+    padding: 24px 0;
+  }
+
+  @include desktop-up {
+    padding: 32px 0;
+  }
+}
+
+// Hide/show utilities
+.mobile-only {
+  @include tablet-up {
+    display: none !important;
+  }
+}
+
+.tablet-up {
+  @include mobile-only {
+    display: none !important;
+  }
+}
+
+.desktop-only {
+  @media (max-width: #{$breakpoint-lg - 1}) {
+    display: none !important;
+  }
+}

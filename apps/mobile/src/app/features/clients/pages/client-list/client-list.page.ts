@@ -3,7 +3,6 @@ import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/stan
 
 @Component({
   selector: 'app-client-list',
-  standalone: true,
   imports: [IonContent, IonHeader, IonTitle, IonToolbar],
   template: `
     <ion-header>

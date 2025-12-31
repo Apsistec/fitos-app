@@ -1,12 +1,10 @@
-import { Component, inject, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import {
   IonTabs,
   IonTabBar,
   IonTabButton,
   IonIcon,
   IonLabel,
-  IonBadge,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -25,16 +23,14 @@ import { AuthService } from '@app/core/services/auth.service';
 
 @Component({
   selector: 'app-tabs',
-  standalone: true,
   imports: [
-    CommonModule,
+
     IonTabs,
     IonTabBar,
     IonTabButton,
     IonIcon,
-    IonLabel,
-    IonBadge,
-  ],
+    IonLabel
+],
   template: `
     <ion-tabs>
       <ion-tab-bar slot="bottom">
@@ -82,7 +78,7 @@ import { AuthService } from '@app/core/services/auth.service';
 export class TabsPage {
   private authService = inject(AuthService);
 
-  isTrainer = computed(() => this.authService.isTrainer());
+  isTrainer = this.authService.isTrainer;
 
   constructor() {
     addIcons({

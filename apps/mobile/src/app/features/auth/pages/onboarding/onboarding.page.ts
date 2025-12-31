@@ -1,5 +1,4 @@
 import { Component, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
@@ -10,7 +9,6 @@ import {
   IonButton,
   IonInput,
   IonItem,
-  IonLabel,
   IonList,
   IonSpinner,
   IonIcon,
@@ -21,10 +19,7 @@ import {
   IonProgressBar,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { 
-  personOutline, 
-  businessOutline,
-  globeOutline,
+import {
   arrowForward,
   checkmarkCircle,
 } from 'ionicons/icons';
@@ -33,9 +28,7 @@ import { SupabaseService } from '@app/core/services/supabase.service';
 
 @Component({
   selector: 'app-onboarding',
-  standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     IonContent,
     IonHeader,
@@ -44,7 +37,6 @@ import { SupabaseService } from '@app/core/services/supabase.service';
     IonButton,
     IonInput,
     IonItem,
-    IonLabel,
     IonList,
     IonSpinner,
     IonIcon,
@@ -73,20 +65,26 @@ import { SupabaseService } from '@app/core/services/supabase.service';
 
           <form [formGroup]="profileForm">
             <ion-list lines="none">
-              <ion-item>
-                <ion-icon name="person-outline" slot="start" color="medium"></ion-icon>
+              <ion-item lines="none">
                 <ion-input
                   formControlName="fullName"
                   type="text"
-                  placeholder="Full Name"
-                ></ion-input>
+                  label="Full Name"
+                  labelPlacement="floating"
+                  fill="outline"
+                  placeholder="John Doe"
+                  helperText="Enter your full name"
+                  [errorText]="fullNameError()"
+                />
               </ion-item>
 
-              <ion-item>
-                <ion-icon name="globe-outline" slot="start" color="medium"></ion-icon>
+              <ion-item lines="none">
                 <ion-select
                   formControlName="timezone"
-                  placeholder="Timezone"
+                  label="Timezone"
+                  labelPlacement="floating"
+                  fill="outline"
+                  placeholder="Select your timezone"
                   interface="action-sheet"
                 >
                   <ion-select-option value="America/New_York">Eastern Time</ion-select-option>
@@ -100,9 +98,14 @@ import { SupabaseService } from '@app/core/services/supabase.service';
                 </ion-select>
               </ion-item>
 
-              <ion-item>
-                <ion-label>Units</ion-label>
-                <ion-select formControlName="unitsSystem" interface="popover">
+              <ion-item lines="none">
+                <ion-select
+                  formControlName="unitsSystem"
+                  label="Units"
+                  labelPlacement="floating"
+                  fill="outline"
+                  interface="popover"
+                >
                   <ion-select-option value="imperial">Imperial (lbs, ft)</ion-select-option>
                   <ion-select-option value="metric">Metric (kg, cm)</ion-select-option>
                 </ion-select>
@@ -120,28 +123,40 @@ import { SupabaseService } from '@app/core/services/supabase.service';
 
           <form [formGroup]="trainerForm">
             <ion-list lines="none">
-              <ion-item>
-                <ion-icon name="business-outline" slot="start" color="medium"></ion-icon>
+              <ion-item lines="none">
                 <ion-input
                   formControlName="businessName"
                   type="text"
-                  placeholder="Business Name (optional)"
-                ></ion-input>
+                  label="Business Name"
+                  labelPlacement="floating"
+                  fill="outline"
+                  placeholder="Your Fitness Business"
+                  helperText="Optional - Your business or brand name"
+                />
               </ion-item>
 
-              <ion-item>
+              <ion-item lines="none">
                 <ion-textarea
                   formControlName="bio"
+                  label="About You"
+                  labelPlacement="floating"
+                  fill="outline"
                   placeholder="Tell clients about yourself..."
+                  helperText="Share your experience and training philosophy"
                   [autoGrow]="true"
                   rows="4"
-                ></ion-textarea>
+                  [counter]="true"
+                  [maxlength]="500"
+                />
               </ion-item>
 
-              <ion-item>
+              <ion-item lines="none">
                 <ion-select
                   formControlName="specializations"
-                  placeholder="Specializations"
+                  label="Specializations"
+                  labelPlacement="floating"
+                  fill="outline"
+                  placeholder="Select your specialties"
                   [multiple]="true"
                   interface="alert"
                 >
@@ -169,9 +184,12 @@ import { SupabaseService } from '@app/core/services/supabase.service';
 
           <form [formGroup]="clientForm">
             <ion-list lines="none">
-              <ion-item>
+              <ion-item lines="none">
                 <ion-select
                   formControlName="goals"
+                  label="Goals"
+                  labelPlacement="floating"
+                  fill="outline"
                   placeholder="Select your goals"
                   [multiple]="true"
                   interface="alert"
@@ -187,9 +205,14 @@ import { SupabaseService } from '@app/core/services/supabase.service';
                 </ion-select>
               </ion-item>
 
-              <ion-item>
-                <ion-label>Fitness Level</ion-label>
-                <ion-select formControlName="fitnessLevel" interface="popover">
+              <ion-item lines="none">
+                <ion-select
+                  formControlName="fitnessLevel"
+                  label="Fitness Level"
+                  labelPlacement="floating"
+                  fill="outline"
+                  interface="popover"
+                >
                   <ion-select-option value="beginner">Beginner</ion-select-option>
                   <ion-select-option value="intermediate">Intermediate</ion-select-option>
                   <ion-select-option value="advanced">Advanced</ion-select-option>
@@ -282,9 +305,10 @@ import { SupabaseService } from '@app/core/services/supabase.service';
       margin-bottom: 24px;
 
       ion-item {
-        --background: var(--ion-color-light);
-        --border-radius: 8px;
-        margin-bottom: 12px;
+        --background: transparent;
+        --padding-start: 0;
+        --inner-padding-end: 0;
+        margin-bottom: 16px;
       }
     }
 
@@ -358,11 +382,16 @@ export class OnboardingPage {
     fitnessLevel: ['beginner'],
   });
 
+  // Computed error message for full name
+  fullNameError = computed(() => {
+    const control = this.profileForm.get('fullName');
+    if (!control?.touched) return '';
+    if (control.hasError('required')) return 'Full name is required';
+    return '';
+  });
+
   constructor() {
-    addIcons({ 
-      personOutline, 
-      businessOutline,
-      globeOutline,
+    addIcons({
       arrowForward,
       checkmarkCircle,
     });
@@ -419,7 +448,7 @@ export class OnboardingPage {
     if (!userId) return;
 
     const { businessName, bio, specializations } = this.trainerForm.value;
-    
+
     const { error } = await this.supabase
       .from('trainer_profiles')
       .update({
@@ -437,7 +466,7 @@ export class OnboardingPage {
     if (!userId) return;
 
     const { goals, fitnessLevel } = this.clientForm.value;
-    
+
     const { error } = await this.supabase
       .from('client_profiles')
       .update({

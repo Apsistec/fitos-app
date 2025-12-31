@@ -1,5 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   IonCard,
@@ -16,6 +15,9 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { trashOutline, reorderThree } from 'ionicons/icons';
+
+// Register icons at file level
+addIcons({ trashOutline, reorderThree });
 import { Database } from '@fitos/shared';
 
 type Exercise = Database['public']['Tables']['exercises']['Row'];
@@ -35,9 +37,9 @@ export interface ExerciseConfig {
 
 @Component({
   selector: 'app-exercise-config',
-  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
+
     FormsModule,
     IonCard,
     IonCardHeader,
@@ -64,7 +66,7 @@ export interface ExerciseConfig {
             </ion-card-title>
             @if (config.exercise?.primary_muscle) {
               <ion-badge color="primary" class="muscle-badge">
-                {{ config.exercise.primary_muscle }}
+                {{ config.exercise?.primary_muscle }}
               </ion-badge>
             }
           </div>
@@ -228,10 +230,6 @@ export class ExerciseConfigComponent implements OnInit {
   @Input({ required: true }) config!: ExerciseConfig;
   @Output() configChange = new EventEmitter<ExerciseConfig>();
   @Output() remove = new EventEmitter<void>();
-
-  constructor() {
-    addIcons({ trashOutline, reorderThree });
-  }
 
   ngOnInit() {
     // Set defaults if not provided

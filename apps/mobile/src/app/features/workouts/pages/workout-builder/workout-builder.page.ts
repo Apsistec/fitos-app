@@ -1,5 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CdkDragDrop, moveItemInArray, DragDropModule } from '@angular/cdk/drag-drop';
@@ -15,7 +14,6 @@ import {
   IonInput,
   IonTextarea,
   IonItem,
-  IonLabel,
   IonSpinner,
   IonText,
   IonModal,
@@ -24,6 +22,9 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { addOutline, saveOutline, searchOutline } from 'ionicons/icons';
+
+// Register icons at file level
+addIcons({ addOutline, saveOutline, searchOutline });
 import { WorkoutService, ExerciseConfiguration } from '../../../../core/services/workout.service';
 import { ExerciseService } from '../../../../core/services/exercise.service';
 import { ExerciseConfigComponent, ExerciseConfig } from '../../../../shared/components/exercise-config/exercise-config.component';
@@ -34,9 +35,8 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
 
 @Component({
   selector: 'app-workout-builder',
-  standalone: true,
   imports: [
-    CommonModule,
+
     FormsModule,
     DragDropModule,
     IonContent,
@@ -50,7 +50,6 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
     IonInput,
     IonTextarea,
     IonItem,
-    IonLabel,
     IonSpinner,
     IonText,
     IonModal,
@@ -86,22 +85,30 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
         <div class="builder-container">
           <!-- Workout Metadata -->
           <div class="metadata-section">
-            <ion-item>
-              <ion-label position="stacked">Workout Name *</ion-label>
+            <ion-item lines="none">
               <ion-input
                 [(ngModel)]="workoutName"
+                type="text"
+                label="Workout Name"
+                labelPlacement="floating"
+                fill="outline"
                 placeholder="e.g., Upper Body Push"
+                helperText="Required - Enter a descriptive name"
                 required
-              ></ion-input>
+              />
             </ion-item>
 
-            <ion-item>
-              <ion-label position="stacked">Description (optional)</ion-label>
+            <ion-item lines="none">
               <ion-textarea
                 [(ngModel)]="workoutDescription"
+                label="Description"
+                labelPlacement="floating"
+                fill="outline"
                 placeholder="Add notes about this workout..."
+                helperText="Optional - Add workout notes or instructions"
+                [autoGrow]="true"
                 rows="3"
-              ></ion-textarea>
+              />
             </ion-item>
 
             @if (exercises().length > 0) {
@@ -171,7 +178,12 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
               <ion-input
                 [(ngModel)]="exerciseSearchQuery"
                 (ngModelChange)="searchExercises()"
+                type="search"
+                label="Search"
+                labelPlacement="floating"
+                fill="outline"
                 placeholder="Search exercises..."
+                helperText="Search by name or muscle group"
                 debounce="300"
               >
                 <ion-icon slot="start" name="search-outline"></ion-icon>
@@ -297,6 +309,13 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
   `]
 })
 export class WorkoutBuilderPage implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private workoutService = inject(WorkoutService);
+  exerciseService = inject(ExerciseService);
+  private alertController = inject(AlertController);
+  private toastController = inject(ToastController);
+
   // State
   workoutName = '';
   workoutDescription = '';
@@ -309,17 +328,6 @@ export class WorkoutBuilderPage implements OnInit {
   // Exercise picker
   showExercisePicker = signal(false);
   exerciseSearchQuery = '';
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private workoutService: WorkoutService,
-    public exerciseService: ExerciseService,
-    private alertController: AlertController,
-    private toastController: ToastController
-  ) {
-    addIcons({ addOutline, saveOutline, searchOutline });
-  }
 
   async ngOnInit() {
     // Load exercises for picker

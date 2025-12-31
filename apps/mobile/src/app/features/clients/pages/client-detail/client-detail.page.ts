@@ -3,7 +3,6 @@ import { IonContent, IonHeader, IonTitle, IonToolbar, IonBackButton, IonButtons 
 
 @Component({
   selector: 'app-client-detail',
-  standalone: true,
   imports: [IonContent, IonHeader, IonTitle, IonToolbar, IonBackButton, IonButtons],
   template: `
     <ion-header>

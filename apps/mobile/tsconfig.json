@@ -14,8 +14,8 @@
     "lib": ["ES2022", "dom"],
     "baseUrl": ".",
     "paths": {
-      "@app/*": ["apps/mobile/src/app/*"],
-      "@env/*": ["apps/mobile/src/environments/*"]
+      "@app/*": ["src/app/*"],
+      "@env/*": ["src/environments/*"]
     }
   },
   "angularCompilerOptions": {

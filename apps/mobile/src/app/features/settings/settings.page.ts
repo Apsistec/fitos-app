@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   IonContent,
@@ -27,7 +27,6 @@ import { AuthService } from '@app/core/services/auth.service';
 
 @Component({
   selector: 'app-settings',
-  standalone: true,
   imports: [
     IonContent,
     IonHeader,
@@ -48,54 +47,63 @@ import { AuthService } from '@app/core/services/auth.service';
     </ion-header>
 
     <ion-content>
-      <ion-list>
-        <ion-item button detail>
-          <ion-icon name="person-outline" slot="start"></ion-icon>
-          <ion-label>Edit Profile</ion-label>
-        </ion-item>
+      <div class="settings-container">
+        <ion-list>
+          <ion-item button detail>
+            <ion-icon name="person-outline" slot="start"></ion-icon>
+            <ion-label>Edit Profile</ion-label>
+          </ion-item>
 
-        <ion-item button detail>
-          <ion-icon name="notifications-outline" slot="start"></ion-icon>
-          <ion-label>Notifications</ion-label>
-        </ion-item>
+          <ion-item button detail>
+            <ion-icon name="notifications-outline" slot="start"></ion-icon>
+            <ion-label>Notifications</ion-label>
+          </ion-item>
 
-        <ion-item>
-          <ion-icon name="moon-outline" slot="start"></ion-icon>
-          <ion-label>Dark Mode</ion-label>
-          <ion-toggle slot="end"></ion-toggle>
-        </ion-item>
-      </ion-list>
+          <ion-item>
+            <ion-icon name="moon-outline" slot="start"></ion-icon>
+            <ion-label>Dark Mode</ion-label>
+            <ion-toggle slot="end"></ion-toggle>
+          </ion-item>
+        </ion-list>
 
-      <ion-list>
-        <ion-item button detail>
-          <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
-          <ion-label>Privacy & Security</ion-label>
-        </ion-item>
+        <ion-list>
+          <ion-item button detail>
+            <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+            <ion-label>Privacy & Security</ion-label>
+          </ion-item>
 
-        <ion-item button detail>
-          <ion-icon name="help-circle-outline" slot="start"></ion-icon>
-          <ion-label>Help & Support</ion-label>
-        </ion-item>
+          <ion-item button detail>
+            <ion-icon name="help-circle-outline" slot="start"></ion-icon>
+            <ion-label>Help & Support</ion-label>
+          </ion-item>
 
-        <ion-item button detail>
-          <ion-icon name="document-text-outline" slot="start"></ion-icon>
-          <ion-label>Terms & Privacy Policy</ion-label>
-        </ion-item>
-      </ion-list>
+          <ion-item button detail>
+            <ion-icon name="document-text-outline" slot="start"></ion-icon>
+            <ion-label>Terms & Privacy Policy</ion-label>
+          </ion-item>
+        </ion-list>
 
-      <div class="ion-padding">
-        <ion-button expand="block" fill="outline" color="danger" (click)="signOut()">
-          <ion-icon name="log-out-outline" slot="start"></ion-icon>
-          Sign Out
-        </ion-button>
-      </div>
+        @if (isAuthenticated()) {
+          <div class="ion-padding">
+            <ion-button expand="block" fill="outline" color="danger" (click)="signOut()">
+              <ion-icon name="log-out-outline" slot="start"></ion-icon>
+              Sign Out
+            </ion-button>
+          </div>
+        }
 
-      <div class="version-info">
-        <p>FitOS v0.1.0</p>
+        <div class="version-info">
+          <p>FitOS v0.1.0</p>
+        </div>
       </div>
     </ion-content>
   `,
   styles: [`
+    .settings-container {
+      max-width: 768px;
+      margin: 0 auto;
+    }
+
     ion-list {
       margin-bottom: 24px;
     }
@@ -115,6 +123,8 @@ import { AuthService } from '@app/core/services/auth.service';
 export class SettingsPage {
   private authService = inject(AuthService);
   private router = inject(Router);
+
+  isAuthenticated = computed(() => this.authService.isAuthenticated());
 
   constructor() {
     addIcons({

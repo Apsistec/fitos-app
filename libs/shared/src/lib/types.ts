@@ -2,7 +2,7 @@
 // User Types
 // ============================================================================
 
-export type UserRole = 'trainer' | 'client' | 'admin';
+export type UserRole = 'trainer' | 'client' | 'gym_owner' | 'gym_staff' | 'admin';
 export type SubscriptionStatus = 'active' | 'past_due' | 'canceled' | 'trialing';
 
 export interface Profile {

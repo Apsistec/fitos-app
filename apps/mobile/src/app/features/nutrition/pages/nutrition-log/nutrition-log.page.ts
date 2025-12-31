@@ -3,7 +3,6 @@ import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/stan
 
 @Component({
   selector: 'app-nutrition-log',
-  standalone: true,
   imports: [IonContent, IonHeader, IonTitle, IonToolbar],
   template: `
     <ion-header>

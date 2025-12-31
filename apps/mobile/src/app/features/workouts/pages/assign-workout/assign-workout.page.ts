@@ -1,5 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -32,9 +31,8 @@ import { WorkoutService } from '../../../../core/services/workout.service';
 
 @Component({
   selector: 'app-assign-workout',
-  standalone: true,
   imports: [
-    CommonModule,
+
     FormsModule,
     IonContent,
     IonHeader,
@@ -115,16 +113,18 @@ import { WorkoutService } from '../../../../core/services/workout.service';
           <!-- Assignment Form -->
           <ion-list>
             <!-- Client Selection -->
-            <ion-item>
-              <ion-label position="stacked">Client *</ion-label>
+            <ion-item lines="none">
               <ion-select
                 [(ngModel)]="selectedClientId"
+                label="Client"
+                labelPlacement="floating"
+                fill="outline"
                 placeholder="Select a client"
                 interface="action-sheet"
               >
-                @for (client of clientService.activeClients(); track client.user_id) {
-                  <ion-select-option [value]="client.user_id">
-                    {{ client.profile?.first_name }} {{ client.profile?.last_name }}
+                @for (client of clientService.activeClients(); track client.id) {
+                  <ion-select-option [value]="client.id">
+                    {{ client.profile.full_name }}
                   </ion-select-option>
                 }
               </ion-select>
@@ -150,28 +150,26 @@ import { WorkoutService } from '../../../../core/services/workout.service';
 
             <!-- Single Date Picker -->
             @if (!assignMultipleDates) {
-              <ion-item>
-                <ion-label position="stacked">Scheduled Date *</ion-label>
+              <ion-item lines="none">
                 <ion-datetime
                   [(ngModel)]="scheduledDate"
                   presentation="date"
                   [min]="minDate"
                   [max]="maxDate"
-                ></ion-datetime>
+                />
               </ion-item>
             }
 
             <!-- Multiple Dates Picker -->
             @if (assignMultipleDates) {
-              <ion-item>
-                <ion-label position="stacked">Select Dates *</ion-label>
+              <ion-item lines="none">
                 <ion-datetime
                   [(ngModel)]="selectedDates"
                   presentation="date"
                   [multiple]="true"
                   [min]="minDate"
                   [max]="maxDate"
-                ></ion-datetime>
+                />
               </ion-item>
 
               @if (selectedDates && selectedDates.length > 0) {
@@ -188,13 +186,17 @@ import { WorkoutService } from '../../../../core/services/workout.service';
             }
 
             <!-- Trainer Notes -->
-            <ion-item>
-              <ion-label position="stacked">Trainer Notes (optional)</ion-label>
+            <ion-item lines="none">
               <ion-textarea
                 [(ngModel)]="trainerNotes"
+                label="Trainer Notes"
+                labelPlacement="floating"
+                fill="outline"
                 placeholder="Add notes for your client..."
+                helperText="Optional - Special instructions or focus areas"
+                [autoGrow]="true"
                 rows="4"
-              ></ion-textarea>
+              />
             </ion-item>
           </ion-list>
 
@@ -216,7 +218,7 @@ import { WorkoutService } from '../../../../core/services/workout.service';
                 @if (assignMultipleDates) {
                   <div class="summary-item">
                     <span class="label">Dates:</span>
-                    <span class="value">{{ selectedDates?.length }} workouts</span>
+                    <span class="value">{{ selectedDates.length }} workouts</span>
                   </div>
                 } @else {
                   <div class="summary-item">
@@ -297,6 +299,13 @@ import { WorkoutService } from '../../../../core/services/workout.service';
   `]
 })
 export class AssignWorkoutPage implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private assignmentService = inject(AssignmentService);
+  clientService = inject(ClientService);
+  private workoutService = inject(WorkoutService);
+  private toastController = inject(ToastController);
+
   // Template ID from route
   templateId?: string;
 
@@ -315,15 +324,6 @@ export class AssignWorkoutPage implements OnInit {
   // Date constraints (today to 90 days in future)
   minDate = new Date().toISOString();
   maxDate = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private assignmentService: AssignmentService,
-    public clientService: ClientService,
-    private workoutService: WorkoutService,
-    private toastController: ToastController
-  ) {}
 
   async ngOnInit() {
     this.loading.set(true);
@@ -357,12 +357,12 @@ export class AssignWorkoutPage implements OnInit {
 
   getSelectedClientName(): string {
     const client = this.clientService.activeClients().find(
-      c => c.user_id === this.selectedClientId
+      c => c.id === this.selectedClientId
     );
 
     if (!client) return '';
 
-    return `${client.profile?.first_name || ''} ${client.profile?.last_name || ''}`.trim();
+    return client.profile?.full_name || '';
   }
 
   async assignWorkout() {

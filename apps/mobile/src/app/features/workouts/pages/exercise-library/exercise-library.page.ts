@@ -1,5 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
@@ -10,8 +9,6 @@ import {
   IonSearchbar,
   IonRefresher,
   IonRefresherContent,
-  IonList,
-  IonItem,
   IonLabel,
   IonSelect,
   IonSelectOption,
@@ -21,10 +18,16 @@ import {
   IonSpinner,
   IonChip,
   IonFab,
-  IonFabButton
+  IonFabButton,
+  IonGrid,
+  IonRow,
+  IonCol
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { filterOutline, addOutline, closeCircle } from 'ionicons/icons';
+
+// Register icons at file level
+addIcons({ filterOutline, addOutline, closeCircle });
 import { ExerciseService } from '../../../../core/services/exercise.service';
 import { ExerciseCardComponent } from '../../../../shared/components/exercise-card/exercise-card.component';
 import { Database } from '@fitos/shared';
@@ -33,9 +36,8 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
 
 @Component({
   selector: 'app-exercise-library',
-  standalone: true,
   imports: [
-    CommonModule,
+
     FormsModule,
     IonContent,
     IonHeader,
@@ -44,8 +46,6 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
     IonSearchbar,
     IonRefresher,
     IonRefresherContent,
-    IonList,
-    IonItem,
     IonLabel,
     IonSelect,
     IonSelectOption,
@@ -56,6 +56,9 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
     IonChip,
     IonFab,
     IonFabButton,
+    IonGrid,
+    IonRow,
+    IonCol,
     ExerciseCardComponent
   ],
   template: `
@@ -185,15 +188,21 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
               <p>{{ exerciseService.filteredExercises().length }} exercises</p>
             </div>
 
-            @for (exercise of exerciseService.filteredExercises(); track exercise.id) {
-              <app-exercise-card
-                [exercise]="exercise"
-                [showAddButton]="selectionMode()"
-                (detailClick)="onExerciseDetail($event)"
-                (videoClick)="onExerciseVideo($event)"
-                (addClick)="onExerciseAdd($event)"
-              ></app-exercise-card>
-            }
+            <ion-grid>
+              <ion-row>
+                @for (exercise of exerciseService.filteredExercises(); track exercise.id) {
+                  <ion-col size="12" sizeMd="6" sizeLg="4" sizeXl="3">
+                    <app-exercise-card
+                      [exercise]="exercise"
+                      [showAddButton]="selectionMode()"
+                      (detailClick)="onExerciseDetail($event)"
+                      (videoClick)="onExerciseVideo($event)"
+                      (addClick)="onExerciseAdd($event)"
+                    ></app-exercise-card>
+                  </ion-col>
+                }
+              </ion-row>
+            </ion-grid>
           }
         </div>
       }
@@ -276,6 +285,9 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
   `]
 })
 export class ExerciseLibraryPage implements OnInit {
+  exerciseService = inject(ExerciseService);
+  private router = inject(Router);
+
   // Filter state
   searchQuery = '';
   selectedCategory: string | null = null;
@@ -285,13 +297,6 @@ export class ExerciseLibraryPage implements OnInit {
   // UI state
   showFilters = signal(false);
   selectionMode = signal(false); // For use in workout builder
-
-  constructor(
-    public exerciseService: ExerciseService,
-    private router: Router
-  ) {
-    addIcons({ filterOutline, addOutline, closeCircle });
-  }
 
   ngOnInit() {
     this.loadExercises();

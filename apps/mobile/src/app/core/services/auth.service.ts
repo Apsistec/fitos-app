@@ -42,6 +42,27 @@ export class AuthService {
   readonly isAuthenticated = computed(() => !!this._state().user);
   readonly isTrainer = computed(() => this._state().profile?.role === 'trainer');
   readonly isClient = computed(() => this._state().profile?.role === 'client');
+  readonly isOwner = computed(() => this._state().profile?.role === 'gym_owner');
+  readonly accessToken = computed(() => this._state().session?.access_token ?? null);
+
+  /**
+   * Wait for auth initialization to complete
+   * Returns a promise that resolves when auth is initialized
+   */
+  async waitForInitialization(): Promise<void> {
+    if (this._state().initialized) {
+      return Promise.resolve();
+    }
+
+    return new Promise((resolve) => {
+      const checkInterval = setInterval(() => {
+        if (this._state().initialized) {
+          clearInterval(checkInterval);
+          resolve();
+        }
+      }, 50);
+    });
+  }
 
   /**
    * Initialize auth state listener
@@ -137,10 +158,19 @@ export class AuthService {
    */
   private handlePostLogin(): void {
     const profile = this._state().profile;
-    
+
     // Check if onboarding is needed
     if (profile && !profile.fullName) {
       this.router.navigate(['/onboarding']);
+      return;
+    }
+
+    // Check for returnUrl in query params
+    const urlParams = new URLSearchParams(window.location.search);
+    const returnUrl = urlParams.get('returnUrl');
+
+    if (returnUrl) {
+      this.router.navigateByUrl(returnUrl);
     } else {
       this.router.navigate(['/tabs/dashboard']);
     }

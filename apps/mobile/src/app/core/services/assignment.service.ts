@@ -1,10 +1,10 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
 import { Database } from '@fitos/shared';
 
-type AssignedWorkout = Database['public']['Tables']['assigned_workouts']['Row'];
-type AssignedWorkoutInsert = Database['public']['Tables']['assigned_workouts']['Insert'];
+type AssignedWorkout = Database['public']['Tables']['workouts']['Row'];
+type AssignedWorkoutInsert = Database['public']['Tables']['workouts']['Insert'];
 
 export interface WorkoutAssignment {
   clientId: string;
@@ -27,15 +27,13 @@ export class AssignmentService {
   private loadingSignal = signal<boolean>(false);
   private errorSignal = signal<string | null>(null);
 
+  private supabase = inject(SupabaseService);
+  private auth = inject(AuthService);
+
   // Computed values
   assignments = computed(() => this.assignmentsSignal());
   loading = computed(() => this.loadingSignal());
   error = computed(() => this.errorSignal());
-
-  constructor(
-    private supabase: SupabaseService,
-    private auth: AuthService
-  ) {}
 
   /**
    * Assign a workout to a client on a specific date
@@ -51,14 +49,15 @@ export class AssignmentService {
       const assignmentData: AssignedWorkoutInsert = {
         client_id: assignment.clientId,
         template_id: assignment.templateId,
-        assigned_by: userId,
+        trainer_id: userId,
+        name: 'Assigned Workout',
         scheduled_date: assignment.scheduledDate,
         trainer_notes: assignment.trainerNotes || null,
-        status: 'pending'
+        status: 'scheduled'
       };
 
       const { data, error } = await this.supabase.client
-        .from('assigned_workouts')
+        .from('workouts')
         .insert(assignmentData)
         .select()
         .single();
@@ -89,14 +88,15 @@ export class AssignmentService {
       const assignmentData: AssignedWorkoutInsert[] = assignments.map(a => ({
         client_id: a.clientId,
         template_id: a.templateId,
-        assigned_by: userId,
+        trainer_id: userId,
+        name: 'Assigned Workout',
         scheduled_date: a.scheduledDate,
         trainer_notes: a.trainerNotes || null,
-        status: 'pending'
+        status: 'scheduled'
       }));
 
       const { error } = await this.supabase.client
-        .from('assigned_workouts')
+        .from('workouts')
         .insert(assignmentData);
 
       if (error) throw error;

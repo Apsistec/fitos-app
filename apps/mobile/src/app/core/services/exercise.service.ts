@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { Database } from '@fitos/shared';
 
@@ -41,10 +41,10 @@ export class ExerciseService {
       if (filters.category && exercise.category !== filters.category) {
         return false;
       }
-      if (filters.muscleGroup && exercise.primary_muscle_group !== filters.muscleGroup) {
+      if (filters.muscleGroup && exercise.primary_muscle !== filters.muscleGroup) {
         return false;
       }
-      if (filters.equipment && exercise.equipment_required !== filters.equipment) {
+      if (filters.equipment && !exercise.equipment?.includes(filters.equipment)) {
         return false;
       }
       if (filters.searchQuery) {
@@ -66,15 +66,16 @@ export class ExerciseService {
 
   muscleGroups = computed(() => {
     const exercises = this.exercisesSignal();
-    return [...new Set(exercises.map(e => e.primary_muscle_group))].filter(Boolean).sort();
+    return [...new Set(exercises.map(e => e.primary_muscle))].filter(Boolean).sort();
   });
 
   equipmentTypes = computed(() => {
     const exercises = this.exercisesSignal();
-    return [...new Set(exercises.map(e => e.equipment_required))].filter(Boolean).sort();
+    const allEquipment = exercises.flatMap(e => e.equipment || []);
+    return [...new Set(allEquipment)].filter(Boolean).sort();
   });
 
-  constructor(private supabase: SupabaseService) {}
+  private supabase = inject(SupabaseService);
 
   /**
    * Load all exercises (system + user's custom exercises)
