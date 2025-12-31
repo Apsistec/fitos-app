@@ -1,5 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, signal, computed } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import {
@@ -9,6 +8,7 @@ import {
   IonToolbar,
   IonButton,
   IonInput,
+  IonInputPasswordToggle,
   IonItem,
   IonLabel,
   IonList,
@@ -21,10 +21,7 @@ import {
   IonButtons,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { 
-  personOutline, 
-  mailOutline, 
-  lockClosedOutline,
+import {
   fitnessOutline,
   peopleOutline,
 } from 'ionicons/icons';
@@ -33,9 +30,7 @@ import type { UserRole } from '@fitos/shared';
 
 @Component({
   selector: 'app-register',
-  standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     RouterLink,
     IonContent,
@@ -44,6 +39,7 @@ import type { UserRole } from '@fitos/shared';
     IonToolbar,
     IonButton,
     IonInput,
+    IonInputPasswordToggle,
     IonItem,
     IonLabel,
     IonList,
@@ -106,65 +102,67 @@ import type { UserRole } from '@fitos/shared';
         <!-- Registration Form -->
         <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
           <ion-list lines="none">
-            <ion-item>
-              <ion-icon name="person-outline" slot="start" color="medium"></ion-icon>
+            <ion-item lines="none">
               <ion-input
                 formControlName="fullName"
                 type="text"
-                placeholder="Full Name"
+                label="Full Name"
+                labelPlacement="floating"
+                fill="outline"
+                placeholder="John Doe"
                 autocomplete="name"
-              ></ion-input>
+                helperText="Enter your full name"
+                [errorText]="fullNameError()"
+              />
             </ion-item>
-            @if (registerForm.get('fullName')?.touched && registerForm.get('fullName')?.errors) {
-              <ion-note color="danger" class="field-error">
-                Please enter your name
-              </ion-note>
-            }
 
-            <ion-item>
-              <ion-icon name="mail-outline" slot="start" color="medium"></ion-icon>
+            <ion-item lines="none">
               <ion-input
                 formControlName="email"
                 type="email"
-                placeholder="Email"
+                label="Email"
+                labelPlacement="floating"
+                fill="outline"
+                placeholder="you@example.com"
                 autocomplete="email"
-              ></ion-input>
+                helperText="Enter your email address"
+                [errorText]="emailError()"
+              />
             </ion-item>
-            @if (registerForm.get('email')?.touched && registerForm.get('email')?.errors) {
-              <ion-note color="danger" class="field-error">
-                Please enter a valid email address
-              </ion-note>
-            }
 
-            <ion-item>
-              <ion-icon name="lock-closed-outline" slot="start" color="medium"></ion-icon>
+            <ion-item lines="none">
               <ion-input
                 formControlName="password"
                 type="password"
-                placeholder="Password"
+                label="Password"
+                labelPlacement="floating"
+                fill="outline"
+                placeholder="At least 8 characters"
                 autocomplete="new-password"
-              ></ion-input>
+                helperText="Choose a strong password (min 8 characters)"
+                [errorText]="passwordError()"
+                [counter]="true"
+                [minlength]="8"
+              >
+                <ion-input-password-toggle slot="end" />
+              </ion-input>
             </ion-item>
-            @if (registerForm.get('password')?.touched && registerForm.get('password')?.errors) {
-              <ion-note color="danger" class="field-error">
-                Password must be at least 8 characters
-              </ion-note>
-            }
 
-            <ion-item>
-              <ion-icon name="lock-closed-outline" slot="start" color="medium"></ion-icon>
+            <ion-item lines="none">
               <ion-input
                 formControlName="confirmPassword"
                 type="password"
-                placeholder="Confirm Password"
+                label="Confirm Password"
+                labelPlacement="floating"
+                fill="outline"
+                placeholder="Re-enter your password"
                 autocomplete="new-password"
-              ></ion-input>
+                helperText="Re-enter your password to confirm"
+                [errorText]="confirmPasswordError()"
+              >
+                <ion-input-password-toggle slot="end" />
+              </ion-input>
             </ion-item>
-            @if (registerForm.get('confirmPassword')?.touched && registerForm.errors?.['passwordMismatch']) {
-              <ion-note color="danger" class="field-error">
-                Passwords do not match
-              </ion-note>
-            }
           </ion-list>
 
           <ion-button
@@ -256,16 +254,11 @@ import type { UserRole } from '@fitos/shared';
       margin-bottom: 24px;
 
       ion-item {
-        --background: var(--ion-color-light);
-        --border-radius: 8px;
-        margin-bottom: 12px;
+        --background: transparent;
+        --padding-start: 0;
+        --inner-padding-end: 0;
+        margin-bottom: 16px;
       }
-    }
-
-    .field-error {
-      display: block;
-      font-size: 0.75rem;
-      margin: -8px 0 12px 16px;
     }
 
     .terms {
@@ -323,11 +316,42 @@ export class RegisterPage {
     }
   );
 
+  // Computed error messages for ion-input errorText property
+  fullNameError = computed(() => {
+    const control = this.registerForm.get('fullName');
+    if (!control?.touched) return '';
+    if (control.hasError('required')) return 'Full name is required';
+    return '';
+  });
+
+  emailError = computed(() => {
+    const control = this.registerForm.get('email');
+    if (!control?.touched) return '';
+    if (control.hasError('required')) return 'Email is required';
+    if (control.hasError('email')) return 'Please enter a valid email address';
+    return '';
+  });
+
+  passwordError = computed(() => {
+    const control = this.registerForm.get('password');
+    if (!control?.touched) return '';
+    if (control.hasError('required')) return 'Password is required';
+    if (control.hasError('minlength')) return 'Password must be at least 8 characters';
+    return '';
+  });
+
+  confirmPasswordError = computed(() => {
+    const control = this.registerForm.get('confirmPassword');
+    if (!control?.touched) return '';
+    if (control.hasError('required')) return 'Please confirm your password';
+    if (this.registerForm.hasError('passwordMismatch') && control.touched) {
+      return 'Passwords do not match';
+    }
+    return '';
+  });
+
   constructor() {
-    addIcons({ 
-      personOutline, 
-      mailOutline, 
-      lockClosedOutline,
+    addIcons({
       fitnessOutline,
       peopleOutline,
     });
@@ -352,8 +376,8 @@ export class RegisterPage {
 
     const { fullName, email, password } = this.registerForm.value;
     const { error } = await this.authService.signUp(
-      email, 
-      password, 
+      email,
+      password,
       this.selectedRole(),
       fullName
     );

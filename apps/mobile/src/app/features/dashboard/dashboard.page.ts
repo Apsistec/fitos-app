@@ -1,5 +1,5 @@
 import { Component, inject, computed, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe, TitleCasePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import {
   IonContent,
@@ -43,9 +43,9 @@ import type { Workout } from '@fitos/shared';
 
 @Component({
   selector: 'app-dashboard',
-  standalone: true,
   imports: [
-    CommonModule,
+    DatePipe,
+    TitleCasePipe,
     RouterLink,
     IonContent,
     IonHeader,

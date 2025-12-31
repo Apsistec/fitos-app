@@ -1,5 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, signal, ChangeDetectionStrategy } from '@angular/core';
 import {
   IonCard,
   IonCardContent,
@@ -11,11 +10,14 @@ import {
 import { addIcons } from 'ionicons';
 import { playOutline, pauseOutline, stopOutline, closeOutline } from 'ionicons/icons';
 
+// Register icons at file level
+addIcons({ playOutline, pauseOutline, stopOutline, closeOutline });
+
 @Component({
   selector: 'app-rest-timer',
-  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
+
     IonCard,
     IonCardContent,
     IonButton,
@@ -169,10 +171,6 @@ export class RestTimerComponent implements OnInit, OnDestroy {
   private interval?: number;
   private startTime?: number;
   private pausedTime: number = 0;
-
-  constructor() {
-    addIcons({ playOutline, pauseOutline, stopOutline, closeOutline });
-  }
 
   ngOnInit() {
     this.timeRemaining.set(this.restSeconds);

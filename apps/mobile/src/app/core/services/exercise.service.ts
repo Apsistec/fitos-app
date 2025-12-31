@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { Database } from '@fitos/shared';
 
@@ -75,7 +75,7 @@ export class ExerciseService {
     return [...new Set(allEquipment)].filter(Boolean).sort();
   });
 
-  constructor(private supabase: SupabaseService) {}
+  private supabase = inject(SupabaseService);
 
   /**
    * Load all exercises (system + user's custom exercises)

@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
 import { Database } from '@fitos/shared';
@@ -27,15 +27,13 @@ export class AssignmentService {
   private loadingSignal = signal<boolean>(false);
   private errorSignal = signal<string | null>(null);
 
+  private supabase = inject(SupabaseService);
+  private auth = inject(AuthService);
+
   // Computed values
   assignments = computed(() => this.assignmentsSignal());
   loading = computed(() => this.loadingSignal());
   error = computed(() => this.errorSignal());
-
-  constructor(
-    private supabase: SupabaseService,
-    private auth: AuthService
-  ) {}
 
   /**
    * Assign a workout to a client on a specific date

@@ -1,11 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, signal, computed } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
   IonContent,
   IonButton,
   IonInput,
+  IonInputPasswordToggle,
   IonItem,
   IonList,
   IonSpinner,
@@ -13,25 +13,24 @@ import {
   IonNote,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { logoGoogle, logoApple, mailOutline, lockClosedOutline } from 'ionicons/icons';
+import { logoGoogle, logoApple, fitnessOutline } from 'ionicons/icons';
 import { AuthService } from '@app/core/services/auth.service';
 
 @Component({
   selector: 'app-login',
-  standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     RouterLink,
     IonContent,
     IonButton,
     IonInput,
+    IonInputPasswordToggle,
     IonItem,
     IonList,
     IonSpinner,
     IonIcon,
     IonNote
-],
+  ],
   template: `
     <ion-content class="ion-padding">
       <div class="login-container">
@@ -54,35 +53,35 @@ import { AuthService } from '@app/core/services/auth.service';
         <!-- Login Form -->
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
           <ion-list lines="none">
-            <ion-item>
-              <ion-icon name="mail-outline" slot="start" color="medium"></ion-icon>
+            <ion-item lines="none">
               <ion-input
                 formControlName="email"
                 type="email"
-                placeholder="Email"
+                label="Email"
+                labelPlacement="floating"
+                fill="outline"
+                placeholder="you@example.com"
                 autocomplete="email"
-              ></ion-input>
+                helperText="Enter your email address"
+                [errorText]="emailError()"
+              />
             </ion-item>
-            @if (loginForm.get('email')?.touched && loginForm.get('email')?.errors) {
-              <ion-note color="danger" class="field-error">
-                Please enter a valid email address
-              </ion-note>
-            }
 
-            <ion-item>
-              <ion-icon name="lock-closed-outline" slot="start" color="medium"></ion-icon>
+            <ion-item lines="none">
               <ion-input
                 formControlName="password"
                 type="password"
-                placeholder="Password"
+                label="Password"
+                labelPlacement="floating"
+                fill="outline"
+                placeholder="Enter your password"
                 autocomplete="current-password"
-              ></ion-input>
+                helperText="Your account password"
+                [errorText]="passwordError()"
+              >
+                <ion-input-password-toggle slot="end" />
+              </ion-input>
             </ion-item>
-            @if (loginForm.get('password')?.touched && loginForm.get('password')?.errors) {
-              <ion-note color="danger" class="field-error">
-                Password is required
-              </ion-note>
-            }
           </ion-list>
 
           <div class="forgot-password">
@@ -180,19 +179,14 @@ import { AuthService } from '@app/core/services/auth.service';
 
     ion-list {
       background: transparent;
-      margin-bottom: 8px;
+      margin-bottom: 16px;
 
       ion-item {
-        --background: var(--ion-color-light);
-        --border-radius: 8px;
-        margin-bottom: 12px;
+        --background: transparent;
+        --padding-start: 0;
+        --inner-padding-end: 0;
+        margin-bottom: 16px;
       }
-    }
-
-    .field-error {
-      display: block;
-      font-size: 0.75rem;
-      margin: -8px 0 12px 16px;
     }
 
     .forgot-password {
@@ -261,8 +255,24 @@ export class LoginPage {
     password: ['', [Validators.required]],
   });
 
+  // Computed error messages for ion-input errorText property
+  emailError = computed(() => {
+    const control = this.loginForm.get('email');
+    if (!control?.touched) return '';
+    if (control.hasError('required')) return 'Email is required';
+    if (control.hasError('email')) return 'Please enter a valid email address';
+    return '';
+  });
+
+  passwordError = computed(() => {
+    const control = this.loginForm.get('password');
+    if (!control?.touched) return '';
+    if (control.hasError('required')) return 'Password is required';
+    return '';
+  });
+
   constructor() {
-    addIcons({ logoGoogle, logoApple, mailOutline, lockClosedOutline });
+    addIcons({ logoGoogle, logoApple, fitnessOutline });
   }
 
   async onSubmit(): Promise<void> {

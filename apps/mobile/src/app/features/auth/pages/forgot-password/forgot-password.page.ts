@@ -1,5 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, signal, computed } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
@@ -12,20 +11,15 @@ import {
   IonItem,
   IonList,
   IonSpinner,
-  IonIcon,
   IonNote,
   IonBackButton,
   IonButtons,
 } from '@ionic/angular/standalone';
-import { addIcons } from 'ionicons';
-import { mailOutline } from 'ionicons/icons';
 import { AuthService } from '@app/core/services/auth.service';
 
 @Component({
   selector: 'app-forgot-password',
-  standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     RouterLink,
     IonContent,
@@ -37,7 +31,6 @@ import { AuthService } from '@app/core/services/auth.service';
     IonItem,
     IonList,
     IonSpinner,
-    IonIcon,
     IonNote,
     IonBackButton,
     IonButtons,
@@ -76,20 +69,19 @@ import { AuthService } from '@app/core/services/auth.service';
         <!-- Form -->
         <form [formGroup]="forgotForm" (ngSubmit)="onSubmit()">
           <ion-list lines="none">
-            <ion-item>
-              <ion-icon name="mail-outline" slot="start" color="medium"></ion-icon>
+            <ion-item lines="none">
               <ion-input
                 formControlName="email"
                 type="email"
-                placeholder="Email"
+                label="Email"
+                labelPlacement="floating"
+                fill="outline"
+                placeholder="you@example.com"
                 autocomplete="email"
-              ></ion-input>
+                helperText="Enter your registered email address"
+                [errorText]="emailError()"
+              />
             </ion-item>
-            @if (forgotForm.get('email')?.touched && forgotForm.get('email')?.errors) {
-              <ion-note color="danger" class="field-error">
-                Please enter a valid email address
-              </ion-note>
-            }
           </ion-list>
 
           <ion-button
@@ -154,15 +146,10 @@ import { AuthService } from '@app/core/services/auth.service';
       margin-bottom: 24px;
 
       ion-item {
-        --background: var(--ion-color-light);
-        --border-radius: 8px;
+        --background: transparent;
+        --padding-start: 0;
+        --inner-padding-end: 0;
       }
-    }
-
-    .field-error {
-      display: block;
-      font-size: 0.75rem;
-      margin: 8px 0 0 16px;
     }
 
     .back-link {
@@ -188,9 +175,14 @@ export class ForgotPasswordPage {
     email: ['', [Validators.required, Validators.email]],
   });
 
-  constructor() {
-    addIcons({ mailOutline });
-  }
+  // Computed error message for reactive errorText binding
+  emailError = computed(() => {
+    const control = this.forgotForm.get('email');
+    if (!control?.touched) return '';
+    if (control.hasError('required')) return 'Email is required';
+    if (control.hasError('email')) return 'Please enter a valid email address';
+    return '';
+  });
 
   async onSubmit(): Promise<void> {
     if (this.forgotForm.invalid) return;

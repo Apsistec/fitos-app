@@ -1,5 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonBadge, IonButton, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { playCircleOutline, informationCircleOutline, addCircleOutline } from 'ionicons/icons';
@@ -7,11 +6,13 @@ import { Database } from '@fitos/shared';
 
 type Exercise = Database['public']['Tables']['exercises']['Row'];
 
+// Register icons at module level
+addIcons({ playCircleOutline, informationCircleOutline, addCircleOutline });
+
 @Component({
   selector: 'app-exercise-card',
-  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     IonCard,
     IonCardHeader,
     IonCardTitle,
@@ -26,38 +27,38 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
       <ion-card-header>
         <div class="header-wrapper">
           <div class="title-section">
-            <ion-card-title>{{ exercise.name }}</ion-card-title>
+            <ion-card-title>{{ exercise().name }}</ion-card-title>
             <ion-card-subtitle>
-              {{ exercise.primary_muscle }}
-              @if (exercise.secondary_muscles && exercise.secondary_muscles.length > 0) {
-                <span> + {{ exercise.secondary_muscles.length }} more</span>
+              {{ exercise().primary_muscle }}
+              @if (exercise().secondary_muscles?.length) {
+                <span> + {{ exercise().secondary_muscles?.length }} more</span>
               }
             </ion-card-subtitle>
           </div>
-          @if (!exercise.is_system) {
+          @if (!exercise().is_system) {
             <ion-badge color="primary">Custom</ion-badge>
           }
         </div>
       </ion-card-header>
 
       <ion-card-content>
-        @if (exercise.description) {
-          <p class="description">{{ exercise.description }}</p>
+        @if (exercise().description) {
+          <p class="description">{{ exercise().description }}</p>
         }
 
         <div class="metadata">
           <div class="metadata-item">
             <span class="label">Category:</span>
-            <span class="value">{{ exercise.category }}</span>
+            <span class="value">{{ exercise().category }}</span>
           </div>
           <div class="metadata-item">
             <span class="label">Equipment:</span>
-            <span class="value">{{ exercise.equipment?.join(', ') || 'None' }}</span>
+            <span class="value">{{ exercise().equipment?.join(', ') || 'None' }}</span>
           </div>
         </div>
 
         <div class="actions">
-          @if (exercise.video_url) {
+          @if (exercise().video_url) {
             <ion-button fill="clear" size="small" (click)="onVideoClick()">
               <ion-icon slot="start" name="play-circle-outline"></ion-icon>
               Watch Demo
@@ -67,7 +68,7 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
             <ion-icon slot="start" name="information-circle-outline"></ion-icon>
             Details
           </ion-button>
-          @if (showAddButton) {
+          @if (showAddButton()) {
             <ion-button fill="solid" size="small" (click)="onAddClick()">
               <ion-icon slot="start" name="add-circle-outline"></ion-icon>
               Add
@@ -171,26 +172,24 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
   `]
 })
 export class ExerciseCardComponent {
-  @Input({ required: true }) exercise!: Exercise;
-  @Input() showAddButton = false;
+  // Signal-based inputs (Angular 21)
+  exercise = input.required<Exercise>();
+  showAddButton = input(false);
 
-  @Output() videoClick = new EventEmitter<Exercise>();
-  @Output() detailClick = new EventEmitter<Exercise>();
-  @Output() addClick = new EventEmitter<Exercise>();
-
-  constructor() {
-    addIcons({ playCircleOutline, informationCircleOutline, addCircleOutline });
-  }
+  // Signal-based outputs (Angular 21)
+  videoClick = output<Exercise>();
+  detailClick = output<Exercise>();
+  addClick = output<Exercise>();
 
   onVideoClick(): void {
-    this.videoClick.emit(this.exercise);
+    this.videoClick.emit(this.exercise());
   }
 
   onDetailClick(): void {
-    this.detailClick.emit(this.exercise);
+    this.detailClick.emit(this.exercise());
   }
 
   onAddClick(): void {
-    this.addClick.emit(this.exercise);
+    this.addClick.emit(this.exercise());
   }
 }

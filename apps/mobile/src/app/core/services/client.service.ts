@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
 import { Database } from '@fitos/shared';
@@ -24,15 +24,13 @@ export class ClientService {
   loading = computed(() => this.loadingSignal());
   error = computed(() => this.errorSignal());
 
+  private supabase = inject(SupabaseService);
+  private auth = inject(AuthService);
+
   // Active clients only (subscription active)
   activeClients = computed(() =>
     this.clientsSignal().filter(c => c.subscription_status === 'active')
   );
-
-  constructor(
-    private supabase: SupabaseService,
-    private auth: AuthService
-  ) {}
 
   /**
    * Load all clients for the current trainer

@@ -1,5 +1,4 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import {
   IonTabs,
   IonTabBar,
@@ -24,9 +23,8 @@ import { AuthService } from '@app/core/services/auth.service';
 
 @Component({
   selector: 'app-tabs',
-  standalone: true,
   imports: [
-    CommonModule,
+
     IonTabs,
     IonTabBar,
     IonTabButton,

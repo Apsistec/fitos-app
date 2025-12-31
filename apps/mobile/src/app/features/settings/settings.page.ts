@@ -27,7 +27,6 @@ import { AuthService } from '@app/core/services/auth.service';
 
 @Component({
   selector: 'app-settings',
-  standalone: true,
   imports: [
     IonContent,
     IonHeader,

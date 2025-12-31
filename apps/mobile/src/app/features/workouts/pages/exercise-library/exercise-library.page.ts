@@ -1,5 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
@@ -26,6 +25,9 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { filterOutline, addOutline, closeCircle } from 'ionicons/icons';
+
+// Register icons at file level
+addIcons({ filterOutline, addOutline, closeCircle });
 import { ExerciseService } from '../../../../core/services/exercise.service';
 import { ExerciseCardComponent } from '../../../../shared/components/exercise-card/exercise-card.component';
 import { Database } from '@fitos/shared';
@@ -34,9 +36,8 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
 
 @Component({
   selector: 'app-exercise-library',
-  standalone: true,
   imports: [
-    CommonModule,
+
     FormsModule,
     IonContent,
     IonHeader,
@@ -284,6 +285,9 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
   `]
 })
 export class ExerciseLibraryPage implements OnInit {
+  exerciseService = inject(ExerciseService);
+  private router = inject(Router);
+
   // Filter state
   searchQuery = '';
   selectedCategory: string | null = null;
@@ -293,13 +297,6 @@ export class ExerciseLibraryPage implements OnInit {
   // UI state
   showFilters = signal(false);
   selectionMode = signal(false); // For use in workout builder
-
-  constructor(
-    public exerciseService: ExerciseService,
-    private router: Router
-  ) {
-    addIcons({ filterOutline, addOutline, closeCircle });
-  }
 
   ngOnInit() {
     this.loadExercises();

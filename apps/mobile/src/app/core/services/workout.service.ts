@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
 import { Database } from '@fitos/shared';
@@ -29,6 +29,10 @@ export interface ExerciseConfiguration {
   providedIn: 'root'
 })
 export class WorkoutService {
+  // Services
+  private supabase = inject(SupabaseService);
+  private auth = inject(AuthService);
+
   // State
   private templatesSignal = signal<WorkoutTemplateWithExercises[]>([]);
   private currentTemplateSignal = signal<WorkoutTemplateWithExercises | null>(null);
@@ -40,11 +44,6 @@ export class WorkoutService {
   currentTemplate = computed(() => this.currentTemplateSignal());
   loading = computed(() => this.loadingSignal());
   error = computed(() => this.errorSignal());
-
-  constructor(
-    private supabase: SupabaseService,
-    private auth: AuthService
-  ) {}
 
   /**
    * Load all workout templates for the current trainer

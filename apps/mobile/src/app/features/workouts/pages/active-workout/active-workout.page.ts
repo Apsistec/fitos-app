@@ -1,5 +1,4 @@
-import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -17,7 +16,6 @@ import {
   IonCardContent,
   IonList,
   IonItem,
-  IonLabel,
   IonInput,
   IonText,
   IonBadge,
@@ -27,6 +25,9 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { checkmarkOutline, closeOutline, addCircleOutline, trashOutline } from 'ionicons/icons';
+
+// Register icons at file level
+addIcons({ checkmarkOutline, closeOutline, addCircleOutline, trashOutline });
 import { WorkoutSessionService, SetLog } from '../../../../core/services/workout-session.service';
 import { AssignmentService } from '../../../../core/services/assignment.service';
 import { RestTimerComponent } from '../../../../shared/components/rest-timer/rest-timer.component';
@@ -44,9 +45,8 @@ interface ExerciseProgress {
 
 @Component({
   selector: 'app-active-workout',
-  standalone: true,
   imports: [
-    CommonModule,
+
     FormsModule,
     IonContent,
     IonHeader,
@@ -62,7 +62,6 @@ interface ExerciseProgress {
     IonCardContent,
     IonList,
     IonItem,
-    IonLabel,
     IonInput,
     IonText,
     IonBadge,
@@ -134,36 +133,45 @@ interface ExerciseProgress {
 
               <!-- Log Set Form -->
               <ion-list class="log-form">
-                <ion-item>
-                  <ion-label position="stacked">Reps</ion-label>
+                <ion-item lines="none">
                   <ion-input
                     type="number"
                     [(ngModel)]="currentReps"
+                    label="Reps"
+                    labelPlacement="floating"
+                    fill="outline"
                     placeholder="{{ currentExercise()!.targetReps }}"
+                    helperText="Number of repetitions completed"
                     min="0"
-                  ></ion-input>
+                  />
                 </ion-item>
 
-                <ion-item>
-                  <ion-label position="stacked">Weight (lbs)</ion-label>
+                <ion-item lines="none">
                   <ion-input
                     type="number"
                     [(ngModel)]="currentWeight"
+                    label="Weight (lbs)"
+                    labelPlacement="floating"
+                    fill="outline"
                     placeholder="0"
+                    helperText="Weight used for this set"
                     min="0"
                     step="2.5"
-                  ></ion-input>
+                  />
                 </ion-item>
 
-                <ion-item>
-                  <ion-label position="stacked">RPE (1-10)</ion-label>
+                <ion-item lines="none">
                   <ion-input
                     type="number"
                     [(ngModel)]="currentRpe"
+                    label="RPE (1-10)"
+                    labelPlacement="floating"
+                    fill="outline"
                     placeholder="7"
+                    helperText="Rate of Perceived Exertion (1=easy, 10=max)"
                     min="1"
                     max="10"
-                  ></ion-input>
+                  />
                 </ion-item>
               </ion-list>
 
@@ -359,6 +367,13 @@ interface ExerciseProgress {
   `]
 })
 export class ActiveWorkoutPage implements OnInit, OnDestroy {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private sessionService = inject(WorkoutSessionService);
+  private assignmentService = inject(AssignmentService);
+  private alertController = inject(AlertController);
+  private toastController = inject(ToastController);
+
   assignedWorkoutId?: string;
 
   // State
@@ -383,17 +398,6 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
   });
 
   private timerInterval?: number;
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private sessionService: WorkoutSessionService,
-    private assignmentService: AssignmentService,
-    private alertController: AlertController,
-    private toastController: ToastController
-  ) {
-    addIcons({ checkmarkOutline, closeOutline, addCircleOutline, trashOutline });
-  }
 
   async ngOnInit() {
     this.assignedWorkoutId = this.route.snapshot.paramMap.get('id') || undefined;

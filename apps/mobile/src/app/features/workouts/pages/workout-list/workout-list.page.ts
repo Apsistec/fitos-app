@@ -1,5 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
@@ -44,11 +43,21 @@ type WorkoutTemplateWithExercises = Database['public']['Tables']['workout_templa
   exercises: any[];
 };
 
+// Register icons at module level
+addIcons({
+  addOutline,
+  ellipsisVertical,
+  playOutline,
+  createOutline,
+  copyOutline,
+  trashOutline,
+  timeOutline,
+  barbellOutline
+});
+
 @Component({
   selector: 'app-workout-list',
-  standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     IonContent,
     IonHeader,
@@ -321,28 +330,17 @@ type WorkoutTemplateWithExercises = Database['public']['Tables']['workout_templa
   `]
 })
 export class WorkoutListPage implements OnInit {
+  // Services (inject pattern)
+  workoutService = inject(WorkoutService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  private alertController = inject(AlertController);
+  private toastController = inject(ToastController);
+  private actionSheetController = inject(ActionSheetController);
+
+  // State
   searchQuery = '';
   filteredWorkouts = signal<WorkoutTemplateWithExercises[]>([]);
-
-  constructor(
-    public workoutService: WorkoutService,
-    private authService: AuthService,
-    private router: Router,
-    private alertController: AlertController,
-    private toastController: ToastController,
-    private actionSheetController: ActionSheetController
-  ) {
-    addIcons({
-      addOutline,
-      ellipsisVertical,
-      playOutline,
-      createOutline,
-      copyOutline,
-      trashOutline,
-      timeOutline,
-      barbellOutline
-    });
-  }
 
   async ngOnInit() {
     await this.loadWorkouts();
