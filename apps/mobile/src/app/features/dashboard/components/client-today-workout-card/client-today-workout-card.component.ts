@@ -30,7 +30,7 @@ import type { WorkoutWithExercises } from '../../../../core/services/workout.ser
 
           <div class="exercise-count">
             <ion-icon name="barbell-outline"></ion-icon>
-            <span>{{ workout.exercises?.length || 0 }} exercises</span>
+            <span>{{ workout.exercises.length || 0 }} exercises</span>
           </div>
 
           <ion-button

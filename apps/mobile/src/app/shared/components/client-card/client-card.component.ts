@@ -10,9 +10,7 @@ import {
   IonButton,
   IonIcon,
   IonAvatar,
-  IonLabel,
-  IonItem
-} from '@ionic/angular/standalone';
+  IonLabel} from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   personOutline,
@@ -47,24 +45,23 @@ addIcons({
     IonButton,
     IonIcon,
     IonAvatar,
-    IonLabel,
-    IonItem
-  ],
+    IonLabel
+],
   template: `
     <ion-card button (click)="onCardClick()">
       <ion-card-header>
         <div class="card-header-content">
           <div class="client-info">
             <ion-avatar class="client-avatar">
-              @if (client().profile?.avatar_url) {
-                <img [src]="client().profile.avatar_url" [alt]="client().profile?.full_name || 'Client'" />
+              @if (client().profile.avatar_url) {
+                <img [src]="client().profile.avatar_url" [alt]="client().profile.full_name || 'Client'" />
               } @else {
                 <ion-icon name="person-outline"></ion-icon>
               }
             </ion-avatar>
             <div class="client-details">
-              <ion-card-title>{{ client().profile?.full_name || 'Unknown' }}</ion-card-title>
-              <ion-card-subtitle>{{ client().profile?.email }}</ion-card-subtitle>
+              <ion-card-title>{{ client().profile.full_name || 'Unknown' }}</ion-card-title>
+              <ion-card-subtitle>{{ client().profile.email }}</ion-card-subtitle>
             </div>
           </div>
           <ion-button fill="clear" (click)="onMenuClick($event)">

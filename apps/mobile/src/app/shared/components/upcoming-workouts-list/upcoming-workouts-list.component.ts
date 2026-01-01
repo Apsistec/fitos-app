@@ -7,7 +7,6 @@ import {
   IonLabel,
   IonSkeletonText,
   IonIcon,
-  IonBadge,
   IonNote,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -31,9 +30,8 @@ type Workout = Tables<'workouts'>;
     IonLabel,
     IonSkeletonText,
     IonIcon,
-    IonBadge,
-    IonNote,
-  ],
+    IonNote
+],
   templateUrl: './upcoming-workouts-list.component.html',
   styleUrls: ['./upcoming-workouts-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
