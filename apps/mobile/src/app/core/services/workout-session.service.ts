@@ -425,4 +425,85 @@ export class WorkoutSessionService {
       return [];
     }
   }
+
+  /**
+   * Get workout history for the current user (client view)
+   */
+  async getWorkoutHistory(limit = 50, offset = 0): Promise<any[]> {
+    try {
+      const userId = this.auth.user()?.id;
+      if (!userId) throw new Error('User not authenticated');
+
+      const { data, error } = await this.supabase.client
+        .from('workouts')
+        .select('*, template:workout_templates(*)')
+        .eq('client_id', userId)
+        .eq('status', 'completed')
+        .order('completed_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+
+      if (error) throw error;
+
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching workout history:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get workout history for a specific client (trainer view)
+   */
+  async getClientWorkoutHistory(clientId: string, limit = 50, offset = 0): Promise<any[]> {
+    try {
+      const { data, error } = await this.supabase.client
+        .from('workouts')
+        .select('*, template:workout_templates(*)')
+        .eq('client_id', clientId)
+        .eq('status', 'completed')
+        .order('completed_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+
+      if (error) throw error;
+
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching client workout history:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get workout detail with all sets
+   */
+  async getWorkoutDetail(workoutId: string): Promise<{
+    workout: any;
+    sets: LoggedSet[];
+  } | null> {
+    try {
+      const { data: workout, error: workoutError } = await this.supabase.client
+        .from('workouts')
+        .select('*, template:workout_templates(*)')
+        .eq('id', workoutId)
+        .single();
+
+      if (workoutError) throw workoutError;
+
+      const { data: sets, error: setsError } = await this.supabase.client
+        .from('workout_sets')
+        .select('*')
+        .eq('workout_id', workoutId)
+        .order('set_number');
+
+      if (setsError) throw setsError;
+
+      return {
+        workout,
+        sets: sets || []
+      };
+    } catch (error) {
+      console.error('Error fetching workout detail:', error);
+      return null;
+    }
+  }
 }
