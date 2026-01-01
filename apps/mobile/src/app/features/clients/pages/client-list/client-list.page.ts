@@ -22,11 +22,11 @@ import {
   ToastController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { addOutline, filterOutline, chatboxOutline, eyeOutline, personRemoveOutline } from 'ionicons/icons';
+import { addOutline, filterOutline, chatboxOutline, eyeOutline, personRemoveOutline, mailOutline } from 'ionicons/icons';
 import { ClientService, ClientWithProfile } from '../../../../core/services/client.service';
 import { ClientCardComponent } from '../../../../shared/components/client-card/client-card.component';
 
-addIcons({ addOutline, filterOutline, chatboxOutline, eyeOutline, personRemoveOutline });
+addIcons({ addOutline, filterOutline, chatboxOutline, eyeOutline, personRemoveOutline, mailOutline });
 
 type SubscriptionFilter = 'all' | 'active' | 'trialing' | 'past_due' | 'canceled';
 
@@ -58,6 +58,9 @@ type SubscriptionFilter = 'all' | 'active' | 'trialing' | 'past_due' | 'canceled
       <ion-toolbar>
         <ion-title>My Clients</ion-title>
         <ion-buttons slot="end">
+          <ion-button (click)="viewInvitations()">
+            <ion-icon slot="icon-only" name="mail-outline"></ion-icon>
+          </ion-button>
           <ion-button (click)="toggleFilters()">
             <ion-icon slot="icon-only" name="filter-outline"></ion-icon>
           </ion-button>
@@ -352,7 +355,10 @@ export class ClientListPage implements OnInit {
   }
 
   addClient() {
-    // TODO: Navigate to add client page or show invite modal
-    this.router.navigate(['/tabs/clients/add']);
+    this.router.navigate(['/tabs/clients/invite']);
+  }
+
+  viewInvitations() {
+    this.router.navigate(['/tabs/clients/invitations']);
   }
 }

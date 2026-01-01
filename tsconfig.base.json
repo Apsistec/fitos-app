@@ -27,5 +27,12 @@
       "@env/*": ["apps/mobile/src/environments/*"]
     }
   },
-  "exclude": ["node_modules", "tmp"]
+  "exclude": [
+    "node_modules",
+    "tmp",
+    "**/node_modules",
+    "**/dist",
+    "**/www",
+    "**/*.spec.ts"
+  ]
 }

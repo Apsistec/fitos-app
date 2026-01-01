@@ -152,6 +152,20 @@ export const routes: Routes = [
               ),
           },
           {
+            path: 'invite',
+            loadComponent: () =>
+              import('./features/clients/pages/invite-client/invite-client.page').then(
+                (m) => m.InviteClientPage
+              ),
+          },
+          {
+            path: 'invitations',
+            loadComponent: () =>
+              import('./features/clients/pages/invitations-list/invitations-list.page').then(
+                (m) => m.InvitationsListPage
+              ),
+          },
+          {
             path: ':id',
             loadComponent: () =>
               import('./features/clients/pages/client-detail/client-detail.page').then(

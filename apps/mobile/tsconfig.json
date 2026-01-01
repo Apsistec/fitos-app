@@ -18,6 +18,12 @@
       "@env/*": ["src/environments/*"]
     }
   },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "www",
+    "**/*.spec.ts"
+  ],
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
