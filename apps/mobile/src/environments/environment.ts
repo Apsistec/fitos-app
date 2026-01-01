@@ -4,4 +4,5 @@ export const environment = {
   supabaseAnonKey: 'your-local-anon-key',
   stripePublishableKey: 'pk_test_...',
   terraApiKey: '',
+  usdaApiKey: '', // USDA FoodData Central API key
 };
