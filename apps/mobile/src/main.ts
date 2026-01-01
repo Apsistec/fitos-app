@@ -1,4 +1,4 @@
-import { enableProdMode } from '@angular/core';
+import { enableProdMode, isDevMode } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import {
@@ -10,6 +10,7 @@ import {
 } from '@angular/router';
 import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalone';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideServiceWorker } from '@angular/service-worker';
 
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
@@ -49,11 +50,10 @@ bootstrapApplication(AppComponent, {
         errorInterceptor,      // Handle errors last (after retries)
       ])
     ),
-    // TODO: Re-enable service worker after resolving @angular/service-worker package dependencies
-    // PWA configuration files are in place (manifest.webmanifest, ngsw-config.json, UpdateService)
-    // provideServiceWorker('ngsw-worker.js', {
-    //   enabled: !isDevMode(),
-    //   registrationStrategy: 'registerWhenStable:30000'
-    // }),
+    // PWA Service Worker - enabled in production only
+    provideServiceWorker('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      registrationStrategy: 'registerWhenStable:30000'
+    }),
   ],
 });

@@ -18,6 +18,13 @@ export interface AssignedWorkoutWithDetails extends AssignedWorkout {
   client?: any;
 }
 
+export interface RecentActivity {
+  workout: AssignedWorkout;
+  clientName: string;
+  clientAvatar: string | null;
+  completedAt: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -230,5 +237,74 @@ export class AssignmentService {
     this.assignmentsSignal.set([]);
     this.loadingSignal.set(false);
     this.errorSignal.set(null);
+  }
+
+  /**
+   * Get today's schedule for trainer dashboard
+   * Returns all workouts scheduled for today with client details
+   */
+  async getTodaySchedule(trainerId: string): Promise<AssignedWorkoutWithDetails[]> {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+
+      const { data, error } = await this.supabase.client
+        .from('workouts')
+        .select(`
+          *,
+          template:workout_templates(*),
+          client:profiles!workouts_client_id_fkey(*)
+        `)
+        .eq('trainer_id', trainerId)
+        .eq('scheduled_date', today)
+        .in('status', ['scheduled', 'in_progress'])
+        .order('scheduled_time', { ascending: true, nullsFirst: false });
+
+      if (error) throw error;
+
+      return (data as any) || [];
+    } catch (error) {
+      console.error('Error fetching today\'s schedule:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get recent client activity for trainer dashboard
+   * Returns workouts completed in the last N hours
+   */
+  async getRecentActivity(trainerId: string, hours: number = 24): Promise<RecentActivity[]> {
+    try {
+      const cutoffTime = new Date();
+      cutoffTime.setHours(cutoffTime.getHours() - hours);
+      const cutoffTimeStr = cutoffTime.toISOString();
+
+      const { data, error } = await this.supabase.client
+        .from('workouts')
+        .select(`
+          *,
+          client:profiles!workouts_client_id_fkey(full_name, avatar_url)
+        `)
+        .eq('trainer_id', trainerId)
+        .eq('status', 'completed')
+        .not('completed_at', 'is', null)
+        .gte('completed_at', cutoffTimeStr)
+        .order('completed_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+
+      // Transform to RecentActivity format
+      const activities: RecentActivity[] = (data || []).map((workout: any) => ({
+        workout,
+        clientName: workout.client?.full_name || 'Unknown Client',
+        clientAvatar: workout.client?.avatar_url || null,
+        completedAt: workout.completed_at,
+      }));
+
+      return activities;
+    } catch (error) {
+      console.error('Error fetching recent activity:', error);
+      return [];
+    }
   }
 }

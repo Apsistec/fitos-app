@@ -297,4 +297,132 @@ export class WorkoutSessionService {
     this.loadingSignal.set(false);
     this.errorSignal.set(null);
   }
+
+  /**
+   * Get today's workout for a client (scheduled or in_progress)
+   * Used by client dashboard
+   */
+  async getTodayWorkout(clientId: string): Promise<WorkoutSession | null> {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+
+      const { data, error } = await this.supabase.client
+        .from('workouts')
+        .select('*, template:workout_templates(*)')
+        .eq('client_id', clientId)
+        .eq('scheduled_date', today)
+        .in('status', ['scheduled', 'in_progress'])
+        .maybeSingle();
+
+      if (error) throw error;
+
+      return data;
+    } catch (error) {
+      console.error('Error fetching today\'s workout:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get count of completed workouts in the last N days
+   * Used by client dashboard for weekly stats
+   */
+  async getWorkoutCount(clientId: string, days: number = 7): Promise<number> {
+    try {
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+      const startDateStr = startDate.toISOString().split('T')[0];
+
+      const { count, error } = await this.supabase.client
+        .from('workouts')
+        .select('*', { count: 'exact', head: true })
+        .eq('client_id', clientId)
+        .eq('status', 'completed')
+        .gte('completed_at', startDateStr);
+
+      if (error) throw error;
+
+      return count || 0;
+    } catch (error) {
+      console.error('Error fetching workout count:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Calculate current workout streak (consecutive days with completed workouts)
+   * Used by client dashboard
+   */
+  async getCurrentStreak(clientId: string): Promise<number> {
+    try {
+      const { data, error } = await this.supabase.client
+        .from('workouts')
+        .select('completed_at')
+        .eq('client_id', clientId)
+        .eq('status', 'completed')
+        .not('completed_at', 'is', null)
+        .order('completed_at', { ascending: false })
+        .limit(90); // Check last 90 days
+
+      if (error) throw error;
+      if (!data || data.length === 0) return 0;
+
+      // Group workouts by date
+      const workoutDates = new Set(
+        data.map(w => new Date(w.completed_at!).toISOString().split('T')[0])
+      );
+
+      // Calculate streak
+      let streak = 0;
+      const today = new Date();
+
+      for (let i = 0; i < 90; i++) {
+        const checkDate = new Date(today);
+        checkDate.setDate(today.getDate() - i);
+        const dateStr = checkDate.toISOString().split('T')[0];
+
+        if (workoutDates.has(dateStr)) {
+          streak++;
+        } else if (i > 0) {
+          // Break streak if not today (allow rest day today)
+          break;
+        }
+      }
+
+      return streak;
+    } catch (error) {
+      console.error('Error calculating streak:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Get upcoming workouts for a client (next 7 days)
+   * Used by client dashboard
+   */
+  async getUpcomingWorkouts(clientId: string, limit: number = 5): Promise<WorkoutSession[]> {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const nextWeek = new Date();
+      nextWeek.setDate(nextWeek.getDate() + 7);
+      const nextWeekStr = nextWeek.toISOString().split('T')[0];
+
+      const { data, error } = await this.supabase.client
+        .from('workouts')
+        .select('*, template:workout_templates(*)')
+        .eq('client_id', clientId)
+        .gt('scheduled_date', today)
+        .lte('scheduled_date', nextWeekStr)
+        .in('status', ['scheduled'])
+        .order('scheduled_date', { ascending: true })
+        .limit(limit);
+
+      if (error) throw error;
+
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching upcoming workouts:', error);
+      return [];
+    }
+  }
 }

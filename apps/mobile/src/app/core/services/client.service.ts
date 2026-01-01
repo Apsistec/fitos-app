@@ -10,6 +10,18 @@ export interface ClientWithProfile extends ClientProfile {
   profile: Profile;
 }
 
+export interface ClientStats {
+  total: number;
+  active: number;
+  activeToday: number;
+}
+
+export interface ClientNeedingAttention {
+  client: ClientWithProfile;
+  reason: 'missed_workout' | 'inactive' | 'low_adherence';
+  details: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -110,5 +122,131 @@ export class ClientService {
     this.clientsSignal.set([]);
     this.loadingSignal.set(false);
     this.errorSignal.set(null);
+  }
+
+  /**
+   * Get client statistics for trainer dashboard
+   * Returns total clients, active clients, and clients active today
+   */
+  async getClientStats(trainerId: string): Promise<ClientStats> {
+    try {
+      // Get all clients count
+      const { count: totalCount, error: totalError } = await this.supabase.client
+        .from('client_profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('trainer_id', trainerId);
+
+      if (totalError) throw totalError;
+
+      // Get active clients count (subscription_status = 'active')
+      const { count: activeCount, error: activeError } = await this.supabase.client
+        .from('client_profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('trainer_id', trainerId)
+        .eq('subscription_status', 'active');
+
+      if (activeError) throw activeError;
+
+      // Get clients active today (have workout today or completed today)
+      const today = new Date().toISOString().split('T')[0];
+      const { data: todayWorkouts, error: todayError } = await this.supabase.client
+        .from('workouts')
+        .select('client_id')
+        .eq('trainer_id', trainerId)
+        .or(`scheduled_date.eq.${today},completed_at.gte.${today}`);
+
+      if (todayError) throw todayError;
+
+      // Count unique clients
+      const activeToday = new Set(todayWorkouts?.map(w => w.client_id) || []).size;
+
+      return {
+        total: totalCount || 0,
+        active: activeCount || 0,
+        activeToday,
+      };
+    } catch (error) {
+      console.error('Error fetching client stats:', error);
+      return { total: 0, active: 0, activeToday: 0 };
+    }
+  }
+
+  /**
+   * Get clients needing attention for trainer dashboard
+   * Returns clients with missed workouts, inactive streaks, or low adherence
+   */
+  async getClientsNeedingAttention(trainerId: string, limit: number = 5): Promise<ClientNeedingAttention[]> {
+    try {
+      const clientsNeedingAttention: ClientNeedingAttention[] = [];
+
+      // Get all active clients
+      const { data: clients, error: clientsError } = await this.supabase.client
+        .from('client_profiles')
+        .select(`
+          *,
+          profile:profiles!client_profiles_id_fkey(*)
+        `)
+        .eq('trainer_id', trainerId)
+        .eq('subscription_status', 'active');
+
+      if (clientsError) throw clientsError;
+      if (!clients || clients.length === 0) return [];
+
+      // Check each client for issues
+      for (const client of clients as ClientWithProfile[]) {
+        // Check for missed workouts (scheduled in past, status still 'scheduled')
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+        const { data: missedWorkouts, error: missedError } = await this.supabase.client
+          .from('workouts')
+          .select('scheduled_date')
+          .eq('client_id', client.id)
+          .eq('status', 'scheduled')
+          .lt('scheduled_date', yesterdayStr)
+          .limit(1);
+
+        if (!missedError && missedWorkouts && missedWorkouts.length > 0) {
+          clientsNeedingAttention.push({
+            client,
+            reason: 'missed_workout',
+            details: `Missed workout on ${missedWorkouts[0].scheduled_date}`,
+          });
+          continue;
+        }
+
+        // Check for inactivity (no completed workouts in last 7 days)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0];
+
+        const { count: recentWorkouts, error: recentError } = await this.supabase.client
+          .from('workouts')
+          .select('*', { count: 'exact', head: true })
+          .eq('client_id', client.id)
+          .eq('status', 'completed')
+          .gte('completed_at', sevenDaysAgoStr);
+
+        if (!recentError && recentWorkouts === 0) {
+          clientsNeedingAttention.push({
+            client,
+            reason: 'inactive',
+            details: 'No workouts completed in 7 days',
+          });
+          continue;
+        }
+
+        // If we have enough, stop checking
+        if (clientsNeedingAttention.length >= limit) {
+          break;
+        }
+      }
+
+      return clientsNeedingAttention.slice(0, limit);
+    } catch (error) {
+      console.error('Error fetching clients needing attention:', error);
+      return [];
+    }
   }
 }
