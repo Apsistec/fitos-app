@@ -1,85 +1,60 @@
 import { Component, inject, computed, OnInit, signal } from '@angular/core';
-import { DatePipe, TitleCasePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import {
   IonContent,
   IonHeader,
   IonTitle,
   IonToolbar,
-  IonCard,
-  IonCardHeader,
-  IonCardTitle,
-  IonCardSubtitle,
-  IonCardContent,
   IonButton,
   IonIcon,
-  IonList,
-  IonItem,
-  IonLabel,
   IonAvatar,
-  IonBadge,
-  IonProgressBar,
   IonButtons,
   IonRefresher,
   IonRefresherContent,
-  IonGrid,
-  IonRow,
-  IonCol,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import {
-  addOutline,
-  barbellOutline,
-  nutritionOutline,
-  trendingUpOutline,
-  chevronForward,
-  personOutline,
-  checkmarkCircle,
-  timeOutline,
-} from 'ionicons/icons';
+import { personOutline } from 'ionicons/icons';
 import { AuthService } from '@app/core/services/auth.service';
-import { SupabaseService } from '@app/core/services/supabase.service';
-import type { Workout } from '@fitos/shared';
+import { AssignmentService } from '@app/core/services/assignment.service';
+import { ClientService } from '@app/core/services/client.service';
+import { WorkoutSessionService } from '@app/core/services/workout-session.service';
+import { NutritionService } from '@app/core/services/nutrition.service';
+import { ClientTodayWorkoutCardComponent } from './components/client-today-workout-card/client-today-workout-card.component';
+import { ClientNutritionSummaryComponent, type NutritionSummary } from './components/client-nutrition-summary/client-nutrition-summary.component';
+import { TrainerOverviewStatsComponent, type TrainerStats } from './components/trainer-overview-stats/trainer-overview-stats.component';
+import { TrainerNeedsAttentionComponent, type ClientAlert } from './components/trainer-needs-attention/trainer-needs-attention.component';
+import { TrainerActivityFeedComponent, type ActivityItem } from './components/trainer-activity-feed/trainer-activity-feed.component';
+import { StatCardComponent } from '@app/shared/components/stat-card/stat-card.component';
+import { UpcomingWorkoutsListComponent } from '@app/shared/components/upcoming-workouts-list/upcoming-workouts-list.component';
+import type { WorkoutWithExercises } from '@app/core/services/workout.service';
 
 @Component({
   selector: 'app-dashboard',
   imports: [
-    DatePipe,
-    TitleCasePipe,
     RouterLink,
     IonContent,
     IonHeader,
     IonTitle,
     IonToolbar,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardSubtitle,
-    IonCardContent,
     IonButton,
     IonIcon,
-    IonList,
-    IonItem,
-    IonLabel,
     IonAvatar,
-    IonBadge,
-    IonProgressBar,
     IonButtons,
     IonRefresher,
     IonRefresherContent,
-    IonGrid,
-    IonRow,
-    IonCol,
+    ClientTodayWorkoutCardComponent,
+    ClientNutritionSummaryComponent,
+    TrainerOverviewStatsComponent,
+    TrainerNeedsAttentionComponent,
+    TrainerActivityFeedComponent,
+    StatCardComponent,
+    UpcomingWorkoutsListComponent,
   ],
   template: `
     <ion-header>
       <ion-toolbar>
         <ion-title>
-          @if (greeting()) {
-            {{ greeting() }}, {{ firstName() }}
-          } @else {
-            Dashboard
-          }
+          {{ greeting() }}, {{ firstName() }}
         </ion-title>
         <ion-buttons slot="end">
           <ion-button routerLink="/tabs/settings">
@@ -95,315 +70,82 @@ import type { Workout } from '@fitos/shared';
       </ion-toolbar>
     </ion-header>
 
-    <ion-content>
+    <ion-content class="ion-padding">
       <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
         <ion-refresher-content></ion-refresher-content>
       </ion-refresher>
 
-      <div class="dashboard-content">
-        <ion-grid>
-          <ion-row>
-            <!-- Today's Workout Card - Full width on mobile, 2/3 on tablet+, 1/2 on desktop -->
-            <ion-col size="12" sizeMd="8" sizeLg="6">
-              <ion-card class="today-workout-card">
-                <ion-card-header>
-                  <ion-card-subtitle>Today</ion-card-subtitle>
-                  <ion-card-title>
-                    @if (todayWorkout()) {
-                      {{ todayWorkout()?.name }}
-                    } @else {
-                      No Workout Scheduled
-                    }
-                  </ion-card-title>
-                </ion-card-header>
-                <ion-card-content>
-                  @if (todayWorkout()) {
-                    <div class="workout-meta">
-                      <span>
-                        <ion-icon name="time-outline"></ion-icon>
-                        ~45 min
-                      </span>
-                      <ion-badge [color]="getStatusColor(todayWorkout()?.status)">
-                        {{ todayWorkout()?.status | titlecase }}
-                      </ion-badge>
-                    </div>
-                    <ion-button expand="block" [routerLink]="['/tabs/workouts/active', todayWorkout()?.id]">
-                      @if (todayWorkout()?.status === 'scheduled') {
-                        Start Workout
-                      } @else if (todayWorkout()?.status === 'in_progress') {
-                        Continue Workout
-                      } @else {
-                        View Details
-                      }
-                    </ion-button>
-                  } @else {
-                    <p class="no-workout-text">Rest day or no workout assigned for today.</p>
-                    @if (isTrainer()) {
-                      <ion-button expand="block" fill="outline" routerLink="/tabs/workouts/builder">
-                        <ion-icon name="add-outline" slot="start"></ion-icon>
-                        Create Workout
-                      </ion-button>
-                    }
-                  }
-                </ion-card-content>
-              </ion-card>
-            </ion-col>
+      @if (!isTrainer()) {
+        <!-- Client Dashboard -->
+        <div class="client-dashboard">
+          <!-- Today's Workout -->
+          <app-client-today-workout-card [workout]="todayWorkout()" />
 
-            <!-- Quick Stats - Stacked on mobile, side-by-side on tablet+, vertical on desktop -->
-            <ion-col size="6" sizeMd="4" sizeLg="3">
-              <ion-card class="stat-card">
-                <ion-card-content>
-                  <div class="stat-value">{{ weeklyWorkouts() }}</div>
-                  <div class="stat-label">Workouts This Week</div>
-                </ion-card-content>
-              </ion-card>
-            </ion-col>
+          <!-- Quick Stats -->
+          <div class="stats-row">
+            <app-stat-card
+              label="This Week"
+              [value]="weeklyWorkouts()"
+              icon="barbell"
+            />
+            <app-stat-card
+              label="Streak"
+              [value]="currentStreak()"
+              icon="flame"
+              [suffix]="currentStreak() > 0 ? '🔥' : ''"
+            />
+          </div>
 
-            <ion-col size="6" sizeMd="4" sizeLg="3">
-              <ion-card class="stat-card">
-                <ion-card-content>
-                  <div class="stat-value">{{ currentStreak() }}</div>
-                  <div class="stat-label">Day Streak 🔥</div>
-                </ion-card-content>
-              </ion-card>
-            </ion-col>
-          </ion-row>
-
-          <!-- Nutrition Summary (if client) -->
-          @if (!isTrainer()) {
-            <ion-row>
-              <ion-col size="12" sizeMd="6" sizeLg="6">
-                <ion-card>
-                  <ion-card-header>
-                    <ion-card-subtitle>Today's Nutrition</ion-card-subtitle>
-                    <ion-card-title class="nutrition-title">
-                      {{ caloriesConsumed() }} / {{ caloriesTarget() }} cal
-                    </ion-card-title>
-                  </ion-card-header>
-                  <ion-card-content>
-                    <ion-progress-bar
-                      [value]="caloriesProgress()"
-                      class="nutrition-progress"
-                    ></ion-progress-bar>
-
-                    <div class="macros-row">
-                      <div class="macro">
-                        <span class="macro-value protein-color">{{ proteinConsumed() }}g</span>
-                        <span class="macro-label">Protein</span>
-                      </div>
-                      <div class="macro">
-                        <span class="macro-value carbs-color">{{ carbsConsumed() }}g</span>
-                        <span class="macro-label">Carbs</span>
-                      </div>
-                      <div class="macro">
-                        <span class="macro-value fat-color">{{ fatConsumed() }}g</span>
-                        <span class="macro-label">Fat</span>
-                      </div>
-                    </div>
-
-                    <ion-button expand="block" fill="outline" routerLink="/tabs/nutrition/add">
-                      <ion-icon name="add-outline" slot="start"></ion-icon>
-                      Log Food
-                    </ion-button>
-                  </ion-card-content>
-                </ion-card>
-              </ion-col>
-            </ion-row>
-          }
-
-          <!-- Trainer: Recent Clients Activity -->
-          @if (isTrainer()) {
-            <ion-row>
-              <ion-col size="12" sizeMd="6" sizeLg="6">
-                <ion-card>
-                  <ion-card-header>
-                    <ion-card-subtitle>Client Activity</ion-card-subtitle>
-                    <ion-card-title>Recent Updates</ion-card-title>
-                  </ion-card-header>
-                  <ion-card-content class="no-padding">
-                    <ion-list lines="full">
-                      @for (activity of recentActivity(); track activity.id) {
-                        <ion-item [routerLink]="['/tabs/clients', activity.clientId]">
-                          <ion-avatar slot="start">
-                            <img [src]="activity.avatarUrl || 'assets/default-avatar.png'" />
-                          </ion-avatar>
-                          <ion-label>
-                            <h3>{{ activity.clientName }}</h3>
-                            <p>{{ activity.message }}</p>
-                          </ion-label>
-                          <ion-icon name="chevron-forward" slot="end" color="medium"></ion-icon>
-                        </ion-item>
-                      } @empty {
-                        <ion-item>
-                          <ion-label class="ion-text-center">
-                            <p>No recent activity</p>
-                          </ion-label>
-                        </ion-item>
-                      }
-                    </ion-list>
-                  </ion-card-content>
-                </ion-card>
-              </ion-col>
-            </ion-row>
-          }
+          <!-- Nutrition Summary -->
+          <app-client-nutrition-summary [summary]="nutritionSummary()" />
 
           <!-- Upcoming Workouts -->
-          <ion-row>
-            <ion-col size="12" sizeMd="6" sizeLg="6">
-              <ion-card>
-                <ion-card-header>
-                  <ion-card-subtitle>Coming Up</ion-card-subtitle>
-                  <ion-card-title>This Week</ion-card-title>
-                </ion-card-header>
-                <ion-card-content class="no-padding">
-                  <ion-list lines="full">
-                    @for (workout of upcomingWorkouts(); track workout.id) {
-                      <ion-item [routerLink]="['/tabs/workouts/history', workout.id]">
-                        <ion-icon name="barbell-outline" slot="start" color="primary"></ion-icon>
-                        <ion-label>
-                          <h3>{{ workout.name }}</h3>
-                          <p>{{ workout.scheduledDate | date:'EEEE, MMM d' }}</p>
-                        </ion-label>
-                        <ion-icon name="chevron-forward" slot="end" color="medium"></ion-icon>
-                      </ion-item>
-                    } @empty {
-                      <ion-item>
-                        <ion-label class="ion-text-center">
-                          <p>No upcoming workouts</p>
-                        </ion-label>
-                      </ion-item>
-                    }
-                  </ion-list>
-                </ion-card-content>
-              </ion-card>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-      </div>
+          <app-upcoming-workouts-list [workouts]="upcomingWorkouts()" />
+        </div>
+      } @else {
+        <!-- Trainer Dashboard -->
+        <div class="trainer-dashboard">
+          <!-- Overview Stats -->
+          <app-trainer-overview-stats [stats]="trainerStats()" />
+
+          <!-- Needs Attention -->
+          <app-trainer-needs-attention [alerts]="clientAlerts()" />
+
+          <!-- Activity Feed -->
+          <app-trainer-activity-feed [activities]="recentActivity()" />
+        </div>
+      }
     </ion-content>
   `,
   styles: [`
-    .dashboard-content {
-      padding: 8px;
-
-      @media (min-width: 768px) {
-        padding: 16px;
-      }
-
-      @media (min-width: 992px) {
-        padding: 24px;
-      }
-    }
-
-    ion-grid {
+    .client-dashboard,
+    .trainer-dashboard {
       max-width: 1200px;
       margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
     }
 
-    ion-card {
-      margin: 0;
-      height: 100%;
-    }
-
-    .today-workout-card {
-      background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-tertiary) 100%);
-      color: white;
-
-      ion-card-subtitle {
-        color: rgba(255, 255, 255, 0.8);
-      }
-
-      ion-card-title {
-        color: white;
-        font-size: 1.5rem;
-      }
-
-      .workout-meta {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 16px;
-
-        span {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-        }
-      }
-
-      ion-button {
-        --background: white;
-        --color: var(--ion-color-primary);
-      }
-
-      .no-workout-text {
-        margin: 0 0 16px;
-        opacity: 0.9;
-      }
-    }
-
-    .stat-card {
-      ion-card-content {
-        text-align: center;
-        padding: 20px 16px;
-      }
-
-      .stat-value {
-        font-size: 2rem;
-        font-weight: 700;
-        color: var(--ion-color-primary);
-
-        @media (min-width: 768px) {
-          font-size: 2.5rem;
-        }
-      }
-
-      .stat-label {
-        font-size: 0.875rem;
-        color: var(--ion-color-medium);
-        margin-top: 4px;
-      }
-    }
-
-    .nutrition-title {
-      font-size: 1.5rem !important;
-    }
-
-    .nutrition-progress {
-      margin-bottom: 16px;
-    }
-
-    .macros-row {
+    .stats-row {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-bottom: 16px;
-      text-align: center;
-
-      .macro-value {
-        display: block;
-        font-size: 1.25rem;
-        font-weight: 600;
-      }
-
-      .macro-label {
-        font-size: 0.75rem;
-        color: var(--ion-color-medium);
-      }
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
     }
 
-    .no-padding {
-      padding: 0;
-    }
-
-    ion-list {
-      background: transparent;
+    @media (max-width: 576px) {
+      .stats-row {
+        grid-template-columns: 1fr;
+      }
     }
   `],
 })
 export class DashboardPage implements OnInit {
   private authService = inject(AuthService);
-  private supabase = inject(SupabaseService);
+  private assignmentService = inject(AssignmentService);
+  private clientService = inject(ClientService);
+  private sessionService = inject(WorkoutSessionService);
+  private nutritionService = inject(NutritionService);
 
   // User info
   isTrainer = computed(() => this.authService.isTrainer());
@@ -421,43 +163,27 @@ export class DashboardPage implements OnInit {
     return 'Good evening';
   });
 
-  // Data signals
-  todayWorkout = signal<Workout | null>(null);
+  // Client data signals
+  todayWorkout = signal<WorkoutWithExercises | null>(null);
   weeklyWorkouts = signal(0);
   currentStreak = signal(0);
-  upcomingWorkouts = signal<Workout[]>([]);
-  
-  // Nutrition (real data from backend)
-  caloriesConsumed = signal(0);
-  caloriesTarget = signal(0);
-  caloriesProgress = computed(() => {
-    const target = this.caloriesTarget();
-    return target > 0 ? Math.min(this.caloriesConsumed() / target, 1) : 0;
-  });
-  proteinConsumed = signal(0);
-  carbsConsumed = signal(0);
-  fatConsumed = signal(0);
+  upcomingWorkouts = signal<any[]>([]);
+  nutritionSummary = signal<NutritionSummary | null>(null);
 
-  // Trainer activity
-  recentActivity = signal<Array<{
-    id: string;
-    clientId: string;
-    clientName: string;
-    avatarUrl: string;
-    message: string;
-  }>>([]);
+  // Trainer data signals
+  trainerStats = signal<TrainerStats>({
+    totalClients: 0,
+    activeClients: 0,
+    workoutsToday: 0,
+    weeklyRevenue: 0,
+    clientChange: 0,
+    revenueChange: 0,
+  });
+  clientAlerts = signal<ClientAlert[]>([]);
+  recentActivity = signal<ActivityItem[]>([]);
 
   constructor() {
-    addIcons({
-      addOutline,
-      barbellOutline,
-      nutritionOutline,
-      trendingUpOutline,
-      chevronForward,
-      personOutline,
-      checkmarkCircle,
-      timeOutline,
-    });
+    addIcons({ personOutline });
   }
 
   ngOnInit(): void {
@@ -465,28 +191,179 @@ export class DashboardPage implements OnInit {
   }
 
   async loadDashboardData(): Promise<void> {
-    // TODO: Load actual data from Supabase
-    // Set to defaults until backend data is available
-    this.upcomingWorkouts.set([]);
-    this.weeklyWorkouts.set(0);
-    this.currentStreak.set(0);
-    this.todayWorkout.set(null);
-
-    // TODO: Load nutrition data if client
-    // TODO: Load client activity if trainer
+    try {
+      if (this.isTrainer()) {
+        await this.loadTrainerDashboard();
+      } else {
+        await this.loadClientDashboard();
+      }
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    }
   }
 
-  getStatusColor(status: string | undefined): string {
-    switch (status) {
-      case 'completed':
-        return 'success';
-      case 'in_progress':
-        return 'warning';
-      case 'skipped':
-        return 'medium';
-      default:
-        return 'primary';
+  private async loadClientDashboard(): Promise<void> {
+    const userId = this.authService.user()?.id;
+    if (!userId) return;
+
+    // For now, set default/empty values
+    // TODO: Implement actual service methods when backend is ready
+    this.todayWorkout.set(null);
+    this.weeklyWorkouts.set(0);
+    this.currentStreak.set(0);
+    this.upcomingWorkouts.set([]);
+    this.nutritionSummary.set(null);
+
+    // TODO: Uncomment when services are fully implemented
+    /*
+    const today = new Date().toISOString().split('T')[0];
+
+    // Load today's workout assignment
+    const assignments = await this.assignmentService.getAssignmentsForDate(userId, today);
+    if (assignments.length > 0) {
+      // Get the full workout details with exercises
+      const workoutId = assignments[0].workout_template_id;
+      // Fetch workout with exercises from WorkoutService
+      this.todayWorkout.set(null);
     }
+
+    // Load weekly workout count
+    const sessions = await this.sessionService.getSessionsForDateRange(
+      userId,
+      this.getStartOfWeek(),
+      today
+    );
+    this.weeklyWorkouts.set(sessions.filter((s: any) => s.status === 'completed').length);
+
+    // Calculate streak (simplified - should be more robust)
+    this.currentStreak.set(this.calculateStreak(sessions));
+
+    // Load upcoming workouts
+    const upcomingAssignments = await this.assignmentService.getAssignmentsForDateRange(
+      userId,
+      today,
+      this.getEndOfWeek()
+    );
+    this.upcomingWorkouts.set(upcomingAssignments);
+
+    // Load nutrition summary
+    const nutritionData = await this.nutritionService.getDailySummary(userId, today);
+    if (nutritionData) {
+      this.nutritionSummary.set({
+        calories: {
+          consumed: nutritionData.total_calories || 0,
+          target: nutritionData.target_calories || 2000,
+        },
+        protein: {
+          consumed: nutritionData.total_protein || 0,
+          target: nutritionData.target_protein || 150,
+        },
+        carbs: {
+          consumed: nutritionData.total_carbs || 0,
+          target: nutritionData.target_carbs || 200,
+        },
+        fat: {
+          consumed: nutritionData.total_fat || 0,
+          target: nutritionData.target_fat || 65,
+        },
+      });
+    }
+    */
+  }
+
+  private async loadTrainerDashboard(): Promise<void> {
+    const trainerId = this.authService.user()?.id;
+    if (!trainerId) return;
+
+    // For now, set default/empty values
+    // TODO: Implement actual service methods when backend is ready
+    this.trainerStats.set({
+      totalClients: 0,
+      activeClients: 0,
+      workoutsToday: 0,
+      weeklyRevenue: 0,
+      clientChange: 0,
+      revenueChange: 0,
+    });
+    this.clientAlerts.set([]);
+    this.recentActivity.set([]);
+
+    // TODO: Uncomment when services are fully implemented
+    /*
+    // Load clients
+    const clients = await this.clientService.getClients(trainerId);
+    const activeClients = clients.filter((c: any) => c.status === 'active');
+
+    // Load today's workouts for all clients
+    const today = new Date().toISOString().split('T')[0];
+    let workoutsToday = 0;
+    for (const client of activeClients) {
+      const assignments = await this.assignmentService.getAssignmentsForDate(client.id, today);
+      workoutsToday += assignments.length;
+    }
+
+    // Set trainer stats
+    this.trainerStats.set({
+      totalClients: clients.length,
+      activeClients: activeClients.length,
+      workoutsToday,
+      weeklyRevenue: 0, // TODO: Implement revenue tracking
+      clientChange: 0, // TODO: Calculate from historical data
+      revenueChange: 0, // TODO: Calculate from historical data
+    });
+
+    // Load client alerts
+    // TODO: Implement actual alert logic based on missed workouts, low adherence, etc.
+    this.clientAlerts.set([]);
+
+    // Load recent activity
+    // TODO: Implement actual activity feed from workout sessions
+    this.recentActivity.set([]);
+    */
+  }
+
+  private getStartOfWeek(): string {
+    const now = new Date();
+    const day = now.getDay();
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Adjust for Sunday
+    const monday = new Date(now.setDate(diff));
+    return monday.toISOString().split('T')[0];
+  }
+
+  private getEndOfWeek(): string {
+    const now = new Date();
+    const day = now.getDay();
+    const diff = now.getDate() - day + 7; // Next Sunday
+    const sunday = new Date(now.setDate(diff));
+    return sunday.toISOString().split('T')[0];
+  }
+
+  private calculateStreak(sessions: any[]): number {
+    // Simplified streak calculation
+    // TODO: Implement proper streak logic considering scheduled vs completed workouts
+    const completedDates = new Set(
+      sessions
+        .filter(s => s.status === 'completed')
+        .map(s => s.started_at?.split('T')[0])
+    );
+
+    let streak = 0;
+    const today = new Date();
+
+    for (let i = 0; i < 365; i++) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+
+      if (completedDates.has(dateStr)) {
+        streak++;
+      } else if (i > 0) {
+        // Allow grace for today
+        break;
+      }
+    }
+
+    return streak;
   }
 
   async handleRefresh(event: CustomEvent): Promise<void> {

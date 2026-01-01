@@ -13,6 +13,9 @@ export interface WorkoutTemplateWithExercises extends WorkoutTemplate {
   exercises: TemplateExercise[];
 }
 
+// Alias for backwards compatibility
+export type WorkoutWithExercises = WorkoutTemplateWithExercises;
+
 export interface ExerciseConfiguration {
   exerciseId: string;
   exerciseName?: string;

@@ -1,0 +1,38 @@
+@if (loading()) {
+  <ion-list>
+    @for (i of [1, 2, 3]; track i) {
+      <ion-item>
+        <ion-label>
+          <ion-skeleton-text [animated]="true" style="width: 70%; height: 18px; margin-bottom: 8px;"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 40%; height: 14px;"></ion-skeleton-text>
+        </ion-label>
+      </ion-item>
+    }
+  </ion-list>
+} @else if (workouts() && workouts()!.length === 0) {
+  <div class="empty-state">
+    <ion-icon name="calendar-outline" color="medium"></ion-icon>
+    <p>No workouts scheduled</p>
+  </div>
+} @else {
+  <ion-list lines="full">
+    @for (workout of workouts(); track workout.id) {
+      <ion-item button (click)="onWorkoutClick(workout)" detail="true">
+        <div class="workout-date-badge" slot="start">
+          <ion-icon name="calendar-outline" color="primary"></ion-icon>
+          <ion-note color="medium" class="day-label">{{ getDayOfWeek(workout.scheduled_date) }}</ion-note>
+        </div>
+        <ion-label>
+          <h3>{{ workout.name }}</h3>
+          <p>{{ formatDate(workout.scheduled_date) }}</p>
+        </ion-label>
+        @if (workout.scheduled_time) {
+          <ion-note slot="end" color="medium">
+            <ion-icon name="time-outline"></ion-icon>
+            {{ workout.scheduled_time }}
+          </ion-note>
+        }
+      </ion-item>
+    }
+  </ion-list>
+}
