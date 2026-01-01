@@ -111,7 +111,15 @@ export const routes: Routes = [
               ),
           },
           {
-            // Workout history/detail - everyone
+            // Workout history list - everyone
+            path: 'history',
+            loadComponent: () =>
+              import('./features/workouts/pages/workout-history/workout-history.page').then(
+                (m) => m.WorkoutHistoryPage
+              ),
+          },
+          {
+            // Workout detail - everyone
             path: 'history/:id',
             loadComponent: () =>
               import('./features/workouts/pages/workout-detail/workout-detail.page').then(
