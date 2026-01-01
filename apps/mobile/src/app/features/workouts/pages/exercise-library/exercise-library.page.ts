@@ -21,7 +21,8 @@ import {
   IonFabButton,
   IonGrid,
   IonRow,
-  IonCol
+  IonCol,
+  ModalController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { filterOutline, addOutline, closeCircle } from 'ionicons/icons';
@@ -30,6 +31,7 @@ import { filterOutline, addOutline, closeCircle } from 'ionicons/icons';
 addIcons({ filterOutline, addOutline, closeCircle });
 import { ExerciseService } from '../../../../core/services/exercise.service';
 import { ExerciseCardComponent } from '../../../../shared/components/exercise-card/exercise-card.component';
+import { ExerciseDetailModal } from '../../../../shared/modals/exercise-detail/exercise-detail.modal';
 import { Database } from '@fitos/shared';
 
 type Exercise = Database['public']['Tables']['exercises']['Row'];
@@ -287,6 +289,7 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
 export class ExerciseLibraryPage implements OnInit {
   exerciseService = inject(ExerciseService);
   private router = inject(Router);
+  private modalCtrl = inject(ModalController);
 
   // Filter state
   searchQuery = '';
@@ -364,9 +367,12 @@ export class ExerciseLibraryPage implements OnInit {
     this.clearFilters();
   }
 
-  onExerciseDetail(exercise: Exercise) {
-    // TODO: Navigate to exercise detail page
-    console.log('View exercise detail:', exercise.name);
+  async onExerciseDetail(exercise: Exercise) {
+    const modal = await this.modalCtrl.create({
+      component: ExerciseDetailModal,
+      componentProps: { exercise }
+    });
+    await modal.present();
   }
 
   onExerciseVideo(exercise: Exercise) {
