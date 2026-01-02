@@ -147,27 +147,27 @@ Chart.register(...registerables);
                 </ion-card-header>
                 <ion-card-content>
                   <div class="stats-grid">
-                    @if (latestMeasurement()?.value && latestMeasurement()?.measurement_type === 'weight') {
+                    @if (latestMeasurement().value && latestMeasurement().measurement_type === 'weight') {
                       <div class="stat">
                         <div class="stat-label">Weight</div>
-                        <div class="stat-value">{{ latestMeasurement()?.value }} {{ latestMeasurement()?.unit }}</div>
+                        <div class="stat-value">{{ latestMeasurement().value }} {{ latestMeasurement().unit }}</div>
                       </div>
                     }
-                    @if (latestMeasurement()?.value && latestMeasurement()?.measurement_type === 'body_fat') {
+                    @if (latestMeasurement().value && latestMeasurement().measurement_type === 'body_fat') {
                       <div class="stat">
                         <div class="stat-label">Body Fat</div>
-                        <div class="stat-value">{{ latestMeasurement()?.value }}%</div>
+                        <div class="stat-value">{{ latestMeasurement().value }}%</div>
                       </div>
                     }
-                    @if (latestMeasurement()?.value && latestMeasurement()?.measurement_type === 'waist') {
+                    @if (latestMeasurement().value && latestMeasurement().measurement_type === 'waist') {
                       <div class="stat">
                         <div class="stat-label">Waist</div>
-                        <div class="stat-value">{{ latestMeasurement()?.value }} {{ latestMeasurement()?.unit }}</div>
+                        <div class="stat-value">{{ latestMeasurement().value }} {{ latestMeasurement().unit }}</div>
                       </div>
                     }
                   </div>
                   <p class="measurement-date">
-                    {{ formatDate(latestMeasurement()?.measured_at) }}
+                    {{ formatDate(latestMeasurement().measured_at) }}
                   </p>
                 </ion-card-content>
               </ion-card>
@@ -183,7 +183,7 @@ Chart.register(...registerables);
                       <ion-item>
                         <div class="measurement-item">
                           <div class="measurement-main">
-                            <span class="measurement-weight">{{ measurement.weight_kg }} kg</span>
+                            <span class="measurement-weight">{{ measurement.value }} {{ measurement.unit }}</span>
                             <span class="measurement-date">{{ formatDate(measurement.measured_at) }}</span>
                           </div>
                           @if (measurement.notes) {

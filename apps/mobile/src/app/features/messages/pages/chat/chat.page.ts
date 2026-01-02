@@ -334,8 +334,8 @@ export class ChatPage implements OnInit, AfterViewChecked {
       const client = clients.find((c: any) => c.id === this.otherUserId());
 
       if (client) {
-        this.otherUserName.set(client.full_name || 'Unknown');
-        this.otherUserAvatar.set(client.avatar_url);
+        this.otherUserName.set((client as any).full_name || 'Unknown');
+        this.otherUserAvatar.set((client as any).avatar_url);
       }
     } catch (error) {
       console.error('Error loading other user info:', error);

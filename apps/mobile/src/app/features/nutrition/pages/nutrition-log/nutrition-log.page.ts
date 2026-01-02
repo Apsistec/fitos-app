@@ -34,7 +34,15 @@ import {
 } from 'ionicons/icons';
 import { NutritionService, type NutritionSummary } from '@app/core/services/nutrition.service';
 import { AuthService } from '@app/core/services/auth.service';
-import { NUTRITION_COLORS } from '@fitos/shared';
+
+// Adherence-neutral colors (no red for "over target")
+const NUTRITION_COLORS = {
+  CALORIES: '#6366F1', // Indigo
+  PROTEIN: '#22C55E', // Green
+  CARBS: '#F59E0B', // Amber
+  FAT: '#EC4899', // Pink
+  NEUTRAL: '#6B7280', // Gray
+} as const;
 
 addIcons({
   addOutline,

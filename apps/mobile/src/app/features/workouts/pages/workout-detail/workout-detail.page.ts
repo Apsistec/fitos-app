@@ -1,5 +1,5 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import {
   IonContent,
@@ -14,7 +14,6 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonCardContent,
-  IonBadge,
   IonIcon,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -52,9 +51,8 @@ addIcons({
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
-    IonBadge,
-    IonIcon,
-  ],
+    IonIcon
+],
   template: `
     <ion-header>
       <ion-toolbar>
@@ -153,7 +151,7 @@ addIcons({
                         <span>Set</span>
                         <span>Reps</span>
                         <span>Weight</span>
-                        @if (hasRPE(exercise.sets)) {
+                        @if (hasRpe(exercise)) {
                           <span>RPE</span>
                         }
                       </div>
@@ -169,7 +167,7 @@ addIcons({
                               -
                             }
                           </span>
-                          @if (hasRPE(exercise.sets)) {
+                          @if (hasRpe(exercise)) {
                             <span class="set-rpe">
                               @if (set.rpe) {
                                 {{ set.rpe }}
@@ -471,7 +469,7 @@ export class WorkoutDetailPage implements OnInit {
     }
   }
 
-  hasRPE(sets: any[]): boolean {
-    return sets.some(s => s.rpe);
+  hasRpe(exercise: any): boolean {
+    return exercise.sets.some((s: any) => s.rpe);
   }
 }

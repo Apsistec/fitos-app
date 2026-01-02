@@ -19,8 +19,6 @@ import {
   IonBadge,
   IonIcon,
   IonList,
-  IonItem,
-  IonLabel,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -54,10 +52,8 @@ addIcons({ barbellOutline, timeOutline, calendarOutline, trophyOutline });
     IonCardContent,
     IonBadge,
     IonIcon,
-    IonList,
-    IonItem,
-    IonLabel,
-  ],
+    IonList
+],
   template: `
     <ion-header>
       <ion-toolbar>
