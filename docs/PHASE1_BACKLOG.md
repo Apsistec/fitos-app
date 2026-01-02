@@ -709,20 +709,22 @@ This document outlines the complete feature set for Phase 1 MVP, broken down int
 ### 10.1 In-App Messaging
 **Priority:** P2 (Medium)
 **Sprint:** 8
+**Status:** ✅ COMPLETED
 
 **User Stories:**
-- As a trainer, I can message a client
-- As a client, I can message my trainer
-- As a user, I can see unread message count
+- As a trainer, I can message a client ✅
+- As a client, I can message my trainer ✅
+- As a user, I can see unread message count ✅
 
 **Implementation Tasks:**
-- [ ] Create messages table (verify schema)
-- [ ] Build conversation list page
-- [ ] Create chat interface
-- [ ] Implement real-time updates (Supabase Realtime)
-- [ ] Add unread badge to navigation
-- [ ] Mark messages as read on view
-- [ ] Add message push notifications
+- [x] Create messages table (verify schema)
+- [x] Build conversation list page
+- [x] Create chat interface
+- [x] Implement real-time updates (Supabase Realtime)
+- [x] Add unread count tracking (service-level)
+- [x] Mark messages as read on view
+- [ ] Add unread badge to navigation (DEFERRED)
+- [ ] Add message push notifications (DEFERRED)
 
 ---
 
