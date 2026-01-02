@@ -188,6 +188,13 @@ export const routes: Routes = [
                 (m) => m.ClientDetailPage
               ),
           },
+          {
+            path: ':id/nutrition-targets',
+            loadComponent: () =>
+              import('./features/clients/pages/set-nutrition-targets/set-nutrition-targets.page').then(
+                (m) => m.SetNutritionTargetsPage
+              ),
+          },
         ],
       },
       {
