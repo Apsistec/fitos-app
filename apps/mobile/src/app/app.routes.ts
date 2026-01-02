@@ -164,6 +164,25 @@ export const routes: Routes = [
         ],
       },
       {
+        path: 'messages',
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/messages/pages/conversations/conversations.page').then(
+                (m) => m.ConversationsPage
+              ),
+          },
+          {
+            path: 'chat/:id',
+            loadComponent: () =>
+              import('./features/messages/pages/chat/chat.page').then(
+                (m) => m.ChatPage
+              ),
+          },
+        ],
+      },
+      {
         // Clients - trainers and gym owners only
         path: 'clients',
         canActivate: [trainerOrOwnerGuard],
