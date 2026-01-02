@@ -134,6 +134,14 @@ export const routes: Routes = [
                 (m) => m.ProgressPage
               ),
           },
+          {
+            // Measurements & photos - everyone
+            path: 'measurements',
+            loadComponent: () =>
+              import('./features/clients/pages/measurements/measurements.page').then(
+                (m) => m.MeasurementsPage
+              ),
+          },
         ],
       },
       {
