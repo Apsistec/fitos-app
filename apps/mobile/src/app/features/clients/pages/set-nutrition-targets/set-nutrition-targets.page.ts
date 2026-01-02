@@ -24,6 +24,7 @@ import {
 import { NutritionService } from '@app/core/services/nutrition.service';
 import { ClientService } from '@app/core/services/client.service';
 import type { Tables } from '@fitos/shared';
+import { NUTRITION_COLORS } from '@fitos/shared';
 
 @Component({
   selector: 'app-set-nutrition-targets',
@@ -371,15 +372,15 @@ import type { Tables } from '@fitos/shared';
             transition: width 0.3s ease;
 
             &.protein {
-              background: var(--ion-color-primary);
+              background: #22C55E; /* Neutral green from NUTRITION_COLORS */
             }
 
             &.carbs {
-              background: var(--ion-color-secondary);
+              background: #F59E0B; /* Neutral amber from NUTRITION_COLORS */
             }
 
             &.fat {
-              background: var(--ion-color-tertiary);
+              background: #EC4899; /* Neutral pink from NUTRITION_COLORS */
             }
           }
         }

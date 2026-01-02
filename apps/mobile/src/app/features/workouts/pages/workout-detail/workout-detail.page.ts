@@ -153,7 +153,7 @@ addIcons({
                         <span>Set</span>
                         <span>Reps</span>
                         <span>Weight</span>
-                        @if (exercise.sets.some((s: any) => s.rpe)) {
+                        @if (hasRPE(exercise.sets)) {
                           <span>RPE</span>
                         }
                       </div>
@@ -169,7 +169,7 @@ addIcons({
                               -
                             }
                           </span>
-                          @if (exercise.sets.some((s: any) => s.rpe)) {
+                          @if (hasRPE(exercise.sets)) {
                             <span class="set-rpe">
                               @if (set.rpe) {
                                 {{ set.rpe }}
@@ -469,5 +469,9 @@ export class WorkoutDetailPage implements OnInit {
       const remainingMinutes = minutes % 60;
       return `${hours}h ${remainingMinutes}m`;
     }
+  }
+
+  hasRPE(sets: any[]): boolean {
+    return sets.some(s => s.rpe);
   }
 }
