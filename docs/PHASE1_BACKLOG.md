@@ -4,21 +4,22 @@ This document outlines the complete feature set for Phase 1 MVP, broken down int
 
 ---
 
-## Sprint 0: Foundation & Architecture Setup (Current Sprint)
+## Sprint 0: Foundation & Architecture Setup
+**Status:** ✅ MOSTLY COMPLETED
 
 ### 0.1 Authentication Guards & State Management
 **Priority:** P0 (Critical)
-**Status:** IN PROGRESS
+**Status:** ✅ COMPLETED
 
 **Implementation Tasks:**
 - [x] Create auth service with signals
 - [x] Create basic auth guard
-- [ ] Fix auth guard to properly wait for initialization
-- [ ] Create no-auth guard (redirects authenticated users away from auth pages)
-- [ ] Create role-based guards (trainer, client, gym_owner)
-- [ ] Implement auth state persistence across refreshes
-- [ ] Add loading state during auth check
-- [ ] Create RoleRedirectComponent for automatic routing based on role
+- [x] Fix auth guard to properly wait for initialization
+- [x] Create no-auth guard (redirects authenticated users away from auth pages)
+- [x] Create role-based guards (trainer, client, gym_owner)
+- [x] Implement auth state persistence across refreshes
+- [x] Add loading state during auth check
+- [ ] Create RoleRedirectComponent for automatic routing based on role (DEFERRED)
 
 ### 0.2 HTTP Interceptors
 **Priority:** P0 (Critical)
@@ -180,23 +181,24 @@ This document outlines the complete feature set for Phase 1 MVP, broken down int
 ### 1.4 Client Invitation System
 **Priority:** P1 (High)
 **Sprint:** 2
+**Status:** ✅ COMPLETED
 
 **User Stories:**
-- As a trainer, I can invite a new client via email
-- As a trainer, I can generate a shareable invite link
-- As a potential client, I can accept an invitation and create an account
-- As a trainer, I can see pending invitations
+- As a trainer, I can invite a new client via email ✅
+- As a trainer, I can generate a shareable invite link ✅
+- As a potential client, I can accept an invitation and create an account ✅
+- As a trainer, I can see pending invitations ✅
 
 **Implementation Tasks:**
-- [ ] Create invitations table in database
-- [ ] Build invite generation API (email + shareable link)
-- [ ] Create invite email template
-- [ ] Integrate email sending (Supabase email or Resend)
-- [ ] Build invite acceptance flow
-- [ ] Auto-associate client with trainer on acceptance
-- [ ] Create pending invites list UI for trainers
-- [ ] Add invite expiration (7 days default)
-- [ ] Allow resending expired invites
+- [x] Create invitations table in database
+- [x] Build invite generation API (email + shareable link)
+- [x] Create invite email template
+- [x] Integrate email sending (Supabase email or Resend)
+- [x] Build invite acceptance flow
+- [x] Auto-associate client with trainer on acceptance
+- [x] Create pending invites list UI for trainers
+- [x] Add invite expiration (7 days default)
+- [x] Allow resending expired invites
 
 ---
 
@@ -275,25 +277,26 @@ This document outlines the complete feature set for Phase 1 MVP, broken down int
 ### 3.1 Exercise Database
 **Priority:** P0 (Critical)
 **Sprint:** 1
+**Status:** ✅ COMPLETED
 
 **User Stories:**
-- As a trainer, I can browse a library of exercises
-- As a trainer, I can search for exercises by name
-- As a trainer, I can filter exercises by muscle group and equipment
-- As a client, I can view exercise demonstrations during workouts
+- As a trainer, I can browse a library of exercises ✅
+- As a trainer, I can search for exercises by name ✅
+- As a trainer, I can filter exercises by muscle group and equipment ✅
+- As a client, I can view exercise demonstrations during workouts ✅
 
 **Implementation Tasks:**
-- [ ] Seed database with 200+ common exercises
-- [ ] Create exercise search API endpoint
-- [ ] Implement full-text search on exercise names
-- [ ] Create filter by muscle group endpoint
-- [ ] Create filter by equipment endpoint
-- [ ] Build exercise library page UI
-- [ ] Implement search input with debounce (300ms)
-- [ ] Build filter chips UI
-- [ ] Create exercise card component
-- [ ] Add infinite scroll or pagination (20 per page)
-- [ ] Create exercise detail modal with video
+- [x] Seed database with 200+ common exercises
+- [x] Create exercise search API endpoint
+- [x] Implement full-text search on exercise names
+- [x] Create filter by muscle group endpoint
+- [x] Create filter by equipment endpoint
+- [x] Build exercise library page UI
+- [x] Implement search input with debounce (300ms)
+- [x] Build filter chips UI
+- [x] Create exercise card component
+- [x] Add infinite scroll or pagination (20 per page)
+- [x] Create exercise detail modal with video
 
 ### 3.2 Custom Exercises
 **Priority:** P2 (Medium)
@@ -322,65 +325,68 @@ This document outlines the complete feature set for Phase 1 MVP, broken down int
 ### 4.1 Workout Template Creation
 **Priority:** P0 (Critical)
 **Sprint:** 2
+**Status:** ✅ COMPLETED
 
 **User Stories:**
-- As a trainer, I can create a workout template
-- As a trainer, I can add exercises to a template
-- As a trainer, I can set sets, reps, and rest time for each exercise
-- As a trainer, I can reorder exercises via drag-and-drop
-- As a trainer, I can save a template for reuse
+- As a trainer, I can create a workout template ✅
+- As a trainer, I can add exercises to a template ✅
+- As a trainer, I can set sets, reps, and rest time for each exercise ✅
+- As a trainer, I can reorder exercises via drag-and-drop ✅
+- As a trainer, I can save a template for reuse ✅
 
 **Implementation Tasks:**
-- [ ] Create workout builder page
-- [ ] Build template metadata form (name, description, tags)
-- [ ] Implement exercise picker (search + add)
-- [ ] Create exercise row component with sets/reps/rest inputs
-- [ ] Implement drag-and-drop reordering (CDK DragDrop)
-- [ ] Add remove exercise button
-- [ ] Create save template API
-- [ ] Add template validation
-- [ ] Implement auto-save draft
-- [ ] Add supersets/circuits support
+- [x] Create workout builder page
+- [x] Build template metadata form (name, description, tags)
+- [x] Implement exercise picker (search + add)
+- [x] Create exercise row component with sets/reps/rest inputs
+- [x] Implement drag-and-drop reordering (CDK DragDrop)
+- [x] Add remove exercise button
+- [x] Create save template API
+- [x] Add template validation
+- [ ] Implement auto-save draft (DEFERRED)
+- [ ] Add supersets/circuits support (DEFERRED)
 
 ### 4.2 Template Management
 **Priority:** P1 (High)
 **Sprint:** 2
+**Status:** ✅ COMPLETED
 
 **User Stories:**
-- As a trainer, I can view all my workout templates
-- As a trainer, I can duplicate a template
-- As a trainer, I can edit an existing template
-- As a trainer, I can delete a template
-- As a trainer, I can organize templates by category
+- As a trainer, I can view all my workout templates ✅
+- As a trainer, I can duplicate a template ✅
+- As a trainer, I can edit an existing template ✅
+- As a trainer, I can delete a template ✅
+- As a trainer, I can organize templates by category ✅
 
 **Implementation Tasks:**
-- [ ] Create template list page
-- [ ] Build template card component with actions menu
-- [ ] Implement template duplicate API
-- [ ] Pre-populate builder when editing
-- [ ] Implement template delete with confirmation
-- [ ] Add template search/filter
-- [ ] Add template categories/tags
+- [x] Create template list page (workout-list.page.ts)
+- [x] Build template card component with actions menu
+- [x] Implement template duplicate API
+- [x] Pre-populate builder when editing
+- [x] Implement template delete with confirmation
+- [x] Add template search/filter
+- [x] Add template categories/tags
 
 ### 4.3 Program Assignment
 **Priority:** P0 (Critical)
 **Sprint:** 3
+**Status:** ✅ COMPLETED
 
 **User Stories:**
-- As a trainer, I can assign a workout to a client
-- As a trainer, I can schedule workouts on specific dates
-- As a trainer, I can assign multiple workouts at once (weekly program)
-- As a trainer, I can add private notes to assigned workouts
+- As a trainer, I can assign a workout to a client ✅
+- As a trainer, I can schedule workouts on specific dates ✅
+- As a trainer, I can assign multiple workouts at once (weekly program) ✅
+- As a trainer, I can add private notes to assigned workouts ✅
 
 **Implementation Tasks:**
-- [ ] Create assign workout modal/page
-- [ ] Build client selector dropdown
-- [ ] Implement date picker for scheduling
-- [ ] Create bulk assignment (select multiple dates)
-- [ ] Add trainer notes field (private)
-- [ ] Create assigned workouts API
-- [ ] Show assignment confirmation
-- [ ] Send push notification to client (optional)
+- [x] Create assign workout modal/page
+- [x] Build client selector dropdown
+- [x] Implement date picker for scheduling
+- [x] Create bulk assignment (select multiple dates)
+- [x] Add trainer notes field (private)
+- [x] Create assigned workouts API
+- [x] Show assignment confirmation
+- [ ] Send push notification to client (optional) - DEFERRED
 
 ---
 
@@ -389,59 +395,62 @@ This document outlines the complete feature set for Phase 1 MVP, broken down int
 ### 5.1 Today's Workout
 **Priority:** P0 (Critical)
 **Sprint:** 3
+**Status:** ✅ COMPLETED
 
 **User Stories:**
-- As a client, I can see today's assigned workout
-- As a client, I can start a workout
-- As a client, I can see each exercise with prescribed sets/reps
-- As a client, I can log my actual sets/reps/weight
-- As a client, I can complete a workout
+- As a client, I can see today's assigned workout ✅
+- As a client, I can start a workout ✅
+- As a client, I can see each exercise with prescribed sets/reps ✅
+- As a client, I can log my actual sets/reps/weight ✅
+- As a client, I can complete a workout ✅
 
 **Implementation Tasks:**
-- [ ] Create workout player page
-- [ ] Build workout detail view
-- [ ] Create exercise card with logging inputs
-- [ ] Implement one-tap set completion (match prescription)
-- [ ] Add quick adjust for different weight/reps
-- [ ] Implement set logging API
-- [ ] Add workout start timestamp
-- [ ] Add workout completion flow
-- [ ] Calculate workout duration automatically
-- [ ] Show completion summary screen
+- [x] Create workout player page (active-workout.page.ts)
+- [x] Build workout detail view
+- [x] Create exercise card with logging inputs
+- [x] Implement one-tap set completion (match prescription)
+- [x] Add quick adjust for different weight/reps
+- [x] Implement set logging API
+- [x] Add workout start timestamp
+- [x] Add workout completion flow
+- [x] Calculate workout duration automatically
+- [x] Show completion summary screen
 
 ### 5.2 Rest Timer
 **Priority:** P1 (High)
 **Sprint:** 3
+**Status:** ✅ COMPLETED
 
 **User Stories:**
-- As a client, I see a rest timer after completing a set
-- As a client, I get a notification when rest is complete
-- As a client, I can skip the rest timer
+- As a client, I see a rest timer after completing a set ✅
+- As a client, I get a notification when rest is complete ✅
+- As a client, I can skip the rest timer ✅
 
 **Implementation Tasks:**
-- [ ] Create rest timer component
-- [ ] Auto-start timer after set completion
-- [ ] Show countdown with circular progress
-- [ ] Implement skip button
-- [ ] Add audio/vibration notification on completion
-- [ ] Use exercise-specific rest time from workout
+- [x] Create rest timer component
+- [x] Auto-start timer after set completion
+- [x] Show countdown with circular progress
+- [x] Implement skip button
+- [x] Add audio/vibration notification on completion
+- [x] Use exercise-specific rest time from workout
 
 ### 5.3 Workout History
 **Priority:** P1 (High)
 **Sprint:** 4
+**Status:** ✅ COMPLETED
 
 **User Stories:**
-- As a client, I can view my past workouts
-- As a client, I can see details of a past workout
-- As a trainer, I can view a client's workout history
+- As a client, I can view my past workouts ✅
+- As a client, I can see details of a past workout ✅
+- As a trainer, I can view a client's workout history ✅
 
 **Implementation Tasks:**
-- [ ] Create workout history list page
-- [ ] Build calendar view option
-- [ ] Create workout history card (date, name, duration)
-- [ ] Build workout detail view (exercises, sets logged)
-- [ ] Add filter by date range
-- [ ] Implement trainer view of client history
+- [x] Create workout history list page
+- [x] Build calendar view option
+- [x] Create workout history card (date, name, duration)
+- [x] Build workout detail view (exercises, sets logged)
+- [x] Add filter by date range
+- [x] Implement trainer view of client history
 
 ### 5.4 Progress Charts
 **Priority:** P2 (Medium)
@@ -468,40 +477,42 @@ This document outlines the complete feature set for Phase 1 MVP, broken down int
 ### 6.1 Food Database Integration
 **Priority:** P1 (High)
 **Sprint:** 4
+**Status:** ✅ COMPLETED
 
 **User Stories:**
-- As a user, I can search for foods
-- As a user, I can see nutrition info for a food
-- As a user, I can see portion size options
+- As a user, I can search for foods ✅
+- As a user, I can see nutrition info for a food ✅
+- As a user, I can see portion size options ✅
 
 **Implementation Tasks:**
-- [ ] Integrate USDA FoodData Central API
-- [ ] Create food search service
-- [ ] Cache common foods in local database
-- [ ] Build food search UI with results
-- [ ] Create food detail modal with nutrition info
-- [ ] Show serving size options
-- [ ] Handle API rate limits gracefully
+- [x] Integrate USDA FoodData Central API
+- [x] Create food search service
+- [x] Cache common foods in local database
+- [x] Build food search UI with results
+- [x] Create food detail modal with nutrition info
+- [x] Show serving size options
+- [x] Handle API rate limits gracefully
 
 ### 6.2 Nutrition Logging
 **Priority:** P1 (High)
 **Sprint:** 5
+**Status:** ✅ COMPLETED
 
 **User Stories:**
-- As a client, I can log food I've eaten
-- As a client, I can select the meal type (breakfast, lunch, dinner, snack)
-- As a client, I can adjust portion sizes
-- As a client, I can see my daily nutrition summary
+- As a client, I can log food I've eaten ✅
+- As a client, I can select the meal type (breakfast, lunch, dinner, snack) ✅
+- As a client, I can adjust portion sizes ✅
+- As a client, I can see my daily nutrition summary ✅
 
 **Implementation Tasks:**
-- [ ] Create daily nutrition log page
-- [ ] Build add food flow (search -> select -> log)
-- [ ] Implement meal type selector
-- [ ] Add servings/portion input
-- [ ] Create nutrition entry API
-- [ ] Build daily summary card (calories, protein, carbs, fat)
-- [ ] Show progress bars for each macro
-- [ ] Implement quick re-log recent foods
+- [x] Create daily nutrition log page
+- [x] Build add food flow (search -> select -> log)
+- [x] Implement meal type selector
+- [x] Add servings/portion input
+- [x] Create nutrition entry API
+- [x] Build daily summary card (calories, protein, carbs, fat)
+- [x] Show progress bars for each macro
+- [x] Implement quick re-log recent foods
 
 ### 6.3 Adherence-Neutral UI
 **Priority:** P1 (High)
@@ -597,38 +608,40 @@ This document outlines the complete feature set for Phase 1 MVP, broken down int
 ### 8.1 Client List
 **Priority:** P0 (Critical)
 **Sprint:** 1
+**Status:** ✅ COMPLETED
 
 **User Stories:**
-- As a trainer, I can view all my clients
-- As a trainer, I can search/filter clients
-- As a trainer, I can see client status at a glance
+- As a trainer, I can view all my clients ✅
+- As a trainer, I can search/filter clients ✅
+- As a trainer, I can see client status at a glance ✅
 
 **Implementation Tasks:**
-- [ ] Create client list page
-- [ ] Build client card component (name, photo, status)
-- [ ] Add search input with filter
-- [ ] Show subscription status badge
-- [ ] Show last activity indicator
-- [ ] Add quick actions menu (message, view profile)
+- [x] Create client list page
+- [x] Build client card component (name, photo, status)
+- [x] Add search input with filter
+- [x] Show subscription status badge
+- [x] Show last activity indicator
+- [x] Add quick actions menu (message, view profile)
 
 ### 8.2 Client Profile View
 **Priority:** P1 (High)
 **Sprint:** 4
+**Status:** ✅ COMPLETED
 
 **User Stories:**
-- As a trainer, I can view a client's full profile
-- As a trainer, I can see a client's goals and notes
-- As a trainer, I can add notes about a client
+- As a trainer, I can view a client's full profile ✅
+- As a trainer, I can see a client's goals and notes ✅
+- As a trainer, I can add notes about a client ✅
 
 **Implementation Tasks:**
-- [ ] Create client profile page
-- [ ] Show personal info section
-- [ ] Show goals section
-- [ ] Show injuries/limitations
-- [ ] Create trainer notes section
-- [ ] Implement notes CRUD
-- [ ] Show subscription info
-- [ ] Link to workout history
+- [x] Create client profile page
+- [x] Show personal info section
+- [x] Show goals section
+- [x] Show injuries/limitations
+- [x] Create trainer notes section
+- [x] Implement notes CRUD
+- [x] Show subscription info
+- [x] Link to workout history
 
 ### 8.3 Measurements & Progress Photos
 **Priority:** P2 (Medium)
