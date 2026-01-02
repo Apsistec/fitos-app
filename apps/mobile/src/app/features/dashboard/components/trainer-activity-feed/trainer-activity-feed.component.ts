@@ -19,7 +19,7 @@ export interface ActivityItem {
   standalone: true,
   imports: [CommonModule, IonicModule, RouterLink],
   template: `
-    <ion-card>
+    <ion-card class="activity-feed-card">
       <ion-card-header>
         <div class="header-content">
           <ion-card-title>Recent Activity</ion-card-title>
@@ -76,6 +76,12 @@ export interface ActivityItem {
     </ion-card>
   `,
   styles: [`
+    .activity-feed-card {
+      margin: 0;
+      max-width: 800px;
+      width: 100%;
+    }
+
     .header-content {
       display: flex;
       justify-content: space-between;

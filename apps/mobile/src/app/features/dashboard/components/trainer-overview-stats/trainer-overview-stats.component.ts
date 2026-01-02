@@ -97,6 +97,8 @@ export interface TrainerStats {
 
     .stat-card {
       margin: 0;
+      max-width: 400px;
+      width: 100%;
 
       ion-card-content {
         display: flex;

@@ -59,6 +59,8 @@ import type { WorkoutWithExercises } from '../../../../core/services/workout.ser
   styles: [`
     .workout-card {
       margin: 0;
+      max-width: 800px;
+      width: 100%;
     }
 
     .header-content {
@@ -92,6 +94,8 @@ import type { WorkoutWithExercises } from '../../../../core/services/workout.ser
 
     .empty-card {
       margin: 0;
+      max-width: 800px;
+      width: 100%;
     }
 
     .empty-content {

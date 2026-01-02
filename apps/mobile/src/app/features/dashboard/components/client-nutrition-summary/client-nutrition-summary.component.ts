@@ -104,6 +104,8 @@ export interface NutritionSummary {
   styles: [`
     .nutrition-card {
       margin: 0;
+      max-width: 800px;
+      width: 100%;
     }
 
     .header-content {
@@ -150,6 +152,8 @@ export interface NutritionSummary {
 
     .empty-card {
       margin: 0;
+      max-width: 800px;
+      width: 100%;
     }
 
     .empty-content {

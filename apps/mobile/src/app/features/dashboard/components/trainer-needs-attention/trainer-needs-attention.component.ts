@@ -19,7 +19,7 @@ export interface ClientAlert {
   standalone: true,
   imports: [CommonModule, IonicModule, RouterLink],
   template: `
-    <ion-card>
+    <ion-card class="attention-card">
       <ion-card-header>
         <ion-card-title>Needs Attention</ion-card-title>
       </ion-card-header>
@@ -76,6 +76,12 @@ export interface ClientAlert {
     </ion-card>
   `,
   styles: [`
+    .attention-card {
+      margin: 0;
+      max-width: 800px;
+      width: 100%;
+    }
+
     .alerts-list {
       margin: 0 -1rem;
     }
