@@ -39,20 +39,27 @@ import { AuthService } from '@app/core/services/auth.service';
           <ion-label>Home</ion-label>
         </ion-tab-button>
 
-        <ion-tab-button tab="workouts">
-          <ion-icon name="barbell-outline"></ion-icon>
-          <ion-label>Workouts</ion-label>
-        </ion-tab-button>
+        <!-- Client and Trainer: Workouts tab -->
+        @if (isClient() || isTrainer()) {
+          <ion-tab-button tab="workouts">
+            <ion-icon name="barbell-outline"></ion-icon>
+            <ion-label>Workouts</ion-label>
+          </ion-tab-button>
+        }
 
-        <ion-tab-button tab="nutrition">
-          <ion-icon name="nutrition-outline"></ion-icon>
-          <ion-label>Nutrition</ion-label>
-        </ion-tab-button>
+        <!-- Client and Trainer: Nutrition tab -->
+        @if (isClient() || isTrainer()) {
+          <ion-tab-button tab="nutrition">
+            <ion-icon name="nutrition-outline"></ion-icon>
+            <ion-label>Nutrition</ion-label>
+          </ion-tab-button>
+        }
 
-        @if (isTrainer()) {
+        <!-- Trainer and Owner: Clients/Members tab -->
+        @if (isTrainer() || isOwner()) {
           <ion-tab-button tab="clients">
             <ion-icon name="people-outline"></ion-icon>
-            <ion-label>Clients</ion-label>
+            <ion-label>{{ isOwner() ? 'Members' : 'Clients' }}</ion-label>
           </ion-tab-button>
         }
 
@@ -79,6 +86,8 @@ export class TabsPage {
   private authService = inject(AuthService);
 
   isTrainer = this.authService.isTrainer;
+  isClient = this.authService.isClient;
+  isOwner = this.authService.isOwner;
 
   constructor() {
     addIcons({

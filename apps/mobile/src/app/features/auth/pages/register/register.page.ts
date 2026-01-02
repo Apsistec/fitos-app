@@ -24,6 +24,7 @@ import { addIcons } from 'ionicons';
 import {
   fitnessOutline,
   peopleOutline,
+  businessOutline,
 } from 'ionicons/icons';
 import { AuthService } from '@app/core/services/auth.service';
 import type { UserRole } from '@fitos/shared';
@@ -75,12 +76,18 @@ import type { UserRole } from '@fitos/shared';
               <ion-icon name="people-outline"></ion-icon>
               <ion-label>Client</ion-label>
             </ion-segment-button>
+            <ion-segment-button value="gym_owner">
+              <ion-icon name="business-outline"></ion-icon>
+              <ion-label>Gym Owner</ion-label>
+            </ion-segment-button>
           </ion-segment>
           <p class="role-description">
             @if (selectedRole() === 'trainer') {
               Create programs, track clients, and grow your business.
-            } @else {
+            } @else if (selectedRole() === 'client') {
               Track workouts, nutrition, and work with your trainer.
+            } @else {
+              Manage your facility, trainers, and members.
             }
           </p>
         </div>
@@ -354,6 +361,7 @@ export class RegisterPage {
     addIcons({
       fitnessOutline,
       peopleOutline,
+      businessOutline,
     });
   }
 
