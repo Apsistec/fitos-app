@@ -56,21 +56,23 @@ This document outlines the complete feature set for Phase 1 MVP, broken down int
 
 ### 0.4 Route Protection
 **Priority:** P0 (Critical)
-**Status:** PARTIAL
+**Status:** ✅ COMPLETED
 
-**Known Issues:**
-- Workouts page shows "not logged in" but is still viewable
-- Signout button visible/active when not logged in
-- No redirect to login for protected routes
+**Implementation Notes:**
+- All routes under `/tabs` are protected by `authGuard` and `onboardingCompleteGuard`
+- Auth guard redirects unauthenticated users to `/auth/login`
+- Return URL is stored in sessionStorage for post-login redirect
+- Sign-out button is conditionally shown based on `isAuthenticated()` computed signal
+- Role-specific routes use `trainerOrOwnerGuard` for additional protection
 
 **Implementation Tasks:**
-- [ ] Ensure ALL routes except /auth/* require authentication
-- [ ] Add redirect to /auth/login for unauthenticated users
-- [ ] Store intended route for post-login redirect (returnUrl)
-- [ ] Fix "not logged in" message - should redirect, not display
-- [ ] Conditionally show/hide signout button based on auth state
-- [ ] Add proper loading states during route transitions
-- [ ] Implement canMatch guards for lazy-loaded routes
+- [x] Ensure ALL routes except /auth/* require authentication
+- [x] Add redirect to /auth/login for unauthenticated users
+- [x] Store intended route for post-login redirect (returnUrl) - using sessionStorage
+- [x] Fix "not logged in" message - routes are protected, no message shown
+- [x] Conditionally show/hide signout button based on auth state
+- [ ] Add proper loading states during route transitions (DEFERRED - works without explicit UI)
+- [ ] Implement canMatch guards for lazy-loaded routes (DEFERRED - canActivate is sufficient)
 
 ### 0.5 PWA Setup
 **Priority:** P1 (High)

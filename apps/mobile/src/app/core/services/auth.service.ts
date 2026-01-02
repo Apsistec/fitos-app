@@ -1,11 +1,11 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { SupabaseService } from './supabase.service';
-import { 
-  AuthChangeEvent, 
-  AuthSession, 
-  Provider, 
-  User 
+import {
+  AuthChangeEvent,
+  AuthSession,
+  Provider,
+  User
 } from '@supabase/supabase-js';
 import type { Profile, UserRole } from '@fitos/shared';
 
@@ -23,6 +23,8 @@ export interface AuthState {
 export class AuthService {
   private supabase = inject(SupabaseService);
   private router = inject(Router);
+
+  private readonly RETURN_URL_KEY = 'fitos_return_url';
 
   // Signals for reactive state
   private _state = signal<AuthState>({
@@ -165,15 +167,23 @@ export class AuthService {
       return;
     }
 
-    // Check for returnUrl in query params
-    const urlParams = new URLSearchParams(window.location.search);
-    const returnUrl = urlParams.get('returnUrl');
+    // Check for returnUrl in sessionStorage (set by auth guard)
+    const returnUrl = sessionStorage.getItem(this.RETURN_URL_KEY);
 
     if (returnUrl) {
+      sessionStorage.removeItem(this.RETURN_URL_KEY);
       this.router.navigateByUrl(returnUrl);
     } else {
       this.router.navigate(['/tabs/dashboard']);
     }
+  }
+
+  /**
+   * Store return URL for post-login redirect
+   * Called by auth guard when redirecting to login
+   */
+  setReturnUrl(url: string): void {
+    sessionStorage.setItem(this.RETURN_URL_KEY, url);
   }
 
   /**
