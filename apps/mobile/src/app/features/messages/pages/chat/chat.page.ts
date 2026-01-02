@@ -89,7 +89,7 @@ import { ClientService } from '@app/core/services/client.service';
               >
                 <div class="message-bubble">
                   <p class="message-content">{{ message.content }}</p>
-                  <span class="message-time">{{ formatTime(message.sent_at) }}</span>
+                  <span class="message-time">{{ formatTime(message.created_at) }}</span>
                 </div>
               </div>
             }
@@ -329,8 +329,9 @@ export class ChatPage implements OnInit, AfterViewChecked {
 
   async loadOtherUserInfo(): Promise<void> {
     try {
-      const clients = await this.clientService.getClients();
-      const client = clients.find(c => c.id === this.otherUserId());
+      await this.clientService.loadClients();
+      const clients = this.clientService.clients();
+      const client = clients.find((c: any) => c.id === this.otherUserId());
 
       if (client) {
         this.otherUserName.set(client.full_name || 'Unknown');

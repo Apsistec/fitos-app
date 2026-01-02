@@ -19,7 +19,6 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonCardContent,
-  IonText,
 } from '@ionic/angular/standalone';
 import { NutritionService } from '@app/core/services/nutrition.service';
 import { ClientService } from '@app/core/services/client.service';
@@ -48,7 +47,6 @@ import { NUTRITION_COLORS } from '@fitos/shared';
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
-    IonText,
   ],
   template: `
     <ion-header>
@@ -504,8 +502,9 @@ export class SetNutritionTargetsPage implements OnInit {
     this.loading.set(true);
     try {
       // Load client profile
-      const clients = await this.clientService.getClients();
-      const client = clients.find(c => c.id === this.clientId());
+      await this.clientService.loadClients();
+      const clients = this.clientService.clients();
+      const client = clients.find((c: any) => c.id === this.clientId());
       if (client) {
         this.clientProfile.set(client);
       }

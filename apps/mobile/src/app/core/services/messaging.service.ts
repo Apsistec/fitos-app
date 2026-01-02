@@ -52,7 +52,7 @@ export class MessagingService {
     this.unsubscribe();
 
     // Subscribe to messages where user is sender or recipient
-    this.realtimeChannel = this.supabase
+    this.realtimeChannel = this.supabase.client
       .channel(`messages:${userId}`)
       .on(
         'postgres_changes',
@@ -62,7 +62,7 @@ export class MessagingService {
           table: 'messages',
           filter: `recipient_id=eq.${userId}`,
         },
-        (payload) => {
+        (payload: any) => {
           console.log('New message received:', payload);
           this.handleNewMessage(payload.new as Tables<'messages'>);
         }
@@ -108,7 +108,7 @@ export class MessagingService {
    */
   private unsubscribe(): void {
     if (this.realtimeChannel) {
-      this.supabase.removeChannel(this.realtimeChannel);
+      this.supabase.client.removeChannel(this.realtimeChannel);
       this.realtimeChannel = null;
     }
   }
@@ -131,7 +131,7 @@ export class MessagingService {
         .from('messages')
         .select('*, sender:profiles!messages_sender_id_fkey(*), recipient:profiles!messages_recipient_id_fkey(*)')
         .or(`sender_id.eq.${userId},recipient_id.eq.${userId}`)
-        .order('sent_at', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
 
@@ -195,7 +195,7 @@ export class MessagingService {
         .from('messages')
         .select('*, sender:profiles!messages_sender_id_fkey(*)')
         .or(`and(sender_id.eq.${userId},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${userId})`)
-        .order('sent_at', { ascending: true });
+        .order('created_at', { ascending: true });
 
       if (error) throw error;
 
@@ -231,7 +231,6 @@ export class MessagingService {
           sender_id: userId,
           recipient_id: recipientId,
           content,
-          sent_at: new Date().toISOString(),
         })
         .select('*, sender:profiles!messages_sender_id_fkey(*)')
         .single();

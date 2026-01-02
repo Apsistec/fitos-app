@@ -147,22 +147,22 @@ Chart.register(...registerables);
                 </ion-card-header>
                 <ion-card-content>
                   <div class="stats-grid">
-                    @if (latestMeasurement()?.weight_kg) {
+                    @if (latestMeasurement()?.value && latestMeasurement()?.measurement_type === 'weight') {
                       <div class="stat">
                         <div class="stat-label">Weight</div>
-                        <div class="stat-value">{{ latestMeasurement()?.weight_kg }} kg</div>
+                        <div class="stat-value">{{ latestMeasurement()?.value }} {{ latestMeasurement()?.unit }}</div>
                       </div>
                     }
-                    @if (latestMeasurement()?.body_fat_percent) {
+                    @if (latestMeasurement()?.value && latestMeasurement()?.measurement_type === 'body_fat') {
                       <div class="stat">
                         <div class="stat-label">Body Fat</div>
-                        <div class="stat-value">{{ latestMeasurement()?.body_fat_percent }}%</div>
+                        <div class="stat-value">{{ latestMeasurement()?.value }}%</div>
                       </div>
                     }
-                    @if (latestMeasurement()?.waist_cm) {
+                    @if (latestMeasurement()?.value && latestMeasurement()?.measurement_type === 'waist') {
                       <div class="stat">
                         <div class="stat-label">Waist</div>
-                        <div class="stat-value">{{ latestMeasurement()?.waist_cm }} cm</div>
+                        <div class="stat-value">{{ latestMeasurement()?.value }} {{ latestMeasurement()?.unit }}</div>
                       </div>
                     }
                   </div>
@@ -678,10 +678,10 @@ export class MeasurementsPage implements OnInit {
     const config: ChartConfiguration = {
       type: 'line',
       data: {
-        labels: data.map(m => new Date(m.measured_at).toLocaleDateString()),
+        labels: data.map(m => new Date(m.measured_at || new Date().toISOString()).toLocaleDateString()),
         datasets: [{
           label: 'Weight (kg)',
-          data: data.map(m => m.weight_kg || 0),
+          data: data.map(m => m.value || 0),
           borderColor: 'rgb(75, 192, 192)',
           backgroundColor: 'rgba(75, 192, 192, 0.2)',
           tension: 0.1,

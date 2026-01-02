@@ -66,8 +66,8 @@ export class MeasurementService {
     const sorted = [...measurements].reverse();
 
     const chartData = {
-      dates: sorted.map(m => new Date(m.measured_at).toLocaleDateString()),
-      weights: sorted.map(m => m.weight_kg || 0),
+      dates: sorted.map(m => new Date(m.measured_at || new Date().toISOString()).toLocaleDateString()),
+      weights: sorted.map(m => m.value || 0),
     };
 
     return {

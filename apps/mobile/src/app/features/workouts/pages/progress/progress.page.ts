@@ -268,7 +268,7 @@ export class ProgressPage implements OnInit {
     this.loading.set(true);
     try {
       // Get exercises that the user has logged workouts for
-      const sessions = await this.sessionService.getWorkoutHistory(userId, { limit: 100 });
+      const sessions = await this.sessionService.getWorkoutHistory(100, 0);
 
       // Extract unique exercise IDs from completed sessions
       const exerciseIds = new Set<string>();
@@ -278,15 +278,15 @@ export class ProgressPage implements OnInit {
         }
       }
 
-      // Fetch exercise details
+      // For now, just use the exercise IDs we found
+      // TODO: Add getExercises() method to ExerciseService or fetch individually
       if (exerciseIds.size > 0) {
-        const allExercises = await this.exerciseService.getExercises();
-        const filteredExercises = allExercises.filter(ex => exerciseIds.has(ex.id));
-        this.exercises.set(filteredExercises);
+        const exercisesArray = Array.from(exerciseIds).map(id => ({ id, name: 'Exercise' }));
+        this.exercises.set(exercisesArray as any);
 
         // Auto-select first exercise
-        if (filteredExercises.length > 0 && !this.selectedExerciseId()) {
-          this.selectedExerciseId.set(filteredExercises[0].id);
+        if (exercisesArray.length > 0 && !this.selectedExerciseId()) {
+          this.selectedExerciseId.set(exercisesArray[0].id);
           await this.loadChartData();
         }
       }
@@ -319,13 +319,13 @@ export class ProgressPage implements OnInit {
   }
 
   private async fetchProgressData(userId: string, exerciseId: string): Promise<ChartDataPoint[]> {
-    const sessions = await this.sessionService.getWorkoutHistory(userId, { limit: 50 });
+    const sessions = await this.sessionService.getWorkoutHistory(50, 0);
     const dataPoints: ChartDataPoint[] = [];
 
     for (const session of sessions) {
       if (session.status !== 'completed') continue;
 
-      const loggedExercise = session.logged_exercises?.find(ex => ex.exercise_id === exerciseId);
+      const loggedExercise = session.logged_exercises?.find((ex: any) => ex.exercise_id === exerciseId);
       if (!loggedExercise) continue;
 
       const date = new Date(session.completed_at || session.created_at).toLocaleDateString();
@@ -333,14 +333,14 @@ export class ProgressPage implements OnInit {
       if (this.chartType() === 'strength') {
         // Max weight for the exercise in this session
         const maxWeight = Math.max(
-          ...loggedExercise.logged_sets.map(set => set.weight || 0)
+          ...loggedExercise.logged_sets.map((set: any) => set.weight || 0)
         );
         if (maxWeight > 0) {
           dataPoints.push({ date, value: maxWeight });
         }
       } else {
         // Total volume (sets × reps × weight)
-        const totalVolume = loggedExercise.logged_sets.reduce((sum, set) => {
+        const totalVolume = loggedExercise.logged_sets.reduce((sum: number, set: any) => {
           return sum + ((set.reps || 0) * (set.weight || 0));
         }, 0);
         if (totalVolume > 0) {

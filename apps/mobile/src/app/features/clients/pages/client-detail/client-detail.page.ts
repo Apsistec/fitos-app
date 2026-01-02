@@ -15,7 +15,6 @@ import {
   IonCardTitle,
   IonCardContent,
   IonList,
-  IonItem,
   IonLabel,
   IonNote,
   IonBadge,
@@ -89,7 +88,6 @@ interface TrainerNote {
     IonCardTitle,
     IonCardContent,
     IonList,
-    IonItem,
     IonLabel,
     IonNote,
     IonBadge,
@@ -664,7 +662,7 @@ export class ClientDetailPage implements OnInit {
     this.error.set(null);
 
     try {
-      const clientData = await this.clientService.getClientById(id);
+      const clientData = await this.clientService.getClient(id);
       this.client.set(clientData);
 
       // Load additional data based on selected tab

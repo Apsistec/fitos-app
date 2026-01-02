@@ -84,7 +84,7 @@ import { MessagingService, type Conversation } from '@app/core/services/messagin
                     </p>
                   }
                   <ion-note class="message-time">
-                    {{ formatTime(conversation.lastMessage?.sent_at) }}
+                    {{ formatTime(conversation.lastMessage?.created_at) }}
                   </ion-note>
                 </ion-label>
 
