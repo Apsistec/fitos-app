@@ -126,6 +126,14 @@ export const routes: Routes = [
                 (m) => m.WorkoutDetailPage
               ),
           },
+          {
+            // Progress charts - everyone
+            path: 'progress',
+            loadComponent: () =>
+              import('./features/workouts/pages/progress/progress.page').then(
+                (m) => m.ProgressPage
+              ),
+          },
         ],
       },
       {
