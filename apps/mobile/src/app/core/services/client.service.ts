@@ -8,6 +8,11 @@ type Profile = Database['public']['Tables']['profiles']['Row'];
 
 export interface ClientWithProfile extends ClientProfile {
   profile: Profile;
+  // Convenience properties for commonly accessed profile fields
+  full_name?: string;
+  email?: string;
+  avatar_url?: string;
+  role?: Database['public']['Enums']['user_role'];
 }
 
 export interface ClientStats {
@@ -59,14 +64,23 @@ export class ClientService {
         .from('client_profiles')
         .select(`
           *,
-          profile:profiles!client_profiles_user_id_fkey(*)
+          profile:profiles!client_profiles_id_fkey(*)
         `)
         .eq('trainer_id', userId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      this.clientsSignal.set(data as any || []);
+      // Map data to include convenience properties
+      const clients = (data || []).map(client => ({
+        ...client,
+        full_name: client.profile?.full_name,
+        email: client.profile?.email,
+        avatar_url: client.profile?.avatar_url,
+        role: client.profile?.role,
+      })) as ClientWithProfile[];
+
+      this.clientsSignal.set(clients);
     } catch (error) {
       console.error('Error loading clients:', error);
       this.errorSignal.set(error instanceof Error ? error.message : 'Failed to load clients');
@@ -84,14 +98,21 @@ export class ClientService {
         .from('client_profiles')
         .select(`
           *,
-          profile:profiles!client_profiles_user_id_fkey(*)
+          profile:profiles!client_profiles_id_fkey(*)
         `)
-        .eq('user_id', clientId)
+        .eq('id', clientId)
         .single();
 
       if (error) throw error;
 
-      return data as any;
+      // Map data to include convenience properties
+      return {
+        ...data,
+        full_name: data.profile?.full_name,
+        email: data.profile?.email,
+        avatar_url: data.profile?.avatar_url,
+        role: data.profile?.role,
+      } as ClientWithProfile;
     } catch (error) {
       console.error('Error getting client:', error);
       return null;

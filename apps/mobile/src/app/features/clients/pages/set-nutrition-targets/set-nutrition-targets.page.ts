@@ -21,7 +21,7 @@ import {
   IonCardContent,
 } from '@ionic/angular/standalone';
 import { NutritionService } from '@app/core/services/nutrition.service';
-import { ClientService } from '@app/core/services/client.service';
+import { ClientService, ClientWithProfile } from '@app/core/services/client.service';
 import type { Tables } from '@fitos/shared';
 import { NUTRITION_COLORS } from '@fitos/shared';
 
@@ -407,7 +407,7 @@ export class SetNutritionTargetsPage implements OnInit {
   private route = inject(ActivatedRoute);
 
   clientId = signal<string>('');
-  clientProfile = signal<Tables<'profiles'> | null>(null);
+  clientProfile = signal<ClientWithProfile | null>(null);
   currentTargets = signal<Tables<'nutrition_targets'> | null>(null);
   loading = signal(false);
   submitting = signal(false);
@@ -504,9 +504,9 @@ export class SetNutritionTargetsPage implements OnInit {
       // Load client profile
       await this.clientService.loadClients();
       const clients = this.clientService.clients();
-      const client = clients.find((c: any) => c.id === this.clientId());
+      const client = clients.find(c => c.id === this.clientId());
       if (client) {
-        this.clientProfile.set(client as any);
+        this.clientProfile.set(client);
       }
 
       // Load current targets

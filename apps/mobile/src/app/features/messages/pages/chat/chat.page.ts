@@ -331,11 +331,11 @@ export class ChatPage implements OnInit, AfterViewChecked {
     try {
       await this.clientService.loadClients();
       const clients = this.clientService.clients();
-      const client = clients.find((c: any) => c.id === this.otherUserId());
+      const client = clients.find(c => c.id === this.otherUserId());
 
       if (client) {
-        this.otherUserName.set((client as any).full_name || 'Unknown');
-        this.otherUserAvatar.set((client as any).avatar_url);
+        this.otherUserName.set(client.full_name || 'Unknown');
+        this.otherUserAvatar.set(client.avatar_url || null);
       }
     } catch (error) {
       console.error('Error loading other user info:', error);
