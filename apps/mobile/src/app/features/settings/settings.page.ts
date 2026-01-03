@@ -31,6 +31,7 @@ import {
   alertCircle,
   openOutline,
   pricetagOutline,
+  watchOutline,
 } from 'ionicons/icons';
 import { AuthService } from '@app/core/services/auth.service';
 import { StripeService } from '@app/core/services/stripe.service';
@@ -169,6 +170,14 @@ import { StripeService } from '@app/core/services/stripe.service';
                   <p>Configure your subscription pricing</p>
                 </ion-label>
               </ion-item>
+
+              <ion-item button detail routerLink="/tabs/settings/payments">
+                <ion-icon name="card-outline" slot="start"></ion-icon>
+                <ion-label>
+                  <h3>Payment History</h3>
+                  <p>View your payment transactions</p>
+                </ion-label>
+              </ion-item>
             }
           </ion-list>
         }
@@ -182,6 +191,14 @@ import { StripeService } from '@app/core/services/stripe.service';
           <ion-item button detail>
             <ion-icon name="notifications-outline" slot="start"></ion-icon>
             <ion-label>Notifications</ion-label>
+          </ion-item>
+
+          <ion-item button detail routerLink="/tabs/settings/wearables">
+            <ion-icon name="watch-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>Wearable Devices</h3>
+              <p>Connect fitness trackers and smartwatches</p>
+            </ion-label>
           </ion-item>
 
           <ion-item>
@@ -310,6 +327,7 @@ export class SettingsPage implements OnInit {
       alertCircle,
       openOutline,
       pricetagOutline,
+      watchOutline,
     });
   }
 

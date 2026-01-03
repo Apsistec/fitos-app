@@ -267,6 +267,22 @@ export const routes: Routes = [
                 (m) => m.MySubscriptionPage
               ),
           },
+          {
+            // Wearable devices
+            path: 'wearables',
+            loadComponent: () =>
+              import('./features/settings/pages/wearables/wearables.page').then(
+                (m) => m.WearablesPage
+              ),
+          },
+          {
+            // Payment history
+            path: 'payments',
+            loadComponent: () =>
+              import('./features/settings/pages/payment-history/payment-history.page').then(
+                (m) => m.PaymentHistoryPage
+              ),
+          },
         ],
       },
     ],

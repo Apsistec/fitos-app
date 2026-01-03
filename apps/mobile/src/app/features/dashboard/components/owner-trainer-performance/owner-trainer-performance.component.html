@@ -1,0 +1,44 @@
+<ion-card>
+  <ion-card-header>
+    <ion-card-title>Trainer Performance</ion-card-title>
+  </ion-card-header>
+
+  <ion-card-content>
+    @if (trainers.length === 0) {
+      <div class="empty-state">
+        <ion-text color="medium">
+          <p>No trainers at your facility yet</p>
+        </ion-text>
+      </div>
+    } @else {
+      <ion-list lines="none">
+        @for (trainer of trainers; track trainer.id) {
+          <ion-item [routerLink]="['/tabs/clients']" detail>
+            <ion-avatar slot="start">
+              @if (trainer.avatarUrl) {
+                <img [src]="trainer.avatarUrl" [alt]="trainer.name" />
+              } @else {
+                <ion-icon name="person-circle-outline"></ion-icon>
+              }
+            </ion-avatar>
+            <ion-label>
+              <h3>{{ trainer.name }}</h3>
+              <p>{{ trainer.activeClients }} / {{ trainer.totalClients }} active clients</p>
+              <p class="revenue">${{ trainer.monthlyRevenue.toLocaleString() }} monthly</p>
+            </ion-label>
+            <div slot="end" class="trainer-metrics">
+              @if (trainer.clientChange !== 0) {
+                <ion-badge [color]="trainer.clientChange > 0 ? 'success' : 'danger'">
+                  <ion-icon
+                    [name]="trainer.clientChange > 0 ? 'trending-up-outline' : 'trending-down-outline'"
+                  ></ion-icon>
+                  {{ trainer.clientChange > 0 ? '+' : '' }}{{ trainer.clientChange.toFixed(0) }}%
+                </ion-badge>
+              }
+            </div>
+          </ion-item>
+        }
+      </ion-list>
+    }
+  </ion-card-content>
+</ion-card>

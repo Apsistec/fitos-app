@@ -1,0 +1,136 @@
+<ion-card>
+  <ion-card-header>
+    <div class="card-header-content">
+      <ion-card-title>Wearable Data</ion-card-title>
+      @if (!isLoading() && hasConnections()) {
+        <ion-button fill="clear" size="small" (click)="syncData()">
+          <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+      }
+    </div>
+  </ion-card-header>
+
+  <ion-card-content>
+    @if (isLoading()) {
+      <div class="loading-state">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Loading wearable data...</p>
+      </div>
+    } @else if (!hasConnections()) {
+      <div class="empty-state">
+        <ion-icon name="alert-circle-outline" color="medium"></ion-icon>
+        <p>No wearable devices connected</p>
+        <ion-button
+          fill="outline"
+          size="small"
+          routerLink="/tabs/settings/wearables"
+        >
+          Connect Device
+        </ion-button>
+      </div>
+    } @else if (!latestData()) {
+      <div class="empty-state">
+        <ion-icon name="alert-circle-outline" color="medium"></ion-icon>
+        <p>No recent data available</p>
+        <ion-text color="medium">
+          <small>Data syncs automatically from your device</small>
+        </ion-text>
+      </div>
+    } @else {
+      <div class="data-container">
+        <div class="data-date">
+          {{ formatDate(latestData()!.data_date) }}
+        </div>
+
+        <div class="metrics-grid">
+          <!-- Steps -->
+          <div class="metric">
+            <ion-icon name="footsteps-outline" color="primary"></ion-icon>
+            <div class="metric-content">
+              <div class="metric-value">
+                {{ latestData()!.steps?.toLocaleString() || '--' }}
+              </div>
+              <div class="metric-label">Steps</div>
+            </div>
+          </div>
+
+          <!-- Resting Heart Rate -->
+          <div class="metric">
+            <ion-icon name="heart-outline" color="danger"></ion-icon>
+            <div class="metric-content">
+              <div class="metric-value">
+                {{ latestData()!.resting_heart_rate || '--' }}
+                @if (latestData()!.resting_heart_rate) {
+                  <span class="unit">bpm</span>
+                }
+              </div>
+              <div class="metric-label">Resting HR</div>
+            </div>
+          </div>
+
+          <!-- HRV -->
+          <div class="metric">
+            <ion-icon name="pulse-outline" color="success"></ion-icon>
+            <div class="metric-content">
+              <div class="metric-value">
+                {{ latestData()!.hrv_avg?.toFixed(0) || '--' }}
+                @if (latestData()!.hrv_avg) {
+                  <span class="unit">ms</span>
+                }
+              </div>
+              <div class="metric-label">HRV</div>
+            </div>
+          </div>
+
+          <!-- Sleep Duration -->
+          <div class="metric">
+            <ion-icon name="bed-outline" color="tertiary"></ion-icon>
+            <div class="metric-content">
+              <div class="metric-value">
+                {{ formatDuration(latestData()!.sleep_duration_minutes) }}
+              </div>
+              <div class="metric-label">Sleep</div>
+            </div>
+          </div>
+
+          <!-- Active Minutes -->
+          <div class="metric">
+            <ion-icon name="time-outline" color="warning"></ion-icon>
+            <div class="metric-content">
+              <div class="metric-value">
+                {{ latestData()!.active_minutes || '--' }}
+                @if (latestData()!.active_minutes) {
+                  <span class="unit">min</span>
+                }
+              </div>
+              <div class="metric-label">Active</div>
+            </div>
+          </div>
+
+          <!-- Sleep Efficiency (if available) -->
+          @if (latestData()!.sleep_efficiency) {
+            <div class="metric">
+              <ion-icon name="bed-outline" color="secondary"></ion-icon>
+              <div class="metric-content">
+                <div class="metric-value">
+                  {{ latestData()!.sleep_efficiency?.toFixed(0) }}
+                  <span class="unit">%</span>
+                </div>
+                <div class="metric-label">Sleep Quality</div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="data-note">
+          <ion-text color="medium">
+            <small>
+              Calorie burn is not displayed due to accuracy concerns. Data synced from
+              connected devices.
+            </small>
+          </ion-text>
+        </div>
+      </div>
+    }
+  </ion-card-content>
+</ion-card>

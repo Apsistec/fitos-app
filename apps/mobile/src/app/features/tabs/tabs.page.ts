@@ -1,10 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import {
   IonTabs,
   IonTabBar,
   IonTabButton,
   IonIcon,
   IonLabel,
+  IonBadge,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -16,21 +17,24 @@ import {
   nutrition,
   peopleOutline,
   people,
+  chatbubblesOutline,
+  chatbubbles,
   settingsOutline,
   settings,
 } from 'ionicons/icons';
 import { AuthService } from '@app/core/services/auth.service';
+import { MessagingService } from '@app/core/services/messaging.service';
 
 @Component({
   selector: 'app-tabs',
   imports: [
-
     IonTabs,
     IonTabBar,
     IonTabButton,
     IonIcon,
-    IonLabel
-],
+    IonLabel,
+    IonBadge,
+  ],
   template: `
     <ion-tabs>
       <ion-tab-bar slot="bottom">
@@ -54,6 +58,15 @@ import { AuthService } from '@app/core/services/auth.service';
             <ion-label>Nutrition</ion-label>
           </ion-tab-button>
         }
+
+        <!-- Messages tab for all users -->
+        <ion-tab-button tab="messages">
+          <ion-icon name="chatbubbles-outline"></ion-icon>
+          <ion-label>Messages</ion-label>
+          @if (unreadCount() > 0) {
+            <ion-badge color="danger">{{ unreadCount() > 99 ? '99+' : unreadCount() }}</ion-badge>
+          }
+        </ion-tab-button>
 
         <!-- Trainer and Owner: Clients/Members tab -->
         @if (isTrainer() || isOwner()) {
@@ -79,15 +92,29 @@ import { AuthService } from '@app/core/services/auth.service';
     ion-tab-button {
       --color: var(--ion-color-medium);
       --color-selected: var(--ion-color-primary);
+      position: relative;
+
+      ion-badge {
+        position: absolute;
+        top: 4px;
+        right: calc(50% - 30px);
+        font-size: 0.625rem;
+        min-width: 18px;
+        height: 18px;
+        padding: 2px 4px;
+        border-radius: 9px;
+      }
     }
   `],
 })
-export class TabsPage {
+export class TabsPage implements OnInit {
   private authService = inject(AuthService);
+  private messagingService = inject(MessagingService);
 
   isTrainer = this.authService.isTrainer;
   isClient = this.authService.isClient;
   isOwner = this.authService.isOwner;
+  unreadCount = this.messagingService.totalUnreadSignal;
 
   constructor() {
     addIcons({
@@ -99,8 +126,15 @@ export class TabsPage {
       nutrition,
       peopleOutline,
       people,
+      chatbubblesOutline,
+      chatbubbles,
       settingsOutline,
       settings,
     });
+  }
+
+  async ngOnInit() {
+    // Load conversations to get initial unread count
+    await this.messagingService.loadConversations();
   }
 }

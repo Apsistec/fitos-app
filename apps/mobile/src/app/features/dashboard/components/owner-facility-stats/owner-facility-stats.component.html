@@ -1,0 +1,61 @@
+<ion-card>
+  <ion-card-header>
+    <ion-card-title>Facility Overview</ion-card-title>
+  </ion-card-header>
+
+  <ion-card-content>
+    <div class="stats-grid">
+      <!-- Total Clients -->
+      <div class="stat-item">
+        <ion-icon name="people-outline" color="primary"></ion-icon>
+        <div class="stat-content">
+          <div class="stat-value">{{ stats.totalClients }}</div>
+          <div class="stat-label">Total Clients</div>
+        </div>
+      </div>
+
+      <!-- Total Trainers -->
+      <div class="stat-item">
+        <ion-icon name="people-outline" color="secondary"></ion-icon>
+        <div class="stat-content">
+          <div class="stat-value">{{ stats.totalTrainers }}</div>
+          <div class="stat-label">Trainers</div>
+        </div>
+      </div>
+
+      <!-- Monthly Revenue -->
+      <div class="stat-item">
+        <ion-icon name="cash-outline" color="success"></ion-icon>
+        <div class="stat-content">
+          <div class="stat-value">${{ stats.monthlyRevenue.toLocaleString() }}</div>
+          <div class="stat-label">
+            Monthly Revenue
+            @if (stats.revenueGrowth !== 0) {
+              <span [class.positive]="stats.revenueGrowth > 0" [class.negative]="stats.revenueGrowth < 0">
+                {{ stats.revenueGrowth > 0 ? '+' : '' }}{{ stats.revenueGrowth.toFixed(1) }}%
+              </span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Client Retention -->
+      <div class="stat-item">
+        <ion-icon name="trending-up-outline" color="tertiary"></ion-icon>
+        <div class="stat-content">
+          <div class="stat-value">{{ stats.clientRetention.toFixed(0) }}%</div>
+          <div class="stat-label">Retention Rate</div>
+        </div>
+      </div>
+
+      <!-- Active Workouts Today -->
+      <div class="stat-item">
+        <ion-icon name="barbell-outline" color="warning"></ion-icon>
+        <div class="stat-content">
+          <div class="stat-value">{{ stats.activeWorkouts }}</div>
+          <div class="stat-label">Workouts Today</div>
+        </div>
+      </div>
+    </div>
+  </ion-card-content>
+</ion-card>

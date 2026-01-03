@@ -1,0 +1,145 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/settings"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Wearable Devices</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="syncData()" [disabled]="connections().length === 0">
+        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page-container">
+    <!-- Connected Devices Section -->
+    @if (connections().length > 0) {
+      <div class="section">
+        <h2 class="section-title">Connected Devices</h2>
+
+        @for (connection of connections(); track connection.id) {
+          @let provider = getProviderInfo(connection.provider);
+          <ion-card>
+            <ion-card-content>
+              <div class="device-card">
+                <div class="device-info">
+                  <ion-icon
+                    [name]="provider?.icon || 'fitness'"
+                    [color]="provider?.color || 'primary'"
+                    class="device-icon"
+                  ></ion-icon>
+                  <div class="device-details">
+                    <h3>{{ provider?.name || connection.provider }}</h3>
+                    <p class="device-status">
+                      <ion-icon
+                        [name]="connection.is_active ? 'checkmark-circle' : 'close-circle'"
+                        [color]="connection.is_active ? 'success' : 'danger'"
+                      ></ion-icon>
+                      {{ connection.is_active ? 'Active' : 'Inactive' }}
+                    </p>
+                    <p class="last-sync">
+                      Last synced: {{ formatLastSync(connection.last_sync_at) }}
+                    </p>
+                  </div>
+                </div>
+                <ion-button
+                  fill="clear"
+                  color="danger"
+                  (click)="disconnectDevice(connection)"
+                >
+                  <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+                </ion-button>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        }
+      </div>
+    }
+
+    <!-- Available Devices Section -->
+    @if (availableProviders().length > 0) {
+      <div class="section">
+        <h2 class="section-title">
+          @if (connections().length === 0) {
+            Connect a Device
+          } @else {
+            Add Another Device
+          }
+        </h2>
+
+        @if (connections().length === 0) {
+          <ion-text color="medium">
+            <p class="description">
+              Connect your fitness tracker or smartwatch to automatically sync your activity data,
+              sleep patterns, and health metrics.
+            </p>
+          </ion-text>
+        }
+
+        <div class="provider-grid">
+          @for (provider of availableProviders(); track provider.id) {
+            <ion-card button (click)="connectDevice(provider)" class="provider-card">
+              <ion-card-content>
+                <ion-icon
+                  [name]="provider.icon"
+                  [color]="provider.color"
+                  class="provider-icon"
+                ></ion-icon>
+                <h3>{{ provider.name }}</h3>
+                <ion-button fill="clear" size="small">
+                  <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+                  Connect
+                </ion-button>
+              </ion-card-content>
+            </ion-card>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- No Devices Message -->
+    @if (connections().length === 0 && availableProviders().length === 0 && !isLoading()) {
+      <div class="empty-state">
+        <ion-icon name="watch" color="medium"></ion-icon>
+        <h2>No Devices Available</h2>
+        <p>Please check back later.</p>
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="loading-state">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Loading devices...</p>
+      </div>
+    }
+
+    <!-- Info Card -->
+    <ion-card class="info-card">
+      <ion-card-header>
+        <ion-card-title>About Wearable Data</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p>
+          We sync the following metrics from your wearable device:
+        </p>
+        <ul>
+          <li>Steps and activity minutes</li>
+          <li>Resting heart rate</li>
+          <li>Heart rate variability (HRV)</li>
+          <li>Sleep duration and quality</li>
+        </ul>
+        <p class="note">
+          <strong>Note:</strong> We do not display calorie burn from wearables as research
+          shows these estimates are often inaccurate.
+        </p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

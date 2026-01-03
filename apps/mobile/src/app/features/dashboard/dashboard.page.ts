@@ -27,6 +27,9 @@ import { TrainerNeedsAttentionComponent, type ClientAlert } from './components/t
 import { TrainerActivityFeedComponent, type ActivityItem } from './components/trainer-activity-feed/trainer-activity-feed.component';
 import { StatCardComponent } from '@app/shared/components/stat-card/stat-card.component';
 import { UpcomingWorkoutsListComponent } from '@app/shared/components/upcoming-workouts-list/upcoming-workouts-list.component';
+import { WearableDataCardComponent } from '@app/shared/components/wearable-data-card/wearable-data-card.component';
+import { OwnerFacilityStatsComponent, type FacilityStats } from './components/owner-facility-stats/owner-facility-stats.component';
+import { OwnerTrainerPerformanceComponent, type TrainerPerformance } from './components/owner-trainer-performance/owner-trainer-performance.component';
 import type { WorkoutWithExercises } from '@app/core/services/workout.service';
 
 @Component({
@@ -50,6 +53,9 @@ import type { WorkoutWithExercises } from '@app/core/services/workout.service';
     TrainerActivityFeedComponent,
     StatCardComponent,
     UpcomingWorkoutsListComponent,
+    WearableDataCardComponent,
+    OwnerFacilityStatsComponent,
+    OwnerTrainerPerformanceComponent,
   ],
   animations: [fadeInUp, listStagger],
   template: `
@@ -101,8 +107,23 @@ import type { WorkoutWithExercises } from '@app/core/services/workout.service';
           <!-- Nutrition Summary -->
           <app-client-nutrition-summary [summary]="nutritionSummary()" />
 
+          <!-- Wearable Data -->
+          <app-wearable-data-card />
+
           <!-- Upcoming Workouts -->
           <app-upcoming-workouts-list [workouts]="upcomingWorkouts()" />
+        </div>
+      } @else if (isOwner()) {
+        <!-- Gym Owner Dashboard -->
+        <div class="owner-dashboard" @fadeInUp>
+          <!-- Facility Stats -->
+          <app-owner-facility-stats [stats]="facilityStats()" />
+
+          <!-- Trainer Performance -->
+          <app-owner-trainer-performance [trainers]="trainerPerformance()" />
+
+          <!-- Activity Feed -->
+          <app-trainer-activity-feed [activities]="recentActivity()" />
         </div>
       } @else {
         <!-- Trainer Dashboard -->
@@ -121,7 +142,8 @@ import type { WorkoutWithExercises } from '@app/core/services/workout.service';
   `,
   styles: [`
     .client-dashboard,
-    .trainer-dashboard {
+    .trainer-dashboard,
+    .owner-dashboard {
       max-width: 1200px;
       margin: 0 auto;
       display: flex;
@@ -151,6 +173,7 @@ export class DashboardPage implements OnInit {
 
   // User info
   isTrainer = computed(() => this.authService.isTrainer());
+  isOwner = computed(() => this.authService.isOwner());
   firstName = computed(() => {
     const fullName = this.authService.profile()?.fullName || '';
     return fullName.split(' ')[0] || 'there';
@@ -184,6 +207,17 @@ export class DashboardPage implements OnInit {
   clientAlerts = signal<ClientAlert[]>([]);
   recentActivity = signal<ActivityItem[]>([]);
 
+  // Gym Owner data signals
+  facilityStats = signal<FacilityStats>({
+    totalClients: 0,
+    totalTrainers: 0,
+    monthlyRevenue: 0,
+    activeWorkouts: 0,
+    clientRetention: 0,
+    revenueGrowth: 0,
+  });
+  trainerPerformance = signal<TrainerPerformance[]>([]);
+
   constructor() {
     addIcons({ personOutline });
   }
@@ -194,7 +228,9 @@ export class DashboardPage implements OnInit {
 
   async loadDashboardData(): Promise<void> {
     try {
-      if (this.isTrainer()) {
+      if (this.isOwner()) {
+        await this.loadOwnerDashboard();
+      } else if (this.isTrainer()) {
         await this.loadTrainerDashboard();
       } else {
         await this.loadClientDashboard();
@@ -321,6 +357,62 @@ export class DashboardPage implements OnInit {
     // Load recent activity
     // TODO: Implement actual activity feed from workout sessions
     this.recentActivity.set([]);
+    */
+  }
+
+  private async loadOwnerDashboard(): Promise<void> {
+    const ownerId = this.authService.user()?.id;
+    if (!ownerId) return;
+
+    // For now, set default/empty values
+    // TODO: Implement actual service methods when backend is ready
+    this.facilityStats.set({
+      totalClients: 0,
+      totalTrainers: 0,
+      monthlyRevenue: 0,
+      activeWorkouts: 0,
+      clientRetention: 85,
+      revenueGrowth: 0,
+    });
+    this.trainerPerformance.set([]);
+    this.recentActivity.set([]);
+
+    // TODO: Uncomment when services are fully implemented
+    /*
+    // Load all trainers at the facility
+    const trainers = await this.clientService.getTrainersAtFacility(ownerId);
+
+    // Load all clients across all trainers
+    let totalClients = 0;
+    const trainerPerf: TrainerPerformance[] = [];
+
+    for (const trainer of trainers) {
+      const clients = await this.clientService.getClients(trainer.id);
+      const activeClients = clients.filter((c: any) => c.status === 'active');
+
+      totalClients += clients.length;
+
+      trainerPerf.push({
+        id: trainer.id,
+        name: trainer.fullName,
+        avatarUrl: trainer.avatarUrl,
+        totalClients: clients.length,
+        activeClients: activeClients.length,
+        monthlyRevenue: 0, // TODO: Calculate from subscriptions
+        clientChange: 0, // TODO: Calculate from historical data
+      });
+    }
+
+    this.facilityStats.set({
+      totalClients,
+      totalTrainers: trainers.length,
+      monthlyRevenue: 0, // TODO: Sum all trainer revenues
+      activeWorkouts: 0, // TODO: Count today's workouts across all trainers
+      clientRetention: 85, // TODO: Calculate from historical data
+      revenueGrowth: 0, // TODO: Calculate from historical data
+    });
+
+    this.trainerPerformance.set(trainerPerf);
     */
   }
 

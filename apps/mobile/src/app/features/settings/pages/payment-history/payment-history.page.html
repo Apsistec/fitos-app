@@ -1,0 +1,147 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/settings"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Payment History</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page-container">
+    <!-- Total Revenue Card (Trainers Only) -->
+    @if (isTrainer() && !isLoading()) {
+      <ion-card class="revenue-card">
+        <ion-card-content>
+          <div class="revenue-content">
+            <div class="revenue-label">Total Revenue</div>
+            <div class="revenue-amount">
+              {{ formatCurrency(totalRevenue(), 'usd') }}
+            </div>
+            <div class="revenue-note">
+              Lifetime earnings from subscriptions
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    }
+
+    <!-- Filter Segment -->
+    @if (!isLoading() && payments().length > 0) {
+      <div class="filter-segment">
+        <ion-segment [(ngModel)]="filterStatus" (ionChange)="filterStatus.set($event.detail.value)">
+          <ion-segment-button value="all">
+            <ion-label>All</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="succeeded">
+            <ion-label>Successful</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="pending">
+            <ion-label>Pending</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="loading-state">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Loading payment history...</p>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (error() && !isLoading()) {
+      <ion-card class="error-card">
+        <ion-card-content>
+          <div class="error-content">
+            <ion-icon name="close-circle" color="danger"></ion-icon>
+            <p>{{ error() }}</p>
+            <ion-button fill="outline" (click)="loadPayments()">
+              Retry
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    }
+
+    <!-- Payment List -->
+    @if (!isLoading() && !error() && filteredPayments().length > 0) {
+      <ion-list>
+        @for (payment of filteredPayments(); track payment.id) {
+          <ion-item>
+            <ion-icon
+              [name]="getStatusIcon(payment.status)"
+              [color]="getStatusColor(payment.status)"
+              slot="start"
+            ></ion-icon>
+            <ion-label>
+              <h3>{{ payment.description }}</h3>
+              <p>{{ formatDate(payment.created) }}</p>
+              @if (payment.period_start && payment.period_end) {
+                <p class="period">
+                  {{ formatDate(payment.period_start) }} - {{ formatDate(payment.period_end) }}
+                </p>
+              }
+            </ion-label>
+            <div slot="end" class="payment-amount">
+              <div class="amount">
+                {{ formatCurrency(payment.amount, payment.currency) }}
+              </div>
+              <ion-badge [color]="getStatusColor(payment.status)">
+                {{ payment.status }}
+              </ion-badge>
+            </div>
+          </ion-item>
+
+          <!-- Action Buttons -->
+          @if (payment.invoice_pdf || payment.hosted_invoice_url || payment.receipt_url) {
+            <div class="payment-actions">
+              @if (payment.hosted_invoice_url || payment.receipt_url) {
+                <ion-button fill="clear" size="small" (click)="openInvoice(payment)">
+                  <ion-icon name="receipt-outline" slot="start"></ion-icon>
+                  View Details
+                </ion-button>
+              }
+              @if (payment.invoice_pdf) {
+                <ion-button fill="clear" size="small" (click)="downloadInvoice(payment)">
+                  <ion-icon name="download-outline" slot="start"></ion-icon>
+                  Download PDF
+                </ion-button>
+              }
+            </div>
+          }
+        }
+      </ion-list>
+    }
+
+    <!-- Empty State -->
+    @if (!isLoading() && !error() && payments().length === 0) {
+      <div class="empty-state">
+        <ion-icon name="card-outline" color="medium"></ion-icon>
+        <h2>No Payment History</h2>
+        <p>
+          @if (isTrainer()) {
+            You haven't received any payments yet.
+          } @else {
+            You haven't made any payments yet.
+          }
+        </p>
+      </div>
+    }
+
+    <!-- Filtered Empty State -->
+    @if (!isLoading() && !error() && payments().length > 0 && filteredPayments().length === 0) {
+      <div class="empty-state">
+        <ion-icon name="card-outline" color="medium"></ion-icon>
+        <h2>No {{ filterStatus() }} Payments</h2>
+        <p>Try selecting a different filter.</p>
+      </div>
+    }
+  </div>
+</ion-content>

@@ -1,0 +1,181 @@
+.page-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.section {
+  margin-bottom: 32px;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  padding: 0 8px;
+}
+
+.description {
+  padding: 0 8px 16px;
+  line-height: 1.6;
+}
+
+/* Device Card */
+.device-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.device-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.device-icon {
+  font-size: 48px;
+  flex-shrink: 0;
+}
+
+.device-details {
+  h3 {
+    margin: 0 0 4px 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 2px 0;
+    font-size: 0.875rem;
+    color: var(--ion-color-medium);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    ion-icon {
+      font-size: 16px;
+    }
+  }
+}
+
+.device-status {
+  font-weight: 500;
+}
+
+.last-sync {
+  font-size: 0.8125rem;
+}
+
+/* Provider Grid */
+.provider-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.provider-card {
+  margin: 0;
+
+  ion-card-content {
+    text-align: center;
+    padding: 20px 16px;
+  }
+}
+
+.provider-icon {
+  font-size: 56px;
+  margin-bottom: 8px;
+}
+
+.provider-card h3 {
+  margin: 8px 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 64px 32px;
+
+  ion-icon {
+    font-size: 96px;
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    margin: 0 0 8px 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--ion-color-dark);
+  }
+
+  p {
+    margin: 0;
+    color: var(--ion-color-medium);
+  }
+}
+
+/* Loading State */
+.loading-state {
+  text-align: center;
+  padding: 64px 32px;
+
+  ion-spinner {
+    margin-bottom: 16px;
+  }
+
+  p {
+    margin: 0;
+    color: var(--ion-color-medium);
+  }
+}
+
+/* Info Card */
+.info-card {
+  margin-top: 32px;
+  background: var(--ion-color-light);
+
+  ul {
+    margin: 12px 0;
+    padding-left: 24px;
+    line-height: 1.8;
+  }
+
+  li {
+    margin: 4px 0;
+  }
+
+  .note {
+    margin-top: 16px;
+    padding: 12px;
+    background: var(--ion-color-warning-tint);
+    border-left: 4px solid var(--ion-color-warning);
+    border-radius: 4px;
+    font-size: 0.875rem;
+    line-height: 1.6;
+
+    strong {
+      color: var(--ion-color-warning-shade);
+    }
+  }
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .provider-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .device-icon {
+    font-size: 40px;
+  }
+
+  .provider-icon {
+    font-size: 48px;
+  }
+}
