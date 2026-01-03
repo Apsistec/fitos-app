@@ -175,8 +175,89 @@ import { SupabaseService } from '@app/core/services/supabase.service';
           </form>
         }
 
+        <!-- Step 2: Gym Owner Facility Setup -->
+        @if (currentStep() === 2 && isOwner()) {
+          <div class="step-header">
+            <h2>Your Facility</h2>
+            <p>Set up your gym or fitness center.</p>
+          </div>
+
+          <form [formGroup]="facilityForm">
+            <ion-list lines="none">
+              <ion-item lines="none">
+                <ion-input
+                  formControlName="facilityName"
+                  type="text"
+                  label="Facility Name"
+                  labelPlacement="floating"
+                  fill="outline"
+                  placeholder="My Gym"
+                  helperText="The name of your gym or fitness center"
+                />
+              </ion-item>
+
+              <ion-item lines="none">
+                <ion-textarea
+                  formControlName="description"
+                  label="Description"
+                  labelPlacement="floating"
+                  fill="outline"
+                  placeholder="Tell members about your facility..."
+                  helperText="Optional - Describe your gym's offerings"
+                  [autoGrow]="true"
+                  rows="3"
+                />
+              </ion-item>
+
+              <ion-item lines="none">
+                <ion-input
+                  formControlName="address"
+                  type="text"
+                  label="Street Address"
+                  labelPlacement="floating"
+                  fill="outline"
+                  placeholder="123 Main St"
+                />
+              </ion-item>
+
+              <ion-item lines="none">
+                <ion-input
+                  formControlName="city"
+                  type="text"
+                  label="City"
+                  labelPlacement="floating"
+                  fill="outline"
+                  placeholder="Chicago"
+                />
+              </ion-item>
+
+              <ion-item lines="none">
+                <ion-input
+                  formControlName="state"
+                  type="text"
+                  label="State"
+                  labelPlacement="floating"
+                  fill="outline"
+                  placeholder="IL"
+                />
+              </ion-item>
+
+              <ion-item lines="none">
+                <ion-input
+                  formControlName="zipCode"
+                  type="text"
+                  label="ZIP Code"
+                  labelPlacement="floating"
+                  fill="outline"
+                  placeholder="60601"
+                />
+              </ion-item>
+            </ion-list>
+          </form>
+        }
+
         <!-- Step 2: Client Goals (if client) -->
-        @if (currentStep() === 2 && !isTrainer()) {
+        @if (currentStep() === 2 && !isTrainerOrOwner()) {
           <div class="step-header">
             <h2>Your Fitness Goals</h2>
             <p>What are you working towards?</p>
@@ -228,7 +309,9 @@ import { SupabaseService } from '@app/core/services/supabase.service';
             <ion-icon name="checkmark-circle" color="success"></ion-icon>
             <h2>You're all set!</h2>
             <p>
-              @if (isTrainer()) {
+              @if (isOwner()) {
+                Manage your facility and grow your training team.
+              } @else if (isTrainer()) {
                 Start creating workouts and inviting clients.
               } @else {
                 Track your workouts and nutrition to reach your goals.
@@ -362,6 +445,8 @@ export class OnboardingPage {
   errorMessage = signal<string | null>(null);
 
   isTrainer = computed(() => this.authService.isTrainer());
+  isOwner = computed(() => this.authService.isOwner());
+  isTrainerOrOwner = computed(() => this.isTrainer() || this.isOwner());
   totalSteps = computed(() => 3);
   progressValue = computed(() => this.currentStep() / this.totalSteps());
 
@@ -380,6 +465,15 @@ export class OnboardingPage {
   clientForm: FormGroup = this.fb.group({
     goals: [[]],
     fitnessLevel: ['beginner'],
+  });
+
+  facilityForm: FormGroup = this.fb.group({
+    facilityName: ['', Validators.required],
+    description: [''],
+    address: [''],
+    city: [''],
+    state: [''],
+    zipCode: [''],
   });
 
   // Computed error message for full name
@@ -402,7 +496,11 @@ export class OnboardingPage {
       case 1:
         return this.profileForm.valid;
       case 2:
-        return true; // Optional step
+        // Gym owners must fill in facility name
+        if (this.isOwner()) {
+          return this.facilityForm.get('facilityName')?.valid ?? false;
+        }
+        return true; // Optional step for trainers/clients
       default:
         return true;
     }
@@ -418,7 +516,9 @@ export class OnboardingPage {
         await this.saveProfile();
       } else if (this.currentStep() === 2) {
         // Save role-specific data
-        if (this.isTrainer()) {
+        if (this.isOwner()) {
+          await this.saveFacility();
+        } else if (this.isTrainer()) {
           await this.saveTrainerProfile();
         } else {
           await this.saveClientProfile();
@@ -477,6 +577,46 @@ export class OnboardingPage {
       .eq('id', userId);
 
     if (error) throw error;
+  }
+
+  private async saveFacility(): Promise<void> {
+    const userId = this.authService.user()?.id;
+    if (!userId) return;
+
+    const { facilityName, description, address, city, state, zipCode } = this.facilityForm.value;
+
+    // Create the facility
+    const { data: facility, error: facilityError } = await this.supabase
+      .from('facilities')
+      .insert({
+        owner_id: userId,
+        name: facilityName,
+        description: description || null,
+        address: address || null,
+        city: city || null,
+        state: state || null,
+        zip_code: zipCode || null,
+      })
+      .select()
+      .single();
+
+    if (facilityError) throw facilityError;
+
+    // Link the owner's profile to the facility
+    const { error: profileError } = await this.supabase
+      .from('profiles')
+      .update({ facility_id: facility.id })
+      .eq('id', userId);
+
+    if (profileError) throw profileError;
+
+    // Also update trainer_profiles with facility_id
+    const { error: trainerError } = await this.supabase
+      .from('trainer_profiles')
+      .update({ facility_id: facility.id })
+      .eq('id', userId);
+
+    if (trainerError) throw trainerError;
   }
 
   skip(): void {

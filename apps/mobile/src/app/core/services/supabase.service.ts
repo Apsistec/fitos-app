@@ -30,6 +30,10 @@ export class SupabaseService {
     return this.supabase.storage;
   }
 
+  get functions() {
+    return this.supabase.functions;
+  }
+
   // Typed query helpers
   from<T extends string>(table: T) {
     return this.supabase.from(table);

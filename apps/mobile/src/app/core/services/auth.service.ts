@@ -221,7 +221,12 @@ export class AuthService {
         // Create role-specific profile
         if (role === 'trainer') {
           await this.supabase.from('trainer_profiles').insert({ id: data.user.id });
+        } else if (role === 'gym_owner') {
+          // Gym owners use trainer_profiles (they can also train)
+          // and will create a facility during onboarding
+          await this.supabase.from('trainer_profiles').insert({ id: data.user.id });
         } else {
+          // Clients
           await this.supabase.from('client_profiles').insert({ id: data.user.id });
         }
       }

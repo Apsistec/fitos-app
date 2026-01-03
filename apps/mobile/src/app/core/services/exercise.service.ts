@@ -91,7 +91,7 @@ export class ExerciseService {
       const { data, error } = await this.supabase.client
         .from('exercises')
         .select('*')
-        .or(`is_custom.eq.false,created_by.eq.${userId}`)
+        .or(`is_system.eq.true,created_by.eq.${userId}`)
         .order('name');
 
       if (error) throw error;
@@ -158,7 +158,7 @@ export class ExerciseService {
         .from('exercises')
         .insert({
           ...exercise,
-          is_custom: true,
+          is_system: false,
           created_by: userId
         })
         .select()

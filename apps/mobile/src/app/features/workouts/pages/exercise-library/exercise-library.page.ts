@@ -199,6 +199,7 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
                       [showAddButton]="selectionMode()"
                       (detailClick)="onExerciseDetail($event)"
                       (videoClick)="onExerciseVideo($event)"
+                      (editClick)="editExercise($event)"
                       (addClick)="onExerciseAdd($event)"
                     ></app-exercise-card>
                   </ion-col>
@@ -388,7 +389,13 @@ export class ExerciseLibraryPage implements OnInit {
   }
 
   createCustomExercise() {
-    // TODO: Navigate to create exercise page
-    console.log('Create custom exercise');
+    this.router.navigate(['/tabs/workouts/exercises/new']);
+  }
+
+  editExercise(exercise: Exercise) {
+    // Only allow editing custom exercises (non-system)
+    if (!exercise.is_system) {
+      this.router.navigate(['/tabs/workouts/exercises', exercise.id, 'edit']);
+    }
   }
 }

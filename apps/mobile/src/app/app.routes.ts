@@ -76,6 +76,24 @@ export const routes: Routes = [
               ),
           },
           {
+            // Create custom exercise - trainers and gym owners only
+            path: 'exercises/new',
+            canActivate: [trainerOrOwnerGuard],
+            loadComponent: () =>
+              import('./features/workouts/pages/exercise-form/exercise-form.page').then(
+                (m) => m.ExerciseFormPage
+              ),
+          },
+          {
+            // Edit custom exercise - trainers and gym owners only
+            path: 'exercises/:id/edit',
+            canActivate: [trainerOrOwnerGuard],
+            loadComponent: () =>
+              import('./features/workouts/pages/exercise-form/exercise-form.page').then(
+                (m) => m.ExerciseFormPage
+              ),
+          },
+          {
             // Workout builder - trainers and gym owners only
             path: 'builder',
             canActivate: [trainerOrOwnerGuard],
@@ -226,8 +244,30 @@ export const routes: Routes = [
       },
       {
         path: 'settings',
-        loadComponent: () =>
-          import('./features/settings/settings.page').then((m) => m.SettingsPage),
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/settings/settings.page').then((m) => m.SettingsPage),
+          },
+          {
+            // Trainer pricing - trainers and gym owners only
+            path: 'pricing',
+            canActivate: [trainerOrOwnerGuard],
+            loadComponent: () =>
+              import('./features/settings/pages/trainer-pricing/trainer-pricing.page').then(
+                (m) => m.TrainerPricingPage
+              ),
+          },
+          {
+            // Client subscription management
+            path: 'subscription',
+            loadComponent: () =>
+              import('./features/settings/pages/my-subscription/my-subscription.page').then(
+                (m) => m.MySubscriptionPage
+              ),
+          },
+        ],
       },
     ],
   },

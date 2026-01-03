@@ -38,6 +38,7 @@ import {
 import { WorkoutService } from '../../../../core/services/workout.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { Database } from '@fitos/shared';
+import { listStagger } from '@app/shared/animations';
 
 type WorkoutTemplateWithExercises = Database['public']['Tables']['workout_templates']['Row'] & {
   exercises: any[];
@@ -77,7 +78,8 @@ addIcons({
     IonRefresher,
     IonRefresherContent,
     IonText
-],
+  ],
+  animations: [listStagger],
   template: `
     <ion-header>
       <ion-toolbar>
@@ -132,8 +134,9 @@ addIcons({
               </ion-text>
             </div>
 
-            @for (workout of filteredWorkouts(); track workout.id) {
-              <ion-card>
+            <div [@listAnimation]="filteredWorkouts().length">
+              @for (workout of filteredWorkouts(); track workout.id) {
+                <ion-card>
                 <ion-card-header>
                   <div class="card-header-wrapper">
                     <div class="title-section">
@@ -195,7 +198,8 @@ addIcons({
                   </div>
                 </ion-card-content>
               </ion-card>
-            }
+              }
+            </div>
           }
         </div>
       }

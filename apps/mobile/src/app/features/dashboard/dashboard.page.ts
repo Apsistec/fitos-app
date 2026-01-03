@@ -15,6 +15,7 @@ import {
 import { addIcons } from 'ionicons';
 import { personOutline } from 'ionicons/icons';
 import { AuthService } from '@app/core/services/auth.service';
+import { fadeInUp, listStagger } from '@app/shared/animations';
 import { AssignmentService } from '@app/core/services/assignment.service';
 import { ClientService } from '@app/core/services/client.service';
 import { WorkoutSessionService } from '@app/core/services/workout-session.service';
@@ -50,6 +51,7 @@ import type { WorkoutWithExercises } from '@app/core/services/workout.service';
     StatCardComponent,
     UpcomingWorkoutsListComponent,
   ],
+  animations: [fadeInUp, listStagger],
   template: `
     <ion-header>
       <ion-toolbar>
@@ -77,7 +79,7 @@ import type { WorkoutWithExercises } from '@app/core/services/workout.service';
 
       @if (!isTrainer()) {
         <!-- Client Dashboard -->
-        <div class="client-dashboard">
+        <div class="client-dashboard" @fadeInUp>
           <!-- Today's Workout -->
           <app-client-today-workout-card [workout]="todayWorkout()" />
 
@@ -104,7 +106,7 @@ import type { WorkoutWithExercises } from '@app/core/services/workout.service';
         </div>
       } @else {
         <!-- Trainer Dashboard -->
-        <div class="trainer-dashboard">
+        <div class="trainer-dashboard" @fadeInUp>
           <!-- Overview Stats -->
           <app-trainer-overview-stats [stats]="trainerStats()" />
 

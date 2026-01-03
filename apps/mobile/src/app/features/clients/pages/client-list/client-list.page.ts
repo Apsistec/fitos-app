@@ -25,6 +25,7 @@ import { addIcons } from 'ionicons';
 import { addOutline, filterOutline, chatboxOutline, eyeOutline, personRemoveOutline, mailOutline } from 'ionicons/icons';
 import { ClientService, ClientWithProfile } from '../../../../core/services/client.service';
 import { ClientCardComponent } from '../../../../shared/components/client-card/client-card.component';
+import { listStagger } from '@app/shared/animations';
 
 addIcons({ addOutline, filterOutline, chatboxOutline, eyeOutline, personRemoveOutline, mailOutline });
 
@@ -53,6 +54,7 @@ type SubscriptionFilter = 'all' | 'active' | 'trialing' | 'past_due' | 'canceled
     IonLabel,
     ClientCardComponent
   ],
+  animations: [listStagger],
   template: `
     <ion-header>
       <ion-toolbar>
@@ -134,7 +136,7 @@ type SubscriptionFilter = 'all' | 'active' | 'trialing' | 'past_due' | 'canceled
               <p class="results-count">{{ filteredClients().length }} client{{ filteredClients().length !== 1 ? 's' : '' }}</p>
             </div>
 
-            <div class="clients-grid">
+            <div class="clients-grid" [@listAnimation]="filteredClients().length">
               @for (client of filteredClients(); track client.id) {
                 <app-client-card
                   [client]="client"

@@ -92,15 +92,21 @@ This document outlines the complete feature set for Phase 1 MVP, broken down int
 
 ### 0.6 Animations
 **Priority:** P2 (Medium)
-**Status:** NOT STARTED
+**Status:** ✅ COMPLETED
 
 **Implementation Tasks:**
-- [ ] Add fade-in animations for page loads
-- [ ] Add list stagger animations for workout/exercise lists
-- [ ] Add card entrance animations for dashboard cards
-- [ ] Configure Ionic page transitions (IonicRouteStrategy)
-- [ ] Add loading skeleton animations
-- [ ] Create shared animation triggers file
+- [x] Add fade-in animations for page loads (fadeInUp on dashboard)
+- [x] Add list stagger animations for workout/exercise lists (listStagger)
+- [x] Add card entrance animations for dashboard cards (fadeInUp)
+- [x] Configure Ionic page transitions (IonicRouteStrategy already configured)
+- [x] Add loading skeleton animations (SkeletonCardComponent created)
+- [x] Create shared animation triggers file (animations.ts)
+
+**Implementation Notes:**
+- Animation triggers in apps/mobile/src/app/shared/animations/animations.ts
+- fadeInUp, listStagger, slideInOut, fadeIn, scaleIn triggers available
+- Added animations to DashboardPage, ClientListPage, WorkoutListPage
+- SkeletonCardComponent for loading states
 
 ---
 
@@ -109,77 +115,87 @@ This document outlines the complete feature set for Phase 1 MVP, broken down int
 ### 1.1 Supabase Auth Integration
 **Priority:** P0 (Critical)
 **Sprint:** 1
-**Status:** IN PROGRESS
+**Status:** ✅ COMPLETED
 
 **User Stories:**
-- As a user, I can sign up with email/password so I can create an account
-- As a user, I can sign in with Google so I can use my existing account
-- As a user, I can sign in with Apple so I can use my existing account
-- As a user, I can reset my password if I forget it
-- As a user, I can sign out of my account
+- As a user, I can sign up with email/password so I can create an account ✅
+- As a user, I can sign in with Google so I can use my existing account (OAuth configured, needs provider keys)
+- As a user, I can sign in with Apple so I can use my existing account (OAuth configured, needs provider keys)
+- As a user, I can reset my password if I forget it ✅
+- As a user, I can sign out of my account ✅
 
 **Implementation Tasks:**
 - [x] Configure Supabase Auth in project
 - [x] Create auth service with login/logout/register methods
 - [x] Implement email/password authentication
-- [ ] Configure Google OAuth provider
-- [ ] Configure Apple OAuth provider (requires Apple Developer account)
+- [x] Configure Google OAuth provider (signInWithProvider method ready, needs API keys)
+- [x] Configure Apple OAuth provider (signInWithProvider method ready, needs API keys)
 - [x] Create password reset flow
 - [x] Implement auth guards for protected routes
 - [x] Add auth state management (signals)
-- [ ] Improve login page UI styling
-- [ ] Improve registration page UI styling
 - [x] Handle auth errors gracefully
+- [ ] Improve login page UI styling (P2 - deferred)
+- [ ] Improve registration page UI styling (P2 - deferred)
 
 ### 1.2 Role-Based Access Control
 **Priority:** P0 (Critical)
 **Sprint:** 1
-**Status:** NEEDS UPDATE
+**Status:** ✅ COMPLETED
 
 **User Stories:**
-- As a new user, I can choose whether I'm a trainer, client, or gym owner during signup
-- As a trainer, I see a trainer-specific dashboard
-- As a client, I see a client-specific dashboard
-- As a gym owner, I see an owner-specific dashboard
+- As a new user, I can choose whether I'm a trainer, client, or gym owner during signup ✅
+- As a trainer, I see a trainer-specific dashboard ✅
+- As a client, I see a client-specific dashboard ✅
+- As a gym owner, I see an owner-specific dashboard ✅
 
 **Implementation Tasks:**
-- [ ] Add role selection step to registration flow
-- [ ] Update database schema for roles (add user_role enum)
-- [ ] Create RoleRedirectComponent that routes to correct dashboard
-- [ ] Implement role-based route guards (trainerGuard, clientGuard, ownerGuard)
-- [ ] Create separate tab navigation for each role
-- [ ] Add role check utilities (isTrainer(), isClient(), isOwner())
-- [ ] Create facilities table for gym owners
-- [ ] Create facility_trainers junction table
-- [ ] Add facility_id to profiles table
+- [x] Add role selection step to registration flow (3-way segment: trainer/client/gym_owner)
+- [x] Update database schema for roles (migration 00006 adds gym_owner to enum)
+- [x] Create RoleRedirectComponent that routes to correct dashboard (via AuthService.isTrainer/isOwner/isClient)
+- [x] Implement role-based route guards (trainerGuard, clientGuard, ownerGuard, trainerOrOwnerGuard)
+- [x] Create separate tab navigation for each role (trainers/owners see clients/workouts tabs)
+- [x] Add role check utilities (isTrainer(), isClient(), isOwner())
+- [x] Create facilities table for gym owners (migration 00005)
+- [x] Create facility_trainers junction table (migration 00005)
+- [x] Add facility_id to profiles table (migration 00005)
+
+**Implementation Notes:**
+- Registration page has 3-way role selection with icons and descriptions
+- AuthService.signUp creates appropriate profile (trainer_profiles for trainers/owners, client_profiles for clients)
+- Onboarding flow has role-specific step 2:
+  - Trainers: Business name, bio, specializations
+  - Gym Owners: Facility setup (name, address, description)
+  - Clients: Goals and fitness level
+- Gym owners get a facility created during onboarding linked to their profile
 
 ### 1.3 Onboarding Flow
 **Priority:** P1 (High)
 **Sprint:** 2
+**Status:** ✅ COMPLETED
 
 **User Stories:**
-- As a new trainer, I can complete my business profile
-- As a trainer, I can add my certifications and specializations
-- As a trainer, I can upload a profile photo
-- As a new client, I can enter my fitness goals
-- As a client, I can enter basic health information
+- As a new trainer, I can complete my business profile ✅
+- As a trainer, I can add my certifications and specializations ✅
+- As a trainer, I can upload a profile photo (deferred - avatar upload)
+- As a new client, I can enter my fitness goals ✅
+- As a client, I can enter basic health information ✅
 
 **Implementation Tasks:**
-- [ ] Create multi-step onboarding wizard component
-- [ ] Build trainer onboarding steps:
+- [x] Create multi-step onboarding wizard component
+- [x] Build trainer onboarding steps:
   - Business info (name, bio, timezone)
-  - Certifications (multi-select)
+  - Certifications (multi-select) - via specializations
   - Specializations (tags)
-  - Avatar upload
-- [ ] Build client onboarding steps:
+  - Avatar upload - DEFERRED
+- [x] Build client onboarding steps:
   - Fitness goals (multi-select)
   - Experience level (beginner/intermediate/advanced)
-  - Availability preferences
-  - Basic measurements (optional)
-- [ ] Implement avatar upload to Supabase Storage
-- [ ] Create onboarding progress indicator
-- [ ] Add skip/complete later option
-- [ ] Mark onboarding complete in profile
+  - Availability preferences - DEFERRED
+  - Basic measurements (optional) - DEFERRED
+- [ ] Implement avatar upload to Supabase Storage - DEFERRED
+- [x] Create onboarding progress indicator
+- [x] Add skip/complete later option
+- [x] Mark onboarding complete in profile (via fullName check)
 
 ### 1.4 Client Invitation System
 **Priority:** P1 (High)
@@ -304,22 +320,29 @@ This document outlines the complete feature set for Phase 1 MVP, broken down int
 ### 3.2 Custom Exercises
 **Priority:** P2 (Medium)
 **Sprint:** 3
+**Status:** ✅ COMPLETED
 
 **User Stories:**
-- As a trainer, I can create custom exercises
-- As a trainer, I can edit my custom exercises
-- As a trainer, I can delete my custom exercises
-- As a trainer, I can add video demonstrations
+- As a trainer, I can create custom exercises ✅
+- As a trainer, I can edit my custom exercises ✅
+- As a trainer, I can delete my custom exercises ✅
+- As a trainer, I can add video demonstrations ✅
 
 **Implementation Tasks:**
-- [ ] Create exercise form component
-- [ ] Implement create exercise API
-- [ ] Implement update exercise API
-- [ ] Implement delete exercise API (soft delete)
-- [ ] Add video URL field (YouTube/Vimeo embed)
-- [ ] Add thumbnail upload to Supabase Storage
-- [ ] Show custom exercises in library with "Custom" badge
-- [ ] Add edit/delete buttons for own exercises
+- [x] Create exercise form component (ExerciseFormPage)
+- [x] Implement create exercise API (ExerciseService.createExercise)
+- [x] Implement update exercise API (ExerciseService.updateExercise)
+- [x] Implement delete exercise API (ExerciseService.deleteExercise with confirmation)
+- [x] Add video URL field (YouTube/Vimeo embed)
+- [ ] Add thumbnail upload to Supabase Storage - DEFERRED
+- [x] Show custom exercises in library with "Custom" badge
+- [x] Add edit/delete buttons for own exercises
+
+**Implementation Notes:**
+- Created ExerciseFormPage for create/edit flow
+- ExerciseCardComponent shows "Custom" badge for non-system exercises
+- Edit button only visible for custom exercises
+- Routes: /tabs/workouts/exercises/new and /tabs/workouts/exercises/:id/edit
 
 ---
 
@@ -562,38 +585,63 @@ This document outlines the complete feature set for Phase 1 MVP, broken down int
 ### 7.1 Stripe Connect Onboarding
 **Priority:** P0 (Critical)
 **Sprint:** 5
+**Status:** ✅ COMPLETED
 
 **User Stories:**
-- As a trainer, I can connect my Stripe account
-- As a trainer, I complete Stripe onboarding to receive payments
-- As a trainer, I can see my Stripe connection status
+- As a trainer, I can connect my Stripe account ✅
+- As a trainer, I complete Stripe onboarding to receive payments ✅
+- As a trainer, I can see my Stripe connection status ✅
 
 **Implementation Tasks:**
-- [ ] Set up Stripe Connect (Standard accounts)
-- [ ] Create Stripe connect onboarding flow
-- [ ] Store Stripe account ID in trainer profile
-- [ ] Create connect/disconnect Stripe UI
-- [ ] Handle Stripe webhooks for account updates
-- [ ] Show connection status on settings page
+- [x] Set up Stripe Connect (Standard accounts)
+- [x] Create Stripe connect onboarding flow
+- [x] Store Stripe account ID in trainer profile
+- [x] Create connect/disconnect Stripe UI
+- [x] Handle Stripe webhooks for account updates
+- [x] Show connection status on settings page
+
+**Implementation Notes:**
+- Created StripeService for frontend Stripe Connect operations
+- Created Supabase Edge Functions:
+  - stripe-connect-onboarding: Creates Stripe Connect account and account link
+  - stripe-account-status: Fetches account status from Stripe
+  - stripe-dashboard-link: Creates login link to Stripe dashboard
+  - stripe-webhook: Handles account.updated and other events
+- Updated Settings page with Stripe Connect UI for trainers
+- Supports connect, disconnect, and open dashboard actions
 
 ### 7.2 Subscription Management
 **Priority:** P0 (Critical)
 **Sprint:** 6
+**Status:** ✅ COMPLETED
 
 **User Stories:**
-- As a trainer, I can create subscription tiers
-- As a client, I can subscribe to a trainer's service
-- As a client, I can manage my subscription
-- As a trainer, I can see my active subscriptions
+- As a trainer, I can create subscription tiers ✅
+- As a client, I can subscribe to a trainer's service ✅
+- As a client, I can manage my subscription ✅
+- As a trainer, I can see my active subscriptions ✅
 
 **Implementation Tasks:**
-- [ ] Create subscription products in Stripe
-- [ ] Build trainer pricing configuration UI
-- [ ] Implement client subscription checkout
-- [ ] Handle subscription webhooks (created, updated, cancelled)
-- [ ] Store subscription status in database
-- [ ] Build subscription management UI for clients
-- [ ] Create subscription revenue dashboard for trainers
+- [x] Create subscription products in Stripe
+- [x] Build trainer pricing configuration UI
+- [x] Implement client subscription checkout
+- [x] Handle subscription webhooks (created, updated, cancelled)
+- [x] Store subscription status in database
+- [x] Build subscription management UI for clients
+- [x] Create subscription revenue dashboard for trainers
+
+**Implementation Notes:**
+- Created SubscriptionService for frontend subscription management
+- Created Supabase Edge Functions:
+  - stripe-create-checkout: Creates Stripe Checkout session for subscription
+  - stripe-customer-portal: Creates Stripe Customer Portal session
+  - stripe-create-price: Creates Stripe products and prices for trainer tiers
+  - stripe-get-prices: Fetches trainer's pricing tiers from Stripe
+  - stripe-cancel-subscription: Cancels subscription (immediate or at period end)
+- Updated stripe-webhook to handle subscription lifecycle events
+- Created TrainerPricingPage for trainers to configure subscription tiers
+- Created MySubscriptionPage for clients to manage their subscription
+- 10% platform fee on subscriptions
 
 ### 7.3 Payment History
 **Priority:** P2 (Medium)

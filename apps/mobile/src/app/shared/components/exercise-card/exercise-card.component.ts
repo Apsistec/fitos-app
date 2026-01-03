@@ -1,13 +1,13 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonBadge, IonButton, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { playCircleOutline, informationCircleOutline, addCircleOutline } from 'ionicons/icons';
+import { playCircleOutline, informationCircleOutline, addCircleOutline, createOutline } from 'ionicons/icons';
 import { Database } from '@fitos/shared';
 
 type Exercise = Database['public']['Tables']['exercises']['Row'];
 
 // Register icons at module level
-addIcons({ playCircleOutline, informationCircleOutline, addCircleOutline });
+addIcons({ playCircleOutline, informationCircleOutline, addCircleOutline, createOutline });
 
 @Component({
   selector: 'app-exercise-card',
@@ -68,6 +68,12 @@ addIcons({ playCircleOutline, informationCircleOutline, addCircleOutline });
             <ion-icon slot="start" name="information-circle-outline"></ion-icon>
             Details
           </ion-button>
+          @if (!exercise().is_system) {
+            <ion-button fill="clear" size="small" (click)="onEditClick()">
+              <ion-icon slot="start" name="create-outline"></ion-icon>
+              Edit
+            </ion-button>
+          }
           @if (showAddButton()) {
             <ion-button fill="solid" size="small" (click)="onAddClick()">
               <ion-icon slot="start" name="add-circle-outline"></ion-icon>
@@ -179,6 +185,7 @@ export class ExerciseCardComponent {
   // Signal-based outputs (Angular 21)
   videoClick = output<Exercise>();
   detailClick = output<Exercise>();
+  editClick = output<Exercise>();
   addClick = output<Exercise>();
 
   onVideoClick(): void {
@@ -187,6 +194,10 @@ export class ExerciseCardComponent {
 
   onDetailClick(): void {
     this.detailClick.emit(this.exercise());
+  }
+
+  onEditClick(): void {
+    this.editClick.emit(this.exercise());
   }
 
   onAddClick(): void {
