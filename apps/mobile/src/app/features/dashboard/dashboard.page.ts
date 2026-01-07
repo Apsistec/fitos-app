@@ -78,7 +78,7 @@ import type { WorkoutWithExercises } from '@app/core/services/workout.service';
       </ion-toolbar>
     </ion-header>
 
-    <ion-content class="ion-padding">
+    <ion-content>
       <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
         <ion-refresher-content></ion-refresher-content>
       </ion-refresher>
@@ -141,20 +141,43 @@ import type { WorkoutWithExercises } from '@app/core/services/workout.service';
     </ion-content>
   `,
   styles: [`
+    ion-content {
+      --padding-start: 16px;
+      --padding-end: 16px;
+      --padding-top: 16px;
+      --padding-bottom: 16px;
+    }
+
     .client-dashboard,
     .trainer-dashboard,
     .owner-dashboard {
-      max-width: 1200px;
+      max-width: 800px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
       gap: 1rem;
+      width: 100%;
     }
 
     .stats-row {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 1rem;
+      width: 100%;
+    }
+
+    /* Ensure all cards have consistent width */
+    app-client-today-workout-card,
+    app-client-nutrition-summary,
+    app-wearable-data-card,
+    app-upcoming-workouts-list,
+    app-trainer-overview-stats,
+    app-trainer-needs-attention,
+    app-trainer-activity-feed,
+    app-owner-facility-stats,
+    app-owner-trainer-performance {
+      width: 100%;
+      max-width: 100%;
     }
 
     @media (max-width: 576px) {

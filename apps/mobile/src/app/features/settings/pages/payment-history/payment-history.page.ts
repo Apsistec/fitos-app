@@ -1,7 +1,6 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import {
   IonHeader,
   IonToolbar,
@@ -18,10 +17,7 @@ import {
   IonRefresherContent,
   IonSpinner,
   IonCard,
-  IonCardHeader,
-  IonCardTitle,
   IonCardContent,
-  IonText,
   IonButton,
   IonSegment,
   IonSegmentButton,
@@ -60,7 +56,6 @@ interface Payment {
   imports: [
     CommonModule,
     FormsModule,
-    RouterLink,
     IonHeader,
     IonToolbar,
     IonTitle,
@@ -76,10 +71,7 @@ interface Payment {
     IonRefresherContent,
     IonSpinner,
     IonCard,
-    IonCardHeader,
-    IonCardTitle,
     IonCardContent,
-    IonText,
     IonButton,
     IonSegment,
     IonSegmentButton,
@@ -154,6 +146,11 @@ export class PaymentHistoryPage implements OnInit {
   async handleRefresh(event: any) {
     await this.loadPayments();
     event.target.complete();
+  }
+
+  onFilterChange(value: string | number | undefined): void {
+    const statusValue = value?.toString() || 'all';
+    this.filterStatus.set(statusValue);
   }
 
   getStatusColor(status: string): string {

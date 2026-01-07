@@ -283,6 +283,46 @@ export const routes: Routes = [
                 (m) => m.PaymentHistoryPage
               ),
           },
+          {
+            // Edit Profile
+            path: 'profile',
+            loadComponent: () =>
+              import('./features/settings/pages/edit-profile/edit-profile.page').then(
+                (m) => m.EditProfilePage
+              ),
+          },
+          {
+            // Notifications
+            path: 'notifications',
+            loadComponent: () =>
+              import('./features/settings/pages/notifications/notifications.page').then(
+                (m) => m.NotificationsPage
+              ),
+          },
+          {
+            // Privacy & Security
+            path: 'privacy',
+            loadComponent: () =>
+              import('./features/settings/pages/privacy/privacy.page').then(
+                (m) => m.PrivacyPage
+              ),
+          },
+          {
+            // Help & Support
+            path: 'help',
+            loadComponent: () =>
+              import('./features/settings/pages/help/help.page').then(
+                (m) => m.HelpPage
+              ),
+          },
+          {
+            // Terms & Privacy Policy
+            path: 'terms',
+            loadComponent: () =>
+              import('./features/settings/pages/terms/terms.page').then(
+                (m) => m.TermsPage
+              ),
+          },
         ],
       },
     ],

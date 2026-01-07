@@ -72,7 +72,7 @@ export class AuthService {
    */
   initAuthListener(): void {
     // Get initial session
-    this.supabase.auth.getSession().then(({ data: { session } }) => {
+    this.supabase.auth.getSession().then(async ({ data: { session } }) => {
       this._state.update((s) => ({
         ...s,
         session,
@@ -82,7 +82,7 @@ export class AuthService {
       }));
 
       if (session?.user) {
-        this.loadProfile(session.user.id);
+        await this.loadProfile(session.user.id);
       }
     });
 
@@ -211,25 +211,10 @@ export class AuthService {
 
       if (error) throw error;
 
-      // Update role in profile (trigger creates profile, but we need to set role)
-      if (data.user) {
-        await this.supabase
-          .from('profiles')
-          .update({ role, full_name: fullName })
-          .eq('id', data.user.id);
-
-        // Create role-specific profile
-        if (role === 'trainer') {
-          await this.supabase.from('trainer_profiles').insert({ id: data.user.id });
-        } else if (role === 'gym_owner') {
-          // Gym owners use trainer_profiles (they can also train)
-          // and will create a facility during onboarding
-          await this.supabase.from('trainer_profiles').insert({ id: data.user.id });
-        } else {
-          // Clients
-          await this.supabase.from('client_profiles').insert({ id: data.user.id });
-        }
-      }
+      // Note: The database trigger (handle_new_user) automatically creates:
+      // 1. A profile in the profiles table with the role
+      // 2. A role-specific profile (trainer_profiles or client_profiles)
+      // No need to manually insert here - the trigger handles it all
 
       return { error: null };
     } catch (error) {

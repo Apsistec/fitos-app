@@ -35,6 +35,7 @@ import {
 } from 'ionicons/icons';
 import { AuthService } from '@app/core/services/auth.service';
 import { StripeService } from '@app/core/services/stripe.service';
+import { ThemeService } from '@app/core/services/theme.service';
 
 @Component({
   selector: 'app-settings',
@@ -183,12 +184,12 @@ import { StripeService } from '@app/core/services/stripe.service';
         }
 
         <ion-list>
-          <ion-item button detail>
+          <ion-item button detail routerLink="/tabs/settings/profile">
             <ion-icon name="person-outline" slot="start"></ion-icon>
             <ion-label>Edit Profile</ion-label>
           </ion-item>
 
-          <ion-item button detail>
+          <ion-item button detail routerLink="/tabs/settings/notifications">
             <ion-icon name="notifications-outline" slot="start"></ion-icon>
             <ion-label>Notifications</ion-label>
           </ion-item>
@@ -204,22 +205,22 @@ import { StripeService } from '@app/core/services/stripe.service';
           <ion-item>
             <ion-icon name="moon-outline" slot="start"></ion-icon>
             <ion-label>Dark Mode</ion-label>
-            <ion-toggle slot="end"></ion-toggle>
+            <ion-toggle slot="end" [checked]="isDarkMode()" (ionChange)="toggleDarkMode($event)"></ion-toggle>
           </ion-item>
         </ion-list>
 
         <ion-list>
-          <ion-item button detail>
+          <ion-item button detail routerLink="/tabs/settings/privacy">
             <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
             <ion-label>Privacy & Security</ion-label>
           </ion-item>
 
-          <ion-item button detail>
+          <ion-item button detail routerLink="/tabs/settings/help">
             <ion-icon name="help-circle-outline" slot="start"></ion-icon>
             <ion-label>Help & Support</ion-label>
           </ion-item>
 
-          <ion-item button detail>
+          <ion-item button detail routerLink="/tabs/settings/terms">
             <ion-icon name="document-text-outline" slot="start"></ion-icon>
             <ion-label>Terms & Privacy Policy</ion-label>
           </ion-item>
@@ -296,12 +297,14 @@ import { StripeService } from '@app/core/services/stripe.service';
 export class SettingsPage implements OnInit {
   private authService = inject(AuthService);
   private stripeService = inject(StripeService);
+  private themeService = inject(ThemeService);
   private alertController = inject(AlertController);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
   isAuthenticated = computed(() => this.authService.isAuthenticated());
   isTrainer = computed(() => this.authService.isTrainer() || this.authService.isOwner());
+  isDarkMode = this.themeService.isDarkMode;
 
   // Stripe signals
   stripeLoading = computed(() => this.stripeService.loading());
@@ -393,6 +396,10 @@ export class SettingsPage implements OnInit {
     });
 
     await alert.present();
+  }
+
+  toggleDarkMode(event: any): void {
+    this.themeService.setDarkMode(event.detail.checked);
   }
 
   async signOut(): Promise<void> {

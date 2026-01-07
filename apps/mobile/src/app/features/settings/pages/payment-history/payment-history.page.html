@@ -33,7 +33,7 @@
     <!-- Filter Segment -->
     @if (!isLoading() && payments().length > 0) {
       <div class="filter-segment">
-        <ion-segment [(ngModel)]="filterStatus" (ionChange)="filterStatus.set($event.detail.value)">
+        <ion-segment [(ngModel)]="filterStatus" (ionChange)="onFilterChange($event.detail.value)">
           <ion-segment-button value="all">
             <ion-label>All</ion-label>
           </ion-segment-button>

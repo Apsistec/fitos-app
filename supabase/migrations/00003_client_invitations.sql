@@ -163,7 +163,7 @@ $$;
 CREATE TRIGGER set_invitations_updated_at
     BEFORE UPDATE ON invitations
     FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
+    EXECUTE FUNCTION update_updated_at();
 
 -- ============================================================================
 -- COMMENTS

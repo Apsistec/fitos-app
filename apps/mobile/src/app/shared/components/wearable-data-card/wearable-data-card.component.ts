@@ -40,7 +40,6 @@ type WearableDailyData = Database['public']['Tables']['wearable_daily_data']['Ro
     IonCardTitle,
     IonCardContent,
     IonIcon,
-    IonBadge,
     IonButton,
     IonSpinner,
     IonText,

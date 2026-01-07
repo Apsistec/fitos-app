@@ -1,6 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import {
   IonHeader,
   IonToolbar,
@@ -8,23 +7,18 @@ import {
   IonContent,
   IonButtons,
   IonBackButton,
-  IonList,
-  IonItem,
-  IonLabel,
   IonIcon,
   IonButton,
   IonCard,
   IonCardHeader,
   IonCardTitle,
   IonCardContent,
-  IonBadge,
   IonRefresher,
   IonRefresherContent,
   IonSpinner,
   AlertController,
   ToastController,
   IonText,
-  IonChip,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -52,28 +46,22 @@ type WearableConnection = Database['public']['Tables']['wearable_connections']['
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
     IonHeader,
     IonToolbar,
     IonTitle,
     IonContent,
     IonButtons,
     IonBackButton,
-    IonList,
-    IonItem,
-    IonLabel,
     IonIcon,
     IonButton,
     IonCard,
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
-    IonBadge,
     IonRefresher,
     IonRefresherContent,
     IonSpinner,
     IonText,
-    IonChip,
   ],
 })
 export class WearablesPage implements OnInit {

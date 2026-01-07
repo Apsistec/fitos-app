@@ -14,6 +14,12 @@ export class SupabaseService {
         autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: true,
+        storageKey: 'fitos-auth',
+        // Use a no-op lock function to avoid NavigatorLock errors in development
+        lock: async (name, acquireTimeout, fn) => {
+          // Simply execute the function without locking
+          return await fn();
+        },
       },
     });
   }

@@ -396,12 +396,10 @@ export class RegisterPage {
       this.errorMessage.set(error.message);
     } else {
       this.successMessage.set(
-        'Account created! Please check your email to verify your account.'
+        'Account created! Please check your email to verify your account before logging in.'
       );
-      // In development without email verification, redirect to onboarding
-      setTimeout(() => {
-        this.router.navigate(['/onboarding']);
-      }, 2000);
+      // Don't auto-redirect since email verification is required
+      // User will be automatically logged in when they click the verification link
     }
   }
 }

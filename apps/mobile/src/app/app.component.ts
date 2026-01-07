@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { AuthService } from './core/services/auth.service';
+import { ThemeService } from './core/services/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -13,6 +14,7 @@ import { AuthService } from './core/services/auth.service';
 })
 export class AppComponent implements OnInit {
   private authService = inject(AuthService);
+  private themeService = inject(ThemeService); // Initialize theme service
 
   ngOnInit(): void {
     // Initialize auth state listener
