@@ -2,6 +2,9 @@
   margin: 0;
   max-width: 400px;
   width: 100%;
+  background: var(--fitos-bg-secondary);
+  border: 1px solid var(--fitos-border-subtle);
+  border-radius: var(--fitos-radius-lg);
 
   ion-card-content {
     padding: 16px;
@@ -22,6 +25,7 @@
 .stat-icon {
   font-size: 32px;
   flex-shrink: 0;
+  color: var(--fitos-accent-primary);
 }
 
 .stat-data {
@@ -32,12 +36,17 @@
 }
 
 .stat-value {
-  font-size: 24px;
+  font-family: var(--fitos-font-mono);
+  font-size: 28px;
   font-weight: 700;
   line-height: 1.2;
+  color: var(--fitos-text-primary);
 }
 
 .stat-label {
   font-size: 14px;
   line-height: 1.2;
+  color: var(--fitos-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }

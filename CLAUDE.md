@@ -2,15 +2,15 @@
 
 ## Project Overview
 
-FitOS is an AI-powered fitness coaching platform for solo trainers. This monorepo contains:
+FitOS is an AI-powered fitness coaching platform for solo trainers. Monorepo structure:
 
 - `apps/mobile` - Ionic Angular mobile app (iOS, Android, PWA)
 - `apps/landing` - Marketing landing page (Angular SSR)
 - `apps/ai-backend` - LangGraph Python backend for AI agents
 - `libs/shared` - Shared TypeScript types and utilities
-- `supabase/` - Database migrations and configuration
+- `supabase/` - Database migrations and Edge Functions
 
-## Tech Stack (Latest Versions as of December 2025)
+## Tech Stack
 
 | Layer | Technology |
 |-------|------------|
@@ -18,68 +18,132 @@ FitOS is an AI-powered fitness coaching platform for solo trainers. This monorep
 | Native | Capacitor 8 |
 | Backend | Supabase (PostgreSQL + pgvector + Auth) |
 | AI | LangGraph (Python) on Cloud Run |
+| Voice AI | Deepgram Nova-3/Aura-2 |
 | Payments | Stripe Connect |
 | Wearables | Terra API |
-| Voice (Phase 2) | Deepgram Nova-3 / Aura-2 |
 
 ## Version Requirements
 
-- **Node.js**: >=20.11.0 (Angular 20 dropped Node 18 support)
+- **Node.js**: >=20.11.0
 - **npm**: >=10.0.0
 - **Angular**: 20.x
 - **Ionic**: 8.7.x
 - **Capacitor**: 8.x
-- **TypeScript**: 5.8.x
-- **ESLint**: 9.x (flat config)
 
 ## Key Commands
 
 ```bash
-# Start mobile app
-npm start
-
-# Start landing page
-npm run start:landing
-
-# Start Supabase locally
-npm run db:start
-
-# Run migrations
-npm run db:migrate
-
-# Generate TypeScript types from database
-npm run db:gen-types
-
-# Start AI backend (Phase 2)
-npm run ai:dev
-
-# Lint code
-npm run lint
+npm start              # Start mobile app
+npm run start:landing  # Start landing page
+npm run db:start       # Start Supabase locally
+npm run db:migrate     # Run migrations
+npm run db:gen-types   # Generate TypeScript types
+npm run lint           # Lint code
+npm test               # Unit tests
 ```
 
-## Database
+---
 
-- PostgreSQL 15 with pgvector extension
-- Row Level Security (RLS) enabled on all tables
-- Use `supabase/migrations/` for schema changes
-- Always generate types after migration: `npm run db:gen-types`
+## Design Philosophy
 
-## Code Style
+**Read First:** `docs/DESIGN_SYSTEM.md`
 
-- Strict TypeScript (`strict: true`)
-- Angular 20 standalone components (default)
-- Angular Signals for reactive state
-- Ionic components for UI
-- Tailwind CSS for custom styling
-- ESLint 9 with flat config
-- Follow Angular style guide
+### Core Principles
+1. **Dark-First** - Default to dark mode for gym environments
+2. **Adherence-Neutral** - Never use red for nutrition "over target"
+3. **<10 Second Logging** - Minimize friction for all data entry
+4. **Glanceable** - Key info visible in <2 seconds
 
-## Angular 20 Features to Use
+### Color System (Dark Mode Default)
+```scss
+--fitos-bg-primary: #0D0D0D;        // Not pure black
+--fitos-accent-primary: #10B981;    // Energetic teal
+--fitos-nutrition-over: #8B5CF6;    // Purple, NOT red
+```
 
-- **Signals**: Use `signal()`, `computed()`, `effect()` for state management
-- **Control Flow**: Use `@if`, `@for`, `@switch` (not `*ngIf`, `*ngFor`)
-- **Zoneless** (experimental): Can enable for better performance
-- **Standalone Components**: Default, no NgModules needed
+---
+
+## Documentation Index
+
+| Document | Purpose |
+|----------|---------|
+| `docs/DESIGN_SYSTEM.md` | Colors, typography, spacing, components |
+| `docs/THEMING.md` | Dark/light mode implementation |
+| `docs/UX_PATTERNS.md` | Friction reduction, navigation patterns |
+| `docs/COMPETITIVE_ANALYSIS.md` | Market research, feature gaps |
+| `docs/PHASE1_BACKLOG.md` | MVP features (Sprints 0-8) |
+| `docs/PHASE2_BACKLOG.md` | AI/CRM features (Sprints 7-16) |
+| `docs/AI_INTEGRATION.md` | Voice, photo, coaching architecture |
+| `docs/CRM_MARKETING.md` | Lead pipeline, email automation |
+| `docs/USER_ROLES_ARCHITECTURE.md` | RBAC, dashboards by role |
+| `docs/SETTINGS_PROFILE_UX.md` | Settings page design standards |
+| `docs/OFFLINE_SYNC.md` | Offline-first patterns |
+
+---
+
+## Angular 20 Patterns
+
+### Signals (Required)
+```typescript
+import { signal, computed, effect } from '@angular/core';
+
+const count = signal(0);
+const doubled = computed(() => count() * 2);
+```
+
+### Control Flow (Required)
+```html
+@if (isLoading()) {
+  <app-skeleton />
+} @else {
+  <app-content />
+}
+
+@for (item of items(); track item.id) {
+  <app-item [data]="item" />
+}
+```
+
+### Standalone Components (Default)
+```typescript
+@Component({
+  standalone: true,
+  imports: [CommonModule, IonicModule],
+  // ...
+})
+```
+
+---
+
+## Critical Rules
+
+### Adherence-Neutral Nutrition
+**NEVER use red/danger colors for nutrition "over target".**
+```scss
+// ❌ WRONG
+.over-target { color: var(--ion-color-danger); }
+
+// ✅ CORRECT  
+.over-target { color: var(--fitos-nutrition-over); } // Purple
+```
+
+### Wearable Data Display
+**NEVER display calorie burn from wearables** (research shows inaccuracy).
+
+Only display:
+- Resting heart rate
+- HRV
+- Sleep duration/quality
+- Steps
+
+### Performance Requirements
+- OnPush change detection on all components
+- Virtual scrolling for lists >50 items
+- Lazy load all feature modules
+- trackBy on all *ngFor
+- Only animate transform/opacity
+
+---
 
 ## File Structure
 
@@ -92,125 +156,118 @@ apps/mobile/src/
 │   │   ├── workouts/
 │   │   ├── nutrition/
 │   │   ├── clients/
+│   │   ├── dashboard/
+│   │   ├── messages/
 │   │   └── settings/
 │   ├── shared/         # Shared components, pipes
 │   └── app.routes.ts
-├── environments/
-└── theme/
+├── theme/              # variables.scss, design tokens
+└── environments/
 ```
 
-## Important Patterns
+---
 
-### Supabase Client
+## Phase Overview
+
+### Phase 1: MVP (Complete)
+- Auth, roles, onboarding
+- Exercise library, workout builder
+- Workout logging, nutrition tracking
+- Stripe payments, wearable integration
+- Messaging
+
+### Phase 2: Differentiation (In Progress)
+- Sprint 7: Dark mode redesign
+- Sprint 8-9: Voice logging (Deepgram)
+- Sprint 10: Photo nutrition AI
+- Sprint 11-12: CRM & email marketing
+- Sprint 13-14: AI coaching + JITAI
+- Sprint 15: Apple Watch
+- Sprint 16: Polish
+
+---
+
+## AI Feature Architecture
+
+**Read:** `docs/AI_INTEGRATION.md`
+
+### Voice Logging (Deepgram)
 ```typescript
-import { createClient } from '@supabase/supabase-js';
-import { Database } from '@fitos/shared';
-
-const supabase = createClient<Database>(
-  environment.supabaseUrl,
-  environment.supabaseAnonKey
-);
+// Commands supported:
+"10 reps at 185"    // Log set
+"repeat"            // Duplicate last
+"skip"              // Skip exercise
+"two eggs and toast" // Log food
 ```
 
-### Angular Signals (Angular 20)
-```typescript
-import { signal, computed, effect } from '@angular/core';
+### Photo Nutrition
+- Transparent breakdown (not opaque single entry)
+- User can edit each identified food
+- Falls back to manual for low confidence
 
-// State
-const count = signal(0);
-
-// Derived state
-const doubled = computed(() => count() * 2);
-
-// Side effects
-effect(() => {
-  console.log(`Count changed to: ${count()}`);
-});
-```
-
-### RLS Policies
-All data access is controlled by RLS. Key patterns:
-- Clients can only see their own data
-- Trainers can see their clients' data
-- System exercises are public; custom exercises are private
-
-### Adherence-Neutral Design
-**IMPORTANT:** Never use red colors for "over target" in nutrition.
-Use neutral colors. See `libs/shared/src/lib/constants.ts` for color palette.
-
-### Wearable Data
-**IMPORTANT:** Never display calorie burn from wearables.
-Research shows it's inaccurate. Only display:
-- Resting heart rate
-- HRV
-- Sleep duration/quality
-- Steps
-
-## Phase 1 Scope
-
-Focus on these features (see `docs/PHASE1_BACKLOG.md`):
-1. Authentication (Supabase Auth)
-2. Exercise library
-3. Workout builder (trainer)
-4. Workout logging (client)
-5. Basic nutrition tracking
-6. Stripe payments
-7. Terra wearable integration
-8. Client management
-
-## DO NOT Implement Yet (Phase 2+)
-
-- Voice logging (Deepgram)
-- AI coaching conversations
-- Churn prediction
-- Photo nutrition logging
-- Proactive JITAI interventions
+### AI Coaching
+- Multi-agent architecture (workout, nutrition, recovery, motivation)
 - Trainer methodology learning
+- JITAI proactive interventions
+
+---
+
+## CRM Architecture
+
+**Read:** `docs/CRM_MARKETING.md`
+
+### Lead Pipeline
+```
+New → Contacted → Qualified → Consultation → Won/Lost
+```
+
+### Built-in Email Marketing
+- Template editor
+- Automated sequences
+- Open/click tracking
+- No external tools required
+
+---
 
 ## Testing
 
 ```bash
-# Unit tests
-npm test
-
-# E2E tests
-npm run e2e
+npm test         # Unit tests
+npm run e2e      # E2E tests
+npm run lint     # ESLint
 ```
 
-Note: Angular 20 supports Vitest (experimental) as an alternative to Karma.
+Coverage target: >80% for services.
 
-## Deployment
-
-- **Mobile**: Capacitor 8 builds → App Store / Play Store
-- **PWA**: Vercel or Firebase Hosting
-- **Landing**: Vercel (SSR) or Firebase Hosting
-- **AI Backend**: Google Cloud Run
-- **Database**: Supabase Cloud
+---
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` and fill in:
-- Supabase credentials
-- Stripe keys
-- Terra API keys
-- OAuth provider credentials
+Required in `.env`:
+```
+SUPABASE_URL=
+SUPABASE_ANON_KEY=
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+TERRA_API_KEY=
+TERRA_DEV_ID=
+DEEPGRAM_API_KEY=
+```
 
-## Research References
+---
 
-Key research informing design decisions:
+## Quick Reference
 
-1. **Behavior Change**: Michie's BCT Taxonomy v1 - need 3+ BCT clusters
-2. **Habit Formation**: 59-66 days median (not 21 days)
-3. **ACWR**: 0.80-1.30 range for lowest injury risk
-4. **Wearable Accuracy**: Oura HRV CCC=0.99, but NO wearable is accurate for calories
-5. **Gamification**: Hedge's g=0.42 initially, declines over time
+### Contrast Requirements
+- Body text: 7:1+ ratio
+- Large text: 4.5:1+ ratio
+- Metrics in gym: 15:1+ ratio
 
-See the strategy document for full citations.
+### Touch Targets
+- Minimum: 44×44px
+- Standard buttons: 48px height
 
-## Capacitor 8 Notes
-
-Capacitor 8 changes:
-- Swift Package Manager (SPM) is now default for iOS (CocoaPods still supported)
-- iOS minimum deployment target: 15.0
-- Android minimum SDK: 24
-- New SystemBars API replaces StatusBar plugin for Android edge-to-edge
+### Animation Timing
+- Fast feedback: 150ms
+- Normal transitions: 250ms
+- Page transitions: 350ms

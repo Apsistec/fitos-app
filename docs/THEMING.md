@@ -1,232 +1,160 @@
-# FitOS Theming & Dark Mode Guide
+# FitOS Theming & Dark Mode Guide v2.0
 
-Complete guide for implementing themes, dark mode, and platform-specific styling.
+**Updated:** January 2026  
+**Design Philosophy:** Dark-first, WHOOP/MacroFactor inspired
 
 ---
 
-## CSS Custom Properties System
+## Core Design Principles
 
-### Core Theme Variables
+1. **Dark Mode Primary** - Default to dark for gym environments
+2. **Adherence-Neutral** - Never use red for "over target" in nutrition
+3. **High Contrast** - 15:1+ for metrics, 7:1+ for body text
+4. **Glanceable** - Key info visible in <2 seconds
 
-```css
-/* global.scss */
+---
+
+## CSS Custom Properties
+
+### Dark Mode (Default)
+
+```scss
+// theme/variables.scss
 :root {
-  /* ===== Brand Colors ===== */
-  --ion-color-primary: #3880ff;
-  --ion-color-primary-rgb: 56, 128, 255;
-  --ion-color-primary-contrast: #ffffff;
+  // ===== Background Hierarchy =====
+  // NOT pure black - reduces eye strain on OLED
+  --ion-background-color: #0D0D0D;
+  --ion-background-color-rgb: 13, 13, 13;
+  
+  --fitos-bg-primary: #0D0D0D;
+  --fitos-bg-secondary: #1A1A1A;    // Cards, elevated
+  --fitos-bg-tertiary: #262626;     // Inputs, interactive
+  --fitos-bg-elevated: #333333;     // Modals, popovers
+
+  // ===== Text Hierarchy =====
+  --ion-text-color: #F5F5F5;
+  --ion-text-color-rgb: 245, 245, 245;
+  
+  --fitos-text-primary: #F5F5F5;    // 15.8:1 contrast
+  --fitos-text-secondary: #A3A3A3;  // 7:1 contrast
+  --fitos-text-tertiary: #737373;   // 4.5:1 contrast
+  --fitos-text-disabled: #525252;
+
+  // ===== Brand Accent =====
+  --ion-color-primary: #10B981;
+  --ion-color-primary-rgb: 16, 185, 129;
+  --ion-color-primary-contrast: #FFFFFF;
   --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #3171e0;
-  --ion-color-primary-tint: #4c8dff;
-
-  --ion-color-secondary: #3dc2ff;
-  --ion-color-secondary-rgb: 61, 194, 255;
-  --ion-color-secondary-contrast: #ffffff;
-  --ion-color-secondary-contrast-rgb: 255, 255, 255;
-  --ion-color-secondary-shade: #36abe0;
-  --ion-color-secondary-tint: #50c8ff;
-
-  --ion-color-tertiary: #5260ff;
-  --ion-color-tertiary-rgb: 82, 96, 255;
-  --ion-color-tertiary-contrast: #ffffff;
-  --ion-color-tertiary-contrast-rgb: 255, 255, 255;
-  --ion-color-tertiary-shade: #4854e0;
-  --ion-color-tertiary-tint: #6370ff;
-
-  /* Status colors for workouts */
-  --ion-color-success: #2dd36f;
-  --ion-color-success-rgb: 45, 211, 111;
-  --ion-color-success-contrast: #ffffff;
-  --ion-color-success-contrast-rgb: 255, 255, 255;
-  --ion-color-success-shade: #28ba62;
-  --ion-color-success-tint: #42d77d;
-
-  --ion-color-warning: #ffc409;
-  --ion-color-warning-rgb: 255, 196, 9;
-  --ion-color-warning-contrast: #000000;
-  --ion-color-warning-contrast-rgb: 0, 0, 0;
-  --ion-color-warning-shade: #e0ac08;
-  --ion-color-warning-tint: #ffca22;
-
-  --ion-color-danger: #eb445a;
-  --ion-color-danger-rgb: 235, 68, 90;
-  --ion-color-danger-contrast: #ffffff;
-  --ion-color-danger-contrast-rgb: 255, 255, 255;
-  --ion-color-danger-shade: #cf3c4f;
-  --ion-color-danger-tint: #ed576b;
-
-  --ion-color-medium: #92949c;
-  --ion-color-medium-rgb: 146, 148, 156;
-  --ion-color-medium-contrast: #ffffff;
-  --ion-color-medium-contrast-rgb: 255, 255, 255;
-  --ion-color-medium-shade: #808289;
-  --ion-color-medium-tint: #9d9fa6;
-
-  --ion-color-light: #f4f5f8;
-  --ion-color-light-rgb: 244, 245, 248;
-  --ion-color-light-contrast: #000000;
-  --ion-color-light-contrast-rgb: 0, 0, 0;
-  --ion-color-light-shade: #d7d8da;
-  --ion-color-light-tint: #f5f6f9;
-
-  /* ===== FitOS Custom Colors ===== */
-  --fit-workout-complete: var(--ion-color-success);
-  --fit-workout-in-progress: var(--ion-color-warning);
-  --fit-workout-skipped: var(--ion-color-medium);
-  --fit-workout-scheduled: var(--ion-color-primary);
+  --ion-color-primary-shade: #0E9F6E;
+  --ion-color-primary-tint: #34D399;
   
-  /* Adherence-neutral colors (no red for "over target") */
-  --fit-nutrition-on-target: var(--ion-color-success);
-  --fit-nutrition-under: var(--ion-color-primary);
-  --fit-nutrition-over: var(--ion-color-tertiary); /* NOT red/danger */
+  --fitos-accent-primary: #10B981;
+  --fitos-accent-secondary: #8B5CF6;
+  --fitos-accent-glow: rgba(16, 185, 129, 0.3);
+
+  // ===== Status Colors =====
+  --ion-color-success: #10B981;
+  --ion-color-success-rgb: 16, 185, 129;
   
-  /* Streak colors */
-  --fit-streak-active: #ff9500;
-  --fit-streak-frozen: var(--ion-color-medium);
+  --ion-color-warning: #F59E0B;
+  --ion-color-warning-rgb: 245, 158, 11;
   
-  /* ===== Spacing ===== */
-  --fit-spacing-xxs: 2px;
-  --fit-spacing-xs: 4px;
-  --fit-spacing-sm: 8px;
-  --fit-spacing-md: 16px;
-  --fit-spacing-lg: 24px;
-  --fit-spacing-xl: 32px;
-  --fit-spacing-xxl: 48px;
+  --ion-color-danger: #EF4444;
+  --ion-color-danger-rgb: 239, 68, 68;
   
-  /* ===== Typography ===== */
-  --fit-font-size-xs: 12px;
-  --fit-font-size-sm: 14px;
-  --fit-font-size-md: 16px;
-  --fit-font-size-lg: 18px;
-  --fit-font-size-xl: 24px;
-  --fit-font-size-xxl: 32px;
-  
-  /* ===== Border Radius ===== */
-  --fit-radius-sm: 4px;
-  --fit-radius-md: 8px;
-  --fit-radius-lg: 12px;
-  --fit-radius-xl: 16px;
-  --fit-radius-round: 50%;
-  
-  /* ===== Shadows ===== */
-  --fit-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --fit-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --fit-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-  
-  /* ===== Safe Areas ===== */
-  --ion-safe-area-top: env(safe-area-inset-top);
-  --ion-safe-area-bottom: env(safe-area-inset-bottom);
-  --ion-safe-area-left: env(safe-area-inset-left);
-  --ion-safe-area-right: env(safe-area-inset-right);
+  --ion-color-medium: #737373;
+  --ion-color-medium-rgb: 115, 115, 115;
+
+  // ===== Nutrition (Adherence-Neutral) =====
+  --fitos-nutrition-calories: #6366F1;  // Indigo
+  --fitos-nutrition-protein: #10B981;   // Green
+  --fitos-nutrition-carbs: #F59E0B;     // Amber
+  --fitos-nutrition-fat: #EC4899;       // Pink
+  --fitos-nutrition-over: #8B5CF6;      // Purple (NOT red!)
+
+  // ===== Component Backgrounds =====
+  --ion-card-background: var(--fitos-bg-secondary);
+  --ion-item-background: var(--fitos-bg-secondary);
+  --ion-toolbar-background: var(--fitos-bg-secondary);
+  --ion-tab-bar-background: var(--fitos-bg-secondary);
+
+  // ===== Borders =====
+  --fitos-border-subtle: rgba(255, 255, 255, 0.08);
+  --fitos-border-default: rgba(255, 255, 255, 0.12);
+  --fitos-border-strong: rgba(255, 255, 255, 0.2);
+
+  // ===== Step Colors (Ionic internal) =====
+  --ion-background-color-step-50: #1A1A1A;
+  --ion-background-color-step-100: #262626;
+  --ion-background-color-step-150: #333333;
+  --ion-background-color-step-200: #404040;
+  --ion-background-color-step-250: #4D4D4D;
+  --ion-background-color-step-300: #595959;
+  --ion-background-color-step-350: #666666;
+  --ion-background-color-step-400: #737373;
+  --ion-background-color-step-450: #808080;
+  --ion-background-color-step-500: #8C8C8C;
+
+  // ===== Spacing =====
+  --fitos-space-1: 4px;
+  --fitos-space-2: 8px;
+  --fitos-space-3: 12px;
+  --fitos-space-4: 16px;
+  --fitos-space-6: 24px;
+  --fitos-space-8: 32px;
+
+  // ===== Border Radius =====
+  --fitos-radius-sm: 4px;
+  --fitos-radius-md: 8px;
+  --fitos-radius-lg: 12px;
+  --fitos-radius-xl: 16px;
+  --fitos-radius-full: 9999px;
+
+  // ===== Typography =====
+  --ion-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --fitos-font-mono: 'SF Mono', 'Roboto Mono', Consolas, monospace;
 }
 ```
 
----
+### Light Mode Override
 
-## Dark Mode Implementation
-
-### System-Preference Dark Mode
-
-```css
-/* variables.scss - Automatic dark mode */
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Core Ionic dark colors */
-    --ion-color-primary: #428cff;
-    --ion-color-primary-rgb: 66, 140, 255;
-    --ion-color-primary-contrast: #ffffff;
-    --ion-color-primary-shade: #3a7be0;
-    --ion-color-primary-tint: #5598ff;
-
-    --ion-color-secondary: #50c8ff;
-    --ion-color-secondary-rgb: 80, 200, 255;
-
-    --ion-color-tertiary: #6a64ff;
-    --ion-color-tertiary-rgb: 106, 100, 255;
-
-    --ion-color-success: #2fdf75;
-    --ion-color-warning: #ffd534;
-    --ion-color-danger: #ff4961;
-
-    /* Background colors */
-    --ion-background-color: #121212;
-    --ion-background-color-rgb: 18, 18, 18;
-    
-    --ion-text-color: #ffffff;
-    --ion-text-color-rgb: 255, 255, 255;
-    
-    /* Step colors (for gradients and shades) */
-    --ion-background-color-step-50: #1e1e1e;
-    --ion-background-color-step-100: #2a2a2a;
-    --ion-background-color-step-150: #363636;
-    --ion-background-color-step-200: #414141;
-    --ion-background-color-step-250: #4d4d4d;
-    --ion-background-color-step-300: #595959;
-    --ion-background-color-step-350: #656565;
-    --ion-background-color-step-400: #717171;
-    --ion-background-color-step-450: #7d7d7d;
-    --ion-background-color-step-500: #898989;
-    --ion-background-color-step-550: #949494;
-    --ion-background-color-step-600: #a0a0a0;
-    --ion-background-color-step-650: #acacac;
-    --ion-background-color-step-700: #b8b8b8;
-    --ion-background-color-step-750: #c4c4c4;
-    --ion-background-color-step-800: #d0d0d0;
-    --ion-background-color-step-850: #dbdbdb;
-    --ion-background-color-step-900: #e7e7e7;
-    --ion-background-color-step-950: #f3f3f3;
-
-    --ion-text-color-step-50: #f3f3f3;
-    --ion-text-color-step-100: #e7e7e7;
-    --ion-text-color-step-150: #dbdbdb;
-    --ion-text-color-step-200: #d0d0d0;
-    --ion-text-color-step-250: #c4c4c4;
-    --ion-text-color-step-300: #b8b8b8;
-    --ion-text-color-step-350: #acacac;
-    --ion-text-color-step-400: #a0a0a0;
-    --ion-text-color-step-450: #949494;
-    --ion-text-color-step-500: #898989;
-    --ion-text-color-step-550: #7d7d7d;
-    --ion-text-color-step-600: #717171;
-    --ion-text-color-step-650: #656565;
-    --ion-text-color-step-700: #595959;
-    --ion-text-color-step-750: #4d4d4d;
-    --ion-text-color-step-800: #414141;
-    --ion-text-color-step-850: #363636;
-    --ion-text-color-step-900: #2a2a2a;
-    --ion-text-color-step-950: #1e1e1e;
-
-    /* Component backgrounds */
-    --ion-card-background: #1e1e1e;
-    --ion-item-background: #1e1e1e;
-    --ion-toolbar-background: #1f1f1f;
-    --ion-tab-bar-background: #1f1f1f;
-    --ion-modal-background: #121212;
-    
-    /* FitOS dark adjustments */
-    --fit-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --fit-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
-    --fit-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
-  }
-}
-```
-
-### Manual Dark Mode Toggle
-
-```css
-/* Class-based dark mode for manual toggle */
-body.dark {
-  --ion-color-primary: #428cff;
-  --ion-background-color: #121212;
-  --ion-background-color-rgb: 18, 18, 18;
-  --ion-text-color: #ffffff;
-  --ion-text-color-rgb: 255, 255, 255;
+```scss
+// Light mode class (toggle via ThemeService)
+body.light {
+  --ion-background-color: #FFFFFF;
+  --ion-background-color-rgb: 255, 255, 255;
   
-  --ion-card-background: #1e1e1e;
-  --ion-item-background: #1e1e1e;
-  --ion-toolbar-background: #1f1f1f;
+  --fitos-bg-primary: #FFFFFF;
+  --fitos-bg-secondary: #F9FAFB;
+  --fitos-bg-tertiary: #F3F4F6;
+  --fitos-bg-elevated: #FFFFFF;
+
+  --ion-text-color: #111827;
+  --ion-text-color-rgb: 17, 24, 39;
   
-  /* ... same as media query dark mode ... */
+  --fitos-text-primary: #111827;
+  --fitos-text-secondary: #4B5563;
+  --fitos-text-tertiary: #9CA3AF;
+
+  --ion-color-primary: #059669;
+  --ion-color-primary-rgb: 5, 150, 105;
+
+  --ion-card-background: var(--fitos-bg-secondary);
+  --ion-item-background: var(--fitos-bg-secondary);
+  --ion-toolbar-background: var(--fitos-bg-primary);
+  --ion-tab-bar-background: var(--fitos-bg-primary);
+
+  --fitos-border-subtle: rgba(0, 0, 0, 0.05);
+  --fitos-border-default: rgba(0, 0, 0, 0.1);
+  --fitos-border-strong: rgba(0, 0, 0, 0.2);
+
+  // Step colors for light mode
+  --ion-background-color-step-50: #F9FAFB;
+  --ion-background-color-step-100: #F3F4F6;
+  --ion-background-color-step-150: #E5E7EB;
+  --ion-background-color-step-200: #D1D5DB;
+  --ion-background-color-step-250: #9CA3AF;
+  --ion-background-color-step-300: #6B7280;
 }
 ```
 
@@ -242,332 +170,180 @@ import { Preferences } from '@capacitor/preferences';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { Capacitor } from '@capacitor/core';
 
-export type ThemeMode = 'light' | 'dark' | 'system';
+export type ThemeMode = 'dark' | 'light' | 'system';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   private platformId = inject(PLATFORM_ID);
   
-  // Current mode setting (what user selected)
-  mode = signal<ThemeMode>('system');
+  mode = signal<ThemeMode>('dark'); // Default to dark
+  isDarkMode = signal(true);
   
-  // Actual dark mode state (resolved from mode + system preference)
-  isDark = signal(false);
-  
-  // System preference
-  private systemPrefersDark = signal(false);
-  
+  private systemPrefersDark = signal(true);
+
   constructor() {
     if (isPlatformBrowser(this.platformId)) {
       this.init();
     }
   }
-  
+
   private async init() {
-    // Load saved preference
+    // Load saved preference (default: dark)
     const { value } = await Preferences.get({ key: 'theme_mode' });
-    if (value) {
-      this.mode.set(value as ThemeMode);
-    }
+    this.mode.set((value as ThemeMode) || 'dark');
     
-    // Get system preference
+    // System preference detection
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     this.systemPrefersDark.set(mediaQuery.matches);
-    
-    // Listen for system changes
     mediaQuery.addEventListener('change', (e) => {
       this.systemPrefersDark.set(e.matches);
-      this.updateTheme();
+      this.applyTheme();
     });
-    
-    // Initial theme application
-    this.updateTheme();
-    
-    // React to mode changes
+
+    this.applyTheme();
+
     effect(() => {
-      const mode = this.mode();
-      this.updateTheme();
-      Preferences.set({ key: 'theme_mode', value: mode });
+      this.applyTheme();
+      Preferences.set({ key: 'theme_mode', value: this.mode() });
     });
   }
-  
-  private updateTheme() {
-    let shouldBeDark: boolean;
+
+  private applyTheme() {
+    const shouldBeDark = this.mode() === 'dark' || 
+      (this.mode() === 'system' && this.systemPrefersDark());
     
-    switch (this.mode()) {
-      case 'dark':
-        shouldBeDark = true;
-        break;
-      case 'light':
-        shouldBeDark = false;
-        break;
-      case 'system':
-      default:
-        shouldBeDark = this.systemPrefersDark();
-    }
-    
-    this.isDark.set(shouldBeDark);
+    this.isDarkMode.set(shouldBeDark);
+    document.body.classList.toggle('light', !shouldBeDark);
     document.body.classList.toggle('dark', shouldBeDark);
     
-    // Update native status bar
     this.updateStatusBar(shouldBeDark);
   }
-  
+
   private async updateStatusBar(isDark: boolean) {
     if (!Capacitor.isNativePlatform()) return;
     
     try {
       await StatusBar.setStyle({ style: isDark ? Style.Dark : Style.Light });
-      
       if (Capacitor.getPlatform() === 'android') {
         await StatusBar.setBackgroundColor({
-          color: isDark ? '#121212' : '#ffffff'
+          color: isDark ? '#0D0D0D' : '#FFFFFF'
         });
       }
-    } catch (error) {
-      console.warn('StatusBar not available:', error);
+    } catch (e) {
+      console.warn('StatusBar not available:', e);
     }
   }
-  
-  // Public methods
+
   setMode(mode: ThemeMode) {
     this.mode.set(mode);
   }
-  
-  toggleDarkMode() {
-    if (this.mode() === 'system') {
-      this.mode.set(this.isDark() ? 'light' : 'dark');
-    } else {
-      this.mode.set(this.isDark() ? 'light' : 'dark');
-    }
+
+  setDarkMode(isDark: boolean) {
+    this.mode.set(isDark ? 'dark' : 'light');
+  }
+
+  toggle() {
+    this.mode.set(this.isDarkMode() ? 'light' : 'dark');
   }
 }
 ```
 
 ---
 
-## Platform-Specific Styling
+## Component Patterns
 
-### iOS vs Material Design
+### Card with Glow Effect
 
-```css
-/* iOS-specific styles */
-.ios {
-  /* iOS uses San Francisco font */
-  --ion-font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-  
-  /* iOS toolbar styling */
-  ion-toolbar {
-    --padding-top: 12px;
-    --padding-bottom: 12px;
-  }
-  
-  /* iOS-style large titles */
-  ion-title.ios-large {
-    font-size: 34px;
-    font-weight: 700;
-  }
-  
-  /* iOS segment control */
-  ion-segment {
-    --background: var(--ion-toolbar-background);
-  }
-  
-  /* iOS button styling */
-  ion-button {
-    --border-radius: 10px;
-    text-transform: none;
-    font-weight: 600;
-  }
-}
+```scss
+.fitos-card {
+  background: var(--fitos-bg-secondary);
+  border-radius: var(--fitos-radius-lg);
+  border: 1px solid var(--fitos-border-subtle);
+  padding: var(--fitos-space-4);
+  transition: border-color 0.2s, box-shadow 0.2s;
 
-/* Material Design (Android) styles */
-.md {
-  /* Material uses Roboto */
-  --ion-font-family: 'Roboto', 'Helvetica Neue', sans-serif;
-  
-  /* Material toolbar */
-  ion-toolbar {
-    --padding-top: 8px;
-    --padding-bottom: 8px;
+  &:hover, &:focus {
+    border-color: var(--fitos-border-default);
   }
-  
-  /* Material button styling */
-  ion-button {
-    --border-radius: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  
-  /* Material FAB */
-  ion-fab-button {
-    --box-shadow: 0 3px 5px -1px rgba(0,0,0,.2), 
-                  0 6px 10px 0 rgba(0,0,0,.14), 
-                  0 1px 18px 0 rgba(0,0,0,.12);
+
+  &.active, &.selected {
+    border-color: var(--fitos-accent-primary);
+    box-shadow: 0 0 20px var(--fitos-accent-glow);
   }
 }
 ```
 
-### Responsive Breakpoints
+### Metric Display
 
-```css
-/* Mobile-first approach */
-.fit-container {
-  padding: var(--fit-spacing-md);
-  max-width: 100%;
-}
-
-/* Tablet (768px+) */
-@media (min-width: 768px) {
-  .fit-container {
-    padding: var(--fit-spacing-lg);
-    max-width: 720px;
-    margin: 0 auto;
-  }
+```scss
+.fitos-metric {
+  font-family: var(--fitos-font-mono);
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--fitos-text-primary);
   
-  /* Two-column layout on tablet */
-  .fit-dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--fit-spacing-md);
-  }
-}
-
-/* Desktop (1024px+) */
-@media (min-width: 1024px) {
-  .fit-container {
-    max-width: 960px;
-  }
-  
-  .fit-dashboard-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-/* Large desktop (1200px+) */
-@media (min-width: 1200px) {
-  .fit-container {
-    max-width: 1140px;
-  }
-  
-  .fit-dashboard-grid {
-    grid-template-columns: repeat(4, 1fr);
+  &.accent {
+    color: var(--fitos-accent-primary);
+    text-shadow: 0 0 20px var(--fitos-accent-glow);
   }
 }
 ```
 
----
+### Nutrition Progress (Adherence-Neutral)
 
-## Component-Level Theming
-
-### Workout Card Theming
-
-```css
-/* workout-card.component.scss */
-:host {
-  display: block;
-}
-
-.workout-card {
-  --background: var(--ion-card-background);
-  --border-radius: var(--fit-radius-lg);
-  
-  border-left: 4px solid var(--workout-status-color, var(--ion-color-primary));
-  
-  &.scheduled {
-    --workout-status-color: var(--fit-workout-scheduled);
-  }
-  
-  &.in-progress {
-    --workout-status-color: var(--fit-workout-in-progress);
-    animation: pulse 2s ease-in-out infinite;
-  }
-  
-  &.completed {
-    --workout-status-color: var(--fit-workout-complete);
-    opacity: 0.8;
-  }
-  
-  &.skipped {
-    --workout-status-color: var(--fit-workout-skipped);
-    opacity: 0.6;
-  }
-}
-
-@keyframes pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--ion-color-warning-rgb), 0.4); }
-  50% { box-shadow: 0 0 0 8px rgba(var(--ion-color-warning-rgb), 0); }
-}
-
-/* Dark mode adjustments */
-:host-context(body.dark) {
-  .workout-card {
-    --background: var(--ion-background-color-step-50);
-  }
-}
-```
-
-### Progress Bar Theming
-
-```css
-/* Custom progress bar for nutrition (adherence-neutral) */
+```scss
 .nutrition-progress {
-  --progress-background: var(--ion-background-color-step-100);
-  --buffer-background: var(--ion-background-color-step-200);
-  
-  /* Never use red/danger for "over" */
-  &.under-target {
-    --progress-background: var(--fit-nutrition-under);
-  }
-  
-  &.on-target {
-    --progress-background: var(--fit-nutrition-on-target);
-  }
-  
-  &.over-target {
-    --progress-background: var(--fit-nutrition-over); /* Purple, not red */
+  height: 8px;
+  background: var(--fitos-bg-tertiary);
+  border-radius: var(--fitos-radius-full);
+  overflow: hidden;
+
+  .fill {
+    height: 100%;
+    border-radius: var(--fitos-radius-full);
+    transition: width 0.3s ease;
+
+    &.calories { background: var(--fitos-nutrition-calories); }
+    &.protein { background: var(--fitos-nutrition-protein); }
+    &.carbs { background: var(--fitos-nutrition-carbs); }
+    &.fat { background: var(--fitos-nutrition-fat); }
+    
+    // NEVER red for over - use purple
+    &.over { background: var(--fitos-nutrition-over); }
   }
 }
 ```
 
 ---
 
-## Theme Settings Component
+## Animation Guidelines
 
-```typescript
-@Component({
-  selector: 'fit-theme-settings',
-  template: `
-    <ion-list>
-      <ion-list-header>
-        <ion-label>Appearance</ion-label>
-      </ion-list-header>
-      
-      <ion-item>
-        <ion-icon name="sunny-outline" slot="start" />
-        <ion-label>Theme</ion-label>
-        <ion-select 
-          [value]="themeService.mode()"
-          (ionChange)="themeService.setMode($event.detail.value)"
-          interface="popover">
-          <ion-select-option value="system">System</ion-select-option>
-          <ion-select-option value="light">Light</ion-select-option>
-          <ion-select-option value="dark">Dark</ion-select-option>
-        </ion-select>
-      </ion-item>
-      
-      <ion-item>
-        <ion-icon [name]="themeService.isDark() ? 'moon' : 'sunny'" slot="start" />
-        <ion-label>Dark Mode</ion-label>
-        <ion-toggle 
-          [checked]="themeService.isDark()"
-          (ionChange)="themeService.toggleDarkMode()" />
-      </ion-item>
-    </ion-list>
-  `
-})
-export class ThemeSettingsComponent {
-  themeService = inject(ThemeService);
+### Performance Rules
+- Only animate `transform` and `opacity`
+- Keep durations under 300ms for feedback
+- Use `will-change` sparingly
+- Always provide `prefers-reduced-motion` fallback
+
+### Timing Functions
+
+```scss
+--fitos-ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+--fitos-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+--fitos-duration-fast: 150ms;
+--fitos-duration-normal: 250ms;
+--fitos-duration-slow: 350ms;
+```
+
+### Reduced Motion Support
+
+```scss
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 ```
 
@@ -575,8 +351,7 @@ export class ThemeSettingsComponent {
 
 ## Safe Area Handling
 
-```css
-/* Handle notches and home indicators */
+```scss
 ion-content {
   --padding-top: var(--ion-safe-area-top);
   --padding-bottom: var(--ion-safe-area-bottom);
@@ -586,58 +361,20 @@ ion-header ion-toolbar:first-of-type {
   padding-top: var(--ion-safe-area-top);
 }
 
-ion-footer ion-toolbar:last-of-type {
-  padding-bottom: var(--ion-safe-area-bottom);
-}
-
 ion-tab-bar {
   padding-bottom: var(--ion-safe-area-bottom);
-}
-
-/* Full-screen modals */
-ion-modal {
-  --ion-safe-area-top: env(safe-area-inset-top);
-  --ion-safe-area-bottom: env(safe-area-inset-bottom);
-}
-
-/* Landscape handling */
-@media (orientation: landscape) {
-  ion-content {
-    --padding-left: var(--ion-safe-area-left);
-    --padding-right: var(--ion-safe-area-right);
-  }
 }
 ```
 
 ---
 
-## Reduced Motion Support
+## Implementation Checklist
 
-```css
-/* Respect user's motion preferences */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-  
-  /* Disable Ionic animations */
-  ion-modal,
-  ion-popover,
-  ion-action-sheet,
-  ion-alert,
-  ion-toast,
-  ion-loading {
-    --transition-duration: 0ms;
-  }
-  
-  /* Disable page transitions */
-  ion-router-outlet {
-    --ion-page-transition: none;
-  }
-}
-```
+- [ ] Update variables.scss with dark-first colors
+- [ ] Add `<meta name="color-scheme" content="dark light">` to index.html
+- [ ] Update ThemeService to default to dark
+- [ ] Replace all nutrition red colors with purple
+- [ ] Audit text contrast (7:1+ for body, 15:1+ for metrics)
+- [ ] Add glow effects to active states
+- [ ] Test on OLED devices
+- [ ] Add reduced motion support

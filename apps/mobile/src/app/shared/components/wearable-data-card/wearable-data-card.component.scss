@@ -5,6 +5,7 @@
 
   ion-card-title {
     margin: 0;
+    color: var(--fitos-text-primary);
   }
 }
 
@@ -16,16 +17,18 @@
   ion-icon {
     font-size: 48px;
     margin-bottom: 12px;
+    color: var(--fitos-text-tertiary);
   }
 
   p {
     margin: 0 0 12px 0;
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-secondary);
   }
 
   small {
     display: block;
     margin-top: 4px;
+    color: var(--fitos-text-tertiary);
   }
 }
 
@@ -33,7 +36,7 @@
   .data-date {
     text-align: center;
     font-size: 0.875rem;
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-secondary);
     margin-bottom: 20px;
     font-weight: 500;
   }
@@ -55,12 +58,14 @@
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: var(--ion-color-light);
-  border-radius: 8px;
+  background: var(--fitos-bg-tertiary);
+  border-radius: var(--fitos-radius-md);
+  border: 1px solid var(--fitos-border-subtle);
 
   ion-icon {
     font-size: 32px;
     flex-shrink: 0;
+    color: var(--fitos-accent-primary);
   }
 
   .metric-content {
@@ -69,35 +74,39 @@
   }
 
   .metric-value {
+    font-family: var(--fitos-font-mono);
     font-size: 1.25rem;
     font-weight: 600;
-    color: var(--ion-color-dark);
+    color: var(--fitos-text-primary);
     line-height: 1.2;
 
     .unit {
       font-size: 0.75rem;
       font-weight: 400;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-tertiary);
       margin-left: 2px;
     }
   }
 
   .metric-label {
     font-size: 0.75rem;
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-tertiary);
     margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
   }
 }
 
 .data-note {
   text-align: center;
   padding: 12px;
-  background: var(--ion-color-warning-tint);
-  border-left: 3px solid var(--ion-color-warning);
-  border-radius: 4px;
+  background: rgba(245, 158, 11, 0.1);
+  border-left: 3px solid var(--fitos-status-warning);
+  border-radius: var(--fitos-radius-sm);
   margin-top: 16px;
 
   small {
     line-height: 1.5;
+    color: var(--fitos-text-secondary);
   }
 }

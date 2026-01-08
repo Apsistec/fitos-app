@@ -10,7 +10,7 @@ import type { WorkoutWithExercises } from '../../../../core/services/workout.ser
   imports: [CommonModule, IonicModule, RouterLink],
   template: `
     @if (workout(); as workout) {
-      <ion-card class="workout-card">
+      <ion-card class="workout-card hero-card">
         <ion-card-header>
           <div class="header-content">
             <div>
@@ -63,6 +63,25 @@ import type { WorkoutWithExercises } from '../../../../core/services/workout.ser
       width: 100%;
     }
 
+    .hero-card {
+      --background: var(--fitos-bg-secondary);
+      border: 1px solid var(--fitos-accent-primary);
+      box-shadow: var(--fitos-glow-primary);
+
+      ion-card-title {
+        color: var(--fitos-text-primary);
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      ion-card-subtitle {
+        color: var(--fitos-accent-primary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+      }
+    }
+
     .header-content {
       display: flex;
       justify-content: space-between;
@@ -71,7 +90,7 @@ import type { WorkoutWithExercises } from '../../../../core/services/workout.ser
     }
 
     .description {
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary);
       margin-bottom: 1rem;
       font-size: 0.9rem;
     }
@@ -80,22 +99,26 @@ import type { WorkoutWithExercises } from '../../../../core/services/workout.ser
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary);
       margin-bottom: 1rem;
 
       ion-icon {
         font-size: 1.2rem;
+        color: var(--fitos-text-tertiary);
       }
     }
 
     .start-button {
       margin-top: 1rem;
+      --background: var(--fitos-accent-primary);
+      --background-hover: var(--fitos-accent-primary-tint);
     }
 
     .empty-card {
       margin: 0;
       max-width: 800px;
       width: 100%;
+      --background: var(--fitos-bg-secondary);
     }
 
     .empty-content {
@@ -104,17 +127,17 @@ import type { WorkoutWithExercises } from '../../../../core/services/workout.ser
 
       .empty-icon {
         font-size: 4rem;
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-tertiary);
         margin-bottom: 1rem;
       }
 
       h3 {
         margin: 0 0 0.5rem 0;
-        color: var(--ion-color-dark);
+        color: var(--fitos-text-primary);
       }
 
       p {
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-secondary);
         margin-bottom: 1.5rem;
       }
     }

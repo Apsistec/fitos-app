@@ -1,4 +1,4 @@
-import { Component, inject, computed, OnInit } from '@angular/core';
+import { Component, inject, computed, OnInit, signal } from '@angular/core';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import {
   IonContent,
@@ -14,6 +14,8 @@ import {
   IonSpinner,
   IonBadge,
   IonNote,
+  IonSegment,
+  IonSegmentButton,
   AlertController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -35,10 +37,12 @@ import {
   settingsOutline,
   shieldCheckmarkOutline,
   cogOutline,
+  sunnyOutline,
+  phonePortraitOutline,
 } from 'ionicons/icons';
 import { AuthService } from '@app/core/services/auth.service';
 import { StripeService } from '@app/core/services/stripe.service';
-import { ThemeService } from '@app/core/services/theme.service';
+import { ThemeService, ThemeMode } from '@app/core/services/theme.service';
 
 @Component({
   selector: 'app-settings',
@@ -57,6 +61,8 @@ import { ThemeService } from '@app/core/services/theme.service';
     IonSpinner,
     IonBadge,
     IonNote,
+    IonSegment,
+    IonSegmentButton,
   ],
   template: `
     <ion-header>
@@ -69,9 +75,9 @@ import { ThemeService } from '@app/core/services/theme.service';
       <div class="settings-container">
         <!-- Client Subscription Section -->
         @if (!isTrainer()) {
-          <ion-list>
+          <ion-list class="settings-list">
             <div class="section-header">
-              <ion-icon name="card-outline" color="primary"></ion-icon>
+              <ion-icon name="card-outline"></ion-icon>
               <h2>Subscription</h2>
             </div>
 
@@ -87,9 +93,9 @@ import { ThemeService } from '@app/core/services/theme.service';
 
         <!-- Trainer Payments Section -->
         @if (isTrainer()) {
-          <ion-list>
+          <ion-list class="settings-list">
             <div class="section-header">
-              <ion-icon name="card-outline" color="primary"></ion-icon>
+              <ion-icon name="card-outline"></ion-icon>
               <h2>Payments</h2>
             </div>
 
@@ -184,9 +190,9 @@ import { ThemeService } from '@app/core/services/theme.service';
           </ion-list>
         }
 
-        <ion-list>
+        <ion-list class="settings-list">
           <div class="section-header">
-            <ion-icon name="cog-outline" color="primary"></ion-icon>
+            <ion-icon name="cog-outline"></ion-icon>
             <h2>Preferences</h2>
           </div>
 
@@ -208,16 +214,35 @@ import { ThemeService } from '@app/core/services/theme.service';
             </ion-label>
           </ion-item>
 
-          <ion-item>
+          <!-- Theme Selector -->
+          <ion-item class="theme-item">
             <ion-icon name="moon-outline" slot="start"></ion-icon>
-            <ion-label>Dark Mode</ion-label>
-            <ion-toggle slot="end" [checked]="isDarkMode()" (ionChange)="toggleDarkMode($event)"></ion-toggle>
+            <ion-label>
+              <h3>Appearance</h3>
+            </ion-label>
           </ion-item>
+
+          <div class="theme-selector">
+            <ion-segment [value]="themeMode()" (ionChange)="onThemeModeChange($event)">
+              <ion-segment-button value="dark">
+                <ion-icon name="moon-outline"></ion-icon>
+                <ion-label>Dark</ion-label>
+              </ion-segment-button>
+              <ion-segment-button value="light">
+                <ion-icon name="sunny-outline"></ion-icon>
+                <ion-label>Light</ion-label>
+              </ion-segment-button>
+              <ion-segment-button value="system">
+                <ion-icon name="phone-portrait-outline"></ion-icon>
+                <ion-label>System</ion-label>
+              </ion-segment-button>
+            </ion-segment>
+          </div>
         </ion-list>
 
-        <ion-list>
+        <ion-list class="settings-list">
           <div class="section-header">
-            <ion-icon name="shield-checkmark-outline" color="primary"></ion-icon>
+            <ion-icon name="shield-checkmark-outline"></ion-icon>
             <h2>Support & Legal</h2>
           </div>
 
@@ -238,7 +263,7 @@ import { ThemeService } from '@app/core/services/theme.service';
         </ion-list>
 
         @if (isAuthenticated()) {
-          <div class="ion-padding">
+          <div class="signout-section">
             <ion-button expand="block" fill="outline" color="danger" (click)="signOut()">
               <ion-icon name="log-out-outline" slot="start"></ion-icon>
               Sign Out
@@ -256,10 +281,12 @@ import { ThemeService } from '@app/core/services/theme.service';
     .settings-container {
       max-width: 768px;
       margin: 0 auto;
+      padding-bottom: env(safe-area-inset-bottom, 16px);
     }
 
-    ion-list {
+    .settings-list {
       margin-bottom: 24px;
+      background: transparent;
     }
 
     .section-header {
@@ -270,13 +297,64 @@ import { ThemeService } from '@app/core/services/theme.service';
 
       ion-icon {
         font-size: 24px;
+        color: var(--fitos-accent-primary);
       }
 
       h2 {
         font-size: 1.125rem;
         font-weight: 600;
         margin: 0;
-        color: var(--ion-color-dark);
+        color: var(--fitos-text-primary);
+      }
+    }
+
+    ion-item {
+      --background: var(--fitos-bg-secondary);
+      --color: var(--fitos-text-primary);
+      --border-color: var(--fitos-border-subtle);
+
+      ion-icon[slot="start"] {
+        color: var(--fitos-text-secondary);
+      }
+
+      h3 {
+        color: var(--fitos-text-primary);
+        font-weight: 500;
+      }
+
+      p {
+        color: var(--fitos-text-secondary);
+      }
+    }
+
+    .theme-item {
+      --border-width: 0;
+      margin-bottom: 0;
+    }
+
+    .theme-selector {
+      padding: 0 16px 16px;
+
+      ion-segment {
+        --background: var(--fitos-bg-tertiary);
+
+        ion-segment-button {
+          --background-checked: var(--fitos-accent-primary);
+          --color: var(--fitos-text-secondary);
+          --color-checked: #ffffff;
+          --indicator-color: transparent;
+          min-height: 48px;
+
+          ion-icon {
+            font-size: 18px;
+            margin-bottom: 4px;
+          }
+
+          ion-label {
+            font-size: 12px;
+            text-transform: none;
+          }
+        }
       }
     }
 
@@ -300,13 +378,17 @@ import { ThemeService } from '@app/core/services/theme.service';
       background: rgba(var(--ion-color-danger-rgb), 0.1);
     }
 
+    .signout-section {
+      padding: 16px;
+    }
+
     .version-info {
       text-align: center;
       padding: 24px;
 
       p {
         margin: 0;
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-tertiary);
         font-size: 0.875rem;
       }
     }
@@ -323,15 +405,14 @@ export class SettingsPage implements OnInit {
   isAuthenticated = computed(() => this.authService.isAuthenticated());
   isTrainer = computed(() => this.authService.isTrainer() || this.authService.isOwner());
   isDarkMode = this.themeService.isDarkMode;
+  themeMode = this.themeService.mode;
 
   // Stripe signals
   stripeLoading = computed(() => this.stripeService.loading());
   stripeConnected = computed(() => this.stripeService.isConnected());
   stripeRequiresAction = computed(() => this.stripeService.requiresAction());
   stripeError = computed(() => this.stripeService.error());
-  stripeConnecting = computed(() => false); // Local loading state for connect action
-
-  private _stripeConnecting = false;
+  stripeConnecting = signal(false);
 
   constructor() {
     addIcons({
@@ -352,6 +433,8 @@ export class SettingsPage implements OnInit {
       settingsOutline,
       shieldCheckmarkOutline,
       cogOutline,
+      sunnyOutline,
+      phonePortraitOutline,
     });
   }
 
@@ -370,22 +453,20 @@ export class SettingsPage implements OnInit {
   }
 
   async connectStripe(): Promise<void> {
-    this._stripeConnecting = true;
+    this.stripeConnecting.set(true);
     const result = await this.stripeService.createConnectAccountLink();
 
     if ('url' in result) {
-      // Open Stripe onboarding in a new window
       window.open(result.url, '_blank');
     } else {
-      // Error occurred
       console.error('Stripe connect error:', result.error);
     }
 
-    this._stripeConnecting = false;
+    this.stripeConnecting.set(false);
   }
 
   async openStripeDashboard(): Promise<void> {
-    this._stripeConnecting = true;
+    this.stripeConnecting.set(true);
     const result = await this.stripeService.createDashboardLink();
 
     if ('url' in result) {
@@ -394,7 +475,7 @@ export class SettingsPage implements OnInit {
       console.error('Stripe dashboard error:', result.error);
     }
 
-    this._stripeConnecting = false;
+    this.stripeConnecting.set(false);
   }
 
   async disconnectStripe(): Promise<void> {
@@ -417,6 +498,11 @@ export class SettingsPage implements OnInit {
     });
 
     await alert.present();
+  }
+
+  onThemeModeChange(event: any): void {
+    const mode = event.detail.value as ThemeMode;
+    this.themeService.setMode(mode);
   }
 
   toggleDarkMode(event: any): void {

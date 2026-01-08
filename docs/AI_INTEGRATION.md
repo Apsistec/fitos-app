@@ -1,159 +1,30 @@
-# FitOS AI Integration Architecture
+# FitOS AI Integration Architecture v2.0
 
-Patterns for integrating AI agents, voice AI, and LangGraph multi-agent orchestration.
+**Updated:** January 2026  
+**Based on:** WHOOP Coach, Noom Welli, Stanford GPTCoach research
 
 ---
 
 ## Architecture Overview
 
-FitOS uses a multi-agent AI architecture with:
-- **LangGraph** for stateful multi-agent orchestration (backend)
-- **Deepgram** for voice AI (STT/TTS)
-- **MCP (Model Context Protocol)** for standardized tool integration
-- **Supabase** for agent memory and state persistence
+FitOS implements a multi-agent AI system with:
+- **LangGraph** for stateful multi-agent orchestration
+- **Deepgram Nova-3** for voice AI (STT) with <300ms latency
+- **Deepgram Aura-2** for TTS with <200ms latency
+- **Claude/GPT-4** for coaching conversations
+- **Passio AI/SnapCalorie** for photo nutrition recognition
+- **JITAI Framework** for proactive interventions
 
 ---
 
-## AI Agent System
+## Voice AI Implementation
 
-### Agent Roles
-
-| Agent | Purpose | Capabilities |
-|-------|---------|--------------|
-| **Coach Agent** | Trainer's AI assistant | Voice program creation, client prioritization, check-in summaries |
-| **Client Agent** | Member-facing AI | Voice workout logging, photo meal tracking, conversational check-ins |
-| **Habit Agent** | Behavior change | Streak tracking, habit stacking, predictive intervention |
-| **Analytics Agent** | Data synthesis | Wearable integration, trend analysis, recovery scoring |
-| **Billing Agent** | Payment operations | Stripe integration, automated invoicing, payment recovery |
-| **Scheduling Agent** | Calendar management | Google Calendar, booking optimization, reminders |
-
-### Frontend Integration Service
-
-```typescript
-// core/services/ai-agent.service.ts
-import { Injectable, inject, signal, computed } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
-
-export interface AgentMessage {
-  id: string;
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  agentId?: string;
-  timestamp: Date;
-  metadata?: Record<string, any>;
-}
-
-export interface AgentResponse {
-  message: AgentMessage;
-  actions?: AgentAction[];
-  suggestions?: string[];
-}
-
-export interface AgentAction {
-  type: 'log_workout' | 'schedule_session' | 'send_reminder' | 'create_program' | 'log_meal';
-  data: any;
-  confirmed: boolean;
-}
-
-@Injectable({ providedIn: 'root' })
-export class AIAgentService {
-  private http = inject(HttpClient);
-  
-  // State
-  private _messages = signal<AgentMessage[]>([]);
-  private _isProcessing = signal(false);
-  private _currentAgent = signal<string>('client');
-  
-  // Public
-  messages = this._messages.asReadonly();
-  isProcessing = this._isProcessing.asReadonly();
-  currentAgent = this._currentAgent.asReadonly();
-  
-  // Last AI message
-  lastResponse = computed(() => {
-    const msgs = this._messages();
-    return msgs.filter(m => m.role === 'assistant').pop();
-  });
-  
-  // Send message to agent
-  async sendMessage(content: string, context?: Record<string, any>): Promise<AgentResponse> {
-    const userMessage: AgentMessage = {
-      id: crypto.randomUUID(),
-      role: 'user',
-      content,
-      timestamp: new Date()
-    };
-    
-    this._messages.update(msgs => [...msgs, userMessage]);
-    this._isProcessing.set(true);
-    
-    try {
-      const response = await this.http.post<AgentResponse>(
-        `${environment.aiApiUrl}/agent/chat`,
-        {
-          message: content,
-          agentId: this._currentAgent(),
-          context: {
-            ...context,
-            conversationHistory: this._messages().slice(-10) // Last 10 messages for context
-          }
-        }
-      ).toPromise();
-      
-      if (response) {
-        this._messages.update(msgs => [...msgs, response.message]);
-        
-        // Auto-execute confirmed actions
-        for (const action of response.actions || []) {
-          if (action.confirmed) {
-            await this.executeAction(action);
-          }
-        }
-      }
-      
-      return response!;
-    } finally {
-      this._isProcessing.set(false);
-    }
-  }
-  
-  // Execute agent action
-  private async executeAction(action: AgentAction): Promise<void> {
-    switch (action.type) {
-      case 'log_workout':
-        // Call workout service
-        break;
-      case 'log_meal':
-        // Call nutrition service
-        break;
-      case 'schedule_session':
-        // Call scheduling service
-        break;
-    }
-  }
-  
-  // Clear conversation
-  clearConversation(): void {
-    this._messages.set([]);
-  }
-  
-  // Switch agent
-  setAgent(agentId: string): void {
-    this._currentAgent.set(agentId);
-  }
-}
-```
-
----
-
-## Voice AI Integration (Deepgram)
-
-### Voice Service
+### Deepgram Integration
 
 ```typescript
 // core/services/voice.service.ts
-import { Injectable, inject, signal, NgZone } from '@angular/core';
+import { Injectable, signal, inject, NgZone } from '@angular/core';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { environment } from '../../../environments/environment';
 
 export interface VoiceCommand {
@@ -164,8 +35,10 @@ export interface VoiceCommand {
 }
 
 export interface VoiceIntent {
-  action: 'log_set' | 'skip_exercise' | 'start_timer' | 'stop_timer' | 'next_exercise' | 'ask_question';
+  action: 'log_set' | 'repeat_set' | 'skip_exercise' | 'next_exercise' | 
+          'start_timer' | 'stop_timer' | 'log_food' | 'ask_question';
   parameters: Record<string, any>;
+  confidence: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -173,41 +46,36 @@ export class VoiceService {
   private ngZone = inject(NgZone);
   
   // State
-  private _isListening = signal(false);
-  private _transcript = signal('');
-  private _error = signal<string | null>(null);
-  
-  // Public
-  isListening = this._isListening.asReadonly();
-  transcript = this._transcript.asReadonly();
-  error = this._error.asReadonly();
+  isListening = signal(false);
+  transcript = signal('');
+  error = signal<string | null>(null);
   
   private socket: WebSocket | null = null;
   private mediaRecorder: MediaRecorder | null = null;
   private audioStream: MediaStream | null = null;
   
-  // Fitness-specific keywords for better recognition
-  private keywords = [
-    'squat', 'deadlift', 'bench', 'press', 'curl', 'row',
-    'rep', 'reps', 'set', 'sets', 'weight', 'pounds', 'kilos',
-    'skip', 'next', 'done', 'complete', 'rest', 'timer',
+  // Fitness keywords for better recognition
+  private readonly FITNESS_KEYWORDS = [
+    'squat', 'deadlift', 'bench', 'press', 'curl', 'row', 'pullup', 'pushup',
+    'rep', 'reps', 'set', 'sets', 'weight', 'pounds', 'kilos', 'kg', 'lbs',
+    'skip', 'next', 'done', 'complete', 'rest', 'timer', 'repeat',
     'start', 'stop', 'pause', 'resume'
   ];
-  
+
   async startListening(onCommand: (cmd: VoiceCommand) => void): Promise<void> {
-    if (this._isListening()) return;
-    
+    if (this.isListening()) return;
+
     try {
-      // Get microphone access
-      this.audioStream = await navigator.mediaDevices.getUserMedia({ 
+      // Request microphone
+      this.audioStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
           sampleRate: 16000
         }
       });
-      
-      // Setup Deepgram WebSocket
+
+      // Connect to Deepgram with fitness keyword boosting
       const params = new URLSearchParams({
         model: 'nova-2',
         language: 'en',
@@ -215,29 +83,30 @@ export class VoiceService {
         punctuate: 'true',
         interim_results: 'true',
         endpointing: '300',
-        keywords: this.keywords.map(k => `${k}:2`).join(',') // Boost fitness terms
+        keywords: this.FITNESS_KEYWORDS.map(k => `${k}:2`).join(',')
       });
-      
+
       this.socket = new WebSocket(
         `wss://api.deepgram.com/v1/listen?${params}`,
         ['token', environment.deepgramApiKey]
       );
-      
+
       this.socket.onopen = () => {
-        this._isListening.set(true);
-        this._error.set(null);
+        this.isListening.set(true);
+        this.error.set(null);
         this.startRecording();
+        Haptics.impact({ style: ImpactStyle.Light });
       };
-      
+
       this.socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
         const transcript = data.channel?.alternatives?.[0]?.transcript || '';
         const confidence = data.channel?.alternatives?.[0]?.confidence || 0;
         const isFinal = data.is_final || false;
-        
+
         this.ngZone.run(() => {
-          this._transcript.set(transcript);
-          
+          this.transcript.set(transcript);
+
           if (isFinal && transcript.trim()) {
             const command: VoiceCommand = {
               transcript,
@@ -249,42 +118,40 @@ export class VoiceService {
           }
         });
       };
-      
-      this.socket.onerror = (error) => {
+
+      this.socket.onerror = () => {
         this.ngZone.run(() => {
-          this._error.set('Voice connection error');
+          this.error.set('Voice connection error');
           this.stopListening();
         });
       };
-      
+
       this.socket.onclose = () => {
-        this.ngZone.run(() => {
-          this._isListening.set(false);
-        });
+        this.ngZone.run(() => this.isListening.set(false));
       };
-      
+
     } catch (error) {
-      this._error.set('Microphone access denied');
+      this.error.set('Microphone access denied');
       throw error;
     }
   }
-  
+
   private startRecording(): void {
     if (!this.audioStream) return;
-    
+
     this.mediaRecorder = new MediaRecorder(this.audioStream, {
       mimeType: 'audio/webm;codecs=opus'
     });
-    
+
     this.mediaRecorder.ondataavailable = (event) => {
       if (event.data.size > 0 && this.socket?.readyState === WebSocket.OPEN) {
         this.socket.send(event.data);
       }
     };
-    
-    this.mediaRecorder.start(250); // Send audio every 250ms
+
+    this.mediaRecorder.start(250); // Send every 250ms for low latency
   }
-  
+
   stopListening(): void {
     this.mediaRecorder?.stop();
     this.socket?.close();
@@ -294,76 +161,103 @@ export class VoiceService {
     this.socket = null;
     this.audioStream = null;
     
-    this._isListening.set(false);
-    this._transcript.set('');
+    this.isListening.set(false);
+    this.transcript.set('');
   }
-  
-  // Parse natural language into intent
+
+  // Parse voice input into structured intent
   private parseIntent(transcript: string): VoiceIntent | undefined {
-    const lower = transcript.toLowerCase();
-    
-    // Log set: "3 sets of 10 at 135 pounds" or "did 8 reps at 185"
-    const setMatch = lower.match(/(\d+)\s*(?:sets?\s*(?:of\s*)?)?(\d+)?\s*(?:reps?)?\s*(?:at\s*)?(\d+)?\s*(pounds?|lbs?|kilos?|kgs?)?/);
-    if (setMatch) {
-      const [, sets, reps, weight, unit] = setMatch;
-      return {
-        action: 'log_set',
-        parameters: {
-          sets: sets ? parseInt(sets) : undefined,
-          reps: reps ? parseInt(reps) : undefined,
-          weight: weight ? parseInt(weight) : undefined,
-          unit: unit?.startsWith('k') ? 'kg' : 'lbs'
-        }
-      };
+    const lower = transcript.toLowerCase().trim();
+
+    // Repeat command (highest priority for quick logging)
+    if (/^repeat$/i.test(lower) || /^same$/i.test(lower)) {
+      return { action: 'repeat_set', parameters: {}, confidence: 1.0 };
     }
-    
-    // Skip exercise: "skip this" or "skip exercise"
-    if (lower.includes('skip')) {
-      return { action: 'skip_exercise', parameters: {} };
+
+    // Log set: "3 sets of 10 at 185" or "10 reps at 185" or "185 for 10"
+    const setPatterns = [
+      /(\d+)\s*(?:sets?\s*(?:of\s*)?)?(\d+)\s*(?:reps?)?\s*(?:at\s*)?(\d+)?\s*(pounds?|lbs?|kilos?|kgs?)?/i,
+      /(\d+)\s*(?:for|at)\s*(\d+)\s*(?:reps?)?/i,
+      /(\d+)\s*(?:reps?)\s*(?:at\s*)?(\d+)?/i
+    ];
+
+    for (const pattern of setPatterns) {
+      const match = lower.match(pattern);
+      if (match) {
+        return {
+          action: 'log_set',
+          parameters: this.extractSetParameters(match),
+          confidence: 0.9
+        };
+      }
     }
-    
-    // Timer commands
-    if (lower.includes('start') && (lower.includes('timer') || lower.includes('rest'))) {
-      return { action: 'start_timer', parameters: {} };
+
+    // Skip exercise
+    if (/skip/i.test(lower)) {
+      return { action: 'skip_exercise', parameters: {}, confidence: 0.95 };
     }
-    if (lower.includes('stop') && lower.includes('timer')) {
-      return { action: 'stop_timer', parameters: {} };
-    }
-    
+
     // Next exercise
-    if (lower.includes('next') || lower.includes('done')) {
-      return { action: 'next_exercise', parameters: {} };
+    if (/next|done|complete/i.test(lower)) {
+      return { action: 'next_exercise', parameters: {}, confidence: 0.9 };
     }
-    
-    // Question (fallback to AI agent)
-    return { action: 'ask_question', parameters: { question: transcript } };
+
+    // Timer commands
+    if (/start.*(timer|rest)/i.test(lower)) {
+      return { action: 'start_timer', parameters: {}, confidence: 0.9 };
+    }
+    if (/stop.*(timer|rest)/i.test(lower)) {
+      return { action: 'stop_timer', parameters: {}, confidence: 0.9 };
+    }
+
+    // Default: treat as question for AI
+    return { action: 'ask_question', parameters: { question: transcript }, confidence: 0.5 };
   }
-  
-  // Text-to-Speech using Deepgram Aura
+
+  private extractSetParameters(match: RegExpMatchArray): Record<string, any> {
+    const numbers = match.filter(m => m && /^\d+$/.test(m)).map(Number);
+    const unit = match.find(m => m && /^(pounds?|lbs?|kilos?|kgs?)$/i.test(m));
+
+    // Heuristic: largest number is usually weight, others are sets/reps
+    const sorted = [...numbers].sort((a, b) => b - a);
+    
+    return {
+      weight: sorted[0] || undefined,
+      reps: sorted[1] || sorted[0] || undefined,
+      sets: numbers.length > 2 ? sorted[2] : 1,
+      unit: unit?.startsWith('k') ? 'kg' : 'lbs'
+    };
+  }
+
+  // Text-to-Speech for confirmations
   async speak(text: string): Promise<void> {
-    const response = await fetch('https://api.deepgram.com/v1/speak?model=aura-asteria-en', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Token ${environment.deepgramApiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ text })
-    });
-    
-    const audioBlob = await response.blob();
-    const audioUrl = URL.createObjectURL(audioBlob);
-    const audio = new Audio(audioUrl);
-    await audio.play();
-    
-    // Cleanup
-    audio.onended = () => URL.revokeObjectURL(audioUrl);
+    try {
+      const response = await fetch('https://api.deepgram.com/v1/speak?model=aura-asteria-en', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Token ${environment.deepgramApiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text })
+      });
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      await audio.play();
+      audio.onended = () => URL.revokeObjectURL(audioUrl);
+    } catch (error) {
+      console.warn('TTS failed:', error);
+    }
   }
 }
 ```
 
 ---
 
-## Photo-to-Nutrition AI
+## Photo Nutrition AI
+
+### Food Recognition Service
 
 ```typescript
 // features/nutrition/services/food-recognition.service.ts
@@ -371,15 +265,6 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { environment } from '../../../../environments/environment';
-
-export interface FoodRecognitionResult {
-  foods: RecognizedFood[];
-  totalCalories: number;
-  totalProtein: number;
-  totalCarbs: number;
-  totalFat: number;
-  confidence: number;
-}
 
 export interface RecognizedFood {
   name: string;
@@ -389,14 +274,21 @@ export interface RecognizedFood {
   carbs: number;
   fat: number;
   confidence: number;
+  editable: boolean; // User can adjust
+}
+
+export interface FoodRecognitionResult {
+  foods: RecognizedFood[];
+  totals: { calories: number; protein: number; carbs: number; fat: number };
+  overallConfidence: number;
+  imageUrl?: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class FoodRecognitionService {
   private http = inject(HttpClient);
-  
+
   async recognizeFromPhoto(): Promise<FoodRecognitionResult> {
-    // Take or select photo
     const photo = await Camera.getPhoto({
       quality: 80,
       allowEditing: false,
@@ -406,299 +298,428 @@ export class FoodRecognitionService {
       promptLabelPhoto: 'Choose from Gallery',
       promptLabelPicture: 'Take Photo'
     });
-    
-    // Send to AI API for recognition
-    const response = await this.http.post<FoodRecognitionResult>(
+
+    // Send to AI backend for recognition
+    const result = await this.http.post<FoodRecognitionResult>(
       `${environment.aiApiUrl}/nutrition/recognize`,
       {
         image: photo.base64String,
         format: photo.format
       }
     ).toPromise();
-    
-    return response!;
+
+    return result!;
   }
-  
-  // Parse natural language food description
+
+  // Natural language parsing (Nutritionix NLP)
   async parseNaturalLanguage(description: string): Promise<FoodRecognitionResult> {
-    // Uses Nutritionix NLP API for 90%+ accuracy
-    const response = await this.http.post<FoodRecognitionResult>(
+    const result = await this.http.post<FoodRecognitionResult>(
       `${environment.aiApiUrl}/nutrition/parse`,
       { text: description }
     ).toPromise();
-    
-    return response!;
+
+    return result!;
+  }
+
+  // Verify/correct AI suggestions using verified database
+  async verifyFood(food: RecognizedFood, correction?: Partial<RecognizedFood>): Promise<RecognizedFood> {
+    const result = await this.http.post<RecognizedFood>(
+      `${environment.aiApiUrl}/nutrition/verify`,
+      { original: food, correction }
+    ).toPromise();
+
+    return result!;
   }
 }
 ```
 
 ---
 
-## Proactive AI Interventions (JITAI)
+## AI Coaching Agent
+
+### Multi-Agent Architecture
+
+```typescript
+// core/services/ai-coach.service.ts
+import { Injectable, inject, signal, computed } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: Date;
+  agentSource?: 'workout' | 'nutrition' | 'recovery' | 'motivation' | 'general';
+  actions?: ChatAction[];
+}
+
+export interface ChatAction {
+  type: 'log_workout' | 'adjust_program' | 'set_reminder' | 'escalate_trainer';
+  label: string;
+  data: any;
+  executed: boolean;
+}
+
+@Injectable({ providedIn: 'root' })
+export class AICoachService {
+  private http = inject(HttpClient);
+
+  // State
+  private _messages = signal<ChatMessage[]>([]);
+  private _isThinking = signal(false);
+
+  messages = this._messages.asReadonly();
+  isThinking = this._isThinking.asReadonly();
+  
+  lastMessage = computed(() => {
+    const msgs = this._messages();
+    return msgs[msgs.length - 1];
+  });
+
+  async sendMessage(content: string, context?: Record<string, any>): Promise<ChatMessage> {
+    // Add user message
+    const userMessage: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: 'user',
+      content,
+      timestamp: new Date()
+    };
+    this._messages.update(msgs => [...msgs, userMessage]);
+    this._isThinking.set(true);
+
+    try {
+      // Send to LangGraph backend
+      const response = await this.http.post<{
+        message: string;
+        agentSource: string;
+        actions?: ChatAction[];
+        shouldEscalate?: boolean;
+      }>(
+        `${environment.aiApiUrl}/coach/chat`,
+        {
+          message: content,
+          conversationHistory: this._messages().slice(-10),
+          userContext: context
+        }
+      ).toPromise();
+
+      const assistantMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: response!.message,
+        timestamp: new Date(),
+        agentSource: response!.agentSource as any,
+        actions: response!.actions
+      };
+
+      this._messages.update(msgs => [...msgs, assistantMessage]);
+      return assistantMessage;
+
+    } finally {
+      this._isThinking.set(false);
+    }
+  }
+
+  async executeAction(action: ChatAction): Promise<void> {
+    await this.http.post(
+      `${environment.aiApiUrl}/coach/action`,
+      { action }
+    ).toPromise();
+    
+    // Mark action as executed
+    this._messages.update(msgs => 
+      msgs.map(m => ({
+        ...m,
+        actions: m.actions?.map(a => 
+          a === action ? { ...a, executed: true } : a
+        )
+      }))
+    );
+  }
+
+  clearConversation(): void {
+    this._messages.set([]);
+  }
+}
+```
+
+---
+
+## JITAI Proactive Interventions
+
+### Intervention Service
 
 ```typescript
 // core/services/intervention.service.ts
 import { Injectable, inject, signal } from '@angular/core';
 import { LocalNotifications } from '@capacitor/local-notifications';
-import { AIAgentService } from './ai-agent.service';
-import { WorkoutService } from '../../features/workouts/services/workout.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
-export interface InterventionContext {
-  vulnerability: number;  // Risk of skipping (0-1)
-  receptivity: number;    // Willingness to engage (0-1)
-  opportunity: number;    // Context allows action (0-1)
+export interface JITAIContext {
+  vulnerability: number;  // 0-1: Risk of skipping workout
+  receptivity: number;    // 0-1: Willingness to engage
+  opportunity: number;    // 0-1: Context allows action
 }
 
 export interface Intervention {
   id: string;
-  type: 'nudge' | 'reminder' | 'celebration' | 'concern';
+  type: 'nudge' | 'reminder' | 'celebration' | 'concern' | 'insight';
+  title: string;
   message: string;
   priority: number;
-  scheduledAt: Date;
+  action?: {
+    label: string;
+    route: string;
+  };
 }
 
 @Injectable({ providedIn: 'root' })
 export class InterventionService {
-  private aiAgent = inject(AIAgentService);
-  private workoutService = inject(WorkoutService);
+  private http = inject(HttpClient);
   
-  // Track intervention frequency (max 2-3 per day)
-  private todayInterventions = signal(0);
-  private readonly MAX_DAILY_INTERVENTIONS = 3;
-  
-  // Evaluate context and potentially trigger intervention
-  async evaluateAndIntervene(context: InterventionContext): Promise<void> {
-    if (this.todayInterventions() >= this.MAX_DAILY_INTERVENTIONS) {
-      return; // Prevent notification fatigue
+  // Track daily intervention count (max 2-3 per day)
+  private todayCount = signal(0);
+  private readonly MAX_DAILY = 3;
+
+  async evaluateAndIntervene(userId: string): Promise<Intervention | null> {
+    if (this.todayCount() >= this.MAX_DAILY) {
+      return null; // Prevent notification fatigue
     }
-    
-    // Calculate intervention score
-    const score = this.calculateInterventionScore(context);
-    
-    if (score > 0.7) {
-      const intervention = await this.generateIntervention(context);
-      await this.deliverIntervention(intervention);
+
+    try {
+      // Get JITAI context from backend
+      const context = await this.http.get<JITAIContext>(
+        `${environment.aiApiUrl}/jitai/context/${userId}`
+      ).toPromise();
+
+      // Goldilocks principle: intervene at the right moment
+      const shouldIntervene = this.calculateInterventionScore(context!) > 0.7;
+
+      if (!shouldIntervene) return null;
+
+      // Generate personalized intervention
+      const intervention = await this.http.post<Intervention>(
+        `${environment.aiApiUrl}/jitai/generate`,
+        { userId, context }
+      ).toPromise();
+
+      await this.deliverIntervention(intervention!);
+      this.todayCount.update(c => c + 1);
+
+      return intervention!;
+
+    } catch (error) {
+      console.error('Intervention evaluation failed:', error);
+      return null;
     }
   }
-  
-  private calculateInterventionScore(context: InterventionContext): number {
-    // Goldilocks principle: not too early, not too late
-    // High vulnerability + high receptivity + high opportunity = intervene
-    return (context.vulnerability * 0.4) + 
-           (context.receptivity * 0.35) + 
-           (context.opportunity * 0.25);
-  }
-  
-  private async generateIntervention(context: InterventionContext): Promise<Intervention> {
-    // Use AI agent to generate personalized message
-    const response = await this.aiAgent.sendMessage(
-      'Generate a supportive, personalized nudge for a client who might skip their workout',
-      {
-        vulnerabilityScore: context.vulnerability,
-        recentWorkouts: await this.workoutService.getRecentWorkouts(7),
-        userPreferences: await this.getUserPreferences()
-      }
+
+  private calculateInterventionScore(context: JITAIContext): number {
+    // Weighted scoring based on research
+    return (
+      (context.vulnerability * 0.40) +
+      (context.receptivity * 0.35) +
+      (context.opportunity * 0.25)
     );
-    
-    return {
-      id: crypto.randomUUID(),
-      type: context.vulnerability > 0.8 ? 'concern' : 'nudge',
-      message: response.message.content,
-      priority: Math.round(context.vulnerability * 10),
-      scheduledAt: new Date()
-    };
   }
-  
+
   private async deliverIntervention(intervention: Intervention): Promise<void> {
     await LocalNotifications.schedule({
       notifications: [{
-        id: intervention.id.hashCode(),
-        title: intervention.type === 'celebration' ? '🎉 Great job!' : '💪 Quick check-in',
+        id: this.hashCode(intervention.id),
+        title: intervention.title,
         body: intervention.message,
-        schedule: { at: intervention.scheduledAt },
-        actionTypeId: 'INTERVENTION',
-        extra: { interventionId: intervention.id }
+        schedule: { at: new Date() },
+        actionTypeId: intervention.action ? 'INTERVENTION_ACTION' : undefined,
+        extra: { interventionId: intervention.id, route: intervention.action?.route }
       }]
     });
-    
-    this.todayInterventions.update(count => count + 1);
   }
-  
-  private async getUserPreferences(): Promise<any> {
-    // Load user communication preferences
-    return {};
+
+  private hashCode(str: string): number {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash);
   }
 }
 ```
 
 ---
 
-## Trainer Methodology Learning
+## Backend API Endpoints
 
-```typescript
-// features/trainer/services/methodology.service.ts
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
+### AI Service Routes (Python/LangGraph)
 
-export interface TrainerMethodology {
-  id: string;
-  trainerId: string;
-  programmingStyle: string;
-  communicationTone: string;
-  exercisePreferences: ExercisePreference[];
-  progressionSchemes: ProgressionScheme[];
-  coachingPhrases: string[];
-  nutritionPhilosophy: string;
-}
+```python
+# apps/ai-backend/routes/coach.py
+from fastapi import APIRouter, HTTPException
+from langgraph.graph import StateGraph
+from pydantic import BaseModel
+from typing import List, Optional
 
-@Injectable({ providedIn: 'root' })
-export class MethodologyService {
-  private http = inject(HttpClient);
-  
-  // Learn from trainer's existing programs
-  async analyzePrograms(programs: any[]): Promise<void> {
-    await this.http.post(
-      `${environment.aiApiUrl}/trainer/learn-methodology`,
-      { programs }
-    ).toPromise();
-  }
-  
-  // Learn from trainer's communication style
-  async analyzeMessages(messages: any[]): Promise<void> {
-    await this.http.post(
-      `${environment.aiApiUrl}/trainer/learn-communication`,
-      { messages }
-    ).toPromise();
-  }
-  
-  // Get AI response in trainer's voice
-  async generateInTrainerVoice(
-    prompt: string, 
-    context: Record<string, any>
-  ): Promise<string> {
-    const response = await this.http.post<{ message: string }>(
-      `${environment.aiApiUrl}/trainer/generate-response`,
-      { prompt, context }
-    ).toPromise();
+router = APIRouter(prefix="/coach", tags=["AI Coach"])
+
+class ChatRequest(BaseModel):
+    message: str
+    conversationHistory: List[dict]
+    userContext: Optional[dict] = None
+
+class ChatResponse(BaseModel):
+    message: str
+    agentSource: str
+    actions: Optional[List[dict]] = None
+    shouldEscalate: bool = False
+
+@router.post("/chat", response_model=ChatResponse)
+async def chat(request: ChatRequest):
+    """
+    Multi-agent coaching conversation.
+    Routes to appropriate specialist agent based on query.
+    """
+    # LangGraph orchestration
+    graph = build_coach_graph()
+    result = await graph.ainvoke({
+        "message": request.message,
+        "history": request.conversationHistory,
+        "context": request.userContext
+    })
     
-    return response!.message;
-  }
-}
+    return ChatResponse(
+        message=result["response"],
+        agentSource=result["agent_used"],
+        actions=result.get("suggested_actions"),
+        shouldEscalate=result.get("escalate", False)
+    )
+
+# apps/ai-backend/routes/jitai.py
+@router.get("/context/{user_id}")
+async def get_jitai_context(user_id: str):
+    """
+    Calculate JITAI context scores for a user.
+    """
+    # Fetch user data
+    user_data = await get_user_engagement_data(user_id)
+    wearable_data = await get_wearable_data(user_id)
+    
+    vulnerability = calculate_vulnerability(user_data, wearable_data)
+    receptivity = calculate_receptivity(user_data)
+    opportunity = calculate_opportunity(user_data)
+    
+    return {
+        "vulnerability": vulnerability,
+        "receptivity": receptivity,
+        "opportunity": opportunity
+    }
+
+@router.post("/generate")
+async def generate_intervention(user_id: str, context: dict):
+    """
+    Generate a personalized intervention message using AI.
+    """
+    prompt = build_intervention_prompt(user_id, context)
+    response = await llm.generate(prompt)
+    
+    return {
+        "id": str(uuid4()),
+        "type": determine_intervention_type(context),
+        "title": response.title,
+        "message": response.message,
+        "priority": calculate_priority(context)
+    }
 ```
 
 ---
 
-## Usage in Components
-
-### Voice-Enabled Workout Logging
+## Environment Configuration
 
 ```typescript
-@Component({
-  selector: 'fit-voice-logger',
-  template: `
-    <div class="voice-logger">
-      <ion-button 
-        [color]="voiceService.isListening() ? 'danger' : 'primary'"
-        (click)="toggleListening()">
-        <ion-icon [name]="voiceService.isListening() ? 'mic' : 'mic-outline'" slot="start" />
-        {{ voiceService.isListening() ? 'Stop' : 'Voice Log' }}
-      </ion-button>
-      
-      @if (voiceService.isListening()) {
-        <div class="transcript">
-          <ion-text>{{ voiceService.transcript() || 'Listening...' }}</ion-text>
-        </div>
-      }
-      
-      @if (voiceService.error()) {
-        <ion-text color="danger">{{ voiceService.error() }}</ion-text>
-      }
-    </div>
-  `
-})
-export class VoiceLoggerComponent {
-  voiceService = inject(VoiceService);
-  private workoutService = inject(WorkoutService);
+// environments/environment.ts
+export const environment = {
+  production: false,
+  supabaseUrl: 'YOUR_SUPABASE_URL',
+  supabaseAnonKey: 'YOUR_SUPABASE_ANON_KEY',
   
-  async toggleListening() {
-    if (this.voiceService.isListening()) {
-      this.voiceService.stopListening();
-    } else {
-      await this.voiceService.startListening(cmd => this.handleCommand(cmd));
-    }
-  }
+  // AI Services
+  aiApiUrl: 'http://localhost:8000/api/v1',
+  deepgramApiKey: 'YOUR_DEEPGRAM_KEY',
   
-  private async handleCommand(command: VoiceCommand) {
-    if (!command.intent) return;
-    
-    switch (command.intent.action) {
-      case 'log_set':
-        const { reps, weight, unit } = command.intent.parameters;
-        await this.workoutService.logSet({ reps, weight, unit });
-        await this.voiceService.speak(`Logged ${reps} reps at ${weight} ${unit}`);
-        break;
-        
-      case 'skip_exercise':
-        await this.workoutService.skipCurrentExercise();
-        await this.voiceService.speak('Exercise skipped');
-        break;
-        
-      case 'next_exercise':
-        await this.workoutService.nextExercise();
-        break;
-    }
+  // Feature Flags
+  features: {
+    voiceLogging: true,
+    photoNutrition: true,
+    aiCoach: true,
+    jitaiInterventions: true
   }
-}
+};
 ```
 
-### AI Chat Component
+---
 
+## Implementation Phases
+
+### Phase 2A: Voice & Photo AI (Sprints 8-10)
+- Deepgram integration for voice logging
+- Natural language food parsing
+- Photo-to-nutrition recognition
+- Voice feedback via TTS
+
+### Phase 2B: AI Coaching (Sprints 13-14)
+- LangGraph multi-agent backend
+- Chat UI in mobile app
+- Trainer methodology learning
+- JITAI intervention system
+
+### Phase 2C: Apple Watch (Sprint 15)
+- WatchOS companion app
+- Wrist-based workout logging
+- Today's workout complication
+- Phone-watch sync
+
+---
+
+## Testing Strategy
+
+### Voice Service Testing
 ```typescript
-@Component({
-  selector: 'fit-ai-chat',
-  template: `
-    <ion-content>
-      <div class="messages">
-        @for (message of aiAgent.messages(); track message.id) {
-          <div [class]="'message ' + message.role">
-            <ion-text>{{ message.content }}</ion-text>
-            <small>{{ message.timestamp | date:'shortTime' }}</small>
-          </div>
-        }
-        
-        @if (aiAgent.isProcessing()) {
-          <div class="message assistant typing">
-            <ion-spinner name="dots" />
-          </div>
-        }
-      </div>
-    </ion-content>
-    
-    <ion-footer>
-      <ion-toolbar>
-        <ion-input 
-          [(ngModel)]="userMessage"
-          placeholder="Ask your AI coach..."
-          (keyup.enter)="sendMessage()" />
-        <ion-button slot="end" (click)="sendMessage()" [disabled]="!userMessage">
-          <ion-icon slot="icon-only" name="send" />
-        </ion-button>
-      </ion-toolbar>
-    </ion-footer>
-  `
-})
-export class AIChatComponent {
-  aiAgent = inject(AIAgentService);
-  userMessage = '';
-  
-  async sendMessage() {
-    if (!this.userMessage.trim()) return;
-    
-    const message = this.userMessage;
-    this.userMessage = '';
-    
-    await this.aiAgent.sendMessage(message);
-  }
-}
+describe('VoiceService', () => {
+  it('should parse "10 reps at 185" correctly', () => {
+    const intent = service['parseIntent']('10 reps at 185');
+    expect(intent?.action).toBe('log_set');
+    expect(intent?.parameters.reps).toBe(10);
+    expect(intent?.parameters.weight).toBe(185);
+  });
+
+  it('should recognize "repeat" command', () => {
+    const intent = service['parseIntent']('repeat');
+    expect(intent?.action).toBe('repeat_set');
+    expect(intent?.confidence).toBe(1.0);
+  });
+
+  it('should handle gym noise gracefully', async () => {
+    // Mock noisy audio stream
+    // Verify error handling doesn't crash app
+  });
+});
+```
+
+### AI Coach Testing
+```typescript
+describe('AICoachService', () => {
+  it('should route nutrition questions to nutrition agent', async () => {
+    const response = await service.sendMessage('How much protein should I eat?');
+    expect(response.agentSource).toBe('nutrition');
+  });
+
+  it('should escalate complex questions to trainer', async () => {
+    const response = await service.sendMessage('I have sharp knee pain during squats');
+    expect(response.actions).toContainEqual(
+      expect.objectContaining({ type: 'escalate_trainer' })
+    );
+  });
+});
 ```

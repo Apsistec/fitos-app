@@ -1,155 +1,302 @@
-// Ionic Variables and Theming
-// FitOS Custom Theme
+// ===========================================
+// FitOS Theme Variables
+// Dark-First Design System v2.0
+// ===========================================
 
+// Import design tokens
+@import 'design-tokens';
+
+// ===========================================
+// IONIC VARIABLE MAPPINGS (Dark Mode Default)
+// ===========================================
 :root {
-  // Primary - Indigo (used throughout the app)
-  --ion-color-primary: #6366F1;
-  --ion-color-primary-rgb: 99, 102, 241;
-  --ion-color-primary-contrast: #ffffff;
+  // Font
+  --ion-font-family: var(--fitos-font-family);
+
+  // Background
+  --ion-background-color: var(--fitos-bg-primary);
+  --ion-background-color-rgb: 13, 13, 13;
+
+  // Text
+  --ion-text-color: var(--fitos-text-primary);
+  --ion-text-color-rgb: 245, 245, 245;
+
+  // Primary - Energetic Teal
+  --ion-color-primary: var(--fitos-accent-primary);
+  --ion-color-primary-rgb: var(--fitos-accent-primary-rgb);
+  --ion-color-primary-contrast: #FFFFFF;
   --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #575ad4;
-  --ion-color-primary-tint: #737af2;
+  --ion-color-primary-shade: var(--fitos-accent-primary-shade);
+  --ion-color-primary-tint: var(--fitos-accent-primary-tint);
 
-  // Secondary - Slate
-  --ion-color-secondary: #64748B;
-  --ion-color-secondary-rgb: 100, 116, 139;
-  --ion-color-secondary-contrast: #ffffff;
+  // Secondary - Violet
+  --ion-color-secondary: var(--fitos-accent-secondary);
+  --ion-color-secondary-rgb: var(--fitos-accent-secondary-rgb);
+  --ion-color-secondary-contrast: #FFFFFF;
   --ion-color-secondary-contrast-rgb: 255, 255, 255;
-  --ion-color-secondary-shade: #58667a;
-  --ion-color-secondary-tint: #748297;
+  --ion-color-secondary-shade: #7A51D8;
+  --ion-color-secondary-tint: #976CF7;
 
-  // Tertiary - Violet
-  --ion-color-tertiary: #8B5CF6;
-  --ion-color-tertiary-rgb: 139, 92, 246;
-  --ion-color-tertiary-contrast: #ffffff;
+  // Tertiary - Blue
+  --ion-color-tertiary: #3B82F6;
+  --ion-color-tertiary-rgb: 59, 130, 246;
+  --ion-color-tertiary-contrast: #FFFFFF;
   --ion-color-tertiary-contrast-rgb: 255, 255, 255;
-  --ion-color-tertiary-shade: #7a51d8;
-  --ion-color-tertiary-tint: #976cf7;
+  --ion-color-tertiary-shade: #3473D9;
+  --ion-color-tertiary-tint: #4F8EF7;
 
-  // Success - Green (protein, positive)
-  --ion-color-success: #22C55E;
-  --ion-color-success-rgb: 34, 197, 94;
-  --ion-color-success-contrast: #ffffff;
+  // Success
+  --ion-color-success: var(--fitos-status-success);
+  --ion-color-success-rgb: 16, 185, 129;
+  --ion-color-success-contrast: #FFFFFF;
   --ion-color-success-contrast-rgb: 255, 255, 255;
-  --ion-color-success-shade: #1ead53;
-  --ion-color-success-tint: #38cb6e;
+  --ion-color-success-shade: #0E9F6E;
+  --ion-color-success-tint: #34D399;
 
-  // Warning - Amber (carbs, alerts)
-  --ion-color-warning: #F59E0B;
+  // Warning
+  --ion-color-warning: var(--fitos-status-warning);
   --ion-color-warning-rgb: 245, 158, 11;
   --ion-color-warning-contrast: #000000;
   --ion-color-warning-contrast-rgb: 0, 0, 0;
-  --ion-color-warning-shade: #d88b0a;
-  --ion-color-warning-tint: #f6a823;
+  --ion-color-warning-shade: #D88B0A;
+  --ion-color-warning-tint: #F6A823;
 
-  // Danger - Rose (NOT for nutrition "over" - use for errors only)
-  --ion-color-danger: #F43F5E;
-  --ion-color-danger-rgb: 244, 63, 94;
-  --ion-color-danger-contrast: #ffffff;
+  // Danger (errors ONLY, never nutrition)
+  --ion-color-danger: var(--fitos-status-error);
+  --ion-color-danger-rgb: 239, 68, 68;
+  --ion-color-danger-contrast: #FFFFFF;
   --ion-color-danger-contrast-rgb: 255, 255, 255;
-  --ion-color-danger-shade: #d73753;
-  --ion-color-danger-tint: #f5526e;
+  --ion-color-danger-shade: #D73753;
+  --ion-color-danger-tint: #F5526E;
 
-  // Medium - Gray
-  --ion-color-medium: #6B7280;
-  --ion-color-medium-rgb: 107, 114, 128;
-  --ion-color-medium-contrast: #ffffff;
+  // Medium
+  --ion-color-medium: #737373;
+  --ion-color-medium-rgb: 115, 115, 115;
+  --ion-color-medium-contrast: #FFFFFF;
   --ion-color-medium-contrast-rgb: 255, 255, 255;
-  --ion-color-medium-shade: #5e6470;
-  --ion-color-medium-tint: #7a808d;
+  --ion-color-medium-shade: #666666;
+  --ion-color-medium-tint: #808080;
 
   // Light
-  --ion-color-light: #F3F4F6;
-  --ion-color-light-rgb: 243, 244, 246;
-  --ion-color-light-contrast: #000000;
-  --ion-color-light-contrast-rgb: 0, 0, 0;
-  --ion-color-light-shade: #d6d7d8;
-  --ion-color-light-tint: #f4f5f7;
+  --ion-color-light: var(--fitos-bg-tertiary);
+  --ion-color-light-rgb: 38, 38, 38;
+  --ion-color-light-contrast: #FFFFFF;
+  --ion-color-light-contrast-rgb: 255, 255, 255;
+  --ion-color-light-shade: #1A1A1A;
+  --ion-color-light-tint: #333333;
 
   // Dark
-  --ion-color-dark: #1F2937;
-  --ion-color-dark-rgb: 31, 41, 55;
-  --ion-color-dark-contrast: #ffffff;
-  --ion-color-dark-contrast-rgb: 255, 255, 255;
-  --ion-color-dark-shade: #1b2430;
-  --ion-color-dark-tint: #353e4b;
+  --ion-color-dark: var(--fitos-text-primary);
+  --ion-color-dark-rgb: 245, 245, 245;
+  --ion-color-dark-contrast: #000000;
+  --ion-color-dark-contrast-rgb: 0, 0, 0;
+  --ion-color-dark-shade: #E0E0E0;
+  --ion-color-dark-tint: #FAFAFA;
 
-  // ===========================================
-  // FitOS Custom Colors (Nutrition - Adherence Neutral)
-  // ===========================================
-  --fitos-calories: #6366F1;    // Indigo
-  --fitos-protein: #22C55E;     // Green
-  --fitos-carbs: #F59E0B;       // Amber
-  --fitos-fat: #EC4899;         // Pink
-  --fitos-neutral: #6B7280;     // Gray (for "over" instead of red)
+  // Component backgrounds
+  --ion-card-background: var(--fitos-bg-secondary);
+  --ion-item-background: var(--fitos-bg-secondary);
+  --ion-toolbar-background: var(--fitos-bg-secondary);
+  --ion-tab-bar-background: var(--fitos-bg-secondary);
+  --ion-modal-background: var(--fitos-bg-primary);
 
-  // ===========================================
-  // FitOS Text Colors (WCAG AA Compliant)
-  // ===========================================
-  // Use these for text content to ensure proper contrast
-  --fitos-text-primary: var(--ion-color-dark);        // Body text, paragraphs (7:1+ contrast)
-  --fitos-text-secondary: rgba(31, 41, 55, 0.7);      // Descriptions, labels (4.5:1+ contrast)
-  --fitos-text-tertiary: var(--ion-color-medium);     // Metadata, timestamps (3:1+ contrast)
+  // Step colors for gradients
+  --ion-background-color-step-50: #1A1A1A;
+  --ion-background-color-step-100: #262626;
+  --ion-background-color-step-150: #333333;
+  --ion-background-color-step-200: #404040;
+  --ion-background-color-step-250: #4D4D4D;
+  --ion-background-color-step-300: #595959;
+  --ion-background-color-step-350: #666666;
+  --ion-background-color-step-400: #737373;
+  --ion-background-color-step-450: #808080;
+  --ion-background-color-step-500: #8C8C8C;
+  --ion-background-color-step-550: #999999;
+  --ion-background-color-step-600: #A6A6A6;
+  --ion-background-color-step-650: #B3B3B3;
+  --ion-background-color-step-700: #BFBFBF;
+  --ion-background-color-step-750: #CCCCCC;
+  --ion-background-color-step-800: #D9D9D9;
+  --ion-background-color-step-850: #E6E6E6;
+  --ion-background-color-step-900: #F2F2F2;
+  --ion-background-color-step-950: #FAFAFA;
 
-  // ===========================================
-  // Global Styling
-  // ===========================================
-  --ion-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  // Text step colors
+  --ion-text-color-step-50: #E6E6E6;
+  --ion-text-color-step-100: #D9D9D9;
+  --ion-text-color-step-150: #CCCCCC;
+  --ion-text-color-step-200: #BFBFBF;
+  --ion-text-color-step-250: #B3B3B3;
+  --ion-text-color-step-300: #A6A6A6;
+  --ion-text-color-step-350: #999999;
+  --ion-text-color-step-400: #8C8C8C;
+  --ion-text-color-step-450: #808080;
+  --ion-text-color-step-500: #737373;
+  --ion-text-color-step-550: #666666;
+  --ion-text-color-step-600: #595959;
+  --ion-text-color-step-650: #4D4D4D;
+  --ion-text-color-step-700: #404040;
+  --ion-text-color-step-750: #333333;
+  --ion-text-color-step-800: #262626;
+  --ion-text-color-step-850: #1A1A1A;
+  --ion-text-color-step-900: #0D0D0D;
+  --ion-text-color-step-950: #000000;
 }
 
-// Dark Mode
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ion-color-primary: #818CF8;
-    --ion-color-primary-rgb: 129, 140, 248;
-    --ion-color-primary-contrast: #000000;
-    --ion-color-primary-contrast-rgb: 0, 0, 0;
-    --ion-color-primary-shade: #727bda;
-    --ion-color-primary-tint: #8e98f9;
+// ===========================================
+// LIGHT MODE OVERRIDES
+// Applied when body.light class is present
+// ===========================================
+body.light {
+  --ion-background-color: var(--fitos-bg-primary);
+  --ion-background-color-rgb: 255, 255, 255;
 
-    --ion-background-color: #111827;
-    --ion-background-color-rgb: 17, 24, 39;
+  --ion-text-color: var(--fitos-text-primary);
+  --ion-text-color-rgb: 17, 24, 39;
 
-    --ion-text-color: #F9FAFB;
-    --ion-text-color-rgb: 249, 250, 251;
+  --ion-color-primary: #059669;
+  --ion-color-primary-rgb: 5, 150, 105;
+  --ion-color-primary-shade: #047857;
+  --ion-color-primary-tint: #10B981;
 
-    --ion-card-background: #1F2937;
+  --ion-card-background: var(--fitos-bg-secondary);
+  --ion-item-background: var(--fitos-bg-secondary);
+  --ion-toolbar-background: var(--fitos-bg-primary);
+  --ion-tab-bar-background: var(--fitos-bg-primary);
 
-    --ion-item-background: #1F2937;
+  // Step colors for light mode
+  --ion-background-color-step-50: #F9FAFB;
+  --ion-background-color-step-100: #F3F4F6;
+  --ion-background-color-step-150: #E5E7EB;
+  --ion-background-color-step-200: #D1D5DB;
+  --ion-background-color-step-250: #C4C8CF;
+  --ion-background-color-step-300: #9CA3AF;
+  --ion-background-color-step-350: #8B929F;
+  --ion-background-color-step-400: #6B7280;
+  --ion-background-color-step-450: #5B6270;
+  --ion-background-color-step-500: #4B5563;
+}
 
-    --ion-toolbar-background: #1F2937;
+// ===========================================
+// iOS SPECIFIC OVERRIDES
+// ===========================================
+.ios {
+  --ion-toolbar-background: var(--fitos-bg-secondary);
+  --ion-tab-bar-background: var(--fitos-bg-secondary);
+}
 
-    --ion-tab-bar-background: #1F2937;
+.ios body.light {
+  --ion-toolbar-background: var(--fitos-bg-primary);
+  --ion-tab-bar-background: var(--fitos-bg-primary);
+}
 
-    // FitOS Text Colors (Dark Mode)
-    --fitos-text-primary: rgba(255, 255, 255, 0.95);
-    --fitos-text-secondary: rgba(255, 255, 255, 0.7);
-    --fitos-text-tertiary: var(--ion-color-medium);
+// ===========================================
+// MATERIAL DESIGN (Android) OVERRIDES
+// ===========================================
+.md {
+  --ion-toolbar-background: var(--fitos-bg-secondary);
+}
+
+// ===========================================
+// NUTRITION COLORS (ADHERENCE-NEUTRAL)
+// Use these for nutrition UI, NEVER red for "over"
+// ===========================================
+.nutrition-calories { color: var(--fitos-nutrition-calories); }
+.nutrition-protein { color: var(--fitos-nutrition-protein); }
+.nutrition-carbs { color: var(--fitos-nutrition-carbs); }
+.nutrition-fat { color: var(--fitos-nutrition-fat); }
+.nutrition-over { color: var(--fitos-nutrition-over); } // Purple, NOT red!
+.nutrition-neutral { color: var(--fitos-nutrition-neutral); }
+
+// Progress bar backgrounds
+.progress-calories { background: var(--fitos-nutrition-calories); }
+.progress-protein { background: var(--fitos-nutrition-protein); }
+.progress-carbs { background: var(--fitos-nutrition-carbs); }
+.progress-fat { background: var(--fitos-nutrition-fat); }
+.progress-over { background: var(--fitos-nutrition-over); }
+
+// ===========================================
+// UTILITY CLASSES
+// ===========================================
+
+// Text
+.text-primary { color: var(--fitos-text-primary) !important; }
+.text-secondary { color: var(--fitos-text-secondary) !important; }
+.text-tertiary { color: var(--fitos-text-tertiary) !important; }
+.text-accent { color: var(--fitos-accent-primary) !important; }
+
+// Backgrounds
+.bg-primary { background: var(--fitos-bg-primary) !important; }
+.bg-secondary { background: var(--fitos-bg-secondary) !important; }
+.bg-tertiary { background: var(--fitos-bg-tertiary) !important; }
+.bg-elevated { background: var(--fitos-bg-elevated) !important; }
+
+// Typography
+.font-mono { font-family: var(--fitos-font-mono) !important; }
+
+// Glow effects
+.glow-primary {
+  box-shadow: var(--fitos-glow-primary);
+}
+
+.glow-accent {
+  box-shadow: var(--fitos-glow-accent);
+}
+
+// ===========================================
+// COMPONENT PATTERNS
+// ===========================================
+
+// Card with glow on active
+.fitos-card {
+  background: var(--fitos-bg-secondary);
+  border-radius: var(--fitos-radius-lg);
+  border: 1px solid var(--fitos-border-subtle);
+  padding: var(--fitos-space-4);
+  transition: border-color var(--fitos-duration-fast), box-shadow var(--fitos-duration-fast);
+
+  &:hover, &:focus {
+    border-color: var(--fitos-border-default);
+  }
+
+  &.active, &.selected {
+    border-color: var(--fitos-accent-primary);
+    box-shadow: var(--fitos-glow-primary);
   }
 }
 
-// iOS Dark Mode
-.ios body.dark {
-  --ion-background-color: #000000;
-  --ion-background-color-rgb: 0, 0, 0;
+// Metric display (large numbers)
+.fitos-metric {
+  font-family: var(--fitos-font-mono);
+  font-size: var(--fitos-text-4xl);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--fitos-text-primary);
 
-  --ion-text-color: #ffffff;
-  --ion-text-color-rgb: 255, 255, 255;
-
-  --ion-card-background: #1c1c1d;
-  --ion-item-background: #1c1c1d;
+  &.accent {
+    color: var(--fitos-accent-primary);
+    text-shadow: 0 0 20px var(--fitos-accent-glow);
+  }
 }
 
-// Material Design Dark Mode
-.md body.dark {
-  --ion-background-color: #121212;
-  --ion-background-color-rgb: 18, 18, 18;
+// Stat label
+.fitos-stat-label {
+  font-size: var(--fitos-text-sm);
+  color: var(--fitos-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
 
-  --ion-text-color: #ffffff;
-  --ion-text-color-rgb: 255, 255, 255;
-
-  --ion-border-color: #222222;
-
-  --ion-card-background: #1e1e1e;
-  --ion-item-background: #1e1e1e;
+// ===========================================
+// REDUCED MOTION SUPPORT
+// ===========================================
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -6,7 +6,8 @@
 
     <base href="/"/>
 
-    <meta name="color-scheme" content="light dark"/>
+    <!-- Dark-first color scheme -->
+    <meta name="color-scheme" content="dark light"/>
     <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <meta name="format-detection" content="telephone=no"/>
     <meta name="msapplication-tap-highlight" content="no"/>
@@ -16,14 +17,16 @@
     <!-- PWA -->
     <meta name="mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-capable" content="yes"/>
-    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
     <meta name="apple-mobile-web-app-title" content="FitOS"/>
 
-    <!-- Theme color -->
-    <meta name="theme-color" content="#6366F1"/>
+    <!-- Theme color - dark mode default -->
+    <meta name="theme-color" content="#0D0D0D" media="(prefers-color-scheme: dark)"/>
+    <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)"/>
+    
     <link rel="manifest" href="manifest.webmanifest">
 </head>
-  <body>
+  <body class="dark">
     <app-root></app-root>
     <noscript>Please enable JavaScript to continue using this application.</noscript>
 </body>

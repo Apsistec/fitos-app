@@ -1,0 +1,152 @@
+// ===========================================
+// FitOS Design Tokens
+// Dark-First Design System v2.0
+// ===========================================
+
+// ===========================================
+// BACKGROUND HIERARCHY (Dark Mode Default)
+// NOT pure black - reduces eye strain on OLED
+// ===========================================
+:root {
+  --fitos-bg-primary: #0D0D0D;
+  --fitos-bg-secondary: #1A1A1A;
+  --fitos-bg-tertiary: #262626;
+  --fitos-bg-elevated: #333333;
+
+  // ===========================================
+  // TEXT HIERARCHY (WCAG AA+ Compliant)
+  // ===========================================
+  --fitos-text-primary: #F5F5F5;      // 15.8:1 contrast
+  --fitos-text-secondary: #A3A3A3;    // 7:1 contrast
+  --fitos-text-tertiary: #737373;     // 4.5:1 contrast
+  --fitos-text-disabled: #525252;
+
+  // ===========================================
+  // BRAND ACCENT (Energetic Teal - WHOOP-inspired)
+  // ===========================================
+  --fitos-accent-primary: #10B981;
+  --fitos-accent-primary-rgb: 16, 185, 129;
+  --fitos-accent-primary-shade: #0E9F6E;
+  --fitos-accent-primary-tint: #34D399;
+  --fitos-accent-glow: rgba(16, 185, 129, 0.3);
+
+  --fitos-accent-secondary: #8B5CF6;
+  --fitos-accent-secondary-rgb: 139, 92, 246;
+  --fitos-accent-glow-secondary: rgba(139, 92, 246, 0.3);
+
+  // ===========================================
+  // STATUS COLORS
+  // ===========================================
+  --fitos-status-success: #10B981;
+  --fitos-status-info: #3B82F6;
+  --fitos-status-warning: #F59E0B;
+  --fitos-status-error: #EF4444;  // Only for errors, NEVER nutrition
+
+  // ===========================================
+  // NUTRITION (Adherence-Neutral Palette)
+  // NEVER use red for "over target"
+  // ===========================================
+  --fitos-nutrition-calories: #6366F1;  // Indigo
+  --fitos-nutrition-protein: #10B981;   // Teal/Green
+  --fitos-nutrition-carbs: #F59E0B;     // Amber
+  --fitos-nutrition-fat: #EC4899;       // Pink
+  --fitos-nutrition-over: #8B5CF6;      // Purple (NOT red!)
+  --fitos-nutrition-neutral: #6B7280;   // Gray
+
+  // ===========================================
+  // BORDERS & DIVIDERS
+  // ===========================================
+  --fitos-border-subtle: rgba(255, 255, 255, 0.08);
+  --fitos-border-default: rgba(255, 255, 255, 0.12);
+  --fitos-border-strong: rgba(255, 255, 255, 0.2);
+
+  // ===========================================
+  // SHADOWS & GLOWS (Dark mode uses elevation)
+  // ===========================================
+  --fitos-glow-primary: 0 0 20px rgba(16, 185, 129, 0.3);
+  --fitos-glow-accent: 0 0 20px rgba(139, 92, 246, 0.3);
+  --fitos-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --fitos-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --fitos-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+
+  // ===========================================
+  // SPACING (4px base unit)
+  // ===========================================
+  --fitos-space-1: 4px;
+  --fitos-space-2: 8px;
+  --fitos-space-3: 12px;
+  --fitos-space-4: 16px;
+  --fitos-space-5: 20px;
+  --fitos-space-6: 24px;
+  --fitos-space-8: 32px;
+  --fitos-space-10: 40px;
+  --fitos-space-12: 48px;
+  --fitos-space-16: 64px;
+
+  // ===========================================
+  // BORDER RADIUS
+  // ===========================================
+  --fitos-radius-sm: 4px;
+  --fitos-radius-md: 8px;
+  --fitos-radius-lg: 12px;
+  --fitos-radius-xl: 16px;
+  --fitos-radius-2xl: 24px;
+  --fitos-radius-full: 9999px;
+
+  // ===========================================
+  // TYPOGRAPHY
+  // ===========================================
+  --fitos-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --fitos-font-mono: 'SF Mono', 'Roboto Mono', Consolas, monospace;
+
+  // Type scale
+  --fitos-text-xs: 12px;
+  --fitos-text-sm: 14px;
+  --fitos-text-base: 16px;
+  --fitos-text-lg: 18px;
+  --fitos-text-xl: 20px;
+  --fitos-text-2xl: 24px;
+  --fitos-text-3xl: 30px;
+  --fitos-text-4xl: 36px;
+
+  // ===========================================
+  // ANIMATION
+  // ===========================================
+  --fitos-ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --fitos-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --fitos-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --fitos-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --fitos-duration-fast: 150ms;
+  --fitos-duration-normal: 250ms;
+  --fitos-duration-slow: 350ms;
+  --fitos-duration-slower: 500ms;
+}
+
+// ===========================================
+// LIGHT MODE OVERRIDES
+// ===========================================
+body.light {
+  --fitos-bg-primary: #FFFFFF;
+  --fitos-bg-secondary: #F9FAFB;
+  --fitos-bg-tertiary: #F3F4F6;
+  --fitos-bg-elevated: #FFFFFF;
+
+  --fitos-text-primary: #111827;
+  --fitos-text-secondary: #4B5563;
+  --fitos-text-tertiary: #9CA3AF;
+  --fitos-text-disabled: #D1D5DB;
+
+  --fitos-accent-primary: #059669;
+  --fitos-accent-primary-shade: #047857;
+  --fitos-accent-primary-tint: #10B981;
+  --fitos-accent-glow: rgba(5, 150, 105, 0.2);
+
+  --fitos-border-subtle: rgba(0, 0, 0, 0.05);
+  --fitos-border-default: rgba(0, 0, 0, 0.1);
+  --fitos-border-strong: rgba(0, 0, 0, 0.2);
+
+  --fitos-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --fitos-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --fitos-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+}

@@ -1,6 +1,7 @@
 @use './theme/responsive.scss';
 /*
  * FitOS Global Styles
+ * Dark-First Design System v2.0
  */
 
 // Import Ionic styles
@@ -17,159 +18,370 @@
 @import '@ionic/angular/css/text-transformation.css';
 @import '@ionic/angular/css/flex-utils.css';
 
-// FitOS Responsive Utilities
+// ===========================================
+// BASE DARK MODE STYLES
+// ===========================================
+
+html, body {
+  background: var(--fitos-bg-primary);
+  color: var(--fitos-text-primary);
+}
+
+// Ensure dark class is default
+body {
+  &:not(.light) {
+    // Dark mode is default
+  }
+}
 
 // ===========================================
-// FitOS Custom Global Styles
+// IONIC COMPONENT OVERRIDES
 // ===========================================
 
 // Safe area padding for notched devices
 ion-content {
   --padding-top: env(safe-area-inset-top);
   --padding-bottom: env(safe-area-inset-bottom);
+  --background: var(--fitos-bg-primary);
 }
 
 // Card styling
 ion-card {
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --background: var(--fitos-bg-secondary);
+  --color: var(--fitos-text-primary);
+  border-radius: var(--fitos-radius-lg);
+  box-shadow: none;
+  border: 1px solid var(--fitos-border-subtle);
+
+  ion-card-header {
+    ion-card-title {
+      color: var(--fitos-text-primary);
+      font-weight: 600;
+    }
+    
+    ion-card-subtitle {
+      color: var(--fitos-text-secondary);
+    }
+  }
+
+  ion-card-content {
+    color: var(--fitos-text-secondary);
+  }
 }
 
 // Button styling
 ion-button {
-  --border-radius: 8px;
+  --border-radius: var(--fitos-radius-md);
   font-weight: 600;
   text-transform: none;
   letter-spacing: 0;
 }
 
 // Input styling
-ion-input, ion-textarea {
-  --border-radius: 8px;
+ion-input, ion-textarea, ion-select {
+  --border-radius: var(--fitos-radius-md);
+  --background: var(--fitos-bg-tertiary);
+  --color: var(--fitos-text-primary);
+  --placeholder-color: var(--fitos-text-tertiary);
+}
+
+// Item styling for dark mode
+ion-item {
+  --background: var(--fitos-bg-secondary);
+  --color: var(--fitos-text-primary);
+  --border-color: var(--fitos-border-subtle);
+  --detail-icon-color: var(--fitos-text-tertiary);
+  --border-radius: var(--fitos-radius-md);
+
+  ion-label {
+    color: var(--fitos-text-primary) !important;
+
+    h2, h3 {
+      color: var(--fitos-text-primary) !important;
+    }
+
+    p {
+      color: var(--fitos-text-secondary) !important;
+    }
+  }
+
+  ion-note {
+    color: var(--fitos-text-tertiary);
+  }
 }
 
 // List styling
-ion-item {
-  --border-radius: 8px;
+ion-list {
+  background: transparent;
+  
+  ion-list-header {
+    color: var(--fitos-text-primary);
+  }
+}
+
+// Toolbar styling
+ion-toolbar {
+  --background: var(--fitos-bg-secondary);
+  --color: var(--fitos-text-primary);
+  --border-color: var(--fitos-border-subtle);
+
+  ion-title {
+    color: var(--fitos-text-primary);
+  }
+
+  ion-back-button {
+    --color: var(--fitos-accent-primary);
+  }
+}
+
+// Tab bar styling
+ion-tab-bar {
+  --background: var(--fitos-bg-secondary);
+  --color: var(--fitos-text-tertiary);
+  --color-selected: var(--fitos-accent-primary);
+  border-top: 1px solid var(--fitos-border-subtle);
+}
+
+// Segment styling
+ion-segment {
+  --background: var(--fitos-bg-tertiary);
+
+  ion-segment-button {
+    --background-checked: var(--fitos-accent-primary);
+    --color: var(--fitos-text-secondary);
+    --color-checked: #ffffff;
+    --indicator-color: transparent;
+  }
+}
+
+// Modal styling
+ion-modal {
+  --background: var(--fitos-bg-primary);
+  --border-radius: var(--fitos-radius-xl);
+
+  ion-content {
+    --background: var(--fitos-bg-primary);
+  }
+}
+
+// Action sheet styling
+ion-action-sheet {
+  --background: var(--fitos-bg-secondary);
+  --color: var(--fitos-text-primary);
+  --button-background: var(--fitos-bg-secondary);
+  --button-color: var(--fitos-text-primary);
+}
+
+// Alert styling
+ion-alert {
+  --background: var(--fitos-bg-secondary);
+
+  .alert-title {
+    color: var(--fitos-text-primary);
+  }
+
+  .alert-message {
+    color: var(--fitos-text-secondary);
+  }
+
+  .alert-input {
+    background: var(--fitos-bg-tertiary);
+    color: var(--fitos-text-primary);
+    border-color: var(--fitos-border-default);
+  }
+}
+
+// Toast styling
+ion-toast {
+  --background: var(--fitos-bg-elevated);
+  --color: var(--fitos-text-primary);
+}
+
+// Searchbar styling
+ion-searchbar {
+  --background: var(--fitos-bg-tertiary);
+  --color: var(--fitos-text-primary);
+  --placeholder-color: var(--fitos-text-tertiary);
+  --icon-color: var(--fitos-text-tertiary);
+  --clear-button-color: var(--fitos-text-secondary);
+}
+
+// Toggle styling
+ion-toggle {
+  --track-background: var(--fitos-bg-tertiary);
+  --track-background-checked: var(--fitos-accent-primary);
+}
+
+// Checkbox styling
+ion-checkbox {
+  --background: var(--fitos-bg-tertiary);
+  --background-checked: var(--fitos-accent-primary);
+  --border-color: var(--fitos-border-default);
+  --border-color-checked: var(--fitos-accent-primary);
+  --checkmark-color: #ffffff;
+}
+
+// Radio styling
+ion-radio {
+  --color: var(--fitos-text-tertiary);
+  --color-checked: var(--fitos-accent-primary);
+}
+
+// Spinner styling
+ion-spinner {
+  --color: var(--fitos-accent-primary);
+}
+
+// Note styling
+ion-note {
+  color: var(--fitos-text-tertiary);
+}
+
+// Badge styling  
+ion-badge {
+  border-radius: var(--fitos-radius-full);
 }
 
 // ===========================================
-// Nutrition Colors (Adherence Neutral)
+// NUTRITION COLORS (ADHERENCE-NEUTRAL)
+// NEVER use red for "over target"
 // ===========================================
-.calories-color {
-  color: var(--fitos-calories);
-}
+.calories-color { color: var(--fitos-nutrition-calories); }
+.protein-color { color: var(--fitos-nutrition-protein); }
+.carbs-color { color: var(--fitos-nutrition-carbs); }
+.fat-color { color: var(--fitos-nutrition-fat); }
 
-.protein-color {
-  color: var(--fitos-protein);
-}
-
-.carbs-color {
-  color: var(--fitos-carbs);
-}
-
-.fat-color {
-  color: var(--fitos-fat);
-}
-
-// Use neutral gray for "over target" - NOT red
-.over-target {
-  color: var(--fitos-neutral);
-}
+// Use purple for "over target" - NOT red
+.over-target { color: var(--fitos-nutrition-over); }
+.nutrition-neutral { color: var(--fitos-nutrition-neutral); }
 
 // ===========================================
-// Progress Bars (Nutrition)
+// PROGRESS BARS (Nutrition)
 // ===========================================
 .nutrition-progress {
-  --background: var(--ion-color-light);
-  --progress-background: var(--fitos-calories);
+  --background: var(--fitos-bg-tertiary);
+  --progress-background: var(--fitos-nutrition-calories);
   height: 8px;
-  border-radius: 4px;
+  border-radius: var(--fitos-radius-sm);
 
-  &.protein {
-    --progress-background: var(--fitos-protein);
-  }
-
-  &.carbs {
-    --progress-background: var(--fitos-carbs);
-  }
-
-  &.fat {
-    --progress-background: var(--fitos-fat);
-  }
+  &.protein { --progress-background: var(--fitos-nutrition-protein); }
+  &.carbs { --progress-background: var(--fitos-nutrition-carbs); }
+  &.fat { --progress-background: var(--fitos-nutrition-fat); }
+  &.over { --progress-background: var(--fitos-nutrition-over); }
 }
 
 // ===========================================
-// Workout Logging
+// WORKOUT LOGGING
 // ===========================================
 .set-complete {
-  background-color: var(--ion-color-success);
+  background-color: var(--fitos-status-success);
   color: white;
-  border-radius: 8px;
+  border-radius: var(--fitos-radius-md);
 }
 
 .set-pending {
-  background-color: var(--ion-color-light);
-  border-radius: 8px;
+  background-color: var(--fitos-bg-tertiary);
+  border-radius: var(--fitos-radius-md);
 }
 
-// Rest timer
 .rest-timer {
+  font-family: var(--fitos-font-mono);
   font-size: 3rem;
   font-weight: 700;
   text-align: center;
-  color: var(--ion-color-primary);
+  color: var(--fitos-accent-primary);
 }
 
 // ===========================================
-// Avatar
+// CARDS WITH GLOW EFFECTS
+// ===========================================
+.fitos-card {
+  background: var(--fitos-bg-secondary);
+  border-radius: var(--fitos-radius-lg);
+  border: 1px solid var(--fitos-border-subtle);
+  padding: var(--fitos-space-4);
+  transition: border-color var(--fitos-duration-fast), box-shadow var(--fitos-duration-fast);
+
+  &:hover, &:focus {
+    border-color: var(--fitos-border-default);
+  }
+
+  &.active, &.selected {
+    border-color: var(--fitos-accent-primary);
+    box-shadow: var(--fitos-glow-primary);
+  }
+}
+
+// ===========================================
+// METRIC DISPLAYS
+// ===========================================
+.fitos-metric {
+  font-family: var(--fitos-font-mono);
+  font-size: var(--fitos-text-4xl);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--fitos-text-primary);
+
+  &.accent {
+    color: var(--fitos-accent-primary);
+    text-shadow: 0 0 20px var(--fitos-accent-glow);
+  }
+
+  &.small {
+    font-size: var(--fitos-text-2xl);
+  }
+}
+
+.fitos-stat-label {
+  font-size: var(--fitos-text-sm);
+  color: var(--fitos-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+// ===========================================
+// AVATAR
 // ===========================================
 .avatar {
   width: 48px;
   height: 48px;
   border-radius: 50%;
   object-fit: cover;
+  border: 2px solid var(--fitos-border-default);
 
-  &.small {
-    width: 32px;
-    height: 32px;
-  }
-
-  &.large {
-    width: 80px;
-    height: 80px;
-  }
+  &.small { width: 32px; height: 32px; }
+  &.large { width: 80px; height: 80px; }
 }
 
 // ===========================================
-// Status Badges
+// STATUS BADGES
 // ===========================================
 .status-badge {
   display: inline-flex;
   align-items: center;
   padding: 4px 8px;
-  border-radius: 12px;
+  border-radius: var(--fitos-radius-full);
   font-size: 0.75rem;
   font-weight: 600;
 
   &.active {
-    background-color: rgba(34, 197, 94, 0.1);
-    color: var(--ion-color-success);
+    background-color: rgba(16, 185, 129, 0.15);
+    color: var(--fitos-status-success);
   }
 
   &.pending {
-    background-color: rgba(245, 158, 11, 0.1);
-    color: var(--ion-color-warning);
+    background-color: rgba(245, 158, 11, 0.15);
+    color: var(--fitos-status-warning);
   }
 
   &.inactive {
-    background-color: rgba(107, 114, 128, 0.1);
-    color: var(--ion-color-medium);
+    background-color: rgba(115, 115, 115, 0.15);
+    color: var(--fitos-text-tertiary);
   }
 }
 
 // ===========================================
-// Empty States
+// EMPTY STATES
 // ===========================================
 .empty-state {
   display: flex;
@@ -181,44 +393,75 @@ ion-item {
 
   ion-icon {
     font-size: 64px;
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-tertiary);
     margin-bottom: 16px;
   }
 
   h3 {
     margin: 0 0 8px;
     font-weight: 600;
+    color: var(--fitos-text-primary);
   }
 
   p {
     margin: 0 0 24px;
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-secondary);
   }
 }
 
 // ===========================================
-// Utility Classes
+// UTILITY CLASSES
 // ===========================================
-.text-center {
-  text-align: center;
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.font-bold { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+.font-medium { font-weight: 500; }
+.font-mono { font-family: var(--fitos-font-mono); }
+
+.text-primary { color: var(--fitos-text-primary) !important; }
+.text-secondary { color: var(--fitos-text-secondary) !important; }
+.text-tertiary { color: var(--fitos-text-tertiary) !important; }
+.text-accent { color: var(--fitos-accent-primary) !important; }
+.text-muted { color: var(--fitos-text-tertiary); }
+
+.bg-primary { background: var(--fitos-bg-primary) !important; }
+.bg-secondary { background: var(--fitos-bg-secondary) !important; }
+.bg-tertiary { background: var(--fitos-bg-tertiary) !important; }
+
+.mb-0 { margin-bottom: 0; }
+.mt-0 { margin-top: 0; }
+.p-0 { padding: 0; }
+
+// ===========================================
+// REDUCED MOTION SUPPORT
+// ===========================================
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
-.font-bold {
-  font-weight: 700;
-}
+// ===========================================
+// LIGHT MODE OVERRIDES
+// ===========================================
+body.light {
+  ion-card {
+    box-shadow: var(--fitos-shadow-sm);
+    border: none;
+  }
 
-.font-semibold {
-  font-weight: 600;
-}
+  ion-toolbar {
+    box-shadow: 0 1px 0 var(--fitos-border-subtle);
+  }
 
-.text-muted {
-  color: var(--ion-color-medium);
-}
-
-.mb-0 {
-  margin-bottom: 0;
-}
-
-.mt-0 {
-  margin-top: 0;
+  ion-tab-bar {
+    box-shadow: 0 -1px 0 var(--fitos-border-subtle);
+    border-top: none;
+  }
 }
