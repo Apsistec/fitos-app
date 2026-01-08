@@ -73,6 +73,8 @@ export class AuthService {
   initAuthListener(): void {
     // Get initial session
     this.supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('getSession result:', session ? 'Session exists' : 'No session');
+
       this._state.update((s) => ({
         ...s,
         session,
@@ -82,7 +84,16 @@ export class AuthService {
       }));
 
       if (session?.user) {
+        console.log('Loading profile for user:', session.user.id);
         await this.loadProfile(session.user.id);
+        console.log('Profile loaded, initialized:', this._state().initialized);
+      } else {
+        // No session - redirect to login if not already on auth page
+        const currentUrl = this.router.url;
+        console.log('No session, current URL:', currentUrl);
+        if (!currentUrl.startsWith('/auth')) {
+          this.router.navigate(['/auth/login']);
+        }
       }
     });
 
@@ -108,6 +119,15 @@ export class AuthService {
             initialized: true,
           }));
           this.router.navigate(['/auth/login']);
+        } else if (event === 'INITIAL_SESSION') {
+          // On page refresh with existing session, getSession() already handled it
+          // Just ensure we're initialized if there's no user
+          if (!session?.user) {
+            this._state.update((s) => ({
+              ...s,
+              initialized: true,
+            }));
+          }
         }
       }
     );
@@ -147,8 +167,13 @@ export class AuthService {
       }));
     } catch (error) {
       console.error('Error loading profile:', error);
+      // If profile load fails, sign out to clear bad session
+      await this.signOut();
       this._state.update((s) => ({
         ...s,
+        user: null,
+        session: null,
+        profile: null,
         loading: false,
         initialized: true,
       }));

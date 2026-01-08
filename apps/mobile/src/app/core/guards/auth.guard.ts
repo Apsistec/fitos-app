@@ -2,8 +2,8 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router, UrlTree, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { filter, map, take } from 'rxjs';
-import { Observable } from 'rxjs';
+import { filter, map, take, timeout, catchError } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 /**
  * Auth guard - protects routes that require authentication
@@ -23,6 +23,8 @@ export const authGuard: CanActivateFn = (
     // Wait until auth is initialized
     filter((authState) => authState.initialized),
     take(1),
+    // Timeout after 5 seconds to prevent infinite waiting
+    timeout(5000),
     map((authState) => {
       if (authState.user) {
         return true;
@@ -30,6 +32,12 @@ export const authGuard: CanActivateFn = (
       // Not authenticated - store returnUrl and redirect to login
       authService.setReturnUrl(state.url);
       return router.createUrlTree(['/auth/login']);
+    }),
+    catchError((error) => {
+      console.error('Auth guard timeout or error:', error);
+      // On timeout or error, redirect to login
+      authService.setReturnUrl(state.url);
+      return of(router.createUrlTree(['/auth/login']));
     })
   );
 };

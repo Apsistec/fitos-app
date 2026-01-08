@@ -359,7 +359,7 @@ import { FormsModule } from '@angular/forms';
       }
 
       .last-updated {
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-tertiary);
         font-size: 0.875rem;
         margin: 0 0 32px 0;
       }
@@ -388,7 +388,8 @@ import { FormsModule } from '@angular/forms';
         p {
           line-height: 1.7;
           margin: 0 0 12px 0;
-          color: var(--ion-color-medium);
+          color: var(--fitos-text-primary);
+          font-size: 1rem;
 
           strong {
             color: var(--ion-color-dark);
@@ -403,7 +404,8 @@ import { FormsModule } from '@angular/forms';
           li {
             margin-bottom: 8px;
             line-height: 1.6;
-            color: var(--ion-color-medium);
+            color: var(--fitos-text-primary);
+            font-size: 1rem;
 
             strong {
               color: var(--ion-color-dark);

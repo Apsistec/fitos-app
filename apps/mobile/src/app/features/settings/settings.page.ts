@@ -32,6 +32,9 @@ import {
   openOutline,
   pricetagOutline,
   watchOutline,
+  settingsOutline,
+  shieldCheckmarkOutline,
+  cogOutline,
 } from 'ionicons/icons';
 import { AuthService } from '@app/core/services/auth.service';
 import { StripeService } from '@app/core/services/stripe.service';
@@ -67,11 +70,10 @@ import { ThemeService } from '@app/core/services/theme.service';
         <!-- Client Subscription Section -->
         @if (!isTrainer()) {
           <ion-list>
-            <ion-item class="section-header" lines="none">
-              <ion-label>
-                <h2>Subscription</h2>
-              </ion-label>
-            </ion-item>
+            <div class="section-header">
+              <ion-icon name="card-outline" color="primary"></ion-icon>
+              <h2>Subscription</h2>
+            </div>
 
             <ion-item button detail routerLink="/tabs/settings/subscription">
               <ion-icon name="card-outline" slot="start"></ion-icon>
@@ -86,11 +88,10 @@ import { ThemeService } from '@app/core/services/theme.service';
         <!-- Trainer Payments Section -->
         @if (isTrainer()) {
           <ion-list>
-            <ion-item class="section-header" lines="none">
-              <ion-label>
-                <h2>Payments</h2>
-              </ion-label>
-            </ion-item>
+            <div class="section-header">
+              <ion-icon name="card-outline" color="primary"></ion-icon>
+              <h2>Payments</h2>
+            </div>
 
             <ion-item>
               <ion-icon name="card-outline" slot="start"></ion-icon>
@@ -184,6 +185,11 @@ import { ThemeService } from '@app/core/services/theme.service';
         }
 
         <ion-list>
+          <div class="section-header">
+            <ion-icon name="cog-outline" color="primary"></ion-icon>
+            <h2>Preferences</h2>
+          </div>
+
           <ion-item button detail routerLink="/tabs/settings/profile">
             <ion-icon name="person-outline" slot="start"></ion-icon>
             <ion-label>Edit Profile</ion-label>
@@ -210,6 +216,11 @@ import { ThemeService } from '@app/core/services/theme.service';
         </ion-list>
 
         <ion-list>
+          <div class="section-header">
+            <ion-icon name="shield-checkmark-outline" color="primary"></ion-icon>
+            <h2>Support & Legal</h2>
+          </div>
+
           <ion-item button detail routerLink="/tabs/settings/privacy">
             <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
             <ion-label>Privacy & Security</ion-label>
@@ -252,7 +263,14 @@ import { ThemeService } from '@app/core/services/theme.service';
     }
 
     .section-header {
-      --background: transparent;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 24px 16px 12px;
+
+      ion-icon {
+        font-size: 24px;
+      }
 
       h2 {
         font-size: 1.125rem;
@@ -331,6 +349,9 @@ export class SettingsPage implements OnInit {
       openOutline,
       pricetagOutline,
       watchOutline,
+      settingsOutline,
+      shieldCheckmarkOutline,
+      cogOutline,
     });
   }
 

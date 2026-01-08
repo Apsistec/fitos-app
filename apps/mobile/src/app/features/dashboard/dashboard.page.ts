@@ -99,7 +99,7 @@ import type { WorkoutWithExercises } from '@app/core/services/workout.service';
             <app-stat-card
               label="Streak"
               [value]="currentStreak()"
-              icon="flame"
+              icon="flame-outline"
               [suffix]="currentStreak() > 0 ? '🔥' : ''"
             />
           </div>

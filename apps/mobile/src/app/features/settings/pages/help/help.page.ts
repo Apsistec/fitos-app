@@ -313,7 +313,8 @@ import {
               li {
                 margin-bottom: 8px;
                 line-height: 1.5;
-                color: var(--ion-color-medium);
+                color: var(--fitos-text-primary);
+                font-size: 1rem;
 
                 &:last-child {
                   margin-bottom: 0;

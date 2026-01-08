@@ -62,14 +62,6 @@ import { SupabaseService } from '@app/core/services/supabase.service';
             <h2>Account Security</h2>
           </div>
 
-          <ion-item button detail (click)="changePassword()">
-            <ion-icon name="key-outline" slot="start"></ion-icon>
-            <ion-label>
-              <h3>Change Password</h3>
-              <p>Update your account password</p>
-            </ion-label>
-          </ion-item>
-
           <ion-item button detail (click)="manageSessions()">
             <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
             <ion-label>
@@ -244,7 +236,8 @@ import { SupabaseService } from '@app/core/services/supabase.service';
         li {
           margin-bottom: 8px;
           line-height: 1.5;
-          color: var(--ion-color-medium);
+          color: var(--fitos-text-primary);
+          font-size: 1rem;
 
           &:last-child {
             margin-bottom: 0;
@@ -270,50 +263,6 @@ export class PrivacyPage {
       shieldCheckmarkOutline,
       eyeOffOutline,
     });
-  }
-
-  async changePassword() {
-    const alert = await this.alertController.create({
-      header: 'Change Password',
-      message: 'We\'ll send you a password reset link to your email.',
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel',
-        },
-        {
-          text: 'Send Link',
-          handler: async () => {
-            try {
-              const email = this.authService.profile()?.email;
-              if (!email) return;
-
-              const { error } = await this.supabase.auth.resetPasswordForEmail(email);
-              if (error) throw error;
-
-              const toast = await this.toastController.create({
-                message: 'Password reset link sent to your email',
-                duration: 3000,
-                color: 'success',
-                position: 'bottom',
-              });
-              await toast.present();
-            } catch (error) {
-              console.error('Error sending reset link:', error);
-              const toast = await this.toastController.create({
-                message: 'Failed to send reset link',
-                duration: 3000,
-                color: 'danger',
-                position: 'bottom',
-              });
-              await toast.present();
-            }
-          },
-        },
-      ],
-    });
-
-    await alert.present();
   }
 
   async manageSessions() {

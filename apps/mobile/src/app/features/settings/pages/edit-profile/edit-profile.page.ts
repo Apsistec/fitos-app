@@ -20,9 +20,10 @@ import {
   IonSelect,
   IonSelectOption,
   ToastController,
+  AlertController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { cameraOutline, saveOutline } from 'ionicons/icons';
+import { cameraOutline, saveOutline, keyOutline } from 'ionicons/icons';
 import { AuthService } from '@app/core/services/auth.service';
 import { SupabaseService } from '@app/core/services/supabase.service';
 
@@ -109,6 +110,14 @@ import { SupabaseService } from '@app/core/services/supabase.service';
               <ion-button slot="end" fill="clear" size="small" routerLink="/tabs/settings/change-email">
                 Change
               </ion-button>
+            </ion-item>
+
+            <ion-item button detail (click)="changePassword()">
+              <ion-icon name="key-outline" slot="start" color="primary"></ion-icon>
+              <ion-label>
+                <h3>Change Password</h3>
+                <p>Send password reset link to your email</p>
+              </ion-label>
             </ion-item>
 
             <ion-item>
@@ -213,6 +222,7 @@ export class EditProfilePage implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private toastController = inject(ToastController);
+  private alertController = inject(AlertController);
 
   saving = signal(false);
   avatarUrl = signal<string | null>(null);
@@ -223,7 +233,7 @@ export class EditProfilePage implements OnInit {
   profileForm: FormGroup;
 
   constructor() {
-    addIcons({ cameraOutline, saveOutline });
+    addIcons({ cameraOutline, saveOutline, keyOutline });
 
     this.profileForm = this.fb.group({
       fullName: ['', Validators.required],
@@ -326,5 +336,49 @@ export class EditProfilePage implements OnInit {
       position: 'bottom',
     });
     await toast.present();
+  }
+
+  async changePassword() {
+    const alert = await this.alertController.create({
+      header: 'Change Password',
+      message: 'We\'ll send you a password reset link to your email.',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+        },
+        {
+          text: 'Send Link',
+          handler: async () => {
+            try {
+              const email = this.authService.profile()?.email;
+              if (!email) return;
+
+              const { error } = await this.supabase.client.auth.resetPasswordForEmail(email);
+              if (error) throw error;
+
+              const toast = await this.toastController.create({
+                message: 'Password reset link sent to your email',
+                duration: 3000,
+                color: 'success',
+                position: 'bottom',
+              });
+              await toast.present();
+            } catch (error) {
+              console.error('Error sending reset link:', error);
+              const toast = await this.toastController.create({
+                message: 'Failed to send reset link',
+                duration: 3000,
+                color: 'danger',
+                position: 'bottom',
+              });
+              await toast.present();
+            }
+          },
+        },
+      ],
+    });
+
+    await alert.present();
   }
 }

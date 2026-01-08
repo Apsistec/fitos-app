@@ -84,6 +84,14 @@
   --fitos-neutral: #6B7280;     // Gray (for "over" instead of red)
 
   // ===========================================
+  // FitOS Text Colors (WCAG AA Compliant)
+  // ===========================================
+  // Use these for text content to ensure proper contrast
+  --fitos-text-primary: var(--ion-color-dark);        // Body text, paragraphs (7:1+ contrast)
+  --fitos-text-secondary: rgba(31, 41, 55, 0.7);      // Descriptions, labels (4.5:1+ contrast)
+  --fitos-text-tertiary: var(--ion-color-medium);     // Metadata, timestamps (3:1+ contrast)
+
+  // ===========================================
   // Global Styling
   // ===========================================
   --ion-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -112,6 +120,11 @@
     --ion-toolbar-background: #1F2937;
 
     --ion-tab-bar-background: #1F2937;
+
+    // FitOS Text Colors (Dark Mode)
+    --fitos-text-primary: rgba(255, 255, 255, 0.95);
+    --fitos-text-secondary: rgba(255, 255, 255, 0.7);
+    --fitos-text-tertiary: var(--ion-color-medium);
   }
 }
 
