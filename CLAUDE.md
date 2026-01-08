@@ -10,25 +10,30 @@ FitOS is an AI-powered fitness coaching platform for solo trainers. Monorepo str
 - `libs/shared` - Shared TypeScript types and utilities
 - `supabase/` - Database migrations and Edge Functions
 
-## Tech Stack
+## Tech Stack (2026 Standard)
 
-| Layer | Technology |
-|-------|------------|
-| Frontend | Ionic 8.7 + Angular 20 + TypeScript 5.8 |
-| Native | Capacitor 8 |
-| Backend | Supabase (PostgreSQL + pgvector + Auth) |
-| AI | LangGraph (Python) on Cloud Run |
-| Voice AI | Deepgram Nova-3/Aura-2 |
-| Payments | Stripe Connect |
-| Wearables | Terra API |
+| Layer | Technology | Version | Key 2026 Feature |
+|-------|------------|---------|------------------|
+| Frontend | Angular | 21.0.x | Zoneless by default; Stable Signal Forms |
+| UI Framework | Ionic | 8.7.x | Ionicons v8; Native iOS 19 / Android 15 haptics |
+| Native Runtime | Capacitor | 8.0.x | SPM (Swift Package Manager); Edge-to-Edge Android |
+| TypeScript | TypeScript | 5.9.x | Latest stable with Angular 21 |
+| Node.js | Node.js | 22.12.x | Required for latest Angular/Capacitor CLI |
+| Backend | Supabase | Latest | PostgreSQL + pgvector + Auth + Realtime |
+| AI Backend | LangGraph | Latest | Python on Cloud Run |
+| Voice AI | Deepgram | Nova-3/Aura-2 | Real-time transcription |
+| Payments | Stripe Connect | Latest | Trainer payouts |
+| Wearables | Terra API | Latest | Multi-platform health data |
 
-## Version Requirements
+## Version Requirements (STRICT)
 
-- **Node.js**: >=20.11.0
+- **Node.js**: ^22.12.0 (LTS - Required for Angular 21)
 - **npm**: >=10.0.0
-- **Angular**: 20.x
-- **Ionic**: 8.7.x
-- **Capacitor**: 8.x
+- **Angular**: ~21.0.0 (Zoneless by default)
+- **Ionic**: ^8.7.16 (Latest stable)
+- **Capacitor**: ^8.0.0 (SPM for iOS, Edge-to-Edge Android)
+- **TypeScript**: ~5.9.0 (Compatible with Angular 21)
+- **Test Runner**: Vitest 3.x (Default for Angular 21, replaces Karma/Jasmine)
 
 ## Key Commands
 

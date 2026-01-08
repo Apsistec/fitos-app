@@ -1,6 +1,6 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule} from '@ionic/angular';
 import { RouterLink } from '@angular/router';
 
 export interface NutritionSummary {
@@ -13,6 +13,7 @@ export interface NutritionSummary {
 @Component({
   selector: 'app-client-nutrition-summary',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, IonicModule, RouterLink],
   template: `
     @if (summary(); as summary) {
