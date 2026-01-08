@@ -56,7 +56,6 @@ import { ThemeService, ThemeMode } from '@app/core/services/theme.service';
     IonItem,
     IonLabel,
     IonIcon,
-    IonToggle,
     IonButton,
     IonSpinner,
     IonBadge,

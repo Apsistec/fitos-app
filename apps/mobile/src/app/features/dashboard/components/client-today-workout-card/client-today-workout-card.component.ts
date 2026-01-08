@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { RouterLink } from '@angular/router';
@@ -7,6 +7,7 @@ import type { WorkoutWithExercises } from '../../../../core/services/workout.ser
 @Component({
   selector: 'app-client-today-workout-card',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, IonicModule, RouterLink],
   template: `
     @if (workout(); as workout) {
