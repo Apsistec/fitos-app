@@ -30,6 +30,7 @@ import { ClientService } from '../../../../core/services/client.service';
 import { WorkoutService } from '../../../../core/services/workout.service';
 
 @Component({
+  standalone: true,
   selector: 'app-assign-workout',
   imports: [
 

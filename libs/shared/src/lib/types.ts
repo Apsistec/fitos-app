@@ -13,6 +13,10 @@ export interface Profile {
   role: UserRole;
   timezone: string;
   unitsSystem: 'imperial' | 'metric';
+  streetAddress?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -37,6 +41,10 @@ export interface ClientProfile extends Profile {
   goals: string[];
   injuriesNotes?: string;
   fitnessLevel?: 'beginner' | 'intermediate' | 'advanced';
+  bio?: string;
+  fitnessGoals?: string;
+  dietaryPreferences?: string[];
+  activityLevel?: 'sedentary' | 'light' | 'moderate' | 'active' | 'very-active';
   stripeCustomerId?: string;
   onboardingCompleted: boolean;
 }

@@ -45,6 +45,7 @@ import { StripeService } from '@app/core/services/stripe.service';
 import { ThemeService, ThemeMode } from '@app/core/services/theme.service';
 
 @Component({
+  standalone: true,
   selector: 'app-settings',
   imports: [
     RouterLink,

@@ -44,6 +44,7 @@ interface ExerciseProgress {
 }
 
 @Component({
+  standalone: true,
   selector: 'app-active-workout',
   imports: [
 

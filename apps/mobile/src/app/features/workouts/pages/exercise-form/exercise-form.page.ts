@@ -73,6 +73,7 @@ const COMMON_EQUIPMENT = [
 ];
 
 @Component({
+  standalone: true,
   selector: 'app-exercise-form',
   imports: [
     ReactiveFormsModule,

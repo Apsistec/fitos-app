@@ -34,10 +34,65 @@ export type Database = {
   }
   public: {
     Tables: {
+      cached_foods: {
+        Row: {
+          brand: string | null
+          calories: number
+          carbs: number
+          created_at: string
+          fat: number
+          fdc_id: string
+          fiber: number | null
+          name: string
+          protein: number
+          serving_size: number | null
+          serving_size_unit: string | null
+          sodium: number | null
+          sugar: number | null
+          updated_at: string
+        }
+        Insert: {
+          brand?: string | null
+          calories?: number
+          carbs?: number
+          created_at?: string
+          fat?: number
+          fdc_id: string
+          fiber?: number | null
+          name: string
+          protein?: number
+          serving_size?: number | null
+          serving_size_unit?: string | null
+          sodium?: number | null
+          sugar?: number | null
+          updated_at?: string
+        }
+        Update: {
+          brand?: string | null
+          calories?: number
+          carbs?: number
+          created_at?: string
+          fat?: number
+          fdc_id?: string
+          fiber?: number | null
+          name?: string
+          protein?: number
+          serving_size?: number | null
+          serving_size_unit?: string | null
+          sodium?: number | null
+          sugar?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_profiles: {
         Row: {
+          activity_level: string | null
           created_at: string | null
           date_of_birth: string | null
+          dietary_preferences: string[] | null
+          facility_id: string | null
+          fitness_goals: string | null
           fitness_level: string | null
           gender: string | null
           goals: string[] | null
@@ -53,8 +108,12 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          activity_level?: string | null
           created_at?: string | null
           date_of_birth?: string | null
+          dietary_preferences?: string[] | null
+          facility_id?: string | null
+          fitness_goals?: string | null
           fitness_level?: string | null
           gender?: string | null
           goals?: string[] | null
@@ -70,8 +129,12 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          activity_level?: string | null
           created_at?: string | null
           date_of_birth?: string | null
+          dietary_preferences?: string[] | null
+          facility_id?: string | null
+          fitness_goals?: string | null
           fitness_level?: string | null
           gender?: string | null
           goals?: string[] | null
@@ -88,6 +151,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "client_profiles_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "facilities"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "client_profiles_id_fkey"
             columns: ["id"]
             isOneToOne: true
@@ -99,6 +169,170 @@ export type Database = {
             columns: ["trainer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_sends: {
+        Row: {
+          bounced_at: string | null
+          clicked_at: string | null
+          id: string
+          metadata: Json | null
+          opened_at: string | null
+          provider_message_id: string | null
+          recipient_email: string
+          recipient_id: string | null
+          recipient_type: string
+          sent_at: string
+          sequence_id: string | null
+          step_id: string | null
+          subject: string
+          template_id: string | null
+          unsubscribed_at: string | null
+        }
+        Insert: {
+          bounced_at?: string | null
+          clicked_at?: string | null
+          id?: string
+          metadata?: Json | null
+          opened_at?: string | null
+          provider_message_id?: string | null
+          recipient_email: string
+          recipient_id?: string | null
+          recipient_type: string
+          sent_at?: string
+          sequence_id?: string | null
+          step_id?: string | null
+          subject: string
+          template_id?: string | null
+          unsubscribed_at?: string | null
+        }
+        Update: {
+          bounced_at?: string | null
+          clicked_at?: string | null
+          id?: string
+          metadata?: Json | null
+          opened_at?: string | null
+          provider_message_id?: string | null
+          recipient_email?: string
+          recipient_id?: string | null
+          recipient_type?: string
+          sent_at?: string
+          sequence_id?: string | null
+          step_id?: string | null
+          subject?: string
+          template_id?: string | null
+          unsubscribed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_sends_sequence_id_fkey"
+            columns: ["sequence_id"]
+            isOneToOne: false
+            referencedRelation: "email_sequences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_sends_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "sequence_steps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_sends_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_sequences: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          trainer_id: string
+          trigger_event: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          trainer_id: string
+          trigger_event: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          trainer_id?: string
+          trigger_event?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_sequences_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_templates: {
+        Row: {
+          body_html: string
+          body_text: string | null
+          created_at: string
+          id: string
+          is_system: boolean
+          name: string
+          subject: string
+          trainer_id: string
+          updated_at: string
+          variables: string[] | null
+        }
+        Insert: {
+          body_html: string
+          body_text?: string | null
+          created_at?: string
+          id?: string
+          is_system?: boolean
+          name: string
+          subject: string
+          trainer_id: string
+          updated_at?: string
+          variables?: string[] | null
+        }
+        Update: {
+          body_html?: string
+          body_text?: string | null
+          created_at?: string
+          id?: string
+          is_system?: boolean
+          name?: string
+          subject?: string
+          trainer_id?: string
+          updated_at?: string
+          variables?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_templates_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -171,6 +405,128 @@ export type Database = {
           },
         ]
       }
+      facilities: {
+        Row: {
+          address: string | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          description: string | null
+          email: string | null
+          id: string
+          logo_url: string | null
+          max_members: number | null
+          max_trainers: number | null
+          name: string
+          owner_id: string
+          phone: string | null
+          state: string | null
+          subscription_ends_at: string | null
+          subscription_status: string | null
+          updated_at: string | null
+          website: string | null
+          zip_code: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          max_members?: number | null
+          max_trainers?: number | null
+          name: string
+          owner_id: string
+          phone?: string | null
+          state?: string | null
+          subscription_ends_at?: string | null
+          subscription_status?: string | null
+          updated_at?: string | null
+          website?: string | null
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          max_members?: number | null
+          max_trainers?: number | null
+          name?: string
+          owner_id?: string
+          phone?: string | null
+          state?: string | null
+          subscription_ends_at?: string | null
+          subscription_status?: string | null
+          updated_at?: string | null
+          website?: string | null
+          zip_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facilities_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      facility_trainers: {
+        Row: {
+          created_at: string | null
+          facility_id: string
+          hired_at: string | null
+          id: string
+          is_active: boolean | null
+          role: string | null
+          trainer_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          facility_id: string
+          hired_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          role?: string | null
+          trainer_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          facility_id?: string
+          hired_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          role?: string | null
+          trainer_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facility_trainers_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "facilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facility_trainers_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       foods: {
         Row: {
           brand: string | null
@@ -230,6 +586,63 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string | null
+          email: string
+          expires_at: string
+          id: string
+          invite_code: string
+          personal_message: string | null
+          status: Database["public"]["Enums"]["invitation_status"] | null
+          trainer_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string | null
+          email: string
+          expires_at?: string
+          id?: string
+          invite_code: string
+          personal_message?: string | null
+          status?: Database["public"]["Enums"]["invitation_status"] | null
+          trainer_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          invite_code?: string
+          personal_message?: string | null
+          status?: Database["public"]["Enums"]["invitation_status"] | null
+          trainer_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_accepted_by_fkey"
+            columns: ["accepted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invitations_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       invoices: {
         Row: {
@@ -291,6 +704,156 @@ export type Database = {
             columns: ["trainer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_activities: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string
+          id: string
+          lead_id: string
+          metadata: Json | null
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description: string
+          id?: string
+          lead_id: string
+          metadata?: Json | null
+          type: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string
+          id?: string
+          lead_id?: string
+          metadata?: Json | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_activities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_capture_forms: {
+        Row: {
+          created_at: string
+          description: string | null
+          fields: Json
+          id: string
+          is_active: boolean
+          lead_magnet_name: string | null
+          lead_magnet_url: string | null
+          name: string
+          redirect_url: string | null
+          thank_you_message: string | null
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          fields?: Json
+          id?: string
+          is_active?: boolean
+          lead_magnet_name?: string | null
+          lead_magnet_url?: string | null
+          name: string
+          redirect_url?: string | null
+          thank_you_message?: string | null
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          fields?: Json
+          id?: string
+          is_active?: boolean
+          lead_magnet_name?: string | null
+          lead_magnet_url?: string | null
+          name?: string
+          redirect_url?: string | null
+          thank_you_message?: string | null
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_capture_forms_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          created_at: string
+          email: string
+          expected_value: number | null
+          id: string
+          last_contact_at: string | null
+          name: string
+          next_follow_up: string | null
+          notes: string | null
+          phone: string | null
+          source: Database["public"]["Enums"]["lead_source"]
+          source_detail: string | null
+          stage: Database["public"]["Enums"]["lead_stage"]
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expected_value?: number | null
+          id?: string
+          last_contact_at?: string | null
+          name: string
+          next_follow_up?: string | null
+          notes?: string | null
+          phone?: string | null
+          source?: Database["public"]["Enums"]["lead_source"]
+          source_detail?: string | null
+          stage?: Database["public"]["Enums"]["lead_stage"]
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expected_value?: number | null
+          id?: string
+          last_contact_at?: string | null
+          name?: string
+          next_follow_up?: string | null
+          notes?: string | null
+          phone?: string | null
+          source?: Database["public"]["Enums"]["lead_source"]
+          source_detail?: string | null
+          stage?: Database["public"]["Enums"]["lead_stage"]
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -530,38 +1093,61 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          city: string | null
           created_at: string | null
           email: string
+          facility_id: string | null
           full_name: string | null
           id: string
           role: Database["public"]["Enums"]["user_role"]
+          state: string | null
+          street_address: string | null
           timezone: string | null
           units_system: string | null
           updated_at: string | null
+          zip_code: string | null
         }
         Insert: {
           avatar_url?: string | null
+          city?: string | null
           created_at?: string | null
           email: string
+          facility_id?: string | null
           full_name?: string | null
           id: string
           role?: Database["public"]["Enums"]["user_role"]
+          state?: string | null
+          street_address?: string | null
           timezone?: string | null
           units_system?: string | null
           updated_at?: string | null
+          zip_code?: string | null
         }
         Update: {
           avatar_url?: string | null
+          city?: string | null
           created_at?: string | null
           email?: string
+          facility_id?: string | null
           full_name?: string | null
           id?: string
           role?: Database["public"]["Enums"]["user_role"]
+          state?: string | null
+          street_address?: string | null
           timezone?: string | null
           units_system?: string | null
           updated_at?: string | null
+          zip_code?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "facilities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       progress_photos: {
         Row: {
@@ -594,6 +1180,54 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sequence_steps: {
+        Row: {
+          condition_type: string | null
+          created_at: string
+          delay_days: number
+          delay_hours: number
+          id: string
+          sequence_id: string
+          step_order: number
+          template_id: string
+        }
+        Insert: {
+          condition_type?: string | null
+          created_at?: string
+          delay_days?: number
+          delay_hours?: number
+          id?: string
+          sequence_id: string
+          step_order: number
+          template_id: string
+        }
+        Update: {
+          condition_type?: string | null
+          created_at?: string
+          delay_days?: number
+          delay_hours?: number
+          id?: string
+          sequence_id?: string
+          step_order?: number
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sequence_steps_sequence_id_fkey"
+            columns: ["sequence_id"]
+            isOneToOne: false
+            referencedRelation: "email_sequences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sequence_steps_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -670,6 +1304,7 @@ export type Database = {
           business_name: string | null
           certifications: string[] | null
           created_at: string | null
+          facility_id: string | null
           id: string
           max_clients: number | null
           specializations: string[] | null
@@ -686,6 +1321,7 @@ export type Database = {
           business_name?: string | null
           certifications?: string[] | null
           created_at?: string | null
+          facility_id?: string | null
           id: string
           max_clients?: number | null
           specializations?: string[] | null
@@ -702,6 +1338,7 @@ export type Database = {
           business_name?: string | null
           certifications?: string[] | null
           created_at?: string | null
+          facility_id?: string | null
           id?: string
           max_clients?: number | null
           specializations?: string[] | null
@@ -714,6 +1351,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "trainer_profiles_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "facilities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "trainer_profiles_id_fkey"
             columns: ["id"]
@@ -1106,7 +1750,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      accept_invitation: {
+        Args: { p_invite_code: string; p_user_id: string }
+        Returns: boolean
+      }
+      expire_old_invitations: { Args: never; Returns: undefined }
+      generate_invite_code: { Args: never; Returns: string }
+      get_trainer_id_for_user: { Args: never; Returns: string }
     }
     Enums: {
       exercise_category:
@@ -1115,6 +1765,15 @@ export type Database = {
         | "flexibility"
         | "balance"
         | "plyometric"
+      invitation_status: "pending" | "accepted" | "expired" | "cancelled"
+      lead_source: "website" | "referral" | "social" | "ad" | "other"
+      lead_stage:
+        | "new"
+        | "contacted"
+        | "qualified"
+        | "consultation"
+        | "won"
+        | "lost"
       measurement_type:
         | "weight"
         | "body_fat"
@@ -1138,7 +1797,7 @@ export type Database = {
         | "calves"
         | "full_body"
       subscription_status: "active" | "past_due" | "canceled" | "trialing"
-      user_role: "trainer" | "client" | "admin"
+      user_role: "trainer" | "client" | "admin" | "gym_owner"
       workout_status: "scheduled" | "in_progress" | "completed" | "skipped"
     }
     CompositeTypes: {
@@ -1277,6 +1936,16 @@ export const Constants = {
         "balance",
         "plyometric",
       ],
+      invitation_status: ["pending", "accepted", "expired", "cancelled"],
+      lead_source: ["website", "referral", "social", "ad", "other"],
+      lead_stage: [
+        "new",
+        "contacted",
+        "qualified",
+        "consultation",
+        "won",
+        "lost",
+      ],
       measurement_type: [
         "weight",
         "body_fat",
@@ -1302,7 +1971,7 @@ export const Constants = {
         "full_body",
       ],
       subscription_status: ["active", "past_due", "canceled", "trialing"],
-      user_role: ["trainer", "client", "admin"],
+      user_role: ["trainer", "client", "admin", "gym_owner"],
       workout_status: ["scheduled", "in_progress", "completed", "skipped"],
     },
   },

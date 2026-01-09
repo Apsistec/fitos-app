@@ -34,6 +34,7 @@ import { Database } from '@fitos/shared';
 type Exercise = Database['public']['Tables']['exercises']['Row'];
 
 @Component({
+  standalone: true,
   selector: 'app-workout-builder',
   imports: [
 

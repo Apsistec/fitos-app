@@ -34,6 +34,7 @@ import type { WorkoutWithExercises } from '@app/core/services/workout.service';
 
 @Component({
   selector: 'app-dashboard',
+  standalone: true,
   imports: [
     RouterLink,
     IonContent,

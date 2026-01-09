@@ -24,6 +24,13 @@ export class ThemeService {
   private systemPrefersDark = signal<boolean>(true);
 
   constructor() {
+    // Watch for mode changes - must be in constructor (injection context)
+    effect(() => {
+      const currentMode = this.mode();
+      this.applyTheme();
+      this.saveMode(currentMode);
+    });
+
     if (isPlatformBrowser(this.platformId)) {
       this.init();
     }
@@ -49,13 +56,6 @@ export class ThemeService {
 
     // Apply initial theme
     this.applyTheme();
-
-    // Watch for mode changes
-    effect(() => {
-      const currentMode = this.mode();
-      this.applyTheme();
-      this.saveMode(currentMode);
-    });
   }
 
   private async getStoredMode(): Promise<ThemeMode | null> {

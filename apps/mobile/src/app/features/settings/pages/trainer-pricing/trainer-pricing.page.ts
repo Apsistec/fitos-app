@@ -31,6 +31,7 @@ import { SubscriptionService, TrainerPricing } from '@app/core/services/subscrip
 import { StripeService } from '@app/core/services/stripe.service';
 
 @Component({
+  standalone: true,
   selector: 'app-trainer-pricing',
   imports: [
     ReactiveFormsModule,

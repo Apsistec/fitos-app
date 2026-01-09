@@ -27,6 +27,7 @@ import { MessagingService } from '@app/core/services/messaging.service';
 
 @Component({
   selector: 'app-tabs',
+  standalone: true,
   imports: [
     IonTabs,
     IonTabBar,

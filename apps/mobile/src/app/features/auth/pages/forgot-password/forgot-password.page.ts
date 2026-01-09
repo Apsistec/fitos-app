@@ -19,6 +19,7 @@ import { AuthService } from '@app/core/services/auth.service';
 
 @Component({
   selector: 'app-forgot-password',
+  standalone: true,
   imports: [
     ReactiveFormsModule,
     RouterLink,

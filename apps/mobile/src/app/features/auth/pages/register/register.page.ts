@@ -31,6 +31,7 @@ import type { UserRole } from '@fitos/shared';
 
 @Component({
   selector: 'app-register',
+  standalone: true,
   imports: [
     ReactiveFormsModule,
     RouterLink,

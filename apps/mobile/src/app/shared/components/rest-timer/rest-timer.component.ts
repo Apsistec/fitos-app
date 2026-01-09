@@ -14,6 +14,7 @@ import { playOutline, pauseOutline, stopOutline, closeOutline } from 'ionicons/i
 addIcons({ playOutline, pauseOutline, stopOutline, closeOutline });
 
 @Component({
+  standalone: true,
   selector: 'app-rest-timer',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

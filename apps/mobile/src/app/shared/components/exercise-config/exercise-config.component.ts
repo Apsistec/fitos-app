@@ -36,6 +36,7 @@ export interface ExerciseConfig {
 }
 
 @Component({
+  standalone: true,
   selector: 'app-exercise-config',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

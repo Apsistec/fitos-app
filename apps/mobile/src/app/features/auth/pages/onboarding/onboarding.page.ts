@@ -28,6 +28,7 @@ import { SupabaseService } from '@app/core/services/supabase.service';
 
 @Component({
   selector: 'app-onboarding',
+  standalone: true,
   imports: [
     ReactiveFormsModule,
     IonContent,

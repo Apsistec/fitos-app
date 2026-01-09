@@ -4,6 +4,7 @@ import { AuthService } from './core/services/auth.service';
 import { ThemeService } from './core/services/theme.service';
 
 @Component({
+  standalone: true,
   selector: 'app-root',
   imports: [IonApp, IonRouterOutlet],
   template: `

@@ -202,7 +202,7 @@ ALTER TABLE lead_capture_forms ENABLE ROW LEVEL SECURITY;
 -- Helper function to get trainer_id for current user
 CREATE OR REPLACE FUNCTION get_trainer_id_for_user()
 RETURNS UUID AS $$
-  SELECT id FROM trainer_profiles WHERE user_id = auth.uid() LIMIT 1;
+  SELECT id FROM trainer_profiles WHERE id = auth.uid() LIMIT 1;
 $$ LANGUAGE SQL SECURITY DEFINER STABLE;
 
 -- =====================

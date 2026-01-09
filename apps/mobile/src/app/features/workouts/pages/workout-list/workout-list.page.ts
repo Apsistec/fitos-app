@@ -57,6 +57,7 @@ addIcons({
 });
 
 @Component({
+  standalone: true,
   selector: 'app-workout-list',
   imports: [
     FormsModule,

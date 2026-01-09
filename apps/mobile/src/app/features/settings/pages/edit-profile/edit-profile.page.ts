@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { DatePipe } from '@angular/common';
 import {
   IonContent,
   IonHeader,
@@ -19,11 +20,17 @@ import {
   IonIcon,
   IonSelect,
   IonSelectOption,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardContent,
+  IonText,
+  IonBadge,
   ToastController,
   AlertController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { cameraOutline, saveOutline, keyOutline } from 'ionicons/icons';
+import { cameraOutline, checkmarkCircle } from 'ionicons/icons';
 import { AuthService } from '@app/core/services/auth.service';
 import { SupabaseService } from '@app/core/services/supabase.service';
 
@@ -34,6 +41,7 @@ import { SupabaseService } from '@app/core/services/supabase.service';
     RouterLink,
     FormsModule,
     ReactiveFormsModule,
+    DatePipe,
     IonContent,
     IonHeader,
     IonTitle,
@@ -51,6 +59,12 @@ import { SupabaseService } from '@app/core/services/supabase.service';
     IonIcon,
     IonSelect,
     IonSelectOption,
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
+    IonCardContent,
+    IonText,
+    IonBadge,
   ],
   template: `
     <ion-header>
@@ -58,16 +72,7 @@ import { SupabaseService } from '@app/core/services/supabase.service';
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/tabs/settings"></ion-back-button>
         </ion-buttons>
-        <ion-title>Edit Profile</ion-title>
-        <ion-buttons slot="end">
-          <ion-button (click)="saveProfile()" [disabled]="saving() || profileForm.invalid">
-            @if (saving()) {
-              <ion-spinner name="crescent"></ion-spinner>
-            } @else {
-              <ion-icon slot="icon-only" name="save-outline"></ion-icon>
-            }
-          </ion-button>
-        </ion-buttons>
+        <ion-title>My Profile</ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -90,77 +95,258 @@ import { SupabaseService } from '@app/core/services/supabase.service';
 
         <!-- Profile Form -->
         <form [formGroup]="profileForm">
-          <ion-list>
-            <ion-item>
-              <ion-label position="stacked">Full Name *</ion-label>
-              <ion-input
-                formControlName="fullName"
-                type="text"
-                placeholder="Enter your full name"
-              ></ion-input>
-            </ion-item>
 
-            <ion-item>
-              <ion-label position="stacked">Email</ion-label>
-              <ion-input
-                [value]="email()"
-                type="email"
-                disabled
-              ></ion-input>
-              <ion-button slot="end" fill="clear" size="small" routerLink="/tabs/settings/change-email">
-                Change
-              </ion-button>
-            </ion-item>
+          <!-- Basic Information -->
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>Basic Information</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-list lines="none">
+                <ion-item class="form-item">
+                  <div class="input-container">
+                    <ion-label class="field-label">Full Name</ion-label>
+                    <ion-input
+                      formControlName="fullName"
+                      type="text"
+                      placeholder="Enter your full name"
+                      class="field-input"
+                    ></ion-input>
+                  </div>
+                </ion-item>
 
-            <ion-item button detail (click)="changePassword()">
-              <ion-icon name="key-outline" slot="start" color="primary"></ion-icon>
-              <ion-label>
-                <h3>Change Password</h3>
-                <p>Send password reset link to your email</p>
-              </ion-label>
-            </ion-item>
+                <ion-item class="form-item">
+                  <div class="input-container">
+                    <ion-label class="field-label">Email</ion-label>
+                    <div class="email-row">
+                      <ion-input
+                        [value]="email()"
+                        type="email"
+                        disabled
+                        class="field-input"
+                      ></ion-input>
+                      <ion-button fill="clear" size="small" routerLink="/tabs/settings/change-email">
+                        Change
+                      </ion-button>
+                    </div>
+                  </div>
+                </ion-item>
 
-            <ion-item>
-              <ion-label position="stacked">Timezone</ion-label>
-              <ion-select formControlName="timezone" placeholder="Select timezone">
-                <ion-select-option value="America/New_York">Eastern Time</ion-select-option>
-                <ion-select-option value="America/Chicago">Central Time</ion-select-option>
-                <ion-select-option value="America/Denver">Mountain Time</ion-select-option>
-                <ion-select-option value="America/Los_Angeles">Pacific Time</ion-select-option>
-                <ion-select-option value="America/Anchorage">Alaska Time</ion-select-option>
-                <ion-select-option value="Pacific/Honolulu">Hawaii Time</ion-select-option>
-              </ion-select>
-            </ion-item>
+                <ion-item button detail (click)="changePassword()" class="form-item">
+                  <ion-label>
+                    <h3>Change Password</h3>
+                    <p>Send password reset link to your email</p>
+                  </ion-label>
+                </ion-item>
+              </ion-list>
+            </ion-card-content>
+          </ion-card>
 
-            <ion-item>
-              <ion-label position="stacked">Units System</ion-label>
-              <ion-select formControlName="unitsSystem" placeholder="Select units">
-                <ion-select-option value="imperial">Imperial (lbs, ft/in)</ion-select-option>
-                <ion-select-option value="metric">Metric (kg, cm)</ion-select-option>
-              </ion-select>
-            </ion-item>
+          <!-- Preferences -->
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>Preferences</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-list lines="none">
+                <ion-item class="form-item">
+                  <div class="input-container">
+                    <ion-label class="field-label">Timezone</ion-label>
+                    <ion-select formControlName="timezone" placeholder="Select timezone" class="field-input">
+                      <ion-select-option value="America/New_York">Eastern Time</ion-select-option>
+                      <ion-select-option value="America/Chicago">Central Time</ion-select-option>
+                      <ion-select-option value="America/Denver">Mountain Time</ion-select-option>
+                      <ion-select-option value="America/Los_Angeles">Pacific Time</ion-select-option>
+                      <ion-select-option value="America/Anchorage">Alaska Time</ion-select-option>
+                      <ion-select-option value="Pacific/Honolulu">Hawaii Time</ion-select-option>
+                    </ion-select>
+                  </div>
+                </ion-item>
 
-            @if (isClient()) {
-              <ion-item>
-                <ion-label position="stacked">Bio</ion-label>
-                <ion-textarea
-                  formControlName="bio"
-                  placeholder="Tell us about your fitness journey..."
-                  rows="4"
-                ></ion-textarea>
-              </ion-item>
-            }
-          </ion-list>
+                <ion-item class="form-item">
+                  <div class="input-container">
+                    <ion-label class="field-label">Units</ion-label>
+                    <ion-select formControlName="unitsSystem" placeholder="Select units" class="field-input">
+                      <ion-select-option value="imperial">Imperial (lbs, ft/in)</ion-select-option>
+                      <ion-select-option value="metric">Metric (kg, cm)</ion-select-option>
+                    </ion-select>
+                  </div>
+                </ion-item>
+              </ion-list>
+            </ion-card-content>
+          </ion-card>
 
+          <!-- Address (for subscription) -->
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>Address</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-list lines="none">
+                <ion-item class="form-item">
+                  <div class="input-container">
+                    <ion-label class="field-label">Street Address</ion-label>
+                    <ion-input
+                      formControlName="streetAddress"
+                      type="text"
+                      placeholder="Enter street address"
+                      class="field-input"
+                    ></ion-input>
+                  </div>
+                </ion-item>
+
+                <ion-item class="form-item">
+                  <div class="input-container">
+                    <ion-label class="field-label">City</ion-label>
+                    <ion-input
+                      formControlName="city"
+                      type="text"
+                      placeholder="Enter city"
+                      class="field-input"
+                    ></ion-input>
+                  </div>
+                </ion-item>
+
+                <div class="address-row">
+                  <ion-item class="form-item form-item-half">
+                    <div class="input-container">
+                      <ion-label class="field-label">State</ion-label>
+                      <ion-input
+                        formControlName="state"
+                        type="text"
+                        placeholder="State"
+                        class="field-input"
+                      ></ion-input>
+                    </div>
+                  </ion-item>
+
+                  <ion-item class="form-item form-item-half">
+                    <div class="input-container">
+                      <ion-label class="field-label">ZIP Code</ion-label>
+                      <ion-input
+                        formControlName="zipCode"
+                        type="text"
+                        placeholder="ZIP"
+                        class="field-input"
+                      ></ion-input>
+                    </div>
+                  </ion-item>
+                </div>
+              </ion-list>
+            </ion-card-content>
+          </ion-card>
+
+          <!-- Subscription Info (Read-only) -->
+          @if (subscriptionInfo()) {
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title>Subscription</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <div class="subscription-info">
+                  <div class="info-row">
+                    <span class="field-label">Plan</span>
+                    <ion-text class="field-value">
+                      {{ subscriptionInfo()?.planName || 'Free' }}
+                      @if (subscriptionInfo()?.isActive) {
+                        <ion-badge color="success">Active</ion-badge>
+                      }
+                    </ion-text>
+                  </div>
+                  <div class="info-row">
+                    <span class="field-label">Status</span>
+                    <ion-text class="field-value">{{ subscriptionInfo()?.status || 'N/A' }}</ion-text>
+                  </div>
+                  @if (subscriptionInfo()?.nextBillingDate) {
+                    <div class="info-row">
+                      <span class="field-label">Next Billing</span>
+                      <ion-text class="field-value">{{ subscriptionInfo()?.nextBillingDate | date }}</ion-text>
+                    </div>
+                  }
+                  <ion-button expand="block" fill="clear" routerLink="/tabs/settings/my-subscription">
+                    Manage Subscription
+                  </ion-button>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          }
+
+          <!-- Bio & Fitness Info (Clients only) -->
+          @if (isClient()) {
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title>About Me</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <ion-list lines="none">
+                  <ion-item class="form-item">
+                    <div class="input-container">
+                      <ion-label class="field-label">Bio</ion-label>
+                      <ion-textarea
+                        formControlName="bio"
+                        placeholder="Tell us about your fitness journey..."
+                        rows="4"
+                        class="field-input"
+                      ></ion-textarea>
+                    </div>
+                  </ion-item>
+
+                  <ion-item class="form-item">
+                    <div class="input-container">
+                      <ion-label class="field-label">Fitness Goals</ion-label>
+                      <ion-textarea
+                        formControlName="fitnessGoals"
+                        placeholder="What are your fitness goals?"
+                        rows="3"
+                        class="field-input"
+                      ></ion-textarea>
+                    </div>
+                  </ion-item>
+
+                  <ion-item class="form-item">
+                    <div class="input-container">
+                      <ion-label class="field-label">Dietary Preferences</ion-label>
+                      <ion-select formControlName="dietaryPreferences" multiple placeholder="Select preferences" class="field-input">
+                        <ion-select-option value="vegetarian">Vegetarian</ion-select-option>
+                        <ion-select-option value="vegan">Vegan</ion-select-option>
+                        <ion-select-option value="pescatarian">Pescatarian</ion-select-option>
+                        <ion-select-option value="keto">Keto</ion-select-option>
+                        <ion-select-option value="paleo">Paleo</ion-select-option>
+                        <ion-select-option value="gluten-free">Gluten-Free</ion-select-option>
+                        <ion-select-option value="dairy-free">Dairy-Free</ion-select-option>
+                      </ion-select>
+                    </div>
+                  </ion-item>
+
+                  <ion-item class="form-item">
+                    <div class="input-container">
+                      <ion-label class="field-label">Activity Level</ion-label>
+                      <ion-select formControlName="activityLevel" placeholder="Select activity level" class="field-input">
+                        <ion-select-option value="sedentary">Sedentary (Little/no exercise)</ion-select-option>
+                        <ion-select-option value="light">Light (1-3 days/week)</ion-select-option>
+                        <ion-select-option value="moderate">Moderate (3-5 days/week)</ion-select-option>
+                        <ion-select-option value="active">Active (6-7 days/week)</ion-select-option>
+                        <ion-select-option value="very-active">Very Active (Intense daily)</ion-select-option>
+                      </ion-select>
+                    </div>
+                  </ion-item>
+                </ion-list>
+              </ion-card-content>
+            </ion-card>
+          }
+
+          <!-- Save Button -->
           <div class="form-actions">
             <ion-button
               expand="block"
               (click)="saveProfile()"
               [disabled]="saving() || profileForm.invalid"
+              size="large"
             >
               @if (saving()) {
                 <ion-spinner name="crescent"></ion-spinner>
               } @else {
+                <ion-icon slot="start" name="checkmark-circle"></ion-icon>
                 Save Changes
               }
             </ion-button>
@@ -174,6 +360,7 @@ import { SupabaseService } from '@app/core/services/supabase.service';
       max-width: 600px;
       margin: 0 auto;
       padding: 16px;
+      padding-bottom: 80px;
     }
 
     .avatar-section {
@@ -202,17 +389,109 @@ import { SupabaseService } from '@app/core/services/supabase.service';
       font-weight: 600;
     }
 
-    ion-list {
-      margin-bottom: 24px;
+    ion-card {
+      margin: 16px 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    ion-card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ion-color-primary);
+    }
+
+    .form-item {
+      --padding-start: 0;
+      --inner-padding-end: 0;
+      margin-bottom: 20px;
+    }
+
+    .input-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ion-color-medium);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .field-input {
+      font-size: 16px;
+      color: var(--ion-text-color);
+      --padding-start: 12px;
+      --padding-end: 12px;
+      border: 1px solid var(--ion-color-light);
+      border-radius: 8px;
+      min-height: 44px;
+    }
+
+    .field-value {
+      font-size: 16px;
+      color: var(--ion-text-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .email-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .address-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .form-item-half {
+      flex: 1;
+    }
+
+    .subscription-info {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--ion-color-light);
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
     }
 
     .form-actions {
-      padding: 16px 0;
+      padding: 24px 0;
+      position: sticky;
+      bottom: 0;
+      background: var(--ion-background-color);
+      z-index: 10;
     }
 
-    ion-item {
-      --padding-start: 0;
-      --inner-padding-end: 0;
+    ion-list {
+      padding: 0;
+    }
+
+    ion-textarea {
+      --padding-start: 12px;
+      --padding-end: 12px;
+      --padding-top: 12px;
+      --padding-bottom: 12px;
+      border: 1px solid var(--ion-color-light);
+      border-radius: 8px;
     }
   `],
 })
@@ -228,23 +507,32 @@ export class EditProfilePage implements OnInit {
   avatarUrl = signal<string | null>(null);
   email = signal('');
   initials = signal('');
+  subscriptionInfo = signal<any>(null);
   isClient = this.authService.isClient;
 
   profileForm: FormGroup;
 
   constructor() {
-    addIcons({ cameraOutline, saveOutline, keyOutline });
+    addIcons({ cameraOutline, checkmarkCircle });
 
     this.profileForm = this.fb.group({
       fullName: ['', Validators.required],
       timezone: ['America/New_York'],
       unitsSystem: ['imperial'],
+      streetAddress: [''],
+      city: [''],
+      state: [''],
+      zipCode: [''],
       bio: [''],
+      fitnessGoals: [''],
+      dietaryPreferences: [[]],
+      activityLevel: [''],
     });
   }
 
   async ngOnInit() {
     await this.loadProfile();
+    await this.loadSubscription();
   }
 
   async loadProfile() {
@@ -254,12 +542,44 @@ export class EditProfilePage implements OnInit {
         fullName: profile.fullName || '',
         timezone: profile.timezone || 'America/New_York',
         unitsSystem: profile.unitsSystem || 'imperial',
+        streetAddress: profile.streetAddress || '',
+        city: profile.city || '',
+        state: profile.state || '',
+        zipCode: profile.zipCode || '',
       });
+
+      // Load bio and fitness info from client_profiles if user is a client
+      if (this.isClient()) {
+        const { data: clientProfile } = await this.supabase.client
+          .from('client_profiles')
+          .select('bio, fitness_goals, dietary_preferences, activity_level')
+          .eq('id', profile.id)
+          .single();
+
+        if (clientProfile) {
+          this.profileForm.patchValue({
+            bio: clientProfile.bio || '',
+            fitnessGoals: clientProfile.fitness_goals || '',
+            dietaryPreferences: clientProfile.dietary_preferences || [],
+            activityLevel: clientProfile.activity_level || '',
+          });
+        }
+      }
 
       this.email.set(profile.email || '');
       this.avatarUrl.set(profile.avatarUrl || null);
       this.initials.set(this.getInitials(profile.fullName || ''));
     }
+  }
+
+  async loadSubscription() {
+    // TODO: Load subscription info from database
+    // For now, set a placeholder
+    this.subscriptionInfo.set({
+      planName: 'Free',
+      status: 'Active',
+      isActive: false,
+    });
   }
 
   getInitials(name: string): string {
@@ -280,7 +600,19 @@ export class EditProfilePage implements OnInit {
       const userId = this.authService.user()?.id;
       if (!userId) throw new Error('Not authenticated');
 
-      const { fullName, timezone, unitsSystem, bio } = this.profileForm.value;
+      const {
+        fullName,
+        timezone,
+        unitsSystem,
+        streetAddress,
+        city,
+        state,
+        zipCode,
+        bio,
+        fitnessGoals,
+        dietaryPreferences,
+        activityLevel,
+      } = this.profileForm.value;
 
       const { error } = await this.supabase.client
         .from('profiles')
@@ -288,17 +620,26 @@ export class EditProfilePage implements OnInit {
           full_name: fullName,
           timezone,
           units_system: unitsSystem,
+          street_address: streetAddress,
+          city,
+          state,
+          zip_code: zipCode,
           updated_at: new Date().toISOString(),
         })
         .eq('id', userId);
 
       if (error) throw error;
 
-      // Update client profile bio if applicable
-      if (this.isClient() && bio) {
+      // Update client profile bio and fitness info if applicable
+      if (this.isClient()) {
         await this.supabase.client
           .from('client_profiles')
-          .update({ bio })
+          .update({
+            bio: bio || null,
+            fitness_goals: fitnessGoals || null,
+            dietary_preferences: dietaryPreferences || [],
+            activity_level: activityLevel || null,
+          })
           .eq('id', userId);
       }
 

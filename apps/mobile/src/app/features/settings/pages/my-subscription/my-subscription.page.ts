@@ -25,6 +25,7 @@ import { openOutline, cardOutline, personOutline } from 'ionicons/icons';
 import { SubscriptionService } from '@app/core/services/subscription.service';
 
 @Component({
+  standalone: true,
   selector: 'app-my-subscription',
   imports: [
     CurrencyPipe,

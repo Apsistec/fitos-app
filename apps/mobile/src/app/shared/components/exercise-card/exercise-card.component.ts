@@ -10,6 +10,7 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
 addIcons({ playCircleOutline, informationCircleOutline, addCircleOutline, createOutline });
 
 @Component({
+  standalone: true,
   selector: 'app-exercise-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

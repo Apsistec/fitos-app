@@ -18,6 +18,7 @@ import { AuthService } from '@app/core/services/auth.service';
 
 @Component({
   selector: 'app-login',
+  standalone: true,
   imports: [
     ReactiveFormsModule,
     RouterLink,
