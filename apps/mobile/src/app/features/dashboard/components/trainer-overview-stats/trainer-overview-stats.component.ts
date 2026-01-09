@@ -2,6 +2,8 @@ import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { RouterLink } from '@angular/router';
+import { addIcons } from 'ionicons';
+import { people, checkmarkCircle, barbell, cash, trendingUp, trendingDown } from 'ionicons/icons';
 
 export interface TrainerStats {
   totalClients: number;
@@ -202,6 +204,10 @@ export interface TrainerStats {
 })
 export class TrainerOverviewStatsComponent {
   stats = input<TrainerStats>();
+
+  constructor() {
+    addIcons({ people, checkmarkCircle, barbell, cash, trendingUp, trendingDown });
+  }
 
   getActivePercentage(stats: TrainerStats): number {
     if (stats.totalClients === 0) return 0;

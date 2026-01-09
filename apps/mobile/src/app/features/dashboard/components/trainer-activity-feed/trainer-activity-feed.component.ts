@@ -2,6 +2,8 @@ import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { RouterLink } from '@angular/router';
+import { addIcons } from 'ionicons';
+import { newspaperOutline, checkmark, camera, chatbubble, trophy, card, ellipse } from 'ionicons/icons';
 
 export interface ActivityItem {
   id: string;
@@ -207,6 +209,10 @@ export interface ActivityItem {
 })
 export class TrainerActivityFeedComponent {
   activities = input<ActivityItem[]>();
+
+  constructor() {
+    addIcons({ newspaperOutline, checkmark, camera, chatbubble, trophy, card, ellipse });
+  }
 
   getInitials(name: string): string {
     return name
