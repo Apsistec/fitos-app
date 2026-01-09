@@ -75,26 +75,45 @@ export class AuthService {
     this.supabase.auth.getSession().then(async ({ data: { session } }) => {
       console.log('getSession result:', session ? 'Session exists' : 'No session');
 
-      this._state.update((s) => ({
-        ...s,
-        session,
-        user: session?.user ?? null,
-        loading: !!session?.user, // Still loading if we have user (need profile)
-        initialized: !session?.user, // Initialized if no user
-      }));
-
       if (session?.user) {
         console.log('Loading profile for user:', session.user.id);
+
+        this._state.update((s) => ({
+          ...s,
+          session,
+          user: session.user,
+          loading: true, // Still loading while we fetch profile
+          initialized: false,
+        }));
+
+        // Load profile and wait for it to complete
         await this.loadProfile(session.user.id);
         console.log('Profile loaded, initialized:', this._state().initialized);
       } else {
-        // No session - redirect to login if not already on auth page
+        // No session - mark as initialized
+        this._state.update((s) => ({
+          ...s,
+          session: null,
+          user: null,
+          loading: false,
+          initialized: true,
+        }));
+
+        // Redirect to login if not already on auth page
         const currentUrl = this.router.url;
         console.log('No session, current URL:', currentUrl);
         if (!currentUrl.startsWith('/auth')) {
           this.router.navigate(['/auth/login']);
         }
       }
+    }).catch((error) => {
+      console.error('Error getting session:', error);
+      // On error, mark as initialized so app doesn't hang
+      this._state.update((s) => ({
+        ...s,
+        loading: false,
+        initialized: true,
+      }));
     });
 
     // Listen for auth changes
@@ -102,32 +121,31 @@ export class AuthService {
       async (event: AuthChangeEvent, session: AuthSession | null) => {
         console.log('Auth state changed:', event);
 
-        this._state.update((s) => ({
-          ...s,
-          session,
-          user: session?.user ?? null,
-        }));
-
         if (event === 'SIGNED_IN' && session?.user) {
+          // User signed in - load profile and navigate
+          this._state.update((s) => ({
+            ...s,
+            session,
+            user: session.user,
+            loading: true,
+          }));
           await this.loadProfile(session.user.id);
           this.handlePostLogin();
         } else if (event === 'SIGNED_OUT') {
+          // User signed out - clear state and navigate to login
           this._state.update((s) => ({
             ...s,
+            session: null,
+            user: null,
             profile: null,
             loading: false,
             initialized: true,
           }));
           this.router.navigate(['/auth/login']);
         } else if (event === 'INITIAL_SESSION') {
-          // On page refresh with existing session, getSession() already handled it
-          // Just ensure we're initialized if there's no user
-          if (!session?.user) {
-            this._state.update((s) => ({
-              ...s,
-              initialized: true,
-            }));
-          }
+          // This fires on page load/refresh - getSession() already handles it
+          // Don't do anything here to avoid race conditions
+          console.log('INITIAL_SESSION event - already handled by getSession()');
         }
       }
     );
