@@ -1,0 +1,73 @@
+{
+  "name": "fitos-landing",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/landing/src",
+  "prefix": "app",
+  "targets": {
+    "build": {
+      "executor": "@angular-devkit/build-angular:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/landing",
+        "index": "apps/landing/src/index.html",
+        "browser": "apps/landing/src/main.ts",
+        "polyfills": ["zone.js"],
+        "tsConfig": "apps/landing/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/landing/src/assets",
+            "output": "/assets"
+          }
+        ],
+        "styles": ["apps/landing/src/styles.scss"],
+        "scripts": [],
+        "server": "apps/landing/src/main.server.ts",
+        "prerender": true,
+        "ssr": {
+          "entry": "apps/landing/server.ts"
+        }
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "2mb",
+              "maximumError": "5mb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "configurations": {
+        "production": {
+          "buildTarget": "fitos-landing:build:production"
+        },
+        "development": {
+          "buildTarget": "fitos-landing:build:development"
+        }
+      },
+      "defaultConfiguration": "development",
+      "options": {
+        "port": 4201
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  },
+  "tags": []
+}

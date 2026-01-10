@@ -1,7 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./src/**/*.{html,ts}",
+    // Paths relative to monorepo root (where Angular CLI runs from)
+    "apps/landing/src/**/*.{html,ts}",
   ],
   darkMode: ['class', '[data-theme="dark"]'],
   theme: {

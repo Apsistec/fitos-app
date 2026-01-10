@@ -1,5 +1,5 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, signal, PLATFORM_ID, inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-theme-toggle',
@@ -73,22 +73,29 @@ import { CommonModule } from '@angular/common';
   `],
 })
 export class ThemeToggleComponent implements OnInit {
+  private platformId = inject(PLATFORM_ID);
   isDark = signal(true);
 
   ngOnInit(): void {
-    // Check for saved theme preference or default to dark
-    const savedTheme = localStorage.getItem('fitos-theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    // Only access localStorage and window in browser environment
+    if (isPlatformBrowser(this.platformId)) {
+      // Check for saved theme preference or default to dark
+      const savedTheme = localStorage.getItem('fitos-theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-    if (savedTheme === 'light') {
-      this.setTheme('light');
-    } else if (savedTheme === 'dark' || !savedTheme) {
-      // Default to dark mode
-      this.setTheme('dark');
-    } else if (prefersDark) {
-      this.setTheme('dark');
+      if (savedTheme === 'light') {
+        this.setTheme('light');
+      } else if (savedTheme === 'dark' || !savedTheme) {
+        // Default to dark mode
+        this.setTheme('dark');
+      } else if (prefersDark) {
+        this.setTheme('dark');
+      } else {
+        this.setTheme('light');
+      }
     } else {
-      this.setTheme('light');
+      // Default to dark mode during SSR
+      this.setTheme('dark');
     }
   }
 
@@ -99,7 +106,11 @@ export class ThemeToggleComponent implements OnInit {
 
   private setTheme(theme: 'dark' | 'light'): void {
     this.isDark.set(theme === 'dark');
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('fitos-theme', theme);
+
+    // Only access document and localStorage in browser environment
+    if (isPlatformBrowser(this.platformId)) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('fitos-theme', theme);
+    }
   }
 }

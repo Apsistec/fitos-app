@@ -2,11 +2,12 @@ import { Component, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
+import { IconComponent } from '../icon/icon.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, ThemeToggleComponent],
+  imports: [CommonModule, RouterLink, RouterLinkActive, ThemeToggleComponent, IconComponent],
   template: `
     <header class="header">
       <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -14,10 +15,7 @@ import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
           <!-- Logo -->
           <a routerLink="/" class="logo">
             <div class="logo-icon">
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
+              <app-icon name="lightning" size="sm" class="text-white" />
             </div>
             <span class="logo-text">FitOS</span>
           </a>
@@ -56,15 +54,11 @@ import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
               (click)="toggleMobileMenu()"
               class="mobile-menu-button"
             >
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                @if (!mobileMenuOpen()) {
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M4 6h16M4 12h16M4 18h16" />
-                } @else {
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12" />
-                }
-              </svg>
+              @if (!mobileMenuOpen()) {
+                <app-icon name="menu" size="md" />
+              } @else {
+                <app-icon name="close" size="md" />
+              }
             </button>
           </div>
         </div>
