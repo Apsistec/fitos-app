@@ -104,8 +104,8 @@ export function calculateVolume(sets: number, reps: number, weight: number): num
  */
 export function calculateACWR(
   dailyLoads: number[], // Last 28 days, most recent first
-  acuteDays: number = 7,
-  chronicDays: number = 28
+  acuteDays = 7,
+  chronicDays = 28
 ): number {
   if (dailyLoads.length < chronicDays) {
     return 1.0; // Not enough data
@@ -275,7 +275,7 @@ export function calculateMacros(
 
 export function calculateStreak(
   completedDates: Date[],
-  freezeDays: number = 0
+  freezeDays = 0
 ): { current: number; longest: number } {
   if (completedDates.length === 0) {
     return { current: 0, longest: 0 };

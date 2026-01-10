@@ -25,6 +25,7 @@
       "@env/*": ["apps/mobile/src/environments/*"],
       "@fitos/shared": ["libs/shared/src/index.ts"],
       "@fitos/shared/*": ["libs/shared/src/lib/*"],
+      "@fitos/libs": ["libs/src/index.ts"],
       "shared-content": ["libs/src/index.ts"]
     }
   },

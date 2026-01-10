@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { LegalDocument } from '../../legal/privacy-policy';
 
 @Component({
-  selector: 'fitos-legal-page',
+  selector: 'lib-legal-page',
   standalone: true,
   imports: [CommonModule],
   template: `

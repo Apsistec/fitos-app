@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LegalPageComponent, TERMS_OF_SERVICE } from '@fitos/libs';
+import { LegalPageComponent, TERMS_OF_SERVICE } from '../../../../../../libs/src/index';
 
 @Component({
   selector: 'app-terms',
   standalone: true,
   imports: [CommonModule, LegalPageComponent],
   template: `
-    <fitos-legal-page [document]="termsOfService" />
+    <lib-legal-page [document]="termsOfService" />
   `,
 })
 export class TermsComponent {
