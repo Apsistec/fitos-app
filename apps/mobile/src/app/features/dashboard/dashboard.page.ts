@@ -66,7 +66,7 @@ import type { WorkoutWithExercises } from '@app/core/services/workout.service';
           {{ greeting() }}, {{ firstName() }}
         </ion-title>
         <ion-buttons slot="end">
-          <ion-button routerLink="/tabs/settings">
+          <ion-button routerLink="/tabs/settings/profile">
             <ion-avatar style="width: 32px; height: 32px;">
               @if (avatarUrl()) {
                 <img [src]="avatarUrl()" alt="Profile" />

@@ -22,9 +22,10 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "paths": {
+      "@env/*": ["apps/mobile/src/environments/*"],
       "@fitos/shared": ["libs/shared/src/index.ts"],
       "@fitos/shared/*": ["libs/shared/src/lib/*"],
-      "@env/*": ["apps/mobile/src/environments/*"]
+      "shared-content": ["libs/src/index.ts"]
     }
   },
   "exclude": [

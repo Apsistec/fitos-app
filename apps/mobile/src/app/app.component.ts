@@ -2,6 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { AuthService } from './core/services/auth.service';
 import { ThemeService } from './core/services/theme.service';
+import { addIcons } from 'ionicons';
+import * as allIcons from 'ionicons/icons';
 
 @Component({
   standalone: true,
@@ -16,6 +18,11 @@ import { ThemeService } from './core/services/theme.service';
 export class AppComponent implements OnInit {
   private authService = inject(AuthService);
   private themeService = inject(ThemeService); // Initialize theme service
+
+  constructor() {
+    // Register all Ionicons
+    addIcons(allIcons);
+  }
 
   ngOnInit(): void {
     // Initialize auth state listener

@@ -32,8 +32,8 @@ import { RouterLink } from '@angular/router';
             <ul class="space-y-2 text-sm">
               <li><a routerLink="/features" class="hover:text-white transition-colors">Features</a></li>
               <li><a routerLink="/pricing" class="hover:text-white transition-colors">Pricing</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">Changelog</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">Roadmap</a></li>
+              <li><a routerLink="/changelog" class="hover:text-white transition-colors">Changelog</a></li>
+              <li><a routerLink="/roadmap" class="hover:text-white transition-colors">Roadmap</a></li>
             </ul>
           </div>
 
@@ -41,10 +41,9 @@ import { RouterLink } from '@angular/router';
           <div>
             <h4 class="text-white font-semibold mb-4">Resources</h4>
             <ul class="space-y-2 text-sm">
-              <li><a href="https://docs.fitos.app" class="hover:text-white transition-colors">Documentation</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">API Reference</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">Blog</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">Help Center</a></li>
+              <li><a href="https://docs.fitos.app" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">Documentation</a></li>
+              <li><a routerLink="/blog" class="hover:text-white transition-colors">Blog</a></li>
+              <li><a routerLink="/help" class="hover:text-white transition-colors">Help Center</a></li>
             </ul>
           </div>
 
@@ -54,7 +53,7 @@ import { RouterLink } from '@angular/router';
             <ul class="space-y-2 text-sm">
               <li><a routerLink="/privacy" class="hover:text-white transition-colors">Privacy Policy</a></li>
               <li><a routerLink="/terms" class="hover:text-white transition-colors">Terms of Service</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">Cookie Policy</a></li>
+              <li><a routerLink="/cookies" class="hover:text-white transition-colors">Cookie Policy</a></li>
             </ul>
           </div>
         </div>

@@ -30,7 +30,7 @@ import {
   AlertController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { cameraOutline, checkmarkCircle } from 'ionicons/icons';
+import { cameraOutline, checkmarkCircle, settingsOutline } from 'ionicons/icons';
 import { AuthService } from '@app/core/services/auth.service';
 import { SupabaseService } from '@app/core/services/supabase.service';
 
@@ -70,9 +70,14 @@ import { SupabaseService } from '@app/core/services/supabase.service';
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button defaultHref="/tabs/settings"></ion-back-button>
+          <ion-back-button defaultHref="/tabs/dashboard"></ion-back-button>
         </ion-buttons>
         <ion-title>My Profile</ion-title>
+        <ion-buttons slot="end">
+          <ion-button routerLink="/tabs/settings">
+            <ion-icon slot="icon-only" name="settings-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
 
@@ -513,7 +518,7 @@ export class EditProfilePage implements OnInit {
   profileForm: FormGroup;
 
   constructor() {
-    addIcons({ cameraOutline, checkmarkCircle });
+    addIcons({ cameraOutline, checkmarkCircle, settingsOutline });
 
     this.profileForm = this.fb.group({
       fullName: ['', Validators.required],

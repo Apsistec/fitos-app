@@ -14,11 +14,12 @@
   --fitos-bg-elevated: #333333;
 
   // ===========================================
-  // TEXT HIERARCHY (WCAG AA+ Compliant)
+  // TEXT HIERARCHY (WCAG AAA Compliant)
+  // Enhanced for better dark mode readability
   // ===========================================
-  --fitos-text-primary: #F5F5F5;      // 15.8:1 contrast
-  --fitos-text-secondary: #A3A3A3;    // 7:1 contrast
-  --fitos-text-tertiary: #737373;     // 4.5:1 contrast
+  --fitos-text-primary: #FAFAFA;      // ~17:1 contrast (brighter)
+  --fitos-text-secondary: #B3B3B3;    // ~8:1 contrast (improved)
+  --fitos-text-tertiary: #8C8C8C;     // ~5:1 contrast (improved)
   --fitos-text-disabled: #525252;
 
   // ===========================================

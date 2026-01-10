@@ -63,7 +63,7 @@ export class WorkoutService {
         .from('workout_templates')
         .select(`
           *,
-          exercises:template_exercises(
+          exercises:workout_template_exercises(
             *,
             exercise:exercises(*)
           )
@@ -94,7 +94,7 @@ export class WorkoutService {
         .from('workout_templates')
         .select(`
           *,
-          exercises:template_exercises(
+          exercises:workout_template_exercises(
             *,
             exercise:exercises(*)
           )
@@ -163,7 +163,7 @@ export class WorkoutService {
       }));
 
       const { error: exercisesError } = await this.supabase.client
-        .from('template_exercises')
+        .from('workout_template_exercises')
         .insert(templateExercises);
 
       if (exercisesError) throw exercisesError;
@@ -220,7 +220,7 @@ export class WorkoutService {
 
       // Delete existing exercises
       const { error: deleteError } = await this.supabase.client
-        .from('template_exercises')
+        .from('workout_template_exercises')
         .delete()
         .eq('template_id', id);
 
@@ -240,7 +240,7 @@ export class WorkoutService {
       }));
 
       const { error: exercisesError } = await this.supabase.client
-        .from('template_exercises')
+        .from('workout_template_exercises')
         .insert(templateExercises);
 
       if (exercisesError) throw exercisesError;

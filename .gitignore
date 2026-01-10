@@ -54,3 +54,5 @@ yarn-error.log*
 tmp/
 temp/
 *.tmp
+
+.angular

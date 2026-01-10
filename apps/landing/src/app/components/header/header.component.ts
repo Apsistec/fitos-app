@@ -1,44 +1,46 @@
 import { Component, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterLink, RouterLinkActive, ThemeToggleComponent],
   template: `
-    <header class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
+    <header class="header">
       <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
           <!-- Logo -->
-          <a routerLink="/" class="flex items-center gap-2">
-            <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-violet-600 rounded-lg flex items-center justify-center">
+          <a routerLink="/" class="logo">
+            <div class="logo-icon">
               <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <span class="text-xl font-bold text-gray-900">FitOS</span>
+            <span class="logo-text">FitOS</span>
           </a>
 
           <!-- Desktop Navigation -->
           <div class="hidden md:flex items-center gap-8">
-            <a routerLink="/features" routerLinkActive="text-primary-600" 
-               class="text-gray-600 hover:text-primary-600 font-medium transition-colors">
+            <a routerLink="/features" routerLinkActive="nav-link-active"
+               class="nav-link">
               Features
             </a>
-            <a routerLink="/pricing" routerLinkActive="text-primary-600"
-               class="text-gray-600 hover:text-primary-600 font-medium transition-colors">
+            <a routerLink="/pricing" routerLinkActive="nav-link-active"
+               class="nav-link">
               Pricing
             </a>
-            <a href="https://docs.fitos.app" target="_blank"
-               class="text-gray-600 hover:text-primary-600 font-medium transition-colors">
+            <a href="https://docs.fitos.app" target="_blank" rel="noopener noreferrer"
+               class="nav-link">
               Docs
             </a>
           </div>
 
-          <!-- CTA Buttons -->
+          <!-- CTA Buttons + Theme Toggle -->
           <div class="hidden md:flex items-center gap-4">
+            <app-theme-toggle />
             <a href="https://app.fitos.app/auth/login" class="btn-ghost">
               Sign In
             </a>
@@ -47,42 +49,45 @@ import { CommonModule } from '@angular/common';
             </a>
           </div>
 
-          <!-- Mobile Menu Button -->
-          <button 
-            (click)="toggleMobileMenu()"
-            class="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100"
-          >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              @if (!mobileMenuOpen()) {
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                  d="M4 6h16M4 12h16M4 18h16" />
-              } @else {
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                  d="M6 18L18 6M6 6l12 12" />
-              }
-            </svg>
-          </button>
+          <!-- Mobile Menu Button + Theme Toggle -->
+          <div class="md:hidden flex items-center gap-2">
+            <app-theme-toggle />
+            <button
+              (click)="toggleMobileMenu()"
+              class="mobile-menu-button"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                @if (!mobileMenuOpen()) {
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 6h16M4 12h16M4 18h16" />
+                } @else {
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12" />
+                }
+              </svg>
+            </button>
+          </div>
         </div>
 
         <!-- Mobile Menu -->
         @if (mobileMenuOpen()) {
-          <div class="md:hidden py-4 border-t border-gray-100">
+          <div class="mobile-menu">
             <div class="flex flex-col gap-4">
               <a routerLink="/features" (click)="closeMobileMenu()"
-                 class="text-gray-600 hover:text-primary-600 font-medium py-2">
+                 class="mobile-nav-link">
                 Features
               </a>
               <a routerLink="/pricing" (click)="closeMobileMenu()"
-                 class="text-gray-600 hover:text-primary-600 font-medium py-2">
+                 class="mobile-nav-link">
                 Pricing
               </a>
-              <a href="https://docs.fitos.app" target="_blank"
-                 class="text-gray-600 hover:text-primary-600 font-medium py-2">
+              <a href="https://docs.fitos.app" target="_blank" rel="noopener noreferrer"
+                 class="mobile-nav-link">
                 Docs
               </a>
-              <hr class="border-gray-100" />
-              <a href="https://app.fitos.app/auth/login" 
-                 class="text-gray-600 hover:text-primary-600 font-medium py-2">
+              <hr class="mobile-divider" />
+              <a href="https://app.fitos.app/auth/login"
+                 class="mobile-nav-link">
                 Sign In
               </a>
               <a href="https://app.fitos.app/auth/register" class="btn-primary text-center">
@@ -96,6 +101,91 @@ import { CommonModule } from '@angular/common';
     <!-- Spacer for fixed header -->
     <div class="h-16"></div>
   `,
+  styles: [`
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      background-color: var(--fitos-bg-primary);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--fitos-border-subtle);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .logo-icon {
+      width: 2rem;
+      height: 2rem;
+      background: linear-gradient(135deg, #10B981, #8B5CF6);
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--fitos-text-primary);
+    }
+
+    .nav-link {
+      color: var(--fitos-text-secondary);
+      font-weight: 500;
+      transition: color 0.25s ease;
+    }
+
+    .nav-link:hover {
+      color: var(--fitos-accent-primary);
+    }
+
+    .nav-link-active {
+      color: var(--fitos-accent-primary);
+    }
+
+    .mobile-menu-button {
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      color: var(--fitos-text-secondary);
+      transition: background-color 0.25s ease;
+    }
+
+    .mobile-menu-button:hover {
+      background-color: var(--fitos-bg-secondary);
+    }
+
+    .mobile-menu {
+      padding: 1rem 0;
+      border-top: 1px solid var(--fitos-border-subtle);
+    }
+
+    .mobile-nav-link {
+      color: var(--fitos-text-secondary);
+      font-weight: 500;
+      padding: 0.5rem 0;
+      transition: color 0.25s ease;
+    }
+
+    .mobile-nav-link:hover {
+      color: var(--fitos-accent-primary);
+    }
+
+    .mobile-divider {
+      border-color: var(--fitos-border-subtle);
+    }
+
+    @media (max-width: 768px) {
+      .header {
+        backdrop-filter: blur(8px);
+      }
+    }
+  `],
 })
 export class HeaderComponent {
   mobileMenuOpen = signal(false);

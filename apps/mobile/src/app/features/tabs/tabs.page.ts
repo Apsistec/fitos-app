@@ -52,8 +52,8 @@ import { MessagingService } from '@app/core/services/messaging.service';
           </ion-tab-button>
         }
 
-        <!-- Client and Trainer: Nutrition tab -->
-        @if (isClient() || isTrainer()) {
+        <!-- Client only: Nutrition tab -->
+        @if (isClient()) {
           <ion-tab-button tab="nutrition">
             <ion-icon name="nutrition-outline"></ion-icon>
             <ion-label>Nutrition</ion-label>
@@ -76,11 +76,6 @@ import { MessagingService } from '@app/core/services/messaging.service';
             <ion-label>{{ isOwner() ? 'Members' : 'Clients' }}</ion-label>
           </ion-tab-button>
         }
-
-        <ion-tab-button tab="settings">
-          <ion-icon name="settings-outline"></ion-icon>
-          <ion-label>Settings</ion-label>
-        </ion-tab-button>
       </ion-tab-bar>
     </ion-tabs>
   `,

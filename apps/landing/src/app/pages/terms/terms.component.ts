@@ -1,16 +1,15 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { LegalPageComponent, TERMS_OF_SERVICE } from '@fitos/libs';
 
 @Component({
   selector: 'app-terms',
   standalone: true,
+  imports: [CommonModule, LegalPageComponent],
   template: `
-    <div class="py-24">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 prose prose-lg">
-        <h1>Terms of Service</h1>
-        <p class="lead">Last updated: December 2025</p>
-        <p>Terms of service content coming soon...</p>
-      </div>
-    </div>
+    <fitos-legal-page [document]="termsOfService" />
   `,
 })
-export class TermsComponent {}
+export class TermsComponent {
+  termsOfService = TERMS_OF_SERVICE;
+}

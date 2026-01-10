@@ -173,6 +173,10 @@ export class AuthService {
         role: data.role as UserRole,
         timezone: data.timezone,
         unitsSystem: data.units_system,
+        streetAddress: data.street_address,
+        city: data.city,
+        state: data.state,
+        zipCode: data.zip_code,
         createdAt: new Date(data.created_at),
         updatedAt: new Date(data.updated_at),
       };

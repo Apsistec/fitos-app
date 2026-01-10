@@ -1,16 +1,15 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { LegalPageComponent, PRIVACY_POLICY } from '@fitos/libs';
 
 @Component({
   selector: 'app-privacy',
   standalone: true,
+  imports: [CommonModule, LegalPageComponent],
   template: `
-    <div class="py-24">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 prose prose-lg">
-        <h1>Privacy Policy</h1>
-        <p class="lead">Last updated: December 2025</p>
-        <p>Privacy policy content coming soon...</p>
-      </div>
-    </div>
+    <fitos-legal-page [document]="privacyPolicy" />
   `,
 })
-export class PrivacyComponent {}
+export class PrivacyComponent {
+  privacyPolicy = PRIVACY_POLICY;
+}

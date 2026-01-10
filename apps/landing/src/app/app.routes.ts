@@ -14,12 +14,32 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/pricing/pricing.component').then(m => m.PricingComponent),
   },
   {
+    path: 'changelog',
+    loadComponent: () => import('./pages/changelog/changelog.component').then(m => m.ChangelogComponent),
+  },
+  {
+    path: 'roadmap',
+    loadComponent: () => import('./pages/roadmap/roadmap.component').then(m => m.RoadmapComponent),
+  },
+  {
+    path: 'blog',
+    loadComponent: () => import('./pages/blog/blog.component').then(m => m.BlogComponent),
+  },
+  {
+    path: 'help',
+    loadComponent: () => import('./pages/help/help.component').then(m => m.HelpComponent),
+  },
+  {
     path: 'privacy',
     loadComponent: () => import('./pages/privacy/privacy.component').then(m => m.PrivacyComponent),
   },
   {
     path: 'terms',
     loadComponent: () => import('./pages/terms/terms.component').then(m => m.TermsComponent),
+  },
+  {
+    path: 'cookies',
+    loadComponent: () => import('./pages/cookies/cookies.component').then(m => m.CookiesComponent),
   },
   {
     path: '**',
