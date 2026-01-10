@@ -148,6 +148,23 @@ Only display:
 - trackBy on all *ngFor
 - Only animate transform/opacity
 
+### Git and Configuration Management
+**NEVER disable or modify Git settings (GPG signing, hooks, config) without user approval.**
+
+When encountering Git configuration issues (e.g., GPG signing failures):
+1. Explain the issue clearly
+2. Present all available options to fix it
+3. Ask the user which approach they prefer
+4. Only proceed after receiving explicit approval
+
+Examples of settings that require user approval before modification:
+- GPG signing (`--no-gpg-sign`, `--no-verify`)
+- Git hooks (pre-commit, commit-msg)
+- Git config (user.name, user.email, commit.gpgsign)
+- IDE or editor settings
+- Environment variables
+- Build configurations
+
 ---
 
 ## File Structure
