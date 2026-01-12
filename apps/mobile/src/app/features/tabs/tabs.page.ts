@@ -21,6 +21,8 @@ import {
   chatbubbles,
   settingsOutline,
   settings,
+  sparklesOutline,
+  sparkles,
 } from 'ionicons/icons';
 import { AuthService } from '@app/core/services/auth.service';
 import { MessagingService } from '@app/core/services/messaging.service';
@@ -39,12 +41,13 @@ import { MessagingService } from '@app/core/services/messaging.service';
   template: `
     <ion-tabs>
       <ion-tab-bar slot="bottom">
+        <!-- HOME TAB - All users -->
         <ion-tab-button tab="dashboard">
           <ion-icon name="home-outline"></ion-icon>
           <ion-label>Home</ion-label>
         </ion-tab-button>
 
-        <!-- Client and Trainer: Workouts tab -->
+        <!-- WORKOUTS TAB - Clients and Trainers -->
         @if (isClient() || isTrainer()) {
           <ion-tab-button tab="workouts">
             <ion-icon name="barbell-outline"></ion-icon>
@@ -52,7 +55,7 @@ import { MessagingService } from '@app/core/services/messaging.service';
           </ion-tab-button>
         }
 
-        <!-- Client only: Nutrition tab -->
+        <!-- NUTRITION TAB - Clients only -->
         @if (isClient()) {
           <ion-tab-button tab="nutrition">
             <ion-icon name="nutrition-outline"></ion-icon>
@@ -60,7 +63,21 @@ import { MessagingService } from '@app/core/services/messaging.service';
           </ion-tab-button>
         }
 
-        <!-- Messages tab for all users -->
+        <!-- CLIENTS TAB - Trainers and Owners -->
+        @if (isTrainer() || isOwner()) {
+          <ion-tab-button tab="clients">
+            <ion-icon name="people-outline"></ion-icon>
+            <ion-label>{{ isOwner() ? 'Members' : 'Clients' }}</ion-label>
+          </ion-tab-button>
+        }
+
+        <!-- AI COACH TAB - All users -->
+        <ion-tab-button tab="coaching">
+          <ion-icon name="sparkles-outline"></ion-icon>
+          <ion-label>AI Coach</ion-label>
+        </ion-tab-button>
+
+        <!-- MESSAGES TAB - All users -->
         <ion-tab-button tab="messages">
           <ion-icon name="chatbubbles-outline"></ion-icon>
           <ion-label>Messages</ion-label>
@@ -69,13 +86,11 @@ import { MessagingService } from '@app/core/services/messaging.service';
           }
         </ion-tab-button>
 
-        <!-- Trainer and Owner: Clients/Members tab -->
-        @if (isTrainer() || isOwner()) {
-          <ion-tab-button tab="clients">
-            <ion-icon name="people-outline"></ion-icon>
-            <ion-label>{{ isOwner() ? 'Members' : 'Clients' }}</ion-label>
-          </ion-tab-button>
-        }
+        <!-- SETTINGS TAB - All users -->
+        <ion-tab-button tab="settings">
+          <ion-icon name="settings-outline"></ion-icon>
+          <ion-label>Settings</ion-label>
+        </ion-tab-button>
       </ion-tab-bar>
     </ion-tabs>
   `,
@@ -126,6 +141,8 @@ export class TabsPage implements OnInit {
       chatbubbles,
       settingsOutline,
       settings,
+      sparklesOutline,
+      sparkles,
     });
   }
 

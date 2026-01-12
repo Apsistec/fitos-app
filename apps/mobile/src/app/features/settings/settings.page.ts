@@ -39,6 +39,9 @@ import {
   cogOutline,
   sunnyOutline,
   phonePortraitOutline,
+  briefcaseOutline,
+  funnelOutline,
+  personAddOutline,
 } from 'ionicons/icons';
 import { AuthService } from '@app/core/services/auth.service';
 import { StripeService } from '@app/core/services/stripe.service';
@@ -187,6 +190,32 @@ import { ThemeService, ThemeMode } from '@app/core/services/theme.service';
                 </ion-label>
               </ion-item>
             }
+          </ion-list>
+        }
+
+        <!-- Business Tools - Trainers Only -->
+        @if (isTrainer()) {
+          <ion-list class="settings-list">
+            <div class="section-header">
+              <ion-icon name="briefcase-outline"></ion-icon>
+              <h2>Business Tools</h2>
+            </div>
+
+            <ion-item button detail routerLink="/tabs/crm">
+              <ion-icon name="funnel-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>CRM & Lead Pipeline</h3>
+                <p>Manage leads and track conversions</p>
+              </ion-label>
+            </ion-item>
+
+            <ion-item button detail routerLink="/tabs/clients/invite">
+              <ion-icon name="person-add-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Invite New Client</h3>
+                <p>Send invitation codes to prospects</p>
+              </ion-label>
+            </ion-item>
           </ion-list>
         }
 
@@ -435,6 +464,9 @@ export class SettingsPage implements OnInit {
       cogOutline,
       sunnyOutline,
       phonePortraitOutline,
+      briefcaseOutline,
+      funnelOutline,
+      personAddOutline,
     });
   }
 

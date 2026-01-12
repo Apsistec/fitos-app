@@ -219,7 +219,7 @@ import { SupabaseService } from '@app/core/services/supabase.service';
     .security-info {
       padding: 24px 16px;
       margin: 0 16px;
-      background: var(--ion-color-light);
+      background: var(--fitos-bg-secondary);
       border-radius: 12px;
 
       h3 {

@@ -5,9 +5,42 @@
   background: var(--fitos-bg-secondary);
   border: 1px solid var(--fitos-border-subtle);
   border-radius: var(--fitos-radius-lg);
+  transition: all var(--fitos-duration-fast) var(--fitos-ease-default);
+  position: relative;
+  overflow: hidden;
+
+  // Add subtle glow effect on hover
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity var(--fitos-duration-normal) var(--fitos-ease-default);
+    pointer-events: none;
+  }
+
+  &:hover {
+    border-color: var(--fitos-border-default);
+    transform: translateY(-2px);
+    box-shadow: var(--fitos-glow-primary);
+
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
 
   ion-card-content {
     padding: 16px;
+    position: relative;
+    z-index: 1;
   }
 }
 

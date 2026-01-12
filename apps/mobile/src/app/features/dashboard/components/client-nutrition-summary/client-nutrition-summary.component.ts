@@ -32,14 +32,17 @@ export interface NutritionSummary {
           <div class="macro-item primary">
             <div class="macro-header">
               <span class="macro-label">Calories</span>
-              <span class="macro-values">
+              <span class="macro-values" [class.over-target]="isOverTarget(summary.calories.consumed, summary.calories.target)">
                 {{ summary.calories.consumed }} / {{ summary.calories.target }}
               </span>
             </div>
-            <ion-progress-bar
-              [value]="summary.calories.consumed / summary.calories.target"
-              [color]="getProgressColor(summary.calories.consumed, summary.calories.target)"
-            ></ion-progress-bar>
+            <div class="progress-bar-wrapper">
+              <div
+                class="progress-bar progress-calories"
+                [class.over-target]="isOverTarget(summary.calories.consumed, summary.calories.target)"
+                [style.width.%]="getProgressPercentage(summary.calories.consumed, summary.calories.target)">
+              </div>
+            </div>
           </div>
 
           <!-- Macros -->
@@ -47,40 +50,49 @@ export interface NutritionSummary {
             <div class="macro-item">
               <div class="macro-header">
                 <span class="macro-label">Protein</span>
-                <span class="macro-values">
+                <span class="macro-values" [class.over-target]="isOverTarget(summary.protein.consumed, summary.protein.target)">
                   {{ summary.protein.consumed }}g / {{ summary.protein.target }}g
                 </span>
               </div>
-              <ion-progress-bar
-                [value]="summary.protein.consumed / summary.protein.target"
-                [color]="getProgressColor(summary.protein.consumed, summary.protein.target)"
-              ></ion-progress-bar>
+              <div class="progress-bar-wrapper">
+                <div
+                  class="progress-bar progress-protein"
+                  [class.over-target]="isOverTarget(summary.protein.consumed, summary.protein.target)"
+                  [style.width.%]="getProgressPercentage(summary.protein.consumed, summary.protein.target)">
+                </div>
+              </div>
             </div>
 
             <div class="macro-item">
               <div class="macro-header">
                 <span class="macro-label">Carbs</span>
-                <span class="macro-values">
+                <span class="macro-values" [class.over-target]="isOverTarget(summary.carbs.consumed, summary.carbs.target)">
                   {{ summary.carbs.consumed }}g / {{ summary.carbs.target }}g
                 </span>
               </div>
-              <ion-progress-bar
-                [value]="summary.carbs.consumed / summary.carbs.target"
-                [color]="getProgressColor(summary.carbs.consumed, summary.carbs.target)"
-              ></ion-progress-bar>
+              <div class="progress-bar-wrapper">
+                <div
+                  class="progress-bar progress-carbs"
+                  [class.over-target]="isOverTarget(summary.carbs.consumed, summary.carbs.target)"
+                  [style.width.%]="getProgressPercentage(summary.carbs.consumed, summary.carbs.target)">
+                </div>
+              </div>
             </div>
 
             <div class="macro-item">
               <div class="macro-header">
                 <span class="macro-label">Fat</span>
-                <span class="macro-values">
+                <span class="macro-values" [class.over-target]="isOverTarget(summary.fat.consumed, summary.fat.target)">
                   {{ summary.fat.consumed }}g / {{ summary.fat.target }}g
                 </span>
               </div>
-              <ion-progress-bar
-                [value]="summary.fat.consumed / summary.fat.target"
-                [color]="getProgressColor(summary.fat.consumed, summary.fat.target)"
-              ></ion-progress-bar>
+              <div class="progress-bar-wrapper">
+                <div
+                  class="progress-bar progress-fat"
+                  [class.over-target]="isOverTarget(summary.fat.consumed, summary.fat.target)"
+                  [style.width.%]="getProgressPercentage(summary.fat.consumed, summary.fat.target)">
+                </div>
+              </div>
             </div>
           </div>
 
@@ -120,7 +132,7 @@ export interface NutritionSummary {
 
       &.primary {
         padding-bottom: 1rem;
-        border-bottom: 1px solid var(--ion-color-light);
+        border-bottom: 1px solid var(--fitos-border-subtle);
         margin-bottom: 1.5rem;
       }
     }
@@ -134,17 +146,58 @@ export interface NutritionSummary {
 
     .macro-label {
       font-weight: 500;
-      color: var(--ion-color-dark);
+      color: var(--fitos-text-primary);
     }
 
     .macro-values {
+      font-family: var(--fitos-font-mono);
       font-size: 0.9rem;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary);
+
+      &.over-target {
+        color: var(--fitos-nutrition-over);
+        font-weight: 600;
+      }
     }
 
     .macros-grid {
       display: grid;
       gap: 1rem;
+    }
+
+    /* Custom progress bars with adherence-neutral colors */
+    .progress-bar-wrapper {
+      width: 100%;
+      height: 8px;
+      background: var(--fitos-bg-tertiary);
+      border-radius: var(--fitos-radius-full);
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      border-radius: var(--fitos-radius-full);
+      transition: width 0.3s var(--fitos-ease-default);
+
+      &.over-target {
+        background: var(--fitos-nutrition-over) !important;
+      }
+    }
+
+    .progress-calories {
+      background: var(--fitos-nutrition-calories);
+    }
+
+    .progress-protein {
+      background: var(--fitos-nutrition-protein);
+    }
+
+    .progress-carbs {
+      background: var(--fitos-nutrition-carbs);
+    }
+
+    .progress-fat {
+      background: var(--fitos-nutrition-fat);
     }
 
     .view-button {
@@ -169,11 +222,11 @@ export interface NutritionSummary {
 
       h3 {
         margin: 0 0 0.5rem 0;
-        color: var(--ion-color-dark);
+        color: var(--fitos-text-primary);
       }
 
       p {
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-secondary);
         margin-bottom: 1.5rem;
       }
     }
@@ -182,16 +235,22 @@ export interface NutritionSummary {
 export class ClientNutritionSummaryComponent {
   summary = input<NutritionSummary | null>();
 
-  getProgressColor(consumed: number, target: number): string {
-    const percentage = consumed / target;
+  /**
+   * Returns progress percentage capped at 100%
+   * Adherence-neutral: over-target values are shown differently via CSS, not capped
+   */
+  getProgressPercentage(consumed: number, target: number): number {
+    if (target === 0) return 0;
+    const percentage = (consumed / target) * 100;
+    return Math.min(percentage, 100);
+  }
 
-    // Use neutral colors as per adherence-neutral design
-    if (percentage >= 0.9 && percentage <= 1.1) {
-      return 'success'; // On target
-    } else if (percentage >= 0.8 && percentage <= 1.2) {
-      return 'warning'; // Close to target
-    } else {
-      return 'medium'; // Further from target (neutral, not red)
-    }
+  /**
+   * Checks if value is over target (>110% for tolerance)
+   * Used to apply purple color for over-target values
+   */
+  isOverTarget(consumed: number, target: number): boolean {
+    if (target === 0) return false;
+    return consumed / target > 1.1;
   }
 }

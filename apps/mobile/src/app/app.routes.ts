@@ -179,7 +179,28 @@ export const routes: Routes = [
                 (m) => m.AddFoodPage
               ),
           },
+          {
+            path: 'voice',
+            loadComponent: () =>
+              import('./features/nutrition/components/voice-nutrition/voice-nutrition.component').then(
+                (m) => m.VoiceNutritionComponent
+              ),
+          },
+          {
+            path: 'photo',
+            loadComponent: () =>
+              import('./features/nutrition/pages/photo-nutrition/photo-nutrition.page').then(
+                (m) => m.PhotoNutritionPage
+              ),
+          },
         ],
+      },
+      {
+        path: 'coaching',
+        loadComponent: () =>
+          import('./features/coaching/components/ai-chat/ai-chat.component').then(
+            (m) => m.AIChatComponent
+          ),
       },
       {
         path: 'messages',
@@ -238,6 +259,27 @@ export const routes: Routes = [
             loadComponent: () =>
               import('./features/clients/pages/set-nutrition-targets/set-nutrition-targets.page').then(
                 (m) => m.SetNutritionTargetsPage
+              ),
+          },
+        ],
+      },
+      {
+        // CRM - trainers and gym owners only
+        path: 'crm',
+        canActivate: [trainerOrOwnerGuard],
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/crm/pages/crm/crm.page').then(
+                (m) => m.CRMPage
+              ),
+          },
+          {
+            path: 'leads',
+            loadComponent: () =>
+              import('./features/crm/pages/crm/crm.page').then(
+                (m) => m.CRMPage
               ),
           },
         ],

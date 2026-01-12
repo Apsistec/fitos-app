@@ -13,7 +13,13 @@ import {
   IonRefresherContent,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { personOutline } from 'ionicons/icons';
+import {
+  personOutline,
+  personAddOutline,
+  funnelOutline,
+  barbellOutline,
+  peopleOutline,
+} from 'ionicons/icons';
 import { AuthService } from '@app/core/services/auth.service';
 import { fadeInUp, listStagger } from '@app/shared/animations';
 import { AssignmentService } from '@app/core/services/assignment.service';
@@ -129,6 +135,29 @@ import type { WorkoutWithExercises } from '@app/core/services/workout.service';
       } @else {
         <!-- Trainer Dashboard -->
         <div class="trainer-dashboard" @fadeInUp>
+          <!-- Quick Actions Card -->
+          <div class="quick-actions-card">
+            <h2>Quick Actions</h2>
+            <div class="actions-grid">
+              <ion-button expand="block" fill="solid" routerLink="/tabs/clients/invite">
+                <ion-icon name="person-add-outline" slot="start"></ion-icon>
+                Invite Client
+              </ion-button>
+              <ion-button expand="block" fill="outline" routerLink="/tabs/crm">
+                <ion-icon name="funnel-outline" slot="start"></ion-icon>
+                View CRM
+              </ion-button>
+              <ion-button expand="block" fill="outline" routerLink="/tabs/workouts/create">
+                <ion-icon name="barbell-outline" slot="start"></ion-icon>
+                Create Workout
+              </ion-button>
+              <ion-button expand="block" fill="outline" routerLink="/tabs/clients">
+                <ion-icon name="people-outline" slot="start"></ion-icon>
+                My Clients
+              </ion-button>
+            </div>
+          </div>
+
           <!-- Overview Stats -->
           <app-trainer-overview-stats [stats]="trainerStats()" />
 
@@ -181,8 +210,43 @@ import type { WorkoutWithExercises } from '@app/core/services/workout.service';
       max-width: 100%;
     }
 
+    .quick-actions-card {
+      background: var(--fitos-bg-secondary);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 1rem;
+
+      h2 {
+        margin: 0 0 16px 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--fitos-text-primary);
+      }
+
+      .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+
+        ion-button {
+          margin: 0;
+          font-size: 0.875rem;
+          --padding-start: 12px;
+          --padding-end: 12px;
+        }
+
+        ion-icon {
+          font-size: 18px;
+        }
+      }
+    }
+
     @media (max-width: 576px) {
       .stats-row {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-actions-card .actions-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -243,7 +307,13 @@ export class DashboardPage implements OnInit {
   trainerPerformance = signal<TrainerPerformance[]>([]);
 
   constructor() {
-    addIcons({ personOutline });
+    addIcons({
+      personOutline,
+      personAddOutline,
+      funnelOutline,
+      barbellOutline,
+      peopleOutline,
+    });
   }
 
   ngOnInit(): void {
