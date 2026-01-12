@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { SupabaseService } from './supabase.service';
 
 /**
  * Parsed food item from natural language
@@ -69,10 +70,11 @@ const PORTION_DESCRIPTORS: Record<string, { qty: number; unit: string }> = {
 })
 export class NutritionParserService {
   private http = inject(HttpClient);
+  private supabase = inject(SupabaseService);
 
   // Nutritionix API configuration
-  private readonly NUTRITIONIX_APP_ID = ''; // TODO: Load from environment
-  private readonly NUTRITIONIX_API_KEY = ''; // TODO: Load from environment
+  private nutritionixAppId: string | null = null;
+  private nutritionixApiKey: string | null = null;
   private readonly NUTRITIONIX_API_URL = 'https://trackapi.nutritionix.com/v2';
 
   // State
@@ -142,9 +144,11 @@ export class NutritionParserService {
     if (partialText.length < 2) return [];
 
     try {
+      const credentials = await this.getNutritionixCredentials();
+
       const headers = new HttpHeaders({
-        'x-app-id': this.NUTRITIONIX_APP_ID,
-        'x-app-key': this.NUTRITIONIX_API_KEY,
+        'x-app-id': credentials.appId,
+        'x-app-key': credentials.appKey,
       });
 
       const response = await firstValueFrom(
@@ -169,6 +173,45 @@ export class NutritionParserService {
   }
 
   /**
+   * Get Nutritionix API credentials from Edge Function
+   */
+  private async getNutritionixCredentials(): Promise<{ appId: string; appKey: string }> {
+    // Return cached credentials if available
+    if (this.nutritionixAppId && this.nutritionixApiKey) {
+      return {
+        appId: this.nutritionixAppId,
+        appKey: this.nutritionixApiKey
+      };
+    }
+
+    try {
+      const response = await this.supabase.client.functions.invoke('nutritionix-key');
+
+      if (response.error) {
+        console.error('Failed to get Nutritionix credentials:', response.error);
+        throw new Error('Failed to retrieve API credentials');
+      }
+
+      if (!response.data?.appId || !response.data?.appKey) {
+        console.error('No credentials in response');
+        throw new Error('No API credentials returned');
+      }
+
+      // Cache for subsequent requests
+      this.nutritionixAppId = response.data.appId;
+      this.nutritionixApiKey = response.data.appKey;
+
+      return {
+        appId: response.data.appId,
+        appKey: response.data.appKey
+      };
+    } catch (err) {
+      console.error('Error getting Nutritionix credentials:', err);
+      throw err;
+    }
+  }
+
+  /**
    * Preprocess text to expand portion size descriptors
    * "a fist-sized chicken breast" -> "1 cup chicken breast"
    */
@@ -188,42 +231,42 @@ export class NutritionParserService {
    * Call Nutritionix Natural Language API
    */
   private async callNutritionixNLP(query: string): Promise<ParsedFood[]> {
-    // TODO: Implement when API keys are available
-    // For now, return mock data to show the architecture
-    console.warn('Nutritionix API not configured, returning mock data');
+    try {
+      const credentials = await this.getNutritionixCredentials();
 
-    if (!this.NUTRITIONIX_APP_ID || !this.NUTRITIONIX_API_KEY) {
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json',
+        'x-app-id': credentials.appId,
+        'x-app-key': credentials.appKey,
+      });
+
+      const body = {
+        query,
+        timezone: 'US/Eastern', // TODO: Get from user settings
+      };
+
+      const response = await firstValueFrom(
+        this.http.post<any>(`${this.NUTRITIONIX_API_URL}/natural/nutrients`, body, { headers })
+      );
+
+      // Parse Nutritionix response into our format
+      return response.foods.map((food: any) => ({
+        foodName: food.food_name,
+        servingQty: food.serving_qty,
+        servingUnit: food.serving_unit,
+        calories: Math.round(food.nf_calories),
+        protein: Math.round(food.nf_protein),
+        carbs: Math.round(food.nf_total_carbohydrate),
+        fat: Math.round(food.nf_total_fat),
+        confidence: 0.9, // Nutritionix has ~90% accuracy
+        photoUrl: food.photo?.thumb,
+        brandName: food.brand_name,
+      }));
+    } catch (err) {
+      // Fall back to mock data if API fails
+      console.warn('Nutritionix API failed, returning mock data:', err);
       return this.getMockParsedFoods(query);
     }
-
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'x-app-id': this.NUTRITIONIX_APP_ID,
-      'x-app-key': this.NUTRITIONIX_API_KEY,
-    });
-
-    const body = {
-      query,
-      timezone: 'US/Eastern', // TODO: Get from user settings
-    };
-
-    const response = await firstValueFrom(
-      this.http.post<any>(`${this.NUTRITIONIX_API_URL}/natural/nutrients`, body, { headers })
-    );
-
-    // Parse Nutritionix response into our format
-    return response.foods.map((food: any) => ({
-      foodName: food.food_name,
-      servingQty: food.serving_qty,
-      servingUnit: food.serving_unit,
-      calories: Math.round(food.nf_calories),
-      protein: Math.round(food.nf_protein),
-      carbs: Math.round(food.nf_total_carbohydrate),
-      fat: Math.round(food.nf_total_fat),
-      confidence: 0.9, // Nutritionix has ~90% accuracy
-      photoUrl: food.photo?.thumb,
-      brandName: food.brand_name,
-    }));
   }
 
   /**

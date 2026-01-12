@@ -2,6 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera';
+import { SupabaseService } from './supabase.service';
 
 /**
  * Identified food item from photo
@@ -51,10 +52,10 @@ interface FoodRecognitionResult {
 })
 export class PhotoNutritionService {
   private http = inject(HttpClient);
+  private supabase = inject(SupabaseService);
 
   // Food recognition API configuration
-  // TODO: Load from environment
-  private readonly PASSIO_API_KEY = '';
+  private passioApiKey: string | null = null;
   private readonly PASSIO_API_URL = 'https://api.passiolife.com/v2';
 
   // State
