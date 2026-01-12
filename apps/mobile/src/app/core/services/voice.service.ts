@@ -1,5 +1,6 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
+import { SupabaseService } from './supabase.service';
 
 /**
  * Voice Service for FitOS
@@ -54,6 +55,8 @@ const FITNESS_KEYWORDS = [
   providedIn: 'root',
 })
 export class VoiceService {
+  private supabase = inject(SupabaseService);
+
   private socket: WebSocket | null = null;
   private mediaRecorder: MediaRecorder | null = null;
   private stream: MediaStream | null = null;
@@ -354,13 +357,29 @@ export class VoiceService {
   }
 
   /**
-   * Get Deepgram API key from backend
+   * Get Deepgram API key from backend Edge Function
    */
   private async getDeepgramApiKey(): Promise<string> {
-    // TODO: Implement secure API key retrieval from backend
-    // For now, return empty - this will fail but shows the architecture
-    console.warn('Deepgram API key not configured');
-    return '';
+    try {
+      const response = await this.supabase.client.functions.invoke('deepgram-key');
+
+      if (response.error) {
+        console.error('Failed to get Deepgram API key:', response.error);
+        throw new Error('Failed to retrieve API key');
+      }
+
+      if (!response.data?.key) {
+        console.error('No API key in response');
+        throw new Error('No API key returned');
+      }
+
+      return response.data.key;
+    } catch (err) {
+      console.error('Error getting Deepgram API key:', err);
+      // Return empty string to allow graceful degradation
+      // The connection will fail but won't crash the app
+      return '';
+    }
   }
 
   /**

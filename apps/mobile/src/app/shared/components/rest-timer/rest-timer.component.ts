@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import {
   IonCard,
   IonCardContent,
@@ -9,6 +9,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { playOutline, pauseOutline, stopOutline, closeOutline } from 'ionicons/icons';
+import { HapticService } from '../../../core/services/haptic.service';
 
 // Register icons at file level
 addIcons({ playOutline, pauseOutline, stopOutline, closeOutline });
@@ -160,6 +161,8 @@ addIcons({ playOutline, pauseOutline, stopOutline, closeOutline });
   `]
 })
 export class RestTimerComponent implements OnInit, OnDestroy {
+  private haptic = inject(HapticService);
+
   @Input() restSeconds: number = 90;
   @Input() autoStart: boolean = true;
   @Output() complete = new EventEmitter<void>();
@@ -172,6 +175,7 @@ export class RestTimerComponent implements OnInit, OnDestroy {
   private interval?: number;
   private startTime?: number;
   private pausedTime: number = 0;
+  private warningHapticTriggered = false;
 
   ngOnInit() {
     this.timeRemaining.set(this.restSeconds);
@@ -213,19 +217,23 @@ export class RestTimerComponent implements OnInit, OnDestroy {
     this.timeRemaining.set(remaining);
     this.progress.set(elapsed / this.restSeconds);
 
+    // Haptic warning at 10 seconds remaining
+    if (remaining === 10 && !this.warningHapticTriggered) {
+      this.haptic.light();
+      this.warningHapticTriggered = true;
+    }
+
     if (remaining === 0) {
       this.onComplete();
     }
   }
 
-  private onComplete() {
+  private async onComplete() {
     this.clearInterval();
     this.isRunning.set(false);
 
-    // Vibrate if available
-    if ('vibrate' in navigator) {
-      navigator.vibrate([200, 100, 200]);
-    }
+    // Haptic notification on timer complete
+    await this.haptic.warning();
 
     this.complete.emit();
   }

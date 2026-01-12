@@ -31,6 +31,9 @@ addIcons({ checkmarkOutline, closeOutline, addCircleOutline, trashOutline });
 import { WorkoutSessionService, SetLog } from '../../../../core/services/workout-session.service';
 import { AssignmentService } from '../../../../core/services/assignment.service';
 import { RestTimerComponent } from '../../../../shared/components/rest-timer/rest-timer.component';
+import { HapticService } from '../../../../core/services/haptic.service';
+import { VoiceLoggerComponent } from '../../../../shared/components/voice-logger/voice-logger.component';
+import { ParsedWorkoutCommand } from '../../../../core/services/voice.service';
 
 interface ExerciseProgress {
   exerciseId: string;
@@ -67,7 +70,8 @@ interface ExerciseProgress {
     IonText,
     IonBadge,
     IonSpinner,
-    RestTimerComponent
+    RestTimerComponent,
+    VoiceLoggerComponent
   ],
   template: `
     <ion-header>
@@ -178,13 +182,20 @@ interface ExerciseProgress {
 
               <ion-button
                 expand="block"
-                (click)="logSet()"
+                (click)="haptic.light(); logSet()"
                 [disabled]="!canLogSet()"
                 class="log-button"
               >
                 <ion-icon slot="start" name="add-circle-outline"></ion-icon>
                 Log Set
               </ion-button>
+
+              <!-- Voice Logger -->
+              <div class="voice-logger-container">
+                <app-voice-logger
+                  (commandParsed)="handleVoiceCommand($event)"
+                ></app-voice-logger>
+              </div>
 
               <!-- Logged Sets -->
               @if (currentExercise()!.sets.length > 0) {
@@ -210,14 +221,14 @@ interface ExerciseProgress {
               <!-- Navigation Buttons -->
               <div class="exercise-nav">
                 @if (currentExerciseIndex() > 0) {
-                  <ion-button fill="outline" (click)="previousExercise()">
+                  <ion-button fill="outline" (click)="haptic.light(); previousExercise()">
                     Previous Exercise
                   </ion-button>
                 }
                 @if (currentExercise()!.completedSets >= currentExercise()!.targetSets) {
                   <ion-button
                     [fill]="currentExerciseIndex() < exercises().length - 1 ? 'solid' : 'outline'"
-                    (click)="nextExercise()"
+                    (click)="haptic.light(); nextExercise()"
                   >
                     {{ currentExerciseIndex() < exercises().length - 1 ? 'Next Exercise' : 'Finish' }}
                   </ion-button>
@@ -365,6 +376,14 @@ interface ExerciseProgress {
       flex: 1;
       margin: 0;
     }
+
+    .voice-logger-container {
+      margin: 24px 0;
+      padding: 16px;
+      background: var(--fitos-bg-tertiary);
+      border-radius: var(--fitos-radius-lg);
+      border: 1px solid var(--fitos-border-subtle);
+    }
   `]
 })
 export class ActiveWorkoutPage implements OnInit, OnDestroy {
@@ -374,6 +393,7 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
   private assignmentService = inject(AssignmentService);
   private alertController = inject(AlertController);
   private toastController = inject(ToastController);
+  private haptic = inject(HapticService);
 
   assignedWorkoutId?: string;
 
@@ -390,6 +410,9 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
   currentReps: number | null = null;
   currentWeight: number | null = null;
   currentRpe: number | null = null;
+
+  // Track last set for repeat command
+  lastSet: { reps: number; weight?: number; rpe?: number } | null = null;
 
   // Computed
   currentExercise = computed(() => {
@@ -470,6 +493,9 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
     const result = await this.sessionService.logSet(setLog);
 
     if (result) {
+      // Haptic feedback on set completion
+      await this.haptic.success();
+
       // Update local state
       this.exercises.update(exercises => {
         const updated = [...exercises];
@@ -479,6 +505,13 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
         current.currentSet++;
         return updated;
       });
+
+      // Store last set for repeat command
+      this.lastSet = {
+        reps: this.currentReps!,
+        weight: this.currentWeight || undefined,
+        rpe: this.currentRpe || undefined
+      };
 
       // Reset form
       this.currentReps = null;
@@ -490,14 +523,18 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
         this.restTime.set(exercise.restSeconds);
         this.showRestTimer.set(true);
       } else {
+        // Exercise complete - heavy haptic
+        await this.haptic.heavy();
         this.showToast('Exercise complete!', 'success');
       }
     } else {
+      await this.haptic.error();
       this.showToast('Failed to log set', 'danger');
     }
   }
 
-  onRestComplete() {
+  async onRestComplete() {
+    await this.haptic.warning(); // Alert user rest is over
     this.showRestTimer.set(false);
     this.showToast('Rest complete!');
   }
@@ -556,9 +593,12 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
             );
 
             if (success) {
+              // Heavy haptic on workout completion
+              await this.haptic.heavy();
               this.showToast('Workout completed!', 'success');
               this.router.navigate(['/tabs/dashboard']);
             } else {
+              await this.haptic.error();
               this.showToast('Failed to complete workout', 'danger');
             }
           }
@@ -603,5 +643,62 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
       color
     });
     await toast.present();
+  }
+
+  /**
+   * Handle voice commands from VoiceLoggerComponent
+   */
+  async handleVoiceCommand(command: ParsedWorkoutCommand): Promise<void> {
+    await this.haptic.light();
+
+    switch (command.type) {
+      case 'log_set':
+        if (command.reps) {
+          this.currentReps = command.reps;
+          this.currentWeight = command.weight || null;
+          // Auto-submit if we have complete data
+          if (this.canLogSet()) {
+            await this.logSet();
+          }
+        }
+        break;
+
+      case 'repeat':
+        if (this.lastSet) {
+          this.currentReps = this.lastSet.reps;
+          this.currentWeight = this.lastSet.weight || null;
+          this.currentRpe = this.lastSet.rpe || null;
+          // Auto-submit the repeated set
+          if (this.canLogSet()) {
+            await this.logSet();
+          }
+        } else {
+          this.showToast('No previous set to repeat', 'warning');
+        }
+        break;
+
+      case 'skip':
+        this.nextExercise();
+        break;
+
+      case 'next':
+        this.nextExercise();
+        break;
+
+      case 'rest':
+        if (command.duration) {
+          this.restTime.set(command.duration);
+          this.showRestTimer.set(true);
+        }
+        break;
+
+      case 'done':
+        await this.completeWorkout();
+        break;
+
+      case 'unknown':
+        this.showToast('Command not recognized. Try "10 reps at 185" or "repeat"', 'warning');
+        break;
+    }
   }
 }

@@ -4,8 +4,7 @@
  * Dark-First Design System v2.0
  */
 
-// Import Inter font from Google Fonts
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+// Fonts are loaded in index.html for better performance
 
 // Import Ionic styles
 @import '@ionic/angular/css/core.css';
@@ -28,6 +27,7 @@
 html, body {
   background: var(--fitos-bg-primary);
   color: var(--fitos-text-primary);
+  font-family: var(--fitos-font-family);
 }
 
 // Ensure dark class is default
