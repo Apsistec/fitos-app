@@ -30,8 +30,8 @@ export interface Lead {
 export interface LeadActivity {
   id: string;
   lead_id: string;
-  type: 'note' | 'email' | 'call' | 'meeting' | 'stage_change';
-  description: string;
+  type: 'note' | 'email' | 'call' | 'meeting' | 'status_change';
+  content: string;
   metadata?: Record<string, any>;
   created_at: string;
   created_by: string;
@@ -208,10 +208,10 @@ export class LeadService {
 
       // Log stage change
       await this.logActivity(
-        leadId, 
-        'stage_change', 
+        leadId,
+        'status_change',
         `Stage changed from ${oldStage} to ${newStage}`,
-        { oldStage, newStage }
+        { old_stage: oldStage, new_stage: newStage }
       );
 
       return true;
@@ -274,12 +274,31 @@ export class LeadService {
   }
 
   /**
+   * Get a single lead by ID
+   */
+  async getLeadById(leadId: string): Promise<Lead | null> {
+    try {
+      const { data, error } = await this.supabase.client
+        .from('leads')
+        .select('*')
+        .eq('id', leadId)
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (err) {
+      console.error('Error loading lead:', err);
+      return null;
+    }
+  }
+
+  /**
    * Log lead activity
    */
   async logActivity(
-    leadId: string, 
-    type: LeadActivity['type'], 
-    description: string,
+    leadId: string,
+    type: LeadActivity['type'],
+    content: string,
     metadata?: Record<string, any>
   ): Promise<void> {
     const userId = this.auth.user()?.id;
@@ -291,7 +310,7 @@ export class LeadService {
         .insert({
           lead_id: leadId,
           type,
-          description,
+          content,
           metadata,
           created_by: userId,
         });
@@ -303,7 +322,7 @@ export class LeadService {
   /**
    * Get activities for a lead
    */
-  async getActivities(leadId: string): Promise<LeadActivity[]> {
+  async getLeadActivities(leadId: string): Promise<LeadActivity[]> {
     try {
       const { data, error } = await this.supabase.client
         .from('lead_activities')

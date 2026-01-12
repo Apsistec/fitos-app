@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { CdkDragDrop, CdkDrag, CdkDropList, CdkDropListGroup, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import {
   IonCard,
   IonCardContent,
@@ -24,6 +25,9 @@ import {
   funnelOutline,
 } from 'ionicons/icons';
 import { LeadService, Lead, LeadStage } from '@app/core/services/lead.service';
+import { LeadCardComponent } from '../lead-card/lead-card.component';
+import { LeadFormComponent } from '../lead-form/lead-form.component';
+import { ModalController } from '@ionic/angular/standalone';
 
 const STAGE_CONFIG = {
   new: { label: 'New', color: 'primary', icon: 'person-add-outline' },
@@ -50,14 +54,14 @@ const STAGE_CONFIG = {
   imports: [
     CommonModule,
     FormsModule,
-    IonCard,
-    IonCardContent,
+    CdkDropListGroup,
+    CdkDropList,
+    CdkDrag,
+    LeadCardComponent,
     IonBadge,
     IonIcon,
     IonButton,
     IonSearchbar,
-    IonChip,
-    IonLabel,
     IonSpinner,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -103,7 +107,7 @@ const STAGE_CONFIG = {
 
       <!-- Pipeline Stages (Horizontal Scroll) -->
       @if (!leadService.loading()) {
-        <div class="pipeline-stages">
+        <div cdkDropListGroup class="pipeline-stages">
           @for (stage of stages; track stage) {
             <div class="stage-column">
               <!-- Stage Header -->
@@ -118,65 +122,25 @@ const STAGE_CONFIG = {
               </div>
 
               <!-- Lead Cards -->
-              <div class="lead-cards">
+              <div
+                cdkDropList
+                [cdkDropListData]="getStageLeads(stage)"
+                [id]="stage"
+                (cdkDropListDropped)="onDrop($event)"
+                class="lead-cards"
+              >
                 @for (lead of getStageLeads(stage); track lead.id) {
-                  <ion-card
-                    class="lead-card"
-                    button
-                    (click)="viewLead(lead)"
-                    [class.dragging]="draggedLead() === lead.id"
-                    draggable="true"
-                    (dragstart)="onDragStart($event, lead)"
-                    (dragend)="onDragEnd()"
-                  >
-                    <ion-card-content>
-                      <!-- Lead Name -->
-                      <h3 class="lead-name">{{ lead.name }}</h3>
-
-                      <!-- Contact Info -->
-                      <div class="lead-contact">
-                        <span class="lead-email">{{ lead.email }}</span>
-                        @if (lead.phone) {
-                          <span class="lead-phone">{{ lead.phone }}</span>
-                        }
-                      </div>
-
-                      <!-- Source -->
-                      <div class="lead-meta">
-                        <ion-chip size="small" outline="true">
-                          <ion-label>{{ lead.source }}</ion-label>
-                        </ion-chip>
-                        @if (lead.expected_value) {
-                          <span class="lead-value">\${{ lead.expected_value }}</span>
-                        }
-                      </div>
-
-                      <!-- Follow-up indicator -->
-                      @if (lead.next_follow_up && isOverdue(lead.next_follow_up)) {
-                        <div class="follow-up-alert">
-                          <ion-icon name="calendar-outline"></ion-icon>
-                          <span>Follow-up overdue</span>
-                        </div>
-                      }
-                    </ion-card-content>
-                  </ion-card>
+                  <app-lead-card
+                    cdkDrag
+                    [lead]="lead"
+                    (cardClick)="viewLead($event)"
+                  />
                 } @empty {
                   <div class="empty-stage">
                     <ion-icon name="funnel-outline"></ion-icon>
                     <p>No leads</p>
                   </div>
                 }
-              </div>
-
-              <!-- Drop Zone -->
-              <div
-                class="drop-zone"
-                [class.active]="dropZone() === stage"
-                (dragover)="onDragOver($event, stage)"
-                (dragleave)="onDragLeave()"
-                (drop)="onDrop($event, stage)"
-              >
-                Drop here
               </div>
             </div>
           }
@@ -287,88 +251,13 @@ const STAGE_CONFIG = {
       flex-direction: column;
       gap: var(--fitos-space-3);
       min-height: 200px;
-    }
-
-    .lead-card {
-      margin: 0;
-      cursor: move;
-      transition: all var(--fitos-duration-fast);
-      --background: var(--fitos-bg-secondary);
-      border: 1px solid var(--fitos-border-subtle);
-
-      &:hover {
-        border-color: var(--fitos-border-default);
-        transform: translateY(-2px);
-        box-shadow: var(--fitos-shadow-md);
-      }
-
-      &.dragging {
-        opacity: 0.5;
-        transform: rotate(2deg);
-      }
-
-      ion-card-content {
-        padding: var(--fitos-space-3);
-      }
-    }
-
-    .lead-name {
-      margin: 0 0 var(--fitos-space-2);
-      font-size: var(--fitos-text-base);
-      font-weight: 600;
-      color: var(--fitos-text-primary);
-    }
-
-    .lead-contact {
-      display: flex;
-      flex-direction: column;
-      gap: var(--fitos-space-1);
-      margin-bottom: var(--fitos-space-2);
-    }
-
-    .lead-email {
-      font-size: var(--fitos-text-sm);
-      color: var(--fitos-text-secondary);
-    }
-
-    .lead-phone {
-      font-size: var(--fitos-text-xs);
-      color: var(--fitos-text-tertiary);
-    }
-
-    .lead-meta {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--fitos-space-2);
-
-      ion-chip {
-        margin: 0;
-        font-size: var(--fitos-text-xs);
-        text-transform: capitalize;
-      }
-    }
-
-    .lead-value {
-      font-family: var(--fitos-font-mono);
-      font-size: var(--fitos-text-sm);
-      font-weight: 600;
-      color: var(--fitos-status-success);
-    }
-
-    .follow-up-alert {
-      display: flex;
-      align-items: center;
-      gap: var(--fitos-space-1);
-      margin-top: var(--fitos-space-2);
       padding: var(--fitos-space-2);
-      background: rgba(239, 68, 68, 0.1);
-      border-radius: var(--fitos-radius-sm);
-      font-size: var(--fitos-text-xs);
-      color: var(--fitos-status-error);
+      background: transparent;
+      border-radius: var(--fitos-radius-md);
+      transition: background-color var(--fitos-duration-fast);
 
-      ion-icon {
-        font-size: 14px;
+      &.cdk-drop-list-dragging {
+        background: rgba(16, 185, 129, 0.05);
       }
     }
 
@@ -391,35 +280,14 @@ const STAGE_CONFIG = {
         font-size: var(--fitos-text-sm);
       }
     }
-
-    .drop-zone {
-      min-height: 50px;
-      border: 2px dashed var(--fitos-border-subtle);
-      border-radius: var(--fitos-radius-md);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: var(--fitos-text-sm);
-      color: var(--fitos-text-tertiary);
-      opacity: 0;
-      transition: all var(--fitos-duration-fast);
-
-      &.active {
-        opacity: 1;
-        border-color: var(--fitos-accent-primary);
-        background: rgba(16, 185, 129, 0.1);
-        color: var(--fitos-accent-primary);
-      }
-    }
   `],
 })
 export class LeadPipelineComponent implements OnInit {
   leadService = inject(LeadService);
+  private modalCtrl = inject(ModalController);
 
   // Component state
   searchQuery = signal('');
-  draggedLead = signal<string | null>(null);
-  dropZone = signal<LeadStage | null>(null);
   filteredLeads = signal<Lead[]>([]);
 
   STAGE_CONFIG = STAGE_CONFIG;
@@ -459,50 +327,52 @@ export class LeadPipelineComponent implements OnInit {
     // Search is handled by getStageLeads
   }
 
-  onDragStart(event: DragEvent, lead: Lead): void {
-    this.draggedLead.set(lead.id);
-    event.dataTransfer!.effectAllowed = 'move';
-    event.dataTransfer!.setData('text/plain', lead.id);
-  }
+  async onDrop(event: CdkDragDrop<Lead[]>): Promise<void> {
+    if (event.previousContainer === event.container) {
+      // Reordering within same stage
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    } else {
+      // Moving to different stage
+      const lead = event.previousContainer.data[event.previousIndex];
+      const newStage = event.container.id as LeadStage;
 
-  onDragEnd(): void {
-    this.draggedLead.set(null);
-    this.dropZone.set(null);
-  }
+      await this.leadService.updateStage(lead.id, newStage);
 
-  onDragOver(event: DragEvent, stage: LeadStage): void {
-    event.preventDefault();
-    event.dataTransfer!.dropEffect = 'move';
-    this.dropZone.set(stage);
-  }
-
-  onDragLeave(): void {
-    this.dropZone.set(null);
-  }
-
-  async onDrop(event: DragEvent, newStage: LeadStage): Promise<void> {
-    event.preventDefault();
-    const leadId = this.draggedLead();
-    if (!leadId) return;
-
-    await this.leadService.updateStage(leadId, newStage);
-
-    this.draggedLead.set(null);
-    this.dropZone.set(null);
+      // Transfer item between lists
+      transferArrayItem(
+        event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex
+      );
+    }
   }
 
   viewLead(lead: Lead): void {
-    // TODO: Open lead detail modal
+    // TODO: Navigate to lead detail page
     console.log('View lead:', lead);
   }
 
-  addLead(): void {
-    // TODO: Open add lead modal
-    console.log('Add lead');
-  }
+  async addLead(): Promise<void> {
+    const modal = await this.modalCtrl.create({
+      component: LeadFormComponent,
+      componentProps: {
+        title: 'Add New Lead',
+        subtitle: 'Capture a potential client',
+        showSource: true,
+        showNotes: true,
+        showExpectedValue: true,
+      },
+    });
 
-  isOverdue(date: string): boolean {
-    return new Date(date) < new Date();
+    await modal.present();
+
+    const { role } = await modal.onWillDismiss();
+
+    if (role === 'leadCreated') {
+      // Reload leads to show the new one
+      await this.leadService.loadLeads();
+    }
   }
 
   formatValue(value: number): string {
