@@ -70,7 +70,7 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
       <ion-toolbar>
         <ion-title>Exercise Library</ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="toggleFilters()">
+          <ion-button (click)="toggleFilters()" aria-label="Toggle filters">
             <ion-icon slot="icon-only" name="filter-outline"></ion-icon>
           </ion-button>
         </ion-buttons>

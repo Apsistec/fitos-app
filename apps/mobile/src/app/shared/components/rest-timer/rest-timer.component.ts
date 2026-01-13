@@ -34,7 +34,7 @@ addIcons({ playOutline, pauseOutline, stopOutline, closeOutline });
           <ion-text color="primary">
             <h2>Rest Period</h2>
           </ion-text>
-          <ion-button fill="clear" size="small" (click)="onSkip()">
+          <ion-button fill="clear" size="small" (click)="onSkip()" aria-label="Skip rest timer">
             <ion-icon slot="icon-only" name="close-outline"></ion-icon>
           </ion-button>
         </div>

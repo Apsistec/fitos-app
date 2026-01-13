@@ -128,6 +128,7 @@ const AGENT_CONFIG = {
             size="default"
             (click)="sendMessage()"
             [disabled]="!messageText().trim() || aiCoach.isProcessing()"
+            aria-label="Send message"
           >
             @if (aiCoach.isProcessing()) {
               <ion-spinner name="crescent"></ion-spinner>

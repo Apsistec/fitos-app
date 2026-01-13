@@ -21,7 +21,7 @@ export interface NutritionSummary {
         <ion-card-header>
           <div class="header-content">
             <ion-card-title>Today's Nutrition</ion-card-title>
-            <ion-button fill="clear" size="small" routerLink="/tabs/nutrition">
+            <ion-button fill="clear" size="small" routerLink="/tabs/nutrition" aria-label="Add food">
               <ion-icon slot="icon-only" name="add"></ion-icon>
             </ion-button>
           </div>

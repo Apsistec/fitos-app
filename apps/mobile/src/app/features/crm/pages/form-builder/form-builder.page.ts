@@ -117,10 +117,10 @@ export interface LeadFormConfig {
         </ion-buttons>
         <ion-title>Lead Form Builder</ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="previewForm()">
+          <ion-button (click)="previewForm()" aria-label="Preview form">
             <ion-icon slot="icon-only" name="eye-outline"></ion-icon>
           </ion-button>
-          <ion-button (click)="generateEmbedCode()">
+          <ion-button (click)="generateEmbedCode()" aria-label="Generate embed code">
             <ion-icon slot="icon-only" name="code-outline"></ion-icon>
           </ion-button>
         </ion-buttons>

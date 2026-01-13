@@ -85,6 +85,7 @@ addIcons({ checkmarkOutline, closeOutline, createOutline, trashOutline });
                       size="small"
                       (click)="removeFood(i)"
                       class="delete-btn"
+                      aria-label="Remove food"
                     >
                       <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
                     </ion-button>

@@ -104,7 +104,7 @@ const COMMON_EQUIPMENT = [
         <ion-title>{{ isEditMode() ? 'Edit Exercise' : 'New Exercise' }}</ion-title>
         <ion-buttons slot="end">
           @if (isEditMode()) {
-            <ion-button color="danger" (click)="deleteExercise()">
+            <ion-button color="danger" (click)="deleteExercise()" aria-label="Delete exercise">
               <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
             </ion-button>
           }

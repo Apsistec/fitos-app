@@ -32,6 +32,7 @@ import { WorkoutSessionService, SetLog } from '../../../../core/services/workout
 import { AssignmentService } from '../../../../core/services/assignment.service';
 import { RestTimerComponent } from '../../../../shared/components/rest-timer/rest-timer.component';
 import { HapticService } from '../../../../core/services/haptic.service';
+import { CelebrationService } from '../../../../core/services/celebration.service';
 import { VoiceLoggerComponent } from '../../../../shared/components/voice-logger/voice-logger.component';
 import { ParsedWorkoutCommand } from '../../../../core/services/voice.service';
 
@@ -82,7 +83,7 @@ interface ExerciseProgress {
         </ion-buttons>
         <ion-title>{{ workoutName() }}</ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="completeWorkout()" [disabled]="!canComplete()">
+          <ion-button (click)="completeWorkout()" [disabled]="!canComplete()" aria-label="Complete workout">
             <ion-icon slot="icon-only" name="checkmark-outline"></ion-icon>
           </ion-button>
         </ion-buttons>
@@ -394,6 +395,7 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
   private assignmentService = inject(AssignmentService);
   private alertController = inject(AlertController);
   private toastController = inject(ToastController);
+  private celebration = inject(CelebrationService);
   haptic = inject(HapticService); // Public for template access
 
   assignedWorkoutId?: string;
@@ -594,8 +596,8 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
             );
 
             if (success) {
-              // Heavy haptic on workout completion
-              await this.haptic.heavy();
+              // Celebration animation on workout completion
+              await this.celebration.workoutComplete();
               this.showToast('Workout completed!', 'success');
               this.router.navigate(['/tabs/dashboard']);
             } else {

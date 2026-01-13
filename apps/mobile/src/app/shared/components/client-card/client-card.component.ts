@@ -65,7 +65,7 @@ addIcons({
               <ion-card-subtitle>{{ client().profile.email }}</ion-card-subtitle>
             </div>
           </div>
-          <ion-button fill="clear" (click)="onMenuClick($event)">
+          <ion-button fill="clear" (click)="onMenuClick($event)" aria-label="Open client menu">
             <ion-icon slot="icon-only" name="ellipsis-vertical-outline"></ion-icon>
           </ion-button>
         </div>

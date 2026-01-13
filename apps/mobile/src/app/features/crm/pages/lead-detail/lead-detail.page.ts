@@ -82,7 +82,7 @@ import { ActivityLoggerComponent } from '../../components/activity-logger/activi
         </ion-buttons>
         <ion-title>Lead Details</ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="editLead()">
+          <ion-button (click)="editLead()" aria-label="Edit lead">
             <ion-icon slot="icon-only" name="create-outline"></ion-icon>
           </ion-button>
         </ion-buttons>

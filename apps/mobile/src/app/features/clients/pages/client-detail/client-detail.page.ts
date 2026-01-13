@@ -108,7 +108,7 @@ interface TrainerNote {
         </ion-buttons>
         <ion-title>{{ client()?.full_name || 'Client Profile' }}</ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="showActionSheet()">
+          <ion-button (click)="showActionSheet()" aria-label="Client actions">
             <ion-icon slot="icon-only" name="create-outline"></ion-icon>
           </ion-button>
         </ion-buttons>
@@ -391,6 +391,7 @@ interface TrainerNote {
                             size="small"
                             color="danger"
                             (click)="deleteNote(note.id)"
+                            aria-label="Delete note"
                           >
                             <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
                           </ion-button>

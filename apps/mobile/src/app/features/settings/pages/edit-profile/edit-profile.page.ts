@@ -75,7 +75,7 @@ import { SupabaseService } from '@app/core/services/supabase.service';
         </ion-buttons>
         <ion-title>My Profile</ion-title>
         <ion-buttons slot="end">
-          <ion-button routerLink="/tabs/settings">
+          <ion-button routerLink="/tabs/settings" aria-label="Open settings">
             <ion-icon slot="icon-only" name="settings-outline"></ion-icon>
           </ion-button>
         </ion-buttons>

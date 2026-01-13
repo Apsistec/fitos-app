@@ -151,6 +151,7 @@ addIcons({
                       fill="clear"
                       (click)="openActionSheet(workout)"
                       class="more-button"
+                      aria-label="Workout options"
                     >
                       <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
                     </ion-button>

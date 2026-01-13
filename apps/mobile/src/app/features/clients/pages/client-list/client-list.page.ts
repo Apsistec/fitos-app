@@ -61,10 +61,10 @@ type SubscriptionFilter = 'all' | 'active' | 'trialing' | 'past_due' | 'canceled
       <ion-toolbar>
         <ion-title>My Clients</ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="viewInvitations()">
+          <ion-button (click)="viewInvitations()" aria-label="View invitations">
             <ion-icon slot="icon-only" name="mail-outline"></ion-icon>
           </ion-button>
-          <ion-button (click)="toggleFilters()">
+          <ion-button (click)="toggleFilters()" aria-label="Toggle filters">
             <ion-icon slot="icon-only" name="filter-outline"></ion-icon>
           </ion-button>
         </ion-buttons>

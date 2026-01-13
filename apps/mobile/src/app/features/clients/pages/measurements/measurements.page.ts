@@ -233,6 +233,7 @@ Chart.register(...registerables);
                         color="danger"
                         class="delete-photo-btn"
                         (click)="confirmDeletePhoto(photo, $event)"
+                        aria-label="Delete photo"
                       >
                         <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
                       </ion-button>
@@ -275,7 +276,7 @@ Chart.register(...registerables);
             <ion-toolbar>
               <ion-title>Log Measurement</ion-title>
               <ion-buttons slot="end">
-                <ion-button (click)="showMeasurementModal.set(false)">
+                <ion-button (click)="showMeasurementModal.set(false)" aria-label="Close modal">
                   <ion-icon name="close-outline" slot="icon-only"></ion-icon>
                 </ion-button>
               </ion-buttons>
@@ -381,7 +382,7 @@ Chart.register(...registerables);
             <ion-toolbar>
               <ion-title>Upload Progress Photo</ion-title>
               <ion-buttons slot="end">
-                <ion-button (click)="showPhotoModal.set(false)">
+                <ion-button (click)="showPhotoModal.set(false)" aria-label="Close modal">
                   <ion-icon name="close-outline" slot="icon-only"></ion-icon>
                 </ion-button>
               </ion-buttons>

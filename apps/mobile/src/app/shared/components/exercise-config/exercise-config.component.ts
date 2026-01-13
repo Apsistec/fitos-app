@@ -71,7 +71,7 @@ export interface ExerciseConfig {
               </ion-badge>
             }
           </div>
-          <ion-button fill="clear" color="danger" (click)="onRemove()">
+          <ion-button fill="clear" color="danger" (click)="onRemove()" aria-label="Remove exercise">
             <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
           </ion-button>
         </div>

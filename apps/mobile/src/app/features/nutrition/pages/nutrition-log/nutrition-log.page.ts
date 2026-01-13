@@ -90,7 +90,7 @@ interface WeeklyAverage {
     <ion-header>
       <ion-toolbar>
         <ion-title>Nutrition</ion-title>
-        <ion-button slot="end" fill="clear" (click)="navigateToAddFood()">
+        <ion-button slot="end" fill="clear" (click)="navigateToAddFood()" aria-label="Add food">
           <ion-icon slot="icon-only" name="add-outline"></ion-icon>
         </ion-button>
       </ion-toolbar>
@@ -133,10 +133,10 @@ interface WeeklyAverage {
                     <ion-icon name="calendar-outline"></ion-icon>
                     {{ formatDate(selectedDate()) }}
                   </ion-card-title>
-                  <ion-button fill="clear" size="small" (click)="changeDate(-1)">
+                  <ion-button fill="clear" size="small" (click)="changeDate(-1)" aria-label="Previous day">
                     <ion-icon slot="icon-only" name="chevron-back-outline"></ion-icon>
                   </ion-button>
-                  <ion-button fill="clear" size="small" (click)="changeDate(1)" [disabled]="isToday()">
+                  <ion-button fill="clear" size="small" (click)="changeDate(1)" [disabled]="isToday()" aria-label="Next day">
                     <ion-icon slot="icon-only" name="chevron-forward-outline"></ion-icon>
                   </ion-button>
                 </div>

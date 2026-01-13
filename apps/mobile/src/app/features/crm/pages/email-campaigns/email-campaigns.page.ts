@@ -100,7 +100,7 @@ export interface EmailCampaign {
         </ion-buttons>
         <ion-title>Email Campaigns</ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="createCampaign()">
+          <ion-button (click)="createCampaign()" aria-label="Create campaign">
             <ion-icon slot="icon-only" name="add-outline"></ion-icon>
           </ion-button>
         </ion-buttons>
@@ -229,6 +229,7 @@ export interface EmailCampaign {
                         fill="clear"
                         color="danger"
                         (click)="deleteCampaign($event, campaign)"
+                        aria-label="Delete campaign"
                       >
                         <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
                       </ion-button>

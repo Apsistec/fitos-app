@@ -55,7 +55,7 @@ addIcons({
       <ion-toolbar>
         <ion-title>{{ exercise().name }}</ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="dismiss()">
+          <ion-button (click)="dismiss()" aria-label="Close modal">
             <ion-icon slot="icon-only" name="close-outline"></ion-icon>
           </ion-button>
         </ion-buttons>

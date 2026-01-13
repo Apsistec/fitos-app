@@ -121,7 +121,7 @@ export interface ProgressMetric {
         </ion-buttons>
         <ion-title>AI Insights</ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="refresh()">
+          <ion-button (click)="refresh()" aria-label="Refresh insights">
             <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
           </ion-button>
         </ion-buttons>

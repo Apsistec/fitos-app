@@ -66,7 +66,7 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
         </ion-buttons>
         <ion-title>{{ isEditMode() ? 'Edit Workout' : 'New Workout' }}</ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="saveWorkout()" [disabled]="saving() || !canSave()">
+          <ion-button (click)="saveWorkout()" [disabled]="saving() || !canSave()" aria-label="Save workout">
             @if (saving()) {
               <ion-spinner name="circular"></ion-spinner>
             } @else {

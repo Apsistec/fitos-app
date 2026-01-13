@@ -3,7 +3,7 @@
     <div class="card-header-content">
       <ion-card-title>Wearable Data</ion-card-title>
       @if (!isLoading() && hasConnections()) {
-        <ion-button fill="clear" size="small" (click)="syncData()">
+        <ion-button fill="clear" size="small" (click)="syncData()" aria-label="Sync wearable data">
           <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
         </ion-button>
       }
