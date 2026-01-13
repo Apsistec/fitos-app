@@ -200,9 +200,14 @@ export const routes: Routes = [
         children: [
           {
             path: '',
+            redirectTo: 'chat',
+            pathMatch: 'full',
+          },
+          {
+            path: 'chat',
             loadComponent: () =>
-              import('./features/coaching/components/ai-chat/ai-chat.component').then(
-                (m) => m.AIChatComponent
+              import('./features/coaching/pages/chat/chat.page').then(
+                (m) => m.ChatPage
               ),
           },
           {
@@ -291,16 +296,21 @@ export const routes: Routes = [
         children: [
           {
             path: '',
+            redirectTo: 'pipeline',
+            pathMatch: 'full',
+          },
+          {
+            path: 'pipeline',
             loadComponent: () =>
-              import('./features/crm/pages/crm/crm.page').then(
-                (m) => m.CRMPage
+              import('./features/crm/pages/pipeline/pipeline.page').then(
+                (m) => m.PipelinePage
               ),
           },
           {
-            path: 'leads',
+            path: 'templates',
             loadComponent: () =>
-              import('./features/crm/pages/crm/crm.page').then(
-                (m) => m.CRMPage
+              import('./features/crm/pages/templates/templates.page').then(
+                (m) => m.TemplatesPage
               ),
           },
         ],

@@ -9,8 +9,6 @@ import {
   IonCardContent,
   IonCardHeader,
   IonCardTitle,
-  IonItem,
-  IonLabel,
   IonList,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -57,10 +55,8 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
     IonCardContent,
     IonCardHeader,
     IonCardTitle,
-    IonItem,
-    IonLabel,
-    IonList,
-  ],
+    IonList
+],
   template: `
     <div class="voice-nutrition">
       <!-- Voice Input Section -->

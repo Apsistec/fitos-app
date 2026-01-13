@@ -9,7 +9,6 @@ import {
   IonCardTitle,
   IonCardContent,
   IonBadge,
-  IonItem,
   IonLabel,
   IonNote,
   IonList,
@@ -38,12 +37,11 @@ import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
     IonCardTitle,
     IonCardContent,
     IonBadge,
-    IonItem,
     IonLabel,
     IonNote,
     IonList,
-    IonRange,
-  ],
+    IonRange
+],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="food-results">

@@ -1,7 +1,6 @@
 import { Component, inject, output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
-  IonButton,
   IonIcon,
   IonSpinner,
   IonRippleEffect,
@@ -13,7 +12,7 @@ import { VoiceService, ParsedWorkoutCommand } from '@app/core/services/voice.ser
 @Component({
   selector: 'app-voice-logger',
   standalone: true,
-  imports: [CommonModule, IonButton, IonIcon, IonSpinner, IonRippleEffect],
+  imports: [CommonModule, IonIcon, IonSpinner, IonRippleEffect],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="voice-logger">
