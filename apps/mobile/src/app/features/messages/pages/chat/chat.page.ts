@@ -24,6 +24,7 @@ import { send, personCircleOutline } from 'ionicons/icons';
 import { MessagingService, type Message } from '@app/core/services/messaging.service';
 import { AuthService } from '@app/core/services/auth.service';
 import { ClientService } from '@app/core/services/client.service';
+import { AICoachService } from '@app/core/services/ai-coach.service';
 
 @Component({
   selector: 'app-chat',
@@ -124,6 +125,7 @@ import { ClientService } from '@app/core/services/client.service';
             type="submit"
             fill="clear"
             [disabled]="messageForm.invalid || sending()"
+            aria-label="Send message"
           >
             @if (sending()) {
               <ion-spinner name="crescent"></ion-spinner>
@@ -273,6 +275,7 @@ export class ChatPage implements OnInit, AfterViewChecked {
   private messagingService = inject(MessagingService);
   private authService = inject(AuthService);
   private clientService = inject(ClientService);
+  private aiCoachService = inject(AICoachService);
   private route = inject(ActivatedRoute);
 
   messages = this.messagingService.currentMessagesSignal;
@@ -352,6 +355,23 @@ export class ChatPage implements OnInit, AfterViewChecked {
       if (!content) return;
 
       await this.messagingService.sendMessage(this.otherUserId(), content);
+
+      // Auto-collect training data for Coach Brain if sender is a trainer
+      const isTrainer = this.authService.isTrainer() || this.authService.isOwner();
+      if (isTrainer && content.length >= 20) { // Only collect substantial messages (20+ chars)
+        const trainerId = this.authService.currentUser()?.id;
+        if (trainerId) {
+          // Fire and forget - don't block message sending if collection fails
+          this.aiCoachService.collectTrainingData(
+            trainerId,
+            content,
+            'message'
+          ).catch(err => {
+            console.warn('Failed to collect training data:', err);
+            // Silent fail - don't disrupt user experience
+          });
+        }
+      }
 
       // Clear form
       this.messageForm.reset();

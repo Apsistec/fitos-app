@@ -42,6 +42,8 @@ import {
   briefcaseOutline,
   funnelOutline,
   personAddOutline,
+  bulbOutline,
+  starOutline,
 } from 'ionicons/icons';
 import { AuthService } from '@app/core/services/auth.service';
 import { StripeService } from '@app/core/services/stripe.service';
@@ -215,6 +217,29 @@ import { ThemeService, ThemeMode } from '@app/core/services/theme.service';
               <ion-label>
                 <h3>Invite New Client</h3>
                 <p>Send invitation codes to prospects</p>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+
+          <ion-list class="settings-list">
+            <div class="section-header">
+              <ion-icon name="bulb-outline"></ion-icon>
+              <h2>Coach Brain AI</h2>
+            </div>
+
+            <ion-item button detail routerLink="/tabs/coaching/methodology-setup">
+              <ion-icon name="bulb-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>AI Methodology</h3>
+                <p>Customize how AI represents your coaching style</p>
+              </ion-label>
+            </ion-item>
+
+            <ion-item button detail routerLink="/tabs/coaching/response-review">
+              <ion-icon name="star-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Review AI Responses</h3>
+                <p>Approve and refine AI-generated coaching advice</p>
               </ion-label>
             </ion-item>
           </ion-list>
@@ -468,6 +493,8 @@ export class SettingsPage implements OnInit {
       briefcaseOutline,
       funnelOutline,
       personAddOutline,
+      bulbOutline,
+      starOutline,
     });
   }
 

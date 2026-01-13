@@ -47,6 +47,28 @@ interface ChatResponse {
 }
 
 /**
+ * Coach Brain request (trainer methodology-based)
+ */
+interface CoachBrainRequest {
+  trainer_id: string;
+  client_id?: string;
+  query: string;
+}
+
+/**
+ * Coach Brain response
+ */
+interface CoachBrainResponse {
+  response: string;
+  context_used: Array<{
+    content: string;
+    input_type: string;
+    similarity: number;
+  }>;
+  error?: string;
+}
+
+/**
  * AICoachService - Multi-agent AI coaching integration
  *
  * Features:
@@ -168,4 +190,112 @@ export class AICoachService {
   clearError(): void {
     this.error.set(null);
   }
+
+  /**
+   * Send message using Coach Brain (trainer methodology-based responses)
+   *
+   * This method uses the trainer's specific methodology and voice for responses.
+   * Should be used when responding to client questions on behalf of a trainer.
+   */
+  async sendCoachBrainMessage(
+    trainerId: string,
+    query: string,
+    clientId?: string
+  ): Promise<ChatMessage> {
+    this.isProcessing.set(true);
+    this.error.set(null);
+
+    try {
+      // Add user message to history
+      const userMessage: ChatMessage = {
+        id: this.generateId(),
+        role: 'user',
+        content: query,
+        timestamp: new Date().toISOString(),
+      };
+      this.messages.update(msgs => [...msgs, userMessage]);
+
+      // Call Coach Brain API
+      const request: CoachBrainRequest = {
+        trainer_id: trainerId,
+        client_id: clientId,
+        query: query,
+      };
+
+      const response = await firstValueFrom(
+        this.http.post<CoachBrainResponse>(
+          `${this.AI_BACKEND_URL}/api/v1/coach-brain/respond`,
+          request
+        )
+      );
+
+      // Add assistant message to history
+      const assistantMessage: ChatMessage = {
+        id: this.generateId(),
+        role: 'assistant',
+        content: response.response,
+        timestamp: new Date().toISOString(),
+        agent: 'general',
+        confidence: 0.9, // Coach Brain responses are high confidence
+      };
+      this.messages.update(msgs => [...msgs, assistantMessage]);
+
+      return assistantMessage;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to get Coach Brain response';
+      this.error.set(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      this.isProcessing.set(false);
+    }
+  }
+
+  /**
+   * Automatically collect training data from trainer messages
+   * Call this whenever a trainer sends a message to learn from their voice
+   */
+  async collectTrainingData(
+    trainerId: string,
+    content: string,
+    inputType: 'message' | 'program' | 'feedback' | 'note' | 'workout_description',
+    sourceId?: string
+  ): Promise<boolean> {
+    try {
+      await firstValueFrom(
+        this.http.post(`${this.AI_BACKEND_URL}/api/v1/coach-brain/add-training-data`, {
+          trainer_id: trainerId,
+          content,
+          input_type: inputType,
+          source_id: sourceId
+        })
+      );
+      return true;
+    } catch (error) {
+      console.error('Failed to add training data:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Clear conversation history
+   */
+  clearHistory(): void {
+    this.messages.set([]);
+    this.currentAgent.set(null);
+  }
+
+  /**
+   * Generate unique message ID
+   */
+  private generateId(): string {
+    return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  /**
+   * Clear error state
+   */
+  clearError(): void {
+    this.error.set(null);
+  }
 }
+

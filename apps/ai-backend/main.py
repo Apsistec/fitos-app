@@ -10,7 +10,7 @@ import uvicorn
 
 from app.core.config import settings
 from app.core.logging import setup_logging
-from app.routes import coach, nutrition, voice, jitai, health
+from app.routes import coach, nutrition, voice, jitai, health, coach_brain
 
 # Setup logging
 logger = setup_logging()
@@ -36,6 +36,7 @@ app.add_middleware(
 # Include routers
 app.include_router(health.router, prefix="/api/v1", tags=["Health"])
 app.include_router(coach.router, prefix="/api/v1/coach", tags=["AI Coach"])
+app.include_router(coach_brain.router, prefix="/api/v1", tags=["Coach Brain"])
 app.include_router(nutrition.router, prefix="/api/v1/nutrition", tags=["Nutrition AI"])
 app.include_router(voice.router, prefix="/api/v1/voice", tags=["Voice AI"])
 app.include_router(jitai.router, prefix="/api/v1/jitai", tags=["JITAI"])

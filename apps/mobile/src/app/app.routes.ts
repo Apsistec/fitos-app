@@ -197,10 +197,31 @@ export const routes: Routes = [
       },
       {
         path: 'coaching',
-        loadComponent: () =>
-          import('./features/coaching/components/ai-chat/ai-chat.component').then(
-            (m) => m.AIChatComponent
-          ),
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/coaching/components/ai-chat/ai-chat.component').then(
+                (m) => m.AIChatComponent
+              ),
+          },
+          {
+            path: 'methodology-setup',
+            canActivate: [trainerOrOwnerGuard],
+            loadComponent: () =>
+              import('./features/coaching/pages/methodology-setup/methodology-setup.page').then(
+                (m) => m.MethodologySetupPage
+              ),
+          },
+          {
+            path: 'response-review',
+            canActivate: [trainerOrOwnerGuard],
+            loadComponent: () =>
+              import('./features/coaching/components/response-review/response-review.component').then(
+                (m) => m.ResponseReviewComponent
+              ),
+          },
+        ],
       },
       {
         path: 'messages',

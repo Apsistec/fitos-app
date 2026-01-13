@@ -1,0 +1,188 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Response Review</ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-segment [value]="filter()" (ionChange)="setFilter($any($event.detail.value))">
+      <ion-segment-button value="unapproved">
+        <ion-label>Pending</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="approved">
+        <ion-label>Approved</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="all">
+        <ion-label>All</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (loading()) {
+    <div class="loading-container">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Loading responses...</p>
+    </div>
+  } @else if (filteredResponses().length === 0) {
+    <div class="empty-state">
+      <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+      <h2>All caught up!</h2>
+      <p>
+        @if (filter() === 'unapproved') {
+          No pending responses to review.
+        } @else if (filter() === 'approved') {
+          No approved responses yet.
+        } @else {
+          No responses yet.
+        }
+      </p>
+    </div>
+  } @else {
+    <div class="responses-list">
+      @for (response of filteredResponses(); track response.id) {
+        <ion-card [class.expanded]="isExpanded(response.id)">
+          <!-- Card Header -->
+          <ion-card-header (click)="toggleExpanded(response.id)">
+            <div class="response-header">
+              <div class="header-content">
+                <ion-card-subtitle>
+                  {{ formatDate(response.created_at) }}
+                  @if (response.trainer_approved === true) {
+                    <ion-badge color="success">Approved</ion-badge>
+                  } @else if (response.trainer_approved === false) {
+                    <ion-badge color="danger">Rejected</ion-badge>
+                  } @else {
+                    <ion-badge color="warning">Pending</ion-badge>
+                  }
+                </ion-card-subtitle>
+                <ion-card-title class="query-preview">
+                  {{ response.query }}
+                </ion-card-title>
+              </div>
+              <ion-icon
+                [name]="isExpanded(response.id) ? 'chevron-up' : 'chevron-down'"
+                color="medium"
+              ></ion-icon>
+            </div>
+          </ion-card-header>
+
+          <!-- Card Content (expandable) -->
+          @if (isExpanded(response.id)) {
+            <ion-card-content>
+              <!-- Query -->
+              <div class="section">
+                <h3>Client Question</h3>
+                <p class="query-text">{{ response.query }}</p>
+              </div>
+
+              <!-- AI Response -->
+              <div class="section">
+                <h3>AI Response</h3>
+                <p class="response-text">{{ response.response }}</p>
+              </div>
+
+              <!-- Context Used -->
+              @if (response.context_used && response.context_used.length > 0) {
+                <div class="section">
+                  <h3>Context Used ({{ response.context_used.length }} items)</h3>
+                  @for (context of response.context_used; track context.content) {
+                    <div class="context-item">
+                      <ion-badge color="primary">{{ context.input_type }}</ion-badge>
+                      @if (context.similarity) {
+                        <ion-badge color="medium">{{ (context.similarity * 100).toFixed(0) }}% match</ion-badge>
+                      }
+                      <p>{{ context.content }}</p>
+                    </div>
+                  }
+                </div>
+              }
+
+              <!-- Review Actions -->
+              @if (response.trainer_approved === null || response.trainer_approved === undefined) {
+                @if (reviewingResponse() === response.id) {
+                  <!-- Review Form -->
+                  <div class="review-form">
+                    <h3>Review This Response</h3>
+
+                    <!-- Rating -->
+                    <div class="rating-section">
+                      <ion-label>Quality Rating</ion-label>
+                      <div class="star-rating">
+                        @for (star of [1, 2, 3, 4, 5]; track star) {
+                          <ion-icon
+                            [name]="reviewRating() >= star ? 'star' : 'star-outline'"
+                            [color]="reviewRating() >= star ? 'warning' : 'medium'"
+                            (click)="reviewRating.set(star)"
+                          ></ion-icon>
+                        }
+                      </div>
+                    </div>
+
+                    <!-- Feedback -->
+                    <ion-item lines="none">
+                      <ion-textarea
+                        label="Feedback (optional)"
+                        labelPlacement="stacked"
+                        placeholder="What could be improved?"
+                        [(ngModel)]="reviewFeedback"
+                        [autoGrow]="true"
+                        rows="3"
+                      ></ion-textarea>
+                    </ion-item>
+
+                    <!-- Buttons -->
+                    <div class="review-buttons">
+                      <ion-button fill="clear" color="medium" (click)="cancelReview()">
+                        Cancel
+                      </ion-button>
+                      <ion-button fill="clear" color="danger" (click)="submitReview(response.id, false)">
+                        <ion-icon slot="start" name="close-circle"></ion-icon>
+                        Reject
+                      </ion-button>
+                      <ion-button color="success" (click)="submitReview(response.id, true)">
+                        <ion-icon slot="start" name="checkmark-circle"></ion-icon>
+                        Approve
+                      </ion-button>
+                    </div>
+                  </div>
+                } @else {
+                  <!-- Quick Actions -->
+                  <div class="quick-actions">
+                    <ion-button expand="block" color="success" (click)="approveResponse(response.id)">
+                      <ion-icon slot="start" name="checkmark-circle"></ion-icon>
+                      Quick Approve
+                    </ion-button>
+                    <ion-button expand="block" fill="outline" (click)="startReview(response.id)">
+                      <ion-icon slot="start" name="star"></ion-icon>
+                      Review with Feedback
+                    </ion-button>
+                    <ion-button expand="block" color="danger" fill="outline" (click)="rejectResponse(response.id)">
+                      <ion-icon slot="start" name="close-circle"></ion-icon>
+                      Reject
+                    </ion-button>
+                  </div>
+                }
+              } @else if (response.trainer_feedback) {
+                <!-- Show previous feedback -->
+                <div class="section">
+                  <h3>Your Feedback</h3>
+                  <p>{{ response.trainer_feedback }}</p>
+                  @if (response.trainer_rating) {
+                    <div class="rating-display">
+                      @for (star of [1, 2, 3, 4, 5]; track star) {
+                        <ion-icon
+                          [name]="response.trainer_rating >= star ? 'star' : 'star-outline'"
+                          color="warning"
+                        ></ion-icon>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </ion-card-content>
+          }
+        </ion-card>
+      }
+    </div>
+  }
+</ion-content>
