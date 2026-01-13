@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, signal } from '@angular/core';
+import { Component, Input, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
@@ -19,6 +19,7 @@ interface RecentWorkout {
   selector: 'app-recent-workouts',
   standalone: true,
   imports: [CommonModule, IonicModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ion-card>
       <ion-card-header>

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, signal } from '@angular/core';
+import { Component, Input, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 
@@ -12,6 +12,7 @@ interface ActivityData {
   selector: 'app-activity-chart',
   standalone: true,
   imports: [CommonModule, IonicModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ion-card>
       <ion-card-header>

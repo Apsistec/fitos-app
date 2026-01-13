@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
@@ -19,6 +19,7 @@ interface AttentionItem {
   selector: 'app-attention-required',
   standalone: true,
   imports: [CommonModule, IonicModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ion-card>
       <ion-card-header>

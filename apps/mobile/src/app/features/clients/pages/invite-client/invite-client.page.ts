@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import {  Component, inject, signal, computed , ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
@@ -38,6 +38,7 @@ addIcons({ mailOutline, linkOutline, copyOutline, shareOutline, checkmarkCircle 
 @Component({
   selector: 'app-invite-client',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
     IonContent,

@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import {  Component, inject, signal, computed , ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
@@ -29,6 +29,7 @@ import { SupabaseService } from '@app/core/services/supabase.service';
 @Component({
   selector: 'app-onboarding',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
     IonContent,

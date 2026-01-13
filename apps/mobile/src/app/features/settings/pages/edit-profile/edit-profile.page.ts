@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import {  Component, OnInit, inject, signal , ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
@@ -37,6 +37,7 @@ import { SupabaseService } from '@app/core/services/supabase.service';
 @Component({
   selector: 'app-edit-profile',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
     FormsModule,

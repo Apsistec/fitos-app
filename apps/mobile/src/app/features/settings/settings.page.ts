@@ -1,4 +1,4 @@
-import { Component, inject, computed, OnInit, signal } from '@angular/core';
+import {  Component, inject, computed, OnInit, signal , ChangeDetectionStrategy } from '@angular/core';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import {
   IonContent,
@@ -49,6 +49,7 @@ import { ThemeService, ThemeMode } from '@app/core/services/theme.service';
 
 @Component({
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-settings',
   imports: [
     RouterLink,

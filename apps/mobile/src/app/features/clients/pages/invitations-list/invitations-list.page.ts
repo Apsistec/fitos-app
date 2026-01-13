@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import {  Component, OnInit, inject , ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import {
@@ -51,6 +51,7 @@ addIcons({
 @Component({
   selector: 'app-invitations-list',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     IonContent,

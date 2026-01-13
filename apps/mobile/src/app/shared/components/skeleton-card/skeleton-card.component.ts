@@ -1,10 +1,11 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { IonCard, IonCardHeader, IonCardContent, IonSkeletonText } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-skeleton-card',
   standalone: true,
   imports: [IonCard, IonCardHeader, IonCardContent, IonSkeletonText],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ion-card>
       <ion-card-header>

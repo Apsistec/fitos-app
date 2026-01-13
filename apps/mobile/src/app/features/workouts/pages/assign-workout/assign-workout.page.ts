@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import {  Component, OnInit, signal, inject , ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -31,6 +31,7 @@ import { WorkoutService } from '../../../../core/services/workout.service';
 
 @Component({
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-assign-workout',
   imports: [
 

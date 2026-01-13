@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
+import {  Component, OnInit, OnDestroy, signal, computed, inject , ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -48,6 +48,7 @@ interface ExerciseProgress {
 
 @Component({
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-active-workout',
   imports: [
 
@@ -393,7 +394,7 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
   private assignmentService = inject(AssignmentService);
   private alertController = inject(AlertController);
   private toastController = inject(ToastController);
-  private haptic = inject(HapticService);
+  haptic = inject(HapticService); // Public for template access
 
   assignedWorkoutId?: string;
 

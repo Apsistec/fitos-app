@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import {  Component, inject, signal, computed, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import {
@@ -28,6 +28,7 @@ import { NUTRITION_COLORS } from '@fitos/shared';
 @Component({
   selector: 'app-set-nutrition-targets',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
     IonContent,

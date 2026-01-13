@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import {  Component, OnInit, inject, signal , ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   IonContent,
@@ -34,6 +34,7 @@ interface NotificationPreferences {
 @Component({
   selector: 'app-notifications',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     IonContent,

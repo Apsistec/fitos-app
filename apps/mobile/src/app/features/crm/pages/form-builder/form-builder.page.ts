@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import {  Component, OnInit, inject, signal , ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -80,6 +80,7 @@ export interface LeadFormConfig {
 @Component({
   selector: 'app-form-builder',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     FormsModule,

@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import {  Component, inject, signal, computed , ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import {
@@ -32,6 +32,7 @@ import type { UserRole } from '@fitos/shared';
 @Component({
   selector: 'app-register',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
     RouterLink,

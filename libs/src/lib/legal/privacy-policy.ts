@@ -11,7 +11,7 @@ export interface LegalDocument {
 
 export const PRIVACY_POLICY: LegalDocument = {
   title: 'Privacy Policy',
-  lastUpdated: '2026-01-10',
+  lastUpdated: '2026-01-13',
   sections: [
     {
       title: 'Introduction',
@@ -42,6 +42,14 @@ export const PRIVACY_POLICY: LegalDocument = {
           <li>Wearable device data (heart rate, sleep, steps, HRV) via Terra API</li>
         </ul>
 
+        <h3>Voice and Photo Data</h3>
+        <p>When you use our AI-powered features, we collect:</p>
+        <ul>
+          <li>Voice recordings (temporarily processed for workout and nutrition logging, not permanently stored)</li>
+          <li>Photos of meals (processed for food recognition, stored until you delete them)</li>
+          <li>AI chat conversations with your trainer's AI assistant</li>
+        </ul>
+
         <h3>Automatically Collected Information</h3>
         <p>When you use FitOS, we automatically collect certain information including:</p>
         <ul>
@@ -58,12 +66,13 @@ export const PRIVACY_POLICY: LegalDocument = {
         <p>We use the information we collect to:</p>
         <ul>
           <li><strong>Provide Services:</strong> Deliver our fitness coaching platform, process transactions, and send service-related communications</li>
+          <li><strong>AI Features:</strong> Process voice commands, recognize food in photos, generate personalized coaching responses, and provide proactive interventions at optimal times (JITAI)</li>
           <li><strong>Personalization:</strong> Customize your experience, recommend workouts, and track your progress</li>
           <li><strong>Trainer-Client Relationships:</strong> Enable communication and data sharing between trainers and their clients</li>
-          <li><strong>Improve Platform:</strong> Analyze usage patterns, identify bugs, and develop new features</li>
+          <li><strong>Improve Platform:</strong> Analyze usage patterns, identify bugs, and develop new features. AI models may be trained on anonymized, aggregated data to improve accuracy</li>
           <li><strong>Safety & Security:</strong> Protect against fraud, unauthorized access, and other security threats</li>
           <li><strong>Legal Compliance:</strong> Comply with applicable laws, regulations, and legal processes</li>
-          <li><strong>Marketing:</strong> Send promotional emails (you can opt out at any time)</li>
+          <li><strong>Marketing:</strong> Send promotional emails through our CRM system (you can opt out at any time)</li>
         </ul>
       `,
     },
@@ -81,7 +90,11 @@ export const PRIVACY_POLICY: LegalDocument = {
           <li><strong>Supabase:</strong> Database and authentication services</li>
           <li><strong>Stripe:</strong> Payment processing (we do not store your full credit card information)</li>
           <li><strong>Terra API:</strong> Wearable device integration</li>
-          <li><strong>Google Cloud Platform:</strong> AI backend and data processing</li>
+          <li><strong>Google Cloud Platform:</strong> AI backend hosting (LangGraph) and data processing</li>
+          <li><strong>Anthropic (Claude AI):</strong> AI language model for coaching chat and text processing</li>
+          <li><strong>Deepgram:</strong> Voice transcription for workout and nutrition logging</li>
+          <li><strong>Passio AI:</strong> Food recognition from photos</li>
+          <li><strong>Resend:</strong> Email delivery for CRM campaigns</li>
           <li><strong>Sentry:</strong> Error tracking and monitoring</li>
         </ul>
 

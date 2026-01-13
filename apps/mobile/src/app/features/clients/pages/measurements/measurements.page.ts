@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ViewChild, ElementRef } from '@angular/core';
+import {  Component, inject, signal, OnInit, ViewChild, ElementRef , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -55,6 +55,7 @@ Chart.register(...registerables);
 @Component({
   selector: 'app-measurements',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     ReactiveFormsModule,

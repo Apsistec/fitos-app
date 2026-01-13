@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ViewChild, ElementRef } from '@angular/core';
+import {  Component, inject, signal, OnInit, ViewChild, ElementRef , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonContent,
@@ -35,6 +35,7 @@ interface ChartDataPoint {
 @Component({
   selector: 'app-progress',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     IonContent,

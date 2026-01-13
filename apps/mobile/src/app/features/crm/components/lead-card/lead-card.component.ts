@@ -55,7 +55,7 @@ import { Lead } from '@app/core/services/lead.service';
         </div>
 
         <!-- Follow-up indicator -->
-        @if (lead().next_follow_up && isOverdue(lead().next_follow_up)) {
+        @if (lead().next_follow_up && isOverdue(lead().next_follow_up!)) {
           <div class="follow-up-alert">
             <ion-icon name="calendar-outline"></ion-icon>
             <span>Follow-up overdue</span>

@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonCard,
@@ -47,6 +47,7 @@ addIcons({
     IonAvatar,
     IonLabel
 ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ion-card button (click)="onCardClick()">
       <ion-card-header>

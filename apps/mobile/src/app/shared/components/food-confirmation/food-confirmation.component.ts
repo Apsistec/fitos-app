@@ -355,8 +355,7 @@ export class FoodConfirmationComponent {
   private originalPortions = new Map<number, { qty: number; macros: ParsedFood }>();
 
   constructor() {
-    // Initialize editable foods when input changes
-    this.foods();
+    // Foods will be initialized in ngOnInit
   }
 
   ngOnInit() {

@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { RouterLink } from '@angular/router';
@@ -18,6 +18,7 @@ export interface TrainerStats {
   selector: 'app-trainer-overview-stats',
   standalone: true,
   imports: [CommonModule, IonicModule, RouterLink],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (stats(); as stats) {
       <div class="stats-grid">

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import {  Component, OnInit, inject, signal, computed , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -53,6 +53,7 @@ interface Payment {
   templateUrl: './payment-history.page.html',
   styleUrls: ['./payment-history.page.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     FormsModule,

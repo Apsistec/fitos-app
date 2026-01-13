@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import {  Component, OnInit, signal, inject , ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
@@ -38,6 +38,7 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
 
 @Component({
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-exercise-library',
   imports: [
 

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {  Component , ChangeDetectionStrategy } from '@angular/core';
 import {
   IonContent,
   IonHeader,
@@ -15,6 +15,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-terms',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     IonContent,

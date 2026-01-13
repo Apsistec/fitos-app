@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import {  Component, inject , ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   IonContent,
@@ -30,6 +30,7 @@ import { SupabaseService } from '@app/core/services/supabase.service';
 @Component({
   selector: 'app-privacy',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     IonContent,
     IonHeader,

@@ -1,7 +1,8 @@
-# FitOS Sprint Planning & Roadmap
+# FitOS Sprint Planning v3.0
 
 **Updated:** January 2026  
-**Current Sprint:** Sprint 6.5 (Phase 1 Polish)
+**Current Sprint:** Sprint 16 (Polish & Launch Prep)  
+**Status:** Phase 2 Complete, Phase 3 Planned
 
 ---
 
@@ -10,469 +11,565 @@
 | Phase | Sprints | Status | Focus |
 |-------|---------|--------|-------|
 | Phase 1 | 0-6 | ✅ Complete | MVP Core Features |
-| Phase 1.5 | 6.5 | 🔄 In Progress | Polish, Dark Mode, Bug Fixes |
-| Phase 2 | 7-16 | 📋 Planned | AI, Voice, CRM, Differentiation |
+| Phase 1.5 | 6.5 | ✅ Complete | Polish, Dark Mode, Adherence-Neutral |
+| Phase 2A | 7-10 | ✅ Complete | Voice AI, Photo Nutrition, Design System |
+| Phase 2B | 11-12 | ✅ Complete | CRM, Email Marketing |
+| Phase 2C | 13-14 | ✅ Complete | AI Coaching, JITAI |
+| Phase 2D | 15-16 | 🔄 In Progress | Apple Watch, Launch Prep |
+| Phase 3A | 17-20 | 📋 Planned | Differentiation Features |
+| Phase 3B | 21-24 | 📋 Planned | Advanced AI & Scale |
+| Phase 3C | 25-28 | 📋 Planned | Market Expansion |
 
 ---
 
-## Sprint 6.5: Phase 1 Polish (Current)
+## Completed Sprints Summary
 
-**Duration:** 1 week  
-**Goal:** Fix dark mode issues, polish UI, prepare for Phase 2
+### Phase 1: MVP Core (Sprints 0-6) ✅
 
-### Epic P1: Dark Mode Fixes
-**Priority:** P0 | **Points:** 8
+- User authentication (Supabase Auth)
+- Trainer/client role system
+- Workout builder and templates
+- Exercise library
+- Client management
+- Basic nutrition tracking
+- Progress tracking
+- Messaging system
+- Settings and profile
 
-| Task | Status | Assignee |
-|------|--------|----------|
-| Update variables.scss with dark-first colors | ⬜ | - |
-| Fix Settings page header contrast | ⬜ | - |
-| Fix dropdown selector backgrounds (white → dark) | ⬜ | - |
-| Fix Privacy/Terms page body text contrast | ⬜ | - |
-| Replace nutrition red "over" with purple | ⬜ | - |
-| Add accent glow effects to active states | ⬜ | - |
-| Update StatusBar for dark mode (iOS/Android) | ⬜ | - |
-| Test on OLED devices | ⬜ | - |
+### Sprint 6.5: Phase 1 Polish ✅
 
-### Epic P2: Adherence-Neutral Updates  
-**Priority:** P0 | **Points:** 5
+- Dark mode as default
+- Adherence-neutral colors (purple instead of red for "over")
+- WCAG contrast fixes
+- Performance optimizations (OnPush, virtual scrolling)
 
-| Task | Status | Assignee |
-|------|--------|----------|
-| Audit all nutrition color usage | ⬜ | - |
-| Update NutritionSummaryComponent | ⬜ | - |
-| Update progress bar styles | ⬜ | - |
-| Remove judgmental copy ("over", "bad") | ⬜ | - |
-| Add weekly average view (more forgiving) | ✅ | - |
+### Sprint 7: Design System Refresh ✅
 
-### Epic P3: Performance Audit
-**Priority:** P1 | **Points:** 5
+- Design tokens system (`_design-tokens.scss`)
+- Dark-first color system
+- Typography scale
+- Card components with glow effects
+- Skeleton loading patterns
+- Theme service (dark/light/system)
 
-| Task | Status | Assignee |
-|------|--------|----------|
-| Verify OnPush on all components | ⬜ | - |
-| Add virtual scrolling to exercise library | ⬜ | - |
-| Verify lazy loading all feature modules | ⬜ | - |
-| Add trackBy to remaining *ngFor loops | ⬜ | - |
-| Lighthouse audit (target 90+) | ⬜ | - |
+### Sprint 8: Voice Workout Logging ✅
 
-### Sprint 6.5 Definition of Done
-- [ ] All text passes WCAG AA contrast (4.5:1+ body, 7:1+ metrics)
-- [ ] No red colors in nutrition tracking
-- [ ] Dark mode default on fresh install
+**Implemented:**
+- `VoiceService` with Deepgram WebSocket streaming
+- Voice command parser for workout intents
+- `VoiceLoggerComponent` with pulsing animation
+- Fitness keyword boosting
+- Haptic feedback on successful recognition
+- TTS confirmation via Deepgram Aura
+
+**Files:**
+- `core/services/voice.service.ts`
+- `shared/components/voice-logger/`
+- `ai-backend/app/routes/voice.py`
+
+### Sprint 9: Voice & AI Nutrition Logging ✅
+
+**Implemented:**
+- `NutritionParserService` with Nutritionix NLP
+- Voice input for nutrition logging
+- `VoiceNutritionComponent`
+- Food confirmation UI
+- Multi-food entry support
+- Portion estimation
+
+**Files:**
+- `core/services/nutrition-parser.service.ts`
+- `features/nutrition/components/voice-nutrition/`
+- `shared/components/food-confirmation/`
+
+### Sprint 10: Photo Nutrition AI ✅
+
+**Implemented:**
+- `PhotoNutritionService` with Passio AI
+- Photo capture flow (Capacitor Camera)
+- `FoodIdentificationResultsComponent`
+- Multi-food plate detection
+- Confidence scores display
+- Manual portion adjustment
+
+**Files:**
+- `core/services/photo-nutrition.service.ts`
+- `features/nutrition/components/photo-capture/`
+- `features/nutrition/components/food-identification-results/`
+
+### Sprint 11: CRM Foundation ✅
+
+**Implemented:**
+- `LeadService` with full CRUD
+- Lead pipeline Kanban UI
+- Lead detail page with activity timeline
+- Lead capture form builder
+- UTM parameter tracking
+- Source attribution
+
+**Files:**
+- `core/services/lead.service.ts`
+- `features/crm/pages/crm/` (pipeline)
+- `features/crm/pages/lead-detail/`
+- `features/crm/pages/form-builder/`
+
+### Sprint 12: Email Marketing ✅
+
+**Implemented:**
+- `EmailService` with Resend integration
+- Email template editor
+- Pre-built templates (welcome, nurture, win-back)
+- Email sequences (automated campaigns)
+- Open/click tracking
+- Email analytics dashboard
+
+**Files:**
+- `core/services/email.service.ts`
+- `features/crm/pages/email-campaigns/`
+
+### Sprint 13: AI Coaching Chatbot ✅
+
+**Implemented:**
+- `AICoachService` with LangGraph backend
+- Multi-agent router (workout/nutrition/recovery/motivation)
+- RAG for user data retrieval
+- `AIChatComponent` with typing indicator
+- Quick action buttons
+- Trainer methodology customization
+- Escalate to trainer functionality
+
+**Files:**
+- `core/services/ai-coach.service.ts`
+- `features/coaching/components/ai-chat/`
+- `ai-backend/app/agents/coach_graph.py`
+- `ai-backend/app/agents/specialists.py`
+- `ai-backend/app/routes/coach.py`
+
+### Sprint 14: JITAI Proactive Interventions ✅
+
+**Implemented:**
+- `JITAIService` with intervention engine
+- Vulnerability/receptivity/opportunity scoring
+- Frequency caps (max 3/day)
+- Push notification delivery
+- Personalized intervention messages
+- At-risk client alerts for trainers
+- Engagement scoring
+
+**Files:**
+- `core/services/jitai.service.ts`
+- `ai-backend/app/routes/jitai.py`
+
+### Sprint 15: Apple Watch & Wearables ✅
+
+**Implemented:**
+- `WatchService` with WatchConnectivity
+- `HealthKitService` for Health Connect + HealthKit
+- `TerraService` for Garmin/WHOOP/Oura
+- `WearableDataCard` component
+- Today's workout on watch
+- Quick-log from wrist
+- Phone-watch sync
+
+**Files:**
+- `core/services/watch.service.ts`
+- `core/services/healthkit.service.ts`
+- `core/services/terra.service.ts`
+- `shared/components/wearable-data-card/`
+
+---
+
+## Sprint 16: Polish & Launch Prep (Current) 🔄
+
+**Goal:** Production-ready application
+
+### Epic 16.1: Performance Optimization
+| Task | Points | Status |
+|------|--------|--------|
+| Final Lighthouse audit (90+) | 3 | ⬜ |
+| Bundle size optimization | 3 | ⬜ |
+| Image optimization (WebP, lazy load) | 2 | ⬜ |
+| Fix remaining jank (60fps) | 3 | ⬜ |
+
+### Epic 16.2: Accessibility
+| Task | Points | Status |
+|------|--------|--------|
+| Automated a11y audit (Axe, Lighthouse) | 2 | ⬜ |
+| VoiceOver/TalkBack testing | 5 | ⬜ |
+| Fix accessibility issues | 5 | ⬜ |
+
+### Epic 16.3: Celebration Animations
+| Task | Points | Status |
+|------|--------|--------|
+| Workout completion confetti | 3 | ⬜ |
+| Personal record celebration | 3 | ⬜ |
+| Streak milestones (7, 30, 100 days) | 2 | ⬜ |
+
+### Epic 16.4: App Store Prep
+| Task | Points | Status |
+|------|--------|--------|
+| App Store screenshots and metadata | 3 | ⬜ |
+| Play Store listing | 3 | ⬜ |
+| Privacy policy updates | 2 | ⬜ |
+| TestFlight beta distribution | 2 | ⬜ |
+
+**Sprint 16 Total:** 41 points
+
+---
+
+## Phase 3A: Differentiation (Sprints 17-20) 📋
+
+### Sprint 17: "Coach Brain" AI Assistant
+**Goal:** AI that sounds like the trainer, not a generic chatbot  
+**Duration:** 2 weeks  
+**Strategic Value:** Unlike WHOOP Coach's generic responses
+
+### Epic 17.1: Trainer Methodology Learning
+| Task | Points | Status |
+|------|--------|--------|
+| Create `trainer_methodology` database table | 3 | ⬜ |
+| Build methodology questionnaire UI | 5 | ⬜ |
+| Implement RAG pipeline for trainer voice | 8 | ⬜ |
+| Create prompt engineering templates | 5 | ⬜ |
+| Build methodology analyzer for historical programs | 5 | ⬜ |
+| Add trainer approval workflow | 3 | ⬜ |
+
+### Epic 17.2: AI Voice Customization
+| Task | Points | Status |
+|------|--------|--------|
+| Create methodology setup wizard | 5 | ⬜ |
+| Build sample conversation preview | 3 | ⬜ |
+| Implement voice testing interface | 3 | ⬜ |
+| Add response editing workflow | 3 | ⬜ |
+
+**Sprint 17 Total:** 43 points
+
+**Success Metrics:**
+- AI response accuracy: 85%+
+- Trainer satisfaction with AI voice: 4.5/5
+- Client perception of continuity: 90%+
+
+---
+
+### Sprint 18: Progressive Autonomy Transfer
+**Goal:** Systematically reduce client dependency (SDT-aligned)  
+**Duration:** 2 weeks  
+**Research:** Filipino adolescent study 2025 (autonomy d=1.72)
+
+### Epic 18.1: Client Independence Scoring
+| Task | Points | Status |
+|------|--------|--------|
+| Create autonomy score calculation engine | 5 | ⬜ |
+| Build independence assessment questionnaire | 3 | ⬜ |
+| Implement workout creation capability scoring | 3 | ⬜ |
+| Create nutrition self-management scoring | 3 | ⬜ |
+| Build trainer dashboard for client readiness | 5 | ⬜ |
+
+### Epic 18.2: Maintenance Mode
+| Task | Points | Status |
+|------|--------|--------|
+| Create reduced-price maintenance tier | 3 | ⬜ |
+| Build quarterly check-in scheduling | 3 | ⬜ |
+| Implement on-demand consultation booking | 3 | ⬜ |
+| Create graduation celebration animations | 2 | ⬜ |
+| Add re-engagement pathway | 3 | ⬜ |
+
+**Sprint 18 Total:** 33 points
+
+**Success Metrics:**
+- Client self-efficacy increase: 30%+
+- Voluntary maintenance conversion: 40%+
+- Client satisfaction with graduation: 4.5/5
+
+---
+
+### Sprint 19: Adaptive Streak Healing
+**Goal:** Research-backed engagement that forgives, not punishes  
+**Duration:** 2 weeks  
+**Research:** UCL/Loughborough 2024 - streak breaks "especially demotivating"
+
+### Epic 19.1: Forgiveness-First Streak System
+| Task | Points | Status |
+|------|--------|--------|
+| Refactor streak system from daily to weekly | 5 | ⬜ |
+| Implement streak repair mechanisms | 5 | ⬜ |
+| Create "grace days" for life events | 3 | ⬜ |
+| Build consistency band visualization | 5 | ⬜ |
+| Add streak milestone celebrations | 3 | ⬜ |
+| Implement forgiveness messaging UI | 3 | ⬜ |
+
+### Epic 19.2: Smart Recovery Day Integration
+| Task | Points | Status |
+|------|--------|--------|
+| Detect planned rest days (don't count against streak) | 3 | ⬜ |
+| Integrate wearable recovery data for auto-rest | 5 | ⬜ |
+| Create "active recovery" options | 3 | ⬜ |
+| Build deload week support | 3 | ⬜ |
+
+**Sprint 19 Total:** 38 points
+
+**Success Metrics:**
+- Streak continuation post-miss: +40% vs. current
+- User sentiment on streaks: 4.5/5 positive
+- Weekly retention improvement: +15%
+
+---
+
+### Sprint 20: Coach-Client Video Feedback
+**Goal:** Async form correction addressing AI's #1 limitation  
+**Duration:** 2 weeks  
+**Strategic Value:** Cannot be replicated by AI alone
+
+### Epic 20.1: Video Submission System
+| Task | Points | Status |
+|------|--------|--------|
+| Create video upload flow (Capacitor + Supabase Storage) | 5 | ⬜ |
+| Build video compression pipeline (<50MB) | 5 | ⬜ |
+| Implement trainer annotation tools | 8 | ⬜ |
+| Create video playback with annotations | 5 | ⬜ |
+| Build common corrections library | 3 | ⬜ |
+
+### Epic 20.2: Video Feedback Workflow
+| Task | Points | Status |
+|------|--------|--------|
+| Implement video retention policy | 2 | ⬜ |
+| Add video request feature | 3 | ⬜ |
+| Create notification system for feedback | 3 | ⬜ |
+| Build trainer response time tracking | 2 | ⬜ |
+
+**Sprint 20 Total:** 36 points
+
+**Success Metrics:**
+- Video submission rate: 20%+ of clients
+- Form correction satisfaction: 4.5/5
+- Response time: <24 hours average
+
+---
+
+## Phase 3B: Advanced AI & Scale (Sprints 21-24) 📋
+
+### Sprint 21: Wearable Recovery Integration
+**Goal:** Auto-adjust workout intensity based on HRV/sleep
+
+| Epic | Points | Focus |
+|------|--------|-------|
+| Recovery score calculation | 15 | HRV, sleep, HR analysis |
+| Auto-intensity adjustment | 12 | Workout modification |
+| Trainer recovery alerts | 8 | Dashboard widgets |
+| **Total** | **35** | |
+
+---
+
+### Sprint 22: Natural Language Program Design
+**Goal:** Text/voice-to-workout program converter
+
+| Epic | Points | Focus |
+|------|--------|-------|
+| Program generation AI | 15 | GPT-4 prompt engineering |
+| PDF import with OCR | 8 | Tesseract integration |
+| Voice-to-program flow | 8 | Deepgram + AI chain |
+| **Total** | **31** | |
+
+---
+
+### Sprint 23: Local SEO Automation
+**Goal:** 46% of Google searches are local
+
+| Epic | Points | Focus |
+|------|--------|-------|
+| Google Business Profile API | 10 | Auto-generation |
+| Schema.org structured data | 5 | Trainer pages |
+| Review automation | 8 | Post-milestone triggers |
+| **Total** | **23** | |
+
+---
+
+### Sprint 24: Integration Marketplace
+**Goal:** Compete on core UX, not ecosystem lock-in
+
+| Epic | Points | Focus |
+|------|--------|-------|
+| Integration framework | 12 | Architecture |
+| MyFitnessPal sync | 8 | Nutrition data |
+| Calendly integration | 5 | Scheduling |
+| Zapier webhooks | 8 | Automation |
+| **Total** | **33** | |
+
+---
+
+## Phase 3C: Market Expansion (Sprints 25-28) 📋
+
+### Sprint 25: Gym Owner Business Analytics
+**Goal:** Expand TAM to studio owners
+
+| Epic | Points | Focus |
+|------|--------|-------|
+| Multi-trainer dashboard | 12 | Owner view |
+| Revenue analytics | 10 | Per-trainer breakdown |
+| Retention cohort analysis | 8 | Client lifecycle |
+| **Total** | **30** | |
+
+---
+
+### Sprint 26: Outcome-Based Pricing Tier
+**Goal:** Align platform success with trainer success
+
+| Epic | Points | Focus |
+|------|--------|-------|
+| Result verification system | 10 | Progress tracking |
+| Outcome tier pricing logic | 8 | Stripe integration |
+| Success celebration | 5 | Client achievements |
+| **Total** | **23** | |
+
+---
+
+### Sprint 27: Advanced Gamification
+**Goal:** Research shows +489 steps/day with gamification
+
+| Epic | Points | Focus |
+|------|--------|-------|
+| Activity-based leaderboards | 8 | Not appearance |
+| Weekly challenges | 10 | With repair mechanisms |
+| Supportive community | 8 | Privacy-first |
+| **Total** | **26** | |
+
+---
+
+### Sprint 28: Enterprise Readiness
+**Goal:** Position for corporate wellness market
+
+| Epic | Points | Focus |
+|------|--------|-------|
+| SSO integration | 12 | SAML/OIDC |
+| Admin dashboard | 10 | Organization management |
+| Compliance reporting | 8 | SOC2 preparation |
+| **Total** | **30** | |
+
+---
+
+## Feature Inventory
+
+### Core Services Implemented
+
+| Service | Purpose | Status |
+|---------|---------|--------|
+| `auth.service.ts` | Supabase authentication | ✅ |
+| `supabase.service.ts` | Database client | ✅ |
+| `client.service.ts` | Client management | ✅ |
+| `workout.service.ts` | Workout CRUD | ✅ |
+| `workout-session.service.ts` | Active workout tracking | ✅ |
+| `exercise.service.ts` | Exercise library | ✅ |
+| `nutrition.service.ts` | Nutrition logging | ✅ |
+| `food.service.ts` | Food database | ✅ |
+| `measurement.service.ts` | Progress measurements | ✅ |
+| `messaging.service.ts` | In-app messaging | ✅ |
+| `voice.service.ts` | Deepgram voice AI | ✅ |
+| `nutrition-parser.service.ts` | NLP food parsing | ✅ |
+| `photo-nutrition.service.ts` | Photo food recognition | ✅ |
+| `lead.service.ts` | CRM leads | ✅ |
+| `email.service.ts` | Email marketing | ✅ |
+| `ai-coach.service.ts` | AI coaching chat | ✅ |
+| `jitai.service.ts` | Proactive interventions | ✅ |
+| `healthkit.service.ts` | Health Connect/HealthKit | ✅ |
+| `terra.service.ts` | Third-party wearables | ✅ |
+| `watch.service.ts` | Apple Watch | ✅ |
+| `theme.service.ts` | Dark/light mode | ✅ |
+| `haptic.service.ts` | Haptic feedback | ✅ |
+| `stripe.service.ts` | Payments | ✅ |
+| `subscription.service.ts` | Subscription management | ✅ |
+
+### Phase 3 Services (Planned)
+
+| Service | Purpose | Sprint |
+|---------|---------|--------|
+| `coach-brain.service.ts` | Trainer methodology AI | 17 |
+| `autonomy.service.ts` | Client independence scoring | 18 |
+| `streak.service.ts` | Adaptive streak healing | 19 |
+| `video-feedback.service.ts` | Form check videos | 20 |
+| `recovery.service.ts` | Wearable recovery scoring | 21 |
+| `program-generator.service.ts` | NL program design | 22 |
+| `local-seo.service.ts` | SEO automation | 23 |
+| `integration.service.ts` | Third-party integrations | 24 |
+
+---
+
+## Success Metrics Targets
+
+### Current (Phase 2 Complete)
+| Metric | Target | Status |
+|--------|--------|--------|
+| User retention (30 day) | 60% | TBD |
+| Workout completion rate | 70% | TBD |
+| Voice logging adoption | 40% | TBD |
+| CRM feature usage | 60% | TBD |
+| App store rating | 4.5+ | TBD |
+| Lighthouse Performance | 90+ | TBD |
+
+### Phase 3A Targets
+| Metric | Target |
+|--------|--------|
+| Coach Brain approval rate | 85%+ |
+| Streak continuation post-miss | +40% |
+| Video submission rate | 20%+ clients |
+| Maintenance mode conversion | 40%+ |
+
+### Phase 3B Targets
+| Metric | Target |
+|--------|--------|
+| Recovery-adjusted adoption | 60%+ |
+| Program creation time | -70% |
+| Local search visibility | +50% |
+| Integration adoption | 40%+ trainers |
+
+### Phase 3C Targets
+| Metric | Target |
+|--------|--------|
+| Gym owner adoption | 15%+ |
+| Challenge participation | 40%+ |
+| Enterprise conversion | 20%+ |
+| Overall app rating | 4.7+ |
+
+---
+
+## Launch Checklist
+
+### Technical
 - [ ] Lighthouse Performance 90+
-- [ ] No console errors/warnings
+- [ ] Lighthouse Accessibility 100
+- [ ] Bundle size < 2MB initial
+- [ ] API response times < 200ms P95
+- [ ] Crash rate < 0.1%
+- [ ] All E2E tests passing
+
+### App Store
+- [ ] App Store Connect metadata complete
+- [ ] Screenshots for all device sizes
+- [ ] App preview videos
+- [ ] Privacy policy URL
+- [ ] Support URL
+- [ ] TestFlight beta tested
+
+### Play Store
+- [ ] Google Play Console listing complete
+- [ ] Screenshots and graphics
+- [ ] Privacy policy
+- [ ] Data safety section
+- [ ] Internal testing track
+
+### Marketing
+- [ ] Landing page live
+- [ ] Pre-launch email sequence
+- [ ] Social media accounts
+- [ ] Press kit ready
 
 ---
 
-## Sprint 7: Design System Refresh
-
-**Duration:** 2 weeks  
-**Goal:** Implement new dark-first design system
-
-### Epic 11.1: Color System Implementation
-**Priority:** P0 | **Points:** 13
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Create _design-tokens.scss | 3 | All CSS custom properties |
-| Update variables.scss | 5 | Ionic variable mappings |
-| Create theme toggle service | 3 | Dark/light/system preference |
-| Update all ion-card backgrounds | 2 | Use --fitos-bg-secondary |
-
-### Epic 11.2: Typography Update
-**Priority:** P1 | **Points:** 8
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Add Inter font (or system fallback) | 2 | Variable weight 300-700 |
-| Create typography utility classes | 3 | .fitos-heading-1, .fitos-body, etc. |
-| Update metric displays | 2 | Monospace for numbers |
-| Audit heading hierarchy | 1 | Consistent H1→H6 usage |
-
-### Epic 11.3: Component Refresh
-**Priority:** P1 | **Points:** 13
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Create .fitos-card base styles | 3 | Glow effects, hover states |
-| Update StatCard component | 2 | New typography, spacing |
-| Create hero card variant | 3 | For today's workout |
-| Update button variants | 3 | Primary, secondary, ghost |
-| Add skeleton loading patterns | 2 | Consistent across app |
-
-### Sprint 7 Deliverables
-- [ ] Design tokens documented and implemented
-- [ ] All cards use new styling
-- [ ] Dark mode is visually polished
-- [ ] Typography is consistent
-
----
-
-## Sprint 8: Voice Workout Logging
-
-**Duration:** 2 weeks  
-**Goal:** Enable hands-free workout logging
-
-### Epic 12.1: Deepgram Integration
-**Priority:** P0 | **Points:** 13
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Set up Deepgram account | 1 | API keys, project setup |
-| Create VoiceService | 5 | WebSocket streaming, STT |
-| Add microphone permissions | 2 | Capacitor permissions |
-| Implement keyword boosting | 3 | Fitness vocabulary |
-| Add TTS feedback (Aura) | 2 | Confirmation responses |
-
-### Epic 12.2: Workout Voice Commands
-**Priority:** P0 | **Points:** 13
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Create intent parser | 5 | Parse "10 reps at 185" |
-| Implement "repeat" command | 2 | Duplicate last set |
-| Implement "skip" command | 2 | Skip exercise |
-| Implement "next" command | 2 | Advance to next |
-| Add timer commands | 2 | Start/stop rest |
-
-### Epic 12.3: Voice Logger UI
-**Priority:** P0 | **Points:** 8
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Create VoiceLoggerComponent | 3 | Mic button, transcript |
-| Add to active workout page | 2 | Integration |
-| Show real-time transcript | 2 | With confidence indicator |
-| Add haptic feedback | 1 | On successful log |
-
-### Sprint 8 Deliverables
-- [ ] Voice logging works end-to-end
-- [ ] >90% accuracy on common commands
-- [ ] Works in gym environment (noise handling)
-
----
-
-## Sprint 9: Voice/AI Nutrition Logging
-
-**Duration:** 2 weeks  
-**Goal:** Natural language food logging
-
-### Epic 13.1: Natural Language Parser
-**Priority:** P0 | **Points:** 13
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Integrate Nutritionix NLP API | 5 | 90% accuracy target |
-| Create NL parsing service | 3 | Transform text → foods |
-| Handle portion estimation | 3 | "fist-sized", "handful" |
-| Support multi-food entries | 2 | "eggs, toast, and coffee" |
-
-### Epic 13.2: Voice Food Logging
-**Priority:** P1 | **Points:** 8
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Add voice to nutrition page | 3 | Reuse VoiceService |
-| Create food-specific parser | 3 | Different intents |
-| Build confirmation UI | 2 | Editable breakdown |
-
-### Epic 13.3: AI Describe Feature
-**Priority:** P1 | **Points:** 8
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Create AI description endpoint | 3 | Claude/GPT-4 backend |
-| Build restaurant knowledge | 3 | Common menu items |
-| Handle vague descriptions | 2 | Clarifying questions |
-
-### Sprint 9 Deliverables
-- [ ] "Two eggs and toast" logs correctly
-- [ ] "Lunch at Chipotle" provides estimate
-- [ ] Voice input works for food
-
----
-
-## Sprint 10: Photo Nutrition AI
-
-**Duration:** 2 weeks  
-**Goal:** Snap photo to log meal
-
-### Epic 14.1: Photo Recognition
-**Priority:** P0 | **Points:** 13
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Evaluate/integrate Passio AI | 5 | Or SnapCalorie |
-| Create photo capture flow | 3 | Capacitor Camera |
-| Build results UI | 3 | Editable food list |
-| Handle multi-food plates | 2 | Multiple items |
-
-### Epic 14.2: Portion Estimation
-**Priority:** P1 | **Points:** 8
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Implement depth estimation | 3 | LiDAR if available |
-| Add reference objects | 2 | For scale |
-| Allow manual adjustment | 2 | User correction |
-| Learn from corrections | 1 | Improve over time |
-
-### Sprint 10 Deliverables
-- [ ] Photo → food breakdown in <3 seconds
-- [ ] 85%+ accuracy on common foods
-- [ ] Transparent breakdown (not opaque)
-
----
-
-## Sprint 11: CRM Foundation
-
-**Duration:** 2 weeks  
-**Goal:** Lead tracking for trainers
-
-### Epic 15.1: Lead Pipeline
-**Priority:** P0 | **Points:** 13
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Create leads database schema | 3 | Tables, indexes, RLS |
-| Build LeadService | 3 | CRUD operations |
-| Create Kanban UI | 5 | Drag-drop stages |
-| Implement source tracking | 2 | Attribution |
-
-### Epic 15.2: Lead Capture Forms
-**Priority:** P1 | **Points:** 8
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Create form builder | 3 | Customizable fields |
-| Generate embed code | 2 | Iframe/JS snippet |
-| Auto-create leads | 2 | On form submit |
-| Lead magnet support | 1 | PDF download |
-
-### Epic 15.3: Lead Activities
-**Priority:** P1 | **Points:** 5
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Create activities table | 2 | Activity tracking |
-| Build timeline UI | 2 | Lead detail page |
-| Auto-log stage changes | 1 | Activity entries |
-
-### Sprint 11 Deliverables
-- [ ] Visual lead pipeline
-- [ ] Embeddable lead forms
-- [ ] Source attribution tracking
-
----
-
-## Sprint 12: Email Marketing
-
-**Duration:** 2 weeks  
-**Goal:** Built-in email campaigns
-
-### Epic 16.1: Email Infrastructure
-**Priority:** P0 | **Points:** 13
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Integrate Resend/SendGrid | 3 | Email provider |
-| Create templates table | 2 | Database schema |
-| Build template editor | 5 | WYSIWYG |
-| Implement sending service | 3 | Edge Function |
-
-### Epic 16.2: Email Sequences
-**Priority:** P1 | **Points:** 13
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Create sequences schema | 2 | Multi-step campaigns |
-| Build sequence builder UI | 5 | Visual timeline |
-| Implement delay logic | 3 | Send after X days |
-| Add trigger conditions | 3 | lead_created, etc. |
-
-### Epic 16.3: Email Analytics
-**Priority:** P1 | **Points:** 5
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Track opens/clicks | 2 | Webhooks |
-| Build analytics dashboard | 3 | Metrics display |
-
-### Sprint 12 Deliverables
-- [ ] Email template editor
-- [ ] Automated welcome sequence
-- [ ] Open/click tracking
-
----
-
-## Sprint 13: AI Coaching Chatbot
-
-**Duration:** 2 weeks  
-**Goal:** GPT-4 powered coaching
-
-### Epic 17.1: AI Agent Backend
-**Priority:** P0 | **Points:** 21
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Set up LangGraph service | 5 | Cloud Run deployment |
-| Create chat database | 2 | Conversations table |
-| Implement RAG | 8 | User data retrieval |
-| Build multi-agent router | 5 | workout/nutrition/recovery |
-| Add trainer methodology | 1 | Custom prompts |
-
-### Epic 17.2: Chat UI
-**Priority:** P0 | **Points:** 8
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Create chat page | 3 | Message list + input |
-| Add typing indicator | 2 | While AI processes |
-| Support quick actions | 2 | Suggested questions |
-| Add voice input | 1 | Reuse VoiceService |
-
-### Sprint 13 Deliverables
-- [ ] AI coaching chatbot works
-- [ ] Routes to appropriate specialist
-- [ ] Knows user history
-
----
-
-## Sprint 14: Proactive Interventions
-
-**Duration:** 2 weeks  
-**Goal:** JITAI nudges
-
-### Epic 18.1: Intervention Engine
-**Priority:** P1 | **Points:** 13
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Create intervention rules | 5 | Vulnerability scoring |
-| Implement receptivity check | 3 | Right moment detection |
-| Add frequency caps | 2 | Max 2-3/day |
-| Create intervention templates | 3 | AI-generated copy |
-
-### Epic 18.2: Notification Delivery
-**Priority:** P1 | **Points:** 8
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Create notification service | 3 | Push + in-app |
-| Personalize messages | 3 | User history |
-| Track engagement | 2 | Response rates |
-
-### Sprint 14 Deliverables
-- [ ] Proactive workout reminders
-- [ ] Smart timing (not annoying)
-- [ ] Personalized copy
-
----
-
-## Sprint 15: Apple Watch
-
-**Duration:** 2 weeks  
-**Goal:** Wrist-based logging
-
-### Epic 19.1: Watch App Foundation
-**Priority:** P1 | **Points:** 21
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Create watchOS target | 3 | Xcode project |
-| Implement WatchConnectivity | 5 | Phone-watch sync |
-| Build workout complication | 5 | Today's workout glance |
-| Create logging interface | 5 | Haptic-driven |
-| Sync data to phone | 3 | Background sync |
-
-### Sprint 15 Deliverables
-- [ ] Watch shows today's workout
-- [ ] Can log sets from wrist
-- [ ] Syncs with phone app
-
----
-
-## Sprint 16: Polish & Launch
-
-**Duration:** 2 weeks  
-**Goal:** Production ready
-
-### Epic 20.1: Performance
-**Priority:** P0 | **Points:** 8
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Final performance audit | 3 | Lighthouse, profiling |
-| Bundle size optimization | 2 | Tree shaking |
-| Image optimization | 2 | WebP, lazy load |
-| Fix any remaining jank | 1 | 60fps target |
-
-### Epic 20.2: Accessibility
-**Priority:** P1 | **Points:** 8
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Automated a11y audit | 2 | Axe, Lighthouse |
-| VoiceOver/TalkBack testing | 3 | Manual testing |
-| Fix identified issues | 3 | Remediation |
-
-### Epic 20.3: Celebrations
-**Priority:** P1 | **Points:** 5
-
-| Task | Est | Description |
-|------|-----|-------------|
-| Workout completion confetti | 2 | Animation + haptic |
-| PR celebration | 2 | Personal record |
-| Streak milestone | 1 | 7, 30, 100 days |
-
-### Sprint 16 Deliverables
-- [ ] Lighthouse 90+ all categories
-- [ ] WCAG 2.1 AA compliant
-- [ ] Celebration animations
-- [ ] Ready for app store submission
-
----
-
-## Velocity & Capacity
-
-**Assumed Velocity:** 40 points/sprint (1 developer)
-
-| Sprint | Points | Focus |
-|--------|--------|-------|
-| 6.5 | 18 | Polish |
-| 7 | 34 | Design System |
-| 8 | 34 | Voice Workout |
-| 9 | 29 | Voice Nutrition |
-| 10 | 21 | Photo AI |
-| 11 | 26 | CRM |
-| 12 | 31 | Email |
-| 13 | 29 | AI Chat |
-| 14 | 21 | JITAI |
-| 15 | 21 | Watch |
-| 16 | 21 | Polish |
-
----
-
-## Risk Register
-
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|------------|
-| Deepgram accuracy in gym | Medium | High | Test with gym audio, add noise handling |
-| Photo AI accuracy | Medium | Medium | Start with common foods, expand |
-| LangGraph complexity | Medium | High | Start simple, iterate |
-| Apple Watch approval | Low | Medium | Follow HIG, test thoroughly |
-| API costs at scale | Medium | Medium | Cache aggressively, rate limit |
-
----
-
-## Success Metrics
-
-| Metric | Phase 1 Target | Phase 2 Target |
-|--------|---------------|----------------|
-| User retention (30 day) | 40% | 60% |
-| Workout completion rate | 50% | 70% |
-| Voice logging adoption | - | 40% |
-| CRM feature usage | - | 60% |
-| App store rating | 4.0+ | 4.5+ |
-| Lighthouse Performance | 85+ | 90+ |
+## Related Documentation
+
+- `ROADMAP.md` - Strategic overview and timeline
+- `PHASE1_BACKLOG.md` - MVP features (complete)
+- `PHASE2_BACKLOG.md` - AI/CRM features (complete)
+- `PHASE3_BACKLOG.md` - Differentiation features (planned)
+- `MARKET_RESEARCH_REPORT.md` - Competitive analysis
+- `COST_ANALYSIS.md` - Infrastructure costs
+- `AI_INTEGRATION.md` - Voice, photo, coaching architecture

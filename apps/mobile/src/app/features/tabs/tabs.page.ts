@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import {  Component, inject, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import {
   IonTabs,
   IonTabBar,
@@ -30,6 +30,7 @@ import { MessagingService } from '@app/core/services/messaging.service';
 @Component({
   selector: 'app-tabs',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     IonTabs,
     IonTabBar,

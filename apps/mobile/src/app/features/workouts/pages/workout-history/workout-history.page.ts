@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import {  Component, OnInit, signal, inject , ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import {
@@ -34,6 +34,7 @@ addIcons({ barbellOutline, timeOutline, calendarOutline, trophyOutline });
 @Component({
   selector: 'app-workout-history',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     IonContent,

@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed, inject } from '@angular/core';
+import {  Component, OnInit, signal, computed, inject , ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
@@ -34,6 +34,7 @@ type SubscriptionFilter = 'all' | 'active' | 'trialing' | 'past_due' | 'canceled
 @Component({
   selector: 'app-client-list',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     IonContent,

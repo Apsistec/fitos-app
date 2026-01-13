@@ -287,8 +287,8 @@ export class LeadFormComponent {
   leadCreated = output<void>();
   cancelled = output<void>();
 
-  // Form state
-  formData = signal<Partial<CreateLeadInput>>({
+  // Form state - using plain object for ngModel compatibility
+  formData: Partial<CreateLeadInput> = {
     name: '',
     email: '',
     phone: '',
@@ -296,7 +296,7 @@ export class LeadFormComponent {
     source_detail: '',
     notes: '',
     expected_value: undefined,
-  });
+  };
 
   submitting = signal(false);
   validationError = signal<string | null>(null);
@@ -308,7 +308,7 @@ export class LeadFormComponent {
   validateForm(): boolean {
     this.validationError.set(null);
 
-    const data = this.formData();
+    const data = this.formData;
 
     // Required: name
     if (!data.name || data.name.trim().length === 0) {
@@ -347,7 +347,7 @@ export class LeadFormComponent {
     this.submitting.set(true);
 
     try {
-      const data = this.formData();
+      const data = this.formData;
 
       const input: CreateLeadInput = {
         name: data.name!.trim(),
@@ -391,7 +391,7 @@ export class LeadFormComponent {
   }
 
   private resetForm(): void {
-    this.formData.set({
+    this.formData = {
       name: '',
       email: '',
       phone: '',
@@ -399,7 +399,7 @@ export class LeadFormComponent {
       source_detail: '',
       notes: '',
       expected_value: undefined,
-    });
+    };
     this.validationError.set(null);
   }
 }

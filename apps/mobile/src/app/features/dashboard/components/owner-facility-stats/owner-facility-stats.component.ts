@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonCard,
@@ -32,6 +32,7 @@ export interface FacilityStats {
     IonCardContent,
     IonIcon,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OwnerFacilityStatsComponent {
   @Input() stats: FacilityStats = {

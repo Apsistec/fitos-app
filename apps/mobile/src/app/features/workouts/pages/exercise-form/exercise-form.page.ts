@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import {  Component, inject, signal, computed, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import {
@@ -74,6 +74,7 @@ const COMMON_EQUIPMENT = [
 
 @Component({
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-exercise-form',
   imports: [
     ReactiveFormsModule,

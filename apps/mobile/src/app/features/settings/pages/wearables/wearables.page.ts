@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import {  Component, OnInit, inject, signal , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonHeader,
@@ -44,6 +44,7 @@ type WearableConnection = Database['public']['Tables']['wearable_connections']['
   templateUrl: './wearables.page.html',
   styleUrls: ['./wearables.page.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     IonHeader,

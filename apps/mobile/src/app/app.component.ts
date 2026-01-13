@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { AuthService } from './core/services/auth.service';
 import { ThemeService } from './core/services/theme.service';
@@ -9,11 +9,31 @@ import * as allIcons from 'ionicons/icons';
   standalone: true,
   selector: 'app-root',
   imports: [IonApp, IonRouterOutlet],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ion-app>
-      <ion-router-outlet></ion-router-outlet>
+      <a href="#main-content" class="skip-link">Skip to main content</a>
+      <ion-router-outlet id="main-content"></ion-router-outlet>
     </ion-app>
   `,
+  styles: [`
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      padding: 8px 16px;
+      background: var(--ion-color-primary);
+      color: var(--ion-color-primary-contrast);
+      z-index: 100;
+      text-decoration: none;
+      border-radius: 0 0 4px 0;
+      font-weight: 600;
+    }
+
+    .skip-link:focus {
+      top: 0;
+    }
+  `],
 })
 export class AppComponent implements OnInit {
   private authService = inject(AuthService);

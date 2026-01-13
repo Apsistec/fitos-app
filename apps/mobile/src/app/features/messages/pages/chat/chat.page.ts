@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import {  Component, inject, signal, OnInit, ViewChild, ElementRef, AfterViewChecked , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -28,6 +28,7 @@ import { ClientService } from '@app/core/services/client.service';
 @Component({
   selector: 'app-chat',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     ReactiveFormsModule,

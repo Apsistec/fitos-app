@@ -153,13 +153,13 @@ export class PhotoNutritionService {
     // For now, return mock data to show the architecture
     console.warn('Food recognition API not configured, returning mock data');
 
-    if (!this.PASSIO_API_KEY) {
+    if (!this.passioApiKey) {
       return this.getMockRecognitionResult();
     }
 
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.PASSIO_API_KEY}`,
+      'Authorization': `Bearer ${this.passioApiKey}`,
     });
 
     const body = {

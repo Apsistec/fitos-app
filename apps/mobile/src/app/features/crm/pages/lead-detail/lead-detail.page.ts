@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import {  Component, OnInit, inject, signal , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import {
@@ -50,6 +50,7 @@ import { ActivityLoggerComponent } from '../../components/activity-logger/activi
 @Component({
   selector: 'app-lead-detail',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     ActivityLoggerComponent,

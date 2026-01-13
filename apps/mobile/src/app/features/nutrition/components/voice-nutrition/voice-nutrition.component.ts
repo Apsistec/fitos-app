@@ -1,4 +1,4 @@
-import { Component, output, effect, signal, OnDestroy } from '@angular/core';
+import {  Component, output, effect, signal, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonButton,
@@ -46,6 +46,7 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
 @Component({
   selector: 'app-voice-nutrition',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     IonButton,

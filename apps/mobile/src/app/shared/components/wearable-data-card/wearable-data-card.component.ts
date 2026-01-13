@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, inject, signal } from '@angular/core';
+import { Component, Input, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import {
@@ -44,6 +44,7 @@ type WearableDailyData = Database['public']['Tables']['wearable_daily_data']['Ro
     IonSpinner,
     IonText,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WearableDataCardComponent implements OnInit {
   @Input() clientId?: string; // If viewing another client's data (trainer view)

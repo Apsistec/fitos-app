@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, computed } from '@angular/core';
+import {  Component, inject, OnInit, computed , ChangeDetectionStrategy } from '@angular/core';
 import {
   IonContent,
   IonHeader,
@@ -26,6 +26,7 @@ import { SubscriptionService } from '@app/core/services/subscription.service';
 
 @Component({
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-my-subscription',
   imports: [
     CurrencyPipe,

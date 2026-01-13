@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import {  Component, inject, signal , ChangeDetectionStrategy } from '@angular/core';
 import {
   IonContent,
   IonHeader,
@@ -22,6 +22,7 @@ import { AuthService } from '@app/core/services/auth.service';
 @Component({
   selector: 'app-help',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     IonContent,
     IonHeader,

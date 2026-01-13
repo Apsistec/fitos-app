@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import {  Component, inject, signal, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import {
@@ -24,6 +24,7 @@ import { MessagingService, type Conversation } from '@app/core/services/messagin
 @Component({
   selector: 'app-conversations',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     RouterLink,

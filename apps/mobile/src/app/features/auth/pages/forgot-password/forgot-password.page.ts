@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import {  Component, inject, signal, computed , ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
@@ -20,6 +20,7 @@ import { AuthService } from '@app/core/services/auth.service';
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
     RouterLink,

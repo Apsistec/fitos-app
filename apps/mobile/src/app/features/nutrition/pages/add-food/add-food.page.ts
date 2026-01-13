@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import {  Component, OnInit, inject, signal , ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -53,6 +53,7 @@ addIcons({
 @Component({
   selector: 'app-add-food',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     FormsModule,
@@ -136,7 +137,7 @@ addIcons({
         @if (inputMethod === 'voice') {
           <div class="voice-container">
             <app-voice-nutrition
-              (foodsParsed)="handleVoiceParsedFoods($event)"
+              (foodsConfirmed)="handleVoiceParsedFoods($event)"
             />
           </div>
         }

@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import {  Component, inject, signal, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -32,6 +32,7 @@ import { StripeService } from '@app/core/services/stripe.service';
 
 @Component({
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-trainer-pricing',
   imports: [
     ReactiveFormsModule,

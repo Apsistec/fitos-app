@@ -1,4 +1,4 @@
-import { Component, inject, computed, OnInit, signal } from '@angular/core';
+import { Component, inject, computed, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   IonContent,
@@ -64,6 +64,7 @@ import type { WorkoutWithExercises } from '@app/core/services/workout.service';
     OwnerFacilityStatsComponent,
     OwnerTrainerPerformanceComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeInUp, listStagger],
   template: `
     <ion-header>
