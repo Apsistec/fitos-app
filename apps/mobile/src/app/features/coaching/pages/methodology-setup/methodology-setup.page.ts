@@ -9,7 +9,6 @@ import {
   IonButtons,
   IonButton,
   IonIcon,
-  IonText,
   IonProgressBar,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -40,7 +39,6 @@ import { MethodologyQuestionnaireComponent } from '../../components/methodology-
     IonButtons,
     IonButton,
     IonIcon,
-    IonText,
     IonProgressBar,
     MethodologyQuestionnaireComponent,
   ],

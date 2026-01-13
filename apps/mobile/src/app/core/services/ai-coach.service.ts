@@ -276,26 +276,5 @@ export class AICoachService {
     }
   }
 
-  /**
-   * Clear conversation history
-   */
-  clearHistory(): void {
-    this.messages.set([]);
-    this.currentAgent.set(null);
-  }
-
-  /**
-   * Generate unique message ID
-   */
-  private generateId(): string {
-    return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  /**
-   * Clear error state
-   */
-  clearError(): void {
-    this.error.set(null);
-  }
 }
 

@@ -14,7 +14,6 @@ import {
   IonText,
   IonChip,
   IonInput,
-  IonList,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { saveOutline, addCircleOutline, closeCircleOutline, informationCircleOutline } from 'ionicons/icons';
@@ -56,7 +55,6 @@ import { HapticService } from '@app/core/services/haptic.service';
     IonText,
     IonChip,
     IonInput,
-    IonList,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `

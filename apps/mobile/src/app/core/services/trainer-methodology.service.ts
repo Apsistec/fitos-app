@@ -48,7 +48,7 @@ export interface MethodologyResponseLog {
   client_id: string | null;
   query: string;
   response: string;
-  context_used: Record<string, any> | null;
+  context_used: Array<{ content: string; input_type: string; similarity?: number }> | null;
   trainer_rating: number | null;
   trainer_approved: boolean | null;
   trainer_feedback: string | null;

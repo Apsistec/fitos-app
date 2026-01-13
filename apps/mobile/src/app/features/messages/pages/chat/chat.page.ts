@@ -359,7 +359,7 @@ export class ChatPage implements OnInit, AfterViewChecked {
       // Auto-collect training data for Coach Brain if sender is a trainer
       const isTrainer = this.authService.isTrainer() || this.authService.isOwner();
       if (isTrainer && content.length >= 20) { // Only collect substantial messages (20+ chars)
-        const trainerId = this.authService.currentUser()?.id;
+        const trainerId = this.authService.user()?.id;
         if (trainerId) {
           // Fire and forget - don't block message sending if collection fails
           this.aiCoachService.collectTrainingData(
