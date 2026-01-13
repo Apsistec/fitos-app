@@ -88,6 +88,7 @@
     "@angular/ssr": "~21.0.0",
     "@capacitor/haptics": "^8.0.0",
     "@capacitor/preferences": "^8.0.0",
+    "@capacitor/status-bar": "^8.0.0",
     "canvas-confetti": "^1.9.4",
     "chart.js": "^4.5.1",
     "express": "^4.21.0",
