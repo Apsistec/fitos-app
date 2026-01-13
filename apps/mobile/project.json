@@ -1,0 +1,140 @@
+{
+  "name": "fitos-mobile",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/mobile/src",
+  "prefix": "app",
+  "targets": {
+    "build": {
+      "executor": "@angular-devkit/build-angular:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/mobile",
+        "index": "apps/mobile/src/index.html",
+        "browser": "apps/mobile/src/main.ts",
+        "polyfills": ["zone.js"],
+        "tsConfig": "apps/mobile/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/mobile/src/assets",
+            "output": "/assets"
+          },
+          {
+            "glob": "**/*.svg",
+            "input": "node_modules/ionicons/dist/ionicons/svg",
+            "output": "./svg"
+          },
+          {
+            "glob": "manifest.webmanifest",
+            "input": "apps/mobile/src",
+            "output": "/"
+          },
+          {
+            "glob": "ngsw-config.json",
+            "input": "apps/mobile/src",
+            "output": "/"
+          }
+        ],
+        "styles": [
+          "apps/mobile/src/theme/variables.scss",
+          "apps/mobile/src/global.scss"
+        ],
+        "scripts": [],
+        "optimization": {
+          "scripts": true,
+          "styles": {
+            "minify": true,
+            "inlineCritical": false
+          },
+          "fonts": true
+        },
+        "externalDependencies": [
+          "@angular/cdk",
+          "@angular/service-worker"
+        ]
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "2mb",
+              "maximumError": "5mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
+            }
+          ],
+          "outputHashing": "all",
+          "fileReplacements": [
+            {
+              "replace": "apps/mobile/src/environments/environment.ts",
+              "with": "apps/mobile/src/environments/environment.prod.ts"
+            }
+          ],
+          "serviceWorker": "apps/mobile/ngsw-config.json"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "configurations": {
+        "production": {
+          "buildTarget": "fitos-mobile:build:production"
+        },
+        "development": {
+          "buildTarget": "fitos-mobile:build:development"
+        }
+      },
+      "defaultConfiguration": "development",
+      "options": {
+        "port": 4200
+      }
+    },
+    "test": {
+      "executor": "@angular-devkit/build-angular:karma",
+      "options": {
+        "polyfills": ["zone.js", "zone.js/testing"],
+        "tsConfig": "apps/mobile/tsconfig.spec.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/mobile/src/assets",
+            "output": "/assets"
+          },
+          {
+            "glob": "**/*.svg",
+            "input": "node_modules/ionicons/dist/ionicons/svg",
+            "output": "./svg"
+          }
+        ],
+        "styles": [
+          "apps/mobile/src/theme/variables.scss",
+          "apps/mobile/src/global.scss"
+        ],
+        "scripts": []
+      }
+    },
+    "lint": {
+      "executor": "@angular-eslint/builder:lint",
+      "options": {
+        "lintFilePatterns": [
+          "apps/mobile/src/**/*.ts",
+          "apps/mobile/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": ["type:app", "platform:mobile"]
+}
