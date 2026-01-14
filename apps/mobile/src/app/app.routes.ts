@@ -287,6 +287,13 @@ export const routes: Routes = [
                 (m) => m.SetNutritionTargetsPage
               ),
           },
+          {
+            path: ':id/graduation',
+            loadComponent: () =>
+              import('./features/clients/pages/graduation/graduation.page').then(
+                (m) => m.GraduationPage
+              ),
+          },
         ],
       },
       {

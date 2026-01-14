@@ -46,6 +46,9 @@ import {
 } from 'ionicons/icons';
 import { ClientService } from '../../../../core/services/client.service';
 import { WorkoutSessionService } from '../../../../core/services/workout-session.service';
+import { AutonomyService } from '../../../../core/services/autonomy.service';
+import { AutonomyIndicatorComponent } from '../../components/autonomy-indicator/autonomy-indicator.component';
+import { GraduationAlertComponent } from '../../components/graduation-alert/graduation-alert.component';
 
 addIcons({
   personOutline,
@@ -99,6 +102,8 @@ interface TrainerNote {
     IonRefresherContent,
     IonSegment,
     IonSegmentButton,
+    AutonomyIndicatorComponent,
+    GraduationAlertComponent,
   ],
   template: `
     <ion-header>
@@ -148,6 +153,16 @@ interface TrainerNote {
         <div class="profile-container">
           <!-- Overview Tab -->
           @if (selectedTab === 'overview') {
+            <!-- Autonomy & Graduation -->
+            <app-graduation-alert
+              [assessment]="autonomyAssessment()"
+              [clientId]="clientId()"
+              (graduate)="handleGraduate()"
+              (viewDetails)="handleViewAutonomyDetails()"
+            />
+
+            <app-autonomy-indicator [assessment]="autonomyAssessment()" />
+
             <!-- Personal Info Card -->
             <ion-card>
               <ion-card-header>
@@ -607,6 +622,7 @@ interface TrainerNote {
 export class ClientDetailPage implements OnInit {
   private clientService = inject(ClientService);
   private workoutService = inject(WorkoutSessionService);
+  private autonomyService = inject(AutonomyService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private toastCtrl = inject(ToastController);
@@ -615,9 +631,11 @@ export class ClientDetailPage implements OnInit {
 
   // State
   client = signal<any | null>(null);
+  clientId = signal<string>('');
   loading = signal(false);
   error = signal<string | null>(null);
   selectedTab = 'overview';
+  autonomyAssessment = signal<any | null>(null);
 
   // Workouts tab
   recentWorkouts = signal<any[]>([]);
@@ -650,7 +668,9 @@ export class ClientDetailPage implements OnInit {
   ngOnInit() {
     const clientId = this.route.snapshot.paramMap.get('id');
     if (clientId) {
+      this.clientId.set(clientId);
       this.loadClientProfile(clientId);
+      this.loadAutonomyAssessment(clientId);
     } else {
       this.error.set('Client ID not provided');
     }
@@ -880,5 +900,26 @@ export class ClientDetailPage implements OnInit {
       day: 'numeric',
       year: 'numeric',
     });
+  }
+
+  // Autonomy methods
+  async loadAutonomyAssessment(clientId: string): Promise<void> {
+    try {
+      const assessment = await this.autonomyService.getLatestAssessment(clientId);
+      this.autonomyAssessment.set(assessment);
+    } catch (err) {
+      console.error('Error loading autonomy assessment:', err);
+      // Don't show error to user - autonomy data is optional
+    }
+  }
+
+  handleGraduate(): void {
+    // Navigate to graduation page
+    this.router.navigate(['/tabs/clients', this.clientId(), 'graduation']);
+  }
+
+  handleViewAutonomyDetails(): void {
+    // TODO: Could show autonomy details modal or navigate to assessment page
+    console.log('View autonomy details');
   }
 }

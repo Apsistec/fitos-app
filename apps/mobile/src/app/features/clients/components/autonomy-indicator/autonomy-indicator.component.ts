@@ -25,7 +25,7 @@ import {
   checkmarkCircleOutline,
   timeOutline,
   sparklesOutline,
-} from 'iconicons/icons';
+} from 'ionicons/icons';
 
 import {
   AutonomyAssessment,
