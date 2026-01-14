@@ -27,6 +27,7 @@ import {
   IonSegmentButton,
   ToastController,
   ActionSheetController,
+  ModalController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -49,6 +50,7 @@ import { WorkoutSessionService } from '../../../../core/services/workout-session
 import { AutonomyService } from '../../../../core/services/autonomy.service';
 import { AutonomyIndicatorComponent } from '../../components/autonomy-indicator/autonomy-indicator.component';
 import { GraduationAlertComponent } from '../../components/graduation-alert/graduation-alert.component';
+import { AssessmentFormComponent } from '../../components/assessment-form/assessment-form.component';
 
 addIcons({
   personOutline,
@@ -627,6 +629,7 @@ export class ClientDetailPage implements OnInit {
   private router = inject(Router);
   private toastCtrl = inject(ToastController);
   private actionSheetCtrl = inject(ActionSheetController);
+  private modalCtrl = inject(ModalController);
   private fb = inject(FormBuilder);
 
   // State
@@ -918,8 +921,39 @@ export class ClientDetailPage implements OnInit {
     this.router.navigate(['/tabs/clients', this.clientId(), 'graduation']);
   }
 
-  handleViewAutonomyDetails(): void {
-    // TODO: Could show autonomy details modal or navigate to assessment page
-    console.log('View autonomy details');
+  async handleViewAutonomyDetails(): Promise<void> {
+    await this.openAssessmentForm();
+  }
+
+  async openAssessmentForm(): Promise<void> {
+    const modal = await this.modalCtrl.create({
+      component: AssessmentFormComponent,
+      componentProps: {
+        clientId: this.clientId(),
+      },
+    });
+
+    await modal.present();
+
+    const { data, role } = await modal.onDidDismiss();
+
+    if (role === 'saved' && data) {
+      // Refresh autonomy assessment
+      await this.loadAutonomyAssessment(this.clientId());
+      await this.showToast('Assessment saved successfully!', 'success');
+    }
+  }
+
+  private async showToast(
+    message: string,
+    color: 'success' | 'danger' | 'warning'
+  ): Promise<void> {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      color,
+      position: 'top',
+    });
+    await toast.present();
   }
 }
