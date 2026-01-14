@@ -424,6 +424,14 @@ export const routes: Routes = [
                 (m) => m.TermsPage
               ),
           },
+          {
+            // Integrations
+            path: 'integrations',
+            loadComponent: () =>
+              import('./features/settings/pages/integrations/integrations.page').then(
+                (m) => m.IntegrationsPage
+              ),
+          },
         ],
       },
     ],
