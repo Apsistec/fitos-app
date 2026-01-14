@@ -158,6 +158,8 @@ export interface CreateGraduationInput {
   graduation_type: GraduationType;
   check_in_frequency: CheckInFrequency;
   pricing_reduced_by?: number;
+  journey_stats?: Record<string, any>;
+  achievements?: string[];
   notes?: string;
 }
 
@@ -423,8 +425,8 @@ export class AutonomyService {
           next_check_in_at: nextCheckIn?.toISOString(),
           pricing_reduced_by: input.pricing_reduced_by,
           notes: input.notes,
-          journey_stats: {}, // Will be populated with actual client stats
-          achievements: [],
+          journey_stats: input.journey_stats || {},
+          achievements: input.achievements || [],
         })
         .select()
         .single();

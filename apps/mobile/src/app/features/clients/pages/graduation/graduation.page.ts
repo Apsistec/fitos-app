@@ -53,6 +53,7 @@ import {
   CreateGraduationInput,
 } from '../../../../core/services/autonomy.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { SupabaseService } from '../../../../core/services/supabase.service';
 
 interface JourneyStats {
   daysAsMember: number;
@@ -721,6 +722,7 @@ export class GraduationPage implements OnInit {
   private router = inject(Router);
   private autonomyService = inject(AutonomyService);
   private authService = inject(AuthService);
+  private supabase = inject(SupabaseService);
   private modalCtrl = inject(ModalController);
   private toastCtrl = inject(ToastController);
 
@@ -839,22 +841,20 @@ export class GraduationPage implements OnInit {
 
       this.assessment.set(assessment);
 
-      // TODO: Load actual client data and journey stats
-      // For now, using mock data
-      this.clientName.set('Client Name');
-      this.journeyStats.set({
-        daysAsMember: 180,
-        totalWorkouts: 72,
-        totalNutritionLogs: 540,
-        weightChange: -15,
-        consistencyRate: 85,
-        milestones: [
-          'First self-modified workout',
-          'Consistent nutrition tracking for 30 days',
-          'Recognized need for deload week independently',
-          'Demonstrated exercise form mastery',
-        ],
-      });
+      // Load client profile
+      const { data: clientData } = await this.supabase.client
+        .from('profiles')
+        .select('full_name, created_at')
+        .eq('id', this.clientId())
+        .single();
+
+      if (clientData) {
+        this.clientName.set(clientData.full_name || 'Client');
+      }
+
+      // Calculate journey stats
+      const stats = await this.calculateJourneyStats(this.clientId());
+      this.journeyStats.set(stats);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to load data';
@@ -903,6 +903,16 @@ export class GraduationPage implements OnInit {
         throw new Error('No trainer ID found');
       }
 
+      // Prepare journey stats for storage
+      const stats = this.journeyStats();
+      const journeyStatsForDb = {
+        days_trained: stats.daysAsMember,
+        workouts_completed: stats.totalWorkouts,
+        nutrition_logs: stats.totalNutritionLogs,
+        weight_change: stats.weightChange,
+        consistency_rate: stats.consistencyRate,
+      };
+
       const graduationInput: CreateGraduationInput = {
         client_id: this.clientId(),
         graduation_type: this.graduationType,
@@ -910,6 +920,8 @@ export class GraduationPage implements OnInit {
           this.graduationType === 'full' ? 'none' : this.checkInFrequency,
         pricing_reduced_by:
           this.graduationType !== 'full' ? this.pricingReduction : undefined,
+        journey_stats: journeyStatsForDb,
+        achievements: stats.milestones,
         notes: this.notes || undefined,
       };
 
@@ -949,6 +961,114 @@ export class GraduationPage implements OnInit {
 
   close(): void {
     this.modalCtrl.dismiss();
+  }
+
+  private async calculateJourneyStats(clientId: string): Promise<JourneyStats> {
+    try {
+      // Get client profile for created_at
+      const { data: profile } = await this.supabase.client
+        .from('profiles')
+        .select('created_at')
+        .eq('id', clientId)
+        .single();
+
+      const createdDate = profile?.created_at ? new Date(profile.created_at) : new Date();
+      const daysAsMember = Math.floor(
+        (Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+
+      // Count completed workouts
+      const { count: workoutCount } = await this.supabase.client
+        .from('workouts')
+        .select('*', { count: 'exact', head: true })
+        .eq('client_id', clientId)
+        .eq('status', 'completed');
+
+      // Count nutrition logs
+      const { count: nutritionCount } = await this.supabase.client
+        .from('nutrition_logs')
+        .select('*', { count: 'exact', head: true })
+        .eq('client_id', clientId);
+
+      // Get weight measurements for change calculation
+      const { data: measurements } = await this.supabase.client
+        .from('measurements')
+        .select('weight, recorded_at')
+        .eq('client_id', clientId)
+        .not('weight', 'is', null)
+        .order('recorded_at', { ascending: true })
+        .limit(100);
+
+      let weightChange: number | undefined;
+      if (measurements && measurements.length >= 2) {
+        const firstWeight = measurements[0].weight;
+        const lastWeight = measurements[measurements.length - 1].weight;
+        weightChange = Math.round((lastWeight - firstWeight) * 10) / 10;
+      }
+
+      // Calculate consistency rate (workouts in last 90 days vs expected)
+      const ninetyDaysAgo = new Date();
+      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+      const { count: recentWorkouts } = await this.supabase.client
+        .from('workouts')
+        .select('*', { count: 'exact', head: true })
+        .eq('client_id', clientId)
+        .eq('status', 'completed')
+        .gte('completed_at', ninetyDaysAgo.toISOString());
+
+      // Assume 3 workouts/week as target (12-13 weeks * 3 = ~39 workouts)
+      const expectedWorkouts = 39;
+      const consistencyRate = Math.min(
+        100,
+        Math.round(((recentWorkouts || 0) / expectedWorkouts) * 100)
+      );
+
+      // Get autonomy milestones
+      const { data: milestonesData } = await this.supabase.client
+        .from('autonomy_milestones')
+        .select('title')
+        .eq('client_id', clientId)
+        .order('achieved_at', { ascending: false })
+        .limit(5);
+
+      const milestones = milestonesData?.map((m) => m.title) || [];
+
+      // If no milestones, add some defaults based on data
+      if (milestones.length === 0) {
+        if ((workoutCount || 0) > 50) {
+          milestones.push('Completed 50+ workouts');
+        }
+        if ((nutritionCount || 0) > 200) {
+          milestones.push('Logged 200+ nutrition entries');
+        }
+        if (consistencyRate >= 80) {
+          milestones.push('Maintained 80%+ consistency');
+        }
+        if (weightChange && weightChange < -10) {
+          milestones.push(`Lost ${Math.abs(weightChange)} lbs`);
+        }
+      }
+
+      return {
+        daysAsMember,
+        totalWorkouts: workoutCount || 0,
+        totalNutritionLogs: nutritionCount || 0,
+        weightChange,
+        consistencyRate,
+        milestones,
+      };
+    } catch (err) {
+      console.error('Error calculating journey stats:', err);
+      // Return defaults on error
+      return {
+        daysAsMember: 0,
+        totalWorkouts: 0,
+        totalNutritionLogs: 0,
+        consistencyRate: 0,
+        milestones: [],
+      };
+    }
   }
 
   private async showToast(
