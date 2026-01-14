@@ -643,6 +643,87 @@ export class EmailTemplateService {
   }
 
   /**
+   * Update email sequence
+   */
+  async updateSequence(
+    sequenceId: string,
+    updates: Partial<CreateSequenceInput>
+  ): Promise<boolean> {
+    try {
+      const { error } = await this.supabase.client
+        .from('email_sequences')
+        .update(updates)
+        .eq('id', sequenceId);
+
+      if (error) throw error;
+
+      // Update local state
+      const currentSequences = this.sequences();
+      const updatedSequences = currentSequences.map((s) =>
+        s.id === sequenceId ? { ...s, ...updates } : s
+      );
+      this.sequences.set(updatedSequences);
+
+      return true;
+    } catch (err) {
+      console.error('Error updating sequence:', err);
+      return false;
+    }
+  }
+
+  /**
+   * Delete email sequence
+   */
+  async deleteSequence(sequenceId: string): Promise<boolean> {
+    try {
+      const { error } = await this.supabase.client
+        .from('email_sequences')
+        .delete()
+        .eq('id', sequenceId);
+
+      if (error) throw error;
+
+      // Update local state
+      const currentSequences = this.sequences();
+      this.sequences.set(currentSequences.filter((s) => s.id !== sequenceId));
+
+      return true;
+    } catch (err) {
+      console.error('Error deleting sequence:', err);
+      return false;
+    }
+  }
+
+  /**
+   * Toggle sequence active status
+   */
+  async toggleSequence(
+    sequenceId: string,
+    isActive: boolean
+  ): Promise<boolean> {
+    try {
+      const { error } = await this.supabase.client
+        .from('email_sequences')
+        .update({ is_active: isActive })
+        .eq('id', sequenceId);
+
+      if (error) throw error;
+
+      // Update local state
+      const currentSequences = this.sequences();
+      const updatedSequences = currentSequences.map((s) =>
+        s.id === sequenceId ? { ...s, is_active: isActive } : s
+      );
+      this.sequences.set(updatedSequences);
+
+      return true;
+    } catch (err) {
+      console.error('Error toggling sequence:', err);
+      return false;
+    }
+  }
+
+  /**
    * Add step to sequence
    */
   async addSequenceStep(
@@ -740,6 +821,31 @@ export class EmailTemplateService {
     } catch (err) {
       console.error('Error enrolling lead in sequence:', err);
       return null;
+    }
+  }
+
+  /**
+   * Get enrollment counts for a sequence
+   */
+  async getSequenceEnrollmentCounts(
+    sequenceId: string
+  ): Promise<{ total: number; active: number }> {
+    try {
+      const { data, error } = await this.supabase.client
+        .from('lead_sequences')
+        .select('status')
+        .eq('sequence_id', sequenceId);
+
+      if (error) throw error;
+
+      const total = data?.length || 0;
+      const active =
+        data?.filter((ls) => ls.status === 'active').length || 0;
+
+      return { total, active };
+    } catch (err) {
+      console.error('Error getting sequence enrollment counts:', err);
+      return { total: 0, active: 0 };
     }
   }
 

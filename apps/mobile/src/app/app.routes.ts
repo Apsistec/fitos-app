@@ -313,6 +313,13 @@ export const routes: Routes = [
                 (m) => m.TemplatesPage
               ),
           },
+          {
+            path: 'sequences',
+            loadComponent: () =>
+              import('./features/crm/pages/sequences/sequences.page').then(
+                (m) => m.SequencesPage
+              ),
+          },
         ],
       },
       {
