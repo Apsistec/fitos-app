@@ -36,6 +36,7 @@ import { UpcomingWorkoutsListComponent } from '@app/shared/components/upcoming-w
 import { WearableDataCardComponent } from '@app/shared/components/wearable-data-card/wearable-data-card.component';
 import { OwnerFacilityStatsComponent, type FacilityStats } from './components/owner-facility-stats/owner-facility-stats.component';
 import { OwnerTrainerPerformanceComponent, type TrainerPerformance } from './components/owner-trainer-performance/owner-trainer-performance.component';
+import { CRMDashboardWidgetComponent } from '../crm/components/crm-dashboard-widget.component';
 import type { WorkoutWithExercises } from '@app/core/services/workout.service';
 
 @Component({
@@ -63,6 +64,7 @@ import type { WorkoutWithExercises } from '@app/core/services/workout.service';
     WearableDataCardComponent,
     OwnerFacilityStatsComponent,
     OwnerTrainerPerformanceComponent,
+    CRMDashboardWidgetComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeInUp, listStagger],
@@ -161,6 +163,9 @@ import type { WorkoutWithExercises } from '@app/core/services/workout.service';
 
           <!-- Overview Stats -->
           <app-trainer-overview-stats [stats]="trainerStats()" />
+
+          <!-- CRM Dashboard Widget -->
+          <app-crm-dashboard-widget />
 
           <!-- Needs Attention -->
           <app-trainer-needs-attention [alerts]="clientAlerts()" />

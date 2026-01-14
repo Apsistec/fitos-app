@@ -320,6 +320,13 @@ export const routes: Routes = [
                 (m) => m.SequencesPage
               ),
           },
+          {
+            path: 'analytics',
+            loadComponent: () =>
+              import('./features/crm/pages/email-analytics/email-analytics.page').then(
+                (m) => m.EmailAnalyticsPage
+              ),
+          },
         ],
       },
       {
