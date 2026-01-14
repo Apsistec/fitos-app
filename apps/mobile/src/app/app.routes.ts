@@ -294,6 +294,13 @@ export const routes: Routes = [
                 (m) => m.GraduationPage
               ),
           },
+          {
+            path: 'video-review/:id',
+            loadComponent: () =>
+              import('./features/clients/pages/video-review/video-review.page').then(
+                (m) => m.VideoReviewPage
+              ),
+          },
         ],
       },
       {
