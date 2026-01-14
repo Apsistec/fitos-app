@@ -344,6 +344,20 @@ export const routes: Routes = [
         ],
       },
       {
+        // Analytics - gym owners only
+        path: 'analytics',
+        canActivate: [trainerOrOwnerGuard],
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/analytics/pages/owner-analytics/owner-analytics.page').then(
+                (m) => m.OwnerAnalyticsPage
+              ),
+          },
+        ],
+      },
+      {
         path: 'settings',
         children: [
           {
