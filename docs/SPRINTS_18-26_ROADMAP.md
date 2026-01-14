@@ -1,8 +1,8 @@
 # FitOS Sprints 18-26 Implementation Roadmap
 
 **Last Updated:** 2026-01-14
-**Sprint 25 Status:** ✅ COMPLETE
-**Current Sprint:** Remaining sprints (18-20, 26)
+**Sprint 19 Status:** ✅ COMPLETE
+**Current Sprint:** Remaining sprints (18, 20, 26)
 
 ---
 
@@ -12,7 +12,7 @@
 |--------|---------|--------|--------|--------------|
 | 17 | AI Feature Frontend Integration | ✅ COMPLETE | 13 | None |
 | 18 | AI Coaching Chat UI | 🔲 NOT STARTED | 8 | Sprint 17 |
-| 19 | Adaptive Streak Healing | 🔲 NOT STARTED | 8 | None |
+| 19 | Adaptive Streak Healing | ✅ COMPLETE | 8 | None |
 | 20 | CRM Pipeline & Email Marketing | 🔲 NOT STARTED | 13 | None |
 | 21 | Progressive Autonomy Transfer | ✅ COMPLETE | 8 | Sprint 20 |
 | 22 | Video Feedback System | ✅ COMPLETE | 13 | None |
@@ -21,7 +21,7 @@
 | 25 | Gym Owner Business Analytics | ✅ COMPLETE | 8 | Sprint 20 |
 | 26 | Advanced Gamification | 🔲 NOT STARTED | 8 | Sprint 19 |
 
-**Total Remaining:** 37 story points (Sprints 21-25 complete)
+**Total Remaining:** 29 story points (Sprints 19, 21-25 complete)
 
 ---
 
@@ -93,80 +93,105 @@ CREATE TABLE coach_conversations (
 
 ---
 
-## Sprint 19: Adaptive Streak Healing (8 points)
+## Sprint 19: Adaptive Streak Healing (8 points) ✅ COMPLETE
 
 ### Overview
-Implement weekly-based streak system with forgiveness mechanisms.
+Implement weekly-based streak system with forgiveness mechanisms to support sustainable fitness habits.
 
-### Tasks
+### Completed Features
 
-#### Task 19.1: Streak Database Schema
-**File to create:**
-- `supabase/migrations/00014_streak_system.sql`
+#### Task 19.1: Streak Database Schema ✅
+**File created:**
+- `supabase/migrations/00020_streak_system.sql`
 
-**Schema:**
-```sql
-CREATE TABLE streaks (
-  id UUID PRIMARY KEY,
-  user_id UUID NOT NULL REFERENCES profiles(id),
-  streak_type TEXT CHECK (streak_type IN ('workout', 'nutrition', 'combined')),
-  current_weeks INTEGER DEFAULT 0,
-  longest_weeks INTEGER DEFAULT 0,
-  target_days_per_week INTEGER DEFAULT 4,
-  grace_days_remaining INTEGER DEFAULT 4,
-  last_grace_reset TIMESTAMPTZ DEFAULT NOW(),
-  repair_available BOOLEAN DEFAULT false,
-  repair_expires_at TIMESTAMPTZ,
-  started_at TIMESTAMPTZ DEFAULT NOW(),
-  last_activity_at TIMESTAMPTZ DEFAULT NOW()
-);
+**Tables:**
+- `streaks` - Track user streak progress (current, longest, grace days, repair availability)
+- `weekly_consistency` - Weekly completion tracking with status and bonus days
+- `streak_repairs` - Log of repair attempts and methods used
+- `streak_milestones` - Achievement tracking (1, 4, 13, 26, 52 weeks)
 
-CREATE TABLE weekly_consistency (
-  id UUID PRIMARY KEY,
-  user_id UUID NOT NULL REFERENCES profiles(id),
-  week_start DATE NOT NULL,
-  streak_type TEXT NOT NULL,
-  target_days INTEGER NOT NULL,
-  completed_days INTEGER DEFAULT 0,
-  status TEXT DEFAULT 'in_progress' CHECK (status IN ('in_progress', 'achieved', 'partial', 'missed')),
-  repair_used BOOLEAN DEFAULT false,
-  UNIQUE(user_id, week_start, streak_type)
-);
-```
+**Database Functions:**
+- `get_week_start(date)` - Calculate Monday for any date
+- `calculate_week_status(completed, target, bonus)` - Determine week achievement status
+- `check_repair_needed(user_id, streak_type)` - Check if repair opportunity needed
+- `use_grace_day(user_id, streak_type)` - Apply grace day to repair week
+- `apply_workout_repair(user_id, streak_type, method, workout_id)` - Apply bonus workout/extended session
+- `refresh_grace_days()` - Monthly grace day refill (cron job)
+- `check_milestones(user_id, streak_type, weeks)` - Award milestone achievements
+- `update_streak_on_activity(user_id, activity_type, date)` - Record activity and update streaks
 
-#### Task 19.2: Streak Service
-**File to create:**
+**Week Statuses:**
+- `achieved` - Met target days (4+)
+- `partial` - Within 1 day of target (streak continues)
+- `missed` - 2+ days short of target (repair needed)
+- `in_progress` - Current week not complete
+
+#### Task 19.2: Streak Service ✅
+**File (pre-existing):**
 - `apps/mobile/src/app/core/services/streak.service.ts`
 
-**Features:**
-- `calculateWeeklyStreak(userId, type)` - Calculate current streak
-- `checkStreakStatus()` - Called on app open
-- `repairStreak(method: 'bonus_workout' | 'extended_session')` - Repair mechanisms
-- `useGraceDay()` - Use one of 4 monthly grace days
-- `getStreakMilestones()` - 7, 30, 100, 365 days
+**Implemented Methods:**
+- `getStreak(userId, type)` - Get or create streak
+- `getStreakStats(userId, type)` - Get stats for display
+- `logActivity(userId, activityType, duration, notes)` - Record daily activity
+- `useGraceDay(userId, type)` - Use grace day to repair
+- `repairStreak(userId, type, method)` - Apply workout-based repair
+- `checkStreakStatus(userId, type)` - Check and update repair availability
+- `getMilestones(userId, type)` - Get achieved milestones
 
 **Streak Logic:**
-- Week = Monday-Sunday
-- "Consistent week" = 4+ days of activity (configurable)
-- Missing 1-2 days = "partial" (streak continues)
-- Missing 3+ days = repair needed or streak resets
+- Week = Monday-Sunday (ISO 8601)
+- "Consistent week" = 4+ days of activity (configurable per streak)
+- Missing 1-2 days = "partial" status (streak continues)
+- Missing 3+ days = "missed" status (repair needed or streak resets)
 - Repair options:
-  - Bonus workout (extra session = +1 day credit)
-  - Extended session (150% duration = +1 day credit)
-  - Grace day (4/month, auto-refills)
+  * Bonus workout: Extra session earns +1 day credit
+  * Extended session: 150% duration earns +1 day credit
+  * Grace day: 4/month, auto-refills on 1st of month
 
-#### Task 19.3: Streak UI Components
-**Files to create:**
+#### Task 19.3: Streak UI Components ✅
+**Files (pre-existing):**
 - `apps/mobile/src/app/shared/components/streak-widget/streak-widget.component.ts`
 - `apps/mobile/src/app/shared/components/streak-repair-modal/streak-repair-modal.component.ts`
 
-**Features:**
+**StreakWidget Features:**
 - Weekly consistency bands (not daily chains)
-- Current streak in weeks
+- Current streak display in weeks (not days)
 - This week's progress (e.g., "3/4 days")
+- Status indicator with color coding
+- Grace days remaining counter
+- Repair availability alert
 - Forgiveness messaging: "Life happens. Pick up where you left off."
-- Repair modal with clear explanations
-- Countdown until repair expires
+- Tap to expand for details
+
+**StreakRepairModal Features:**
+- Clear explanation of repair options
+- Visual representation of methods:
+  * Bonus workout (+1 day)
+  * Extended session (150% duration = +1 day)
+  * Grace day (no extra work)
+- Countdown timer until repair expires (48 hours)
+- Easy dismissal if user doesn't want to repair
+- Confirms successful repair
+
+### Forgiveness Philosophy
+- **Never use red/danger colors** for missed streaks
+- **Partial weeks continue streaks** (within 1 day of target)
+- **Multiple repair options** provide flexibility
+- **Grace days** (4/month) for unexpected life events
+- **Positive messaging** focuses on progress, not guilt
+
+**Milestone Thresholds:**
+- 1 week: First consistency achievement
+- 4 weeks: One month streak
+- 13 weeks: Quarter year (3 months)
+- 26 weeks: Half year (6 months)
+- 52 weeks: Full year anniversary
+
+**Commit:** feat: Sprint 19 - Adaptive Streak Healing (database migration)
+**Date:** 2026-01-14
+
+**Note:** UI components (StreakWidget, StreakRepairModal) and service layer were implemented in a previous session. This sprint completed the database migration and functions to support the feature.
 
 ---
 
