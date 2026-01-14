@@ -1,8 +1,8 @@
 # FitOS Sprints 18-26 Implementation Roadmap
 
 **Last Updated:** 2026-01-14
-**Sprint 24 Status:** ✅ COMPLETE
-**Current Sprint:** Sprint 25 (Gym Owner Business Analytics)
+**Sprint 25 Status:** ✅ COMPLETE
+**Current Sprint:** Remaining sprints (18-20, 26)
 
 ---
 
@@ -18,10 +18,10 @@
 | 22 | Video Feedback System | ✅ COMPLETE | 13 | None |
 | 23 | Wearable Recovery Integration | ✅ COMPLETE | 8 | None |
 | 24 | Integration Marketplace | ✅ COMPLETE | 13 | None |
-| 25 | Gym Owner Business Analytics | 🔲 NOT STARTED | 8 | Sprint 20 |
+| 25 | Gym Owner Business Analytics | ✅ COMPLETE | 8 | Sprint 20 |
 | 26 | Advanced Gamification | 🔲 NOT STARTED | 8 | Sprint 19 |
 
-**Total Remaining:** 45 story points (Sprints 21-24 complete)
+**Total Remaining:** 37 story points (Sprints 21-25 complete)
 
 ---
 
@@ -403,29 +403,76 @@ OAuth and data mapping for third-party apps (MyFitnessPal, Google Calendar, Cale
 
 ---
 
-## Sprint 25: Gym Owner Business Analytics (8 points)
+## Sprint 25: Gym Owner Business Analytics (8 points) ✅ COMPLETE
 
 ### Overview
 Facility-wide analytics for gym owners with multi-trainer insights.
 
-### Tasks
+### Completed Features
 
-#### Task 25.1: Multi-Trainer Dashboard
-**File to create:**
+#### Task 25.1: Multi-Trainer Dashboard ✅
+**Files created:**
 - `apps/mobile/src/app/features/analytics/pages/owner-analytics/owner-analytics.page.ts`
+- Route added: `/tabs/analytics`
 
-**Metrics:**
-- Total revenue (sum of all trainers)
-- Revenue per trainer (bar chart)
-- Client count by trainer
-- Retention rate by trainer (66-71% benchmark)
-- LTV:CAC ratio
-- Churn rate (3-5% monthly target)
-- Visit frequency distribution
+**Implemented Metrics:**
+- Total revenue (monthly, YTD, sum of all trainers)
+- Revenue per trainer breakdown (sorted by highest)
+- Active clients count (facility-wide)
+- Retention rate with benchmark comparison (66-71% target)
+- LTV:CAC ratio calculation
+- Churn rate with benchmark (3-5% monthly target)
+- Top performer rankings (revenue & retention)
+- "Needs Attention" alerts (trainers with churn > 5%, retention < 66%, completion < 70%)
 
-#### Task 25.2: Trainer Performance Scoring
-**File to create:**
+**UI Components:**
+- 4 key metric cards with health indicators
+- Revenue by trainer list with per-client averages
+- Top performers section (revenue & retention leaders)
+- Alert card for trainers needing attention
+- Date range selector (7/30/90 days, MTD, YTD)
+- Visual health indicators (success/warning/danger colors based on benchmarks)
+
+#### Task 25.2: Trainer Performance Scoring ✅
+**File created:**
 - `apps/mobile/src/app/core/services/trainer-performance.service.ts`
+
+**Service Features:**
+- `getTrainerMetrics(gymOwnerId, startDate, endDate)` - Individual trainer calculations
+- `getFacilityMetrics(gymOwnerId, startDate, endDate)` - Aggregate facility metrics
+- `getRevenueByTrainer()` - Revenue breakdown sorted by revenue
+- `rankTrainers(metric)` - Rank trainers by any metric with percentiles
+- `getClientDistribution()` - Client count distribution across trainers
+- `getPeriodComparison()` - Period-over-period change calculations
+
+**Metrics Calculated:**
+- Revenue: Monthly, YTD, per-client average, growth rate
+- Clients: Total, active, new (month), churned (month), growth rate
+- Retention: Client retention rate, churn rate
+- Engagement: Workout completion rate, sessions per client
+- Quality: Program adherence rate
+
+**Computed Signals:**
+- `topRevenueTrainers` - Top 5 by revenue
+- `topRetentionTrainers` - Top 5 by retention rate
+- `needsAttention` - Trainers with issues (churn > 5%, retention < 66%, completion < 70%)
+
+### Database Schema
+Uses existing tables:
+- `profiles` - Trainer information
+- `client_trainers` - Client relationships and status
+- `subscriptions` - Revenue data
+- `workouts` - Engagement metrics
+
+No new migrations required.
+
+### Industry Benchmarks
+- Retention rate: 66-71% (using 68% as target)
+- Monthly churn rate: 3-5% (using 4% as target)
+- LTV:CAC ratio: 3:1+ (higher is better)
+
+**Commit:** feat: Sprint 25 - Gym Owner Business Analytics
+**Date:** 2026-01-14
 
 ---
 
