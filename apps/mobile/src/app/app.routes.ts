@@ -448,6 +448,24 @@ export const routes: Routes = [
           },
         ],
       },
+      {
+        // Social/Gamification
+        path: 'social',
+        children: [
+          {
+            path: '',
+            redirectTo: 'leaderboard',
+            pathMatch: 'full',
+          },
+          {
+            path: 'leaderboard',
+            loadComponent: () =>
+              import('./features/social/pages/leaderboard/leaderboard.page').then(
+                (m) => m.LeaderboardPage
+              ),
+          },
+        ],
+      },
     ],
   },
   {
