@@ -1,0 +1,423 @@
+// Wellness Check-In Page Styles
+// Sprint 37: Mental Health Integration
+
+// =====================================================================
+// INTRO STEP
+// =====================================================================
+
+.intro-container {
+  max-width: 600px;
+  margin: 0 auto;
+
+  .intro-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  .disclaimer-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    background: var(--ion-color-warning-tint);
+    border-left: 4px solid var(--ion-color-warning);
+    border-radius: 8px;
+    margin: 1.5rem 0;
+
+    ion-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+  }
+
+  .what-to-expect {
+    margin: 1.5rem 0;
+
+    h3 {
+      margin-bottom: 0.5rem;
+      color: var(--ion-color-primary);
+    }
+
+    ul {
+      margin: 0.5rem 0;
+      padding-left: 20px;
+
+      li {
+        margin-bottom: 0.5rem;
+      }
+    }
+  }
+
+  .error-text {
+    text-align: center;
+    margin-top: 1rem;
+  }
+}
+
+// =====================================================================
+// QUESTIONS STEP
+// =====================================================================
+
+.questions-container {
+  max-width: 600px;
+  margin: 0 auto;
+
+  ion-item {
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --min-height: 60px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &.selected {
+      --background: var(--ion-color-primary-tint);
+    }
+
+    &:hover {
+      --background: var(--ion-color-light);
+    }
+  }
+
+  .button-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 1.5rem;
+
+    ion-button {
+      flex: 1;
+    }
+  }
+}
+
+// =====================================================================
+// RESULTS STEP
+// =====================================================================
+
+.results-container {
+  max-width: 800px;
+  margin: 0 auto;
+
+  .description {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .score-display {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 2rem 0;
+
+    .score-circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 4px solid var(--ion-color-primary);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: var(--ion-color-primary-tint);
+
+      .score-value {
+        font-size: 3rem;
+        font-weight: bold;
+        color: var(--ion-color-primary);
+        line-height: 1;
+      }
+
+      .score-max {
+        font-size: 1.2rem;
+        color: var(--ion-color-medium);
+      }
+    }
+  }
+
+  .recommendations-list,
+  .interventions-list,
+  .notes-list {
+    margin: 1rem 0;
+    padding-left: 20px;
+
+    li {
+      margin-bottom: 0.75rem;
+      line-height: 1.5;
+    }
+  }
+
+  .research-note {
+    padding: 12px;
+    background: var(--ion-color-success-tint);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-style: italic;
+  }
+
+  .crisis-card {
+    border-left: 4px solid var(--ion-color-danger);
+
+    .crisis-alert {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: var(--ion-color-danger-tint);
+      border-radius: 8px;
+      margin-bottom: 1rem;
+
+      ion-icon {
+        font-size: 32px;
+        flex-shrink: 0;
+      }
+
+      p {
+        margin: 0;
+      }
+    }
+
+    .professional-resources {
+      margin-top: 1.5rem;
+
+      h4 {
+        margin-bottom: 0.5rem;
+      }
+
+      ul {
+        padding-left: 20px;
+
+        li {
+          margin-bottom: 0.5rem;
+        }
+      }
+    }
+  }
+
+  .action-buttons {
+    margin-top: 2rem;
+
+    ion-button {
+      margin-bottom: 12px;
+    }
+  }
+}
+
+// =====================================================================
+// WORKOUTS STEP
+// =====================================================================
+
+.workouts-container {
+  max-width: 800px;
+  margin: 0 auto;
+
+  .primary-workout {
+    border-left: 4px solid var(--ion-color-success);
+
+    ion-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      ion-icon {
+        font-size: 28px;
+        color: var(--ion-color-primary);
+      }
+    }
+
+    .workout-details {
+      margin: 1.5rem 0;
+      padding: 16px;
+      background: var(--ion-color-light);
+      border-radius: 8px;
+
+      .detail-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--ion-color-medium-tint);
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .label {
+          font-weight: 600;
+        }
+
+        .value {
+          color: var(--ion-color-primary);
+        }
+      }
+    }
+
+    .effect-size {
+      text-align: center;
+      margin: 1rem 0;
+    }
+
+    .how-to-start,
+    .progression {
+      margin: 1.5rem 0;
+
+      h4 {
+        margin-bottom: 0.5rem;
+        color: var(--ion-color-primary);
+      }
+
+      ul {
+        padding-left: 20px;
+
+        li {
+          margin-bottom: 0.5rem;
+          line-height: 1.5;
+        }
+      }
+    }
+  }
+
+  .alternative-workout {
+    margin: 1rem 0;
+
+    h4 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 0.5rem;
+
+      ion-icon {
+        font-size: 20px;
+        color: var(--ion-color-primary);
+      }
+    }
+
+    p {
+      margin-bottom: 0.75rem;
+      color: var(--ion-color-medium);
+    }
+
+    .alt-details {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+
+      span {
+        padding: 4px 12px;
+        background: var(--ion-color-light);
+        border-radius: 12px;
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  hr {
+    margin: 1.5rem 0;
+    border: none;
+    border-top: 1px solid var(--ion-color-medium-tint);
+  }
+}
+
+// =====================================================================
+// RESOURCES STEP
+// =====================================================================
+
+.resources-container {
+  max-width: 800px;
+  margin: 0 auto;
+
+  .crisis-header {
+    border-left: 4px solid var(--ion-color-danger);
+
+    ion-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      ion-icon {
+        font-size: 28px;
+      }
+    }
+
+    .crisis-message {
+      padding: 16px;
+      background: var(--ion-color-danger-tint);
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+  }
+
+  .resource-card {
+    .resource-info {
+      margin: 1rem 0;
+      padding: 12px;
+      background: var(--ion-color-light);
+      border-radius: 8px;
+
+      .info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+
+        .label {
+          font-weight: 600;
+        }
+      }
+    }
+
+    .resource-buttons {
+      margin-top: 1rem;
+
+      ion-button {
+        margin-bottom: 8px;
+      }
+    }
+  }
+}
+
+// =====================================================================
+// RESPONSIVE
+// =====================================================================
+
+@media (max-width: 768px) {
+  .intro-container,
+  .questions-container,
+  .results-container,
+  .workouts-container,
+  .resources-container {
+    padding: 0;
+  }
+
+  .score-display .score-circle {
+    width: 100px;
+    height: 100px;
+
+    .score-value {
+      font-size: 2.5rem;
+    }
+
+    .score-max {
+      font-size: 1rem;
+    }
+  }
+}
+
+// =====================================================================
+// DARK MODE OVERRIDES
+// =====================================================================
+
+@media (prefers-color-scheme: dark) {
+  .disclaimer-box {
+    background: rgba(var(--ion-color-warning-rgb), 0.2);
+  }
+
+  .workout-details,
+  .resource-info {
+    background: var(--ion-color-step-100);
+  }
+}

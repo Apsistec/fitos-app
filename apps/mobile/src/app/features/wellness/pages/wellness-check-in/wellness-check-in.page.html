@@ -1,0 +1,456 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Wellness Check-In</ion-title>
+  </ion-toolbar>
+  @if (step() === 'questions') {
+    <ion-progress-bar [value]="progress()"></ion-progress-bar>
+  }
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- =============================================== -->
+  <!-- INTRO STEP -->
+  <!-- =============================================== -->
+  @if (step() === 'intro') {
+    <div class="intro-container">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Mental Health Check-In</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p class="intro-text">
+            This brief screening uses validated tools (PHQ-2/GAD-2) to assess your mood and provide
+            personalized exercise recommendations.
+          </p>
+
+          <div class="disclaimer-box">
+            <ion-icon name="information-circle" color="warning"></ion-icon>
+            <p>
+              <strong>Important:</strong> This screening is for <strong>informational purposes
+              only</strong> and does NOT constitute medical advice, diagnosis, or treatment.
+            </p>
+          </div>
+
+          <div class="what-to-expect">
+            <h3>What to Expect</h3>
+            <ul>
+              <li>4 quick questions (2 minutes)</li>
+              <li>Validated screening tools</li>
+              <li>Research-backed workout recommendations</li>
+              <li>Crisis resources if needed</li>
+            </ul>
+          </div>
+
+          <ion-button expand="block" (click)="startScreening()" [disabled]="loading()">
+            @if (loading()) {
+              <ion-spinner name="crescent"></ion-spinner>
+            } @else {
+              Begin Check-In
+            }
+          </ion-button>
+
+          @if (error()) {
+            <ion-text color="danger">
+              <p class="error-text">{{ error() }}</p>
+            </ion-text>
+          }
+        </ion-card-content>
+      </ion-card>
+    </div>
+  }
+
+  <!-- =============================================== -->
+  <!-- QUESTIONS STEP -->
+  <!-- =============================================== -->
+  @if (step() === 'questions' && currentQuestion()) {
+    <div class="questions-container">
+      <ion-card>
+        <ion-card-header>
+          <ion-chip color="primary">
+            <ion-label>Question {{ currentQuestionIndex() + 1 }} of {{ questions().length }}</ion-label>
+          </ion-chip>
+          <ion-card-title>{{ currentQuestion()!.text }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list>
+            @for (option of currentQuestion()!.options; track option.value) {
+              <ion-item
+                [button]="true"
+                [detail]="false"
+                (click)="selectAnswer(currentQuestion()!.id, option.value)"
+                [class.selected]="isAnswerSelected(currentQuestion()!.id, option.value)"
+              >
+                <ion-radio slot="start" [value]="option.value"></ion-radio>
+                <ion-label>{{ option.text }}</ion-label>
+                @if (isAnswerSelected(currentQuestion()!.id, option.value)) {
+                  <ion-icon name="checkmark-circle" slot="end" color="primary"></ion-icon>
+                }
+              </ion-item>
+            }
+          </ion-list>
+
+          <div class="button-group">
+            @if (currentQuestionIndex() > 0) {
+              <ion-button fill="outline" (click)="previousQuestion()">
+                Previous
+              </ion-button>
+            }
+
+            @if (currentQuestionIndex() < questions().length - 1) {
+              <ion-button
+                [disabled]="responses()[currentQuestion()!.id] === undefined"
+                (click)="nextQuestion()"
+              >
+                Next
+              </ion-button>
+            } @else {
+              <ion-button
+                [disabled]="!allQuestionsAnswered()"
+                (click)="submitScreening()"
+              >
+                Complete Screening
+              </ion-button>
+            }
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  }
+
+  <!-- =============================================== -->
+  <!-- RESULTS STEP -->
+  <!-- =============================================== -->
+  @if (step() === 'results' && result()) {
+    <div class="results-container">
+      <!-- Score Card -->
+      <ion-card>
+        <ion-card-header>
+          <ion-chip [color]="severityColor()">
+            <ion-label>{{ wellnessService.formatSeverity(result()!.severity) }} Symptoms</ion-label>
+          </ion-chip>
+          <ion-card-title>Your Results</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p class="description">{{ result()!.description }}</p>
+
+          <div class="score-display">
+            <div class="score-circle">
+              <span class="score-value">{{ result()!.score }}</span>
+              <span class="score-max">/6</span>
+            </div>
+          </div>
+
+          <div class="disclaimer-box">
+            <ion-icon name="shield-checkmark" color="medium"></ion-icon>
+            <p><em>This is not a diagnosis. Professional evaluation recommended if symptoms persist.</em></p>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Recommendations Card -->
+      @if (result()!.recommendations.length > 0) {
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Recommendations</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ul class="recommendations-list">
+              @for (rec of result()!.recommendations; track $index) {
+                <li>{{ rec }}</li>
+              }
+            </ul>
+          </ion-card-content>
+        </ion-card>
+      }
+
+      <!-- Exercise Interventions Card -->
+      @if (result()!.exercise_interventions.length > 0) {
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="fitness"></ion-icon>
+              Exercise Interventions
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <p class="research-note">Research shows exercise is highly effective for mood improvement.</p>
+            <ul class="interventions-list">
+              @for (intervention of result()!.exercise_interventions; track $index) {
+                <li>{{ intervention }}</li>
+              }
+            </ul>
+            <ion-button expand="block" (click)="viewWorkoutRecommendations()">
+              <ion-icon name="fitness" slot="start"></ion-icon>
+              Get Workout Recommendations
+            </ion-button>
+          </ion-card-content>
+        </ion-card>
+      }
+
+      <!-- Crisis Resources (if needed) -->
+      @if (result()!.crisis_concern || result()!.needs_professional_referral) {
+        <ion-card class="crisis-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="medkit"></ion-icon>
+              Professional Support
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            @if (result()!.crisis_concern) {
+              <div class="crisis-alert">
+                <ion-icon name="warning" color="danger"></ion-icon>
+                <p><strong>Immediate support is available 24/7</strong></p>
+              </div>
+            }
+
+            <ion-button expand="block" color="danger" (click)="viewCrisisResources()">
+              <ion-icon name="call" slot="start"></ion-icon>
+              View Crisis Resources
+            </ion-button>
+
+            @if (result()!.professional_resources.length > 0) {
+              <div class="professional-resources">
+                <h4>Professional Resources:</h4>
+                <ul>
+                  @for (resource of result()!.professional_resources; track $index) {
+                    <li>{{ resource }}</li>
+                  }
+                </ul>
+              </div>
+            }
+          </ion-card-content>
+        </ion-card>
+      }
+
+      <!-- Notes Card -->
+      @if (result()!.notes.length > 0) {
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Important Notes</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ul class="notes-list">
+              @for (note of result()!.notes; track $index) {
+                <li>{{ note }}</li>
+              }
+            </ul>
+          </ion-card-content>
+        </ion-card>
+      }
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <ion-button expand="block" (click)="complete()">
+          Complete Check-In
+        </ion-button>
+        <ion-button expand="block" fill="outline" (click)="restart()">
+          Take Again
+        </ion-button>
+      </div>
+    </div>
+  }
+
+  <!-- =============================================== -->
+  <!-- WORKOUTS STEP -->
+  <!-- =============================================== -->
+  @if (step() === 'workouts' && workoutPlan()) {
+    <div class="workouts-container">
+      <!-- Primary Recommendation -->
+      <ion-card class="primary-workout">
+        <ion-card-header>
+          <ion-chip color="success">
+            <ion-label>Recommended</ion-label>
+          </ion-chip>
+          <ion-card-title>
+            <ion-icon [name]="getWorkoutIcon(workoutPlan()!.primary_recommendation.workout_type)"></ion-icon>
+            {{ workoutPlan()!.primary_recommendation.title }}
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p>{{ workoutPlan()!.primary_recommendation.description }}</p>
+
+          <div class="workout-details">
+            <div class="detail-item">
+              <span class="label">Frequency:</span>
+              <span class="value">{{ workoutPlan()!.primary_recommendation.frequency_per_week }}x per week</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Duration:</span>
+              <span class="value">{{ workoutPlan()!.primary_recommendation.duration_minutes }} minutes</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Intensity:</span>
+              <span class="value">{{ formatIntensity(workoutPlan()!.primary_recommendation.intensity) }}</span>
+            </div>
+          </div>
+
+          <div class="effect-size">
+            <ion-chip color="primary">
+              <ion-label>{{ workoutPlan()!.primary_recommendation.effect_size }}</ion-label>
+            </ion-chip>
+          </div>
+
+          <!-- How to Start -->
+          @if (workoutPlan()!.primary_recommendation.how_to_start.length > 0) {
+            <div class="how-to-start">
+              <h4>How to Start:</h4>
+              <ul>
+                @for (step of workoutPlan()!.primary_recommendation.how_to_start; track $index) {
+                  <li>{{ step }}</li>
+                }
+              </ul>
+            </div>
+          }
+
+          <!-- Progression -->
+          @if (workoutPlan()!.primary_recommendation.progression.length > 0) {
+            <div class="progression">
+              <h4>Progression:</h4>
+              <ul>
+                @for (step of workoutPlan()!.primary_recommendation.progression; track $index) {
+                  <li>{{ step }}</li>
+                }
+              </ul>
+            </div>
+          }
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Alternative Options -->
+      @if (workoutPlan()!.alternative_options.length > 0) {
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Alternative Options</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            @for (alt of workoutPlan()!.alternative_options; track $index) {
+              <div class="alternative-workout">
+                <h4>
+                  <ion-icon [name]="getWorkoutIcon(alt.workout_type)"></ion-icon>
+                  {{ alt.title }}
+                </h4>
+                <p>{{ alt.description }}</p>
+                <div class="alt-details">
+                  <span>{{ alt.frequency_per_week }}x/week</span>
+                  <span>{{ alt.duration_minutes }} min</span>
+                  <span>{{ formatIntensity(alt.intensity) }}</span>
+                </div>
+              </div>
+              @if ($index < workoutPlan()!.alternative_options.length - 1) {
+                <hr>
+              }
+            }
+          </ion-card-content>
+        </ion-card>
+      }
+
+      <!-- Adherence Tips -->
+      @if (workoutPlan()!.adherence_tips.length > 0) {
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Tips for Success</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ul>
+              @for (tip of workoutPlan()!.adherence_tips; track $index) {
+                <li>{{ tip }}</li>
+              }
+            </ul>
+          </ion-card-content>
+        </ion-card>
+      }
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <ion-button expand="block" (click)="backToResults()">
+          Back to Results
+        </ion-button>
+        <ion-button expand="block" fill="outline" (click)="complete()">
+          Complete Check-In
+        </ion-button>
+      </div>
+    </div>
+  }
+
+  <!-- =============================================== -->
+  <!-- RESOURCES STEP -->
+  <!-- =============================================== -->
+  @if (step() === 'resources' && result()) {
+    <div class="resources-container">
+      <ion-card class="crisis-header">
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="call" color="danger"></ion-icon>
+            Crisis Resources
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p class="crisis-message">
+            <strong>🆘 If you are in immediate danger, call 911 or go to the nearest emergency room.</strong>
+          </p>
+          <p>These resources provide free, confidential, 24/7 support:</p>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Crisis Resources -->
+      @if (result()!.crisis_resources) {
+        @for (resource of result()!.crisis_resources; track $index) {
+          <ion-card class="resource-card">
+            <ion-card-header>
+              <ion-card-title>{{ resource.name }}</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <p>{{ resource.description }}</p>
+
+              <div class="resource-info">
+                @if (resource.availability) {
+                  <div class="info-item">
+                    <span class="label">Availability:</span>
+                    <span class="value">{{ resource.availability }}</span>
+                  </div>
+                }
+                @if (resource.cost) {
+                  <div class="info-item">
+                    <span class="label">Cost:</span>
+                    <span class="value">{{ resource.cost }}</span>
+                  </div>
+                }
+              </div>
+
+              <div class="resource-buttons">
+                @if (resource.phone) {
+                  <ion-button expand="block" color="danger" (click)="callResource(resource)">
+                    <ion-icon name="call" slot="start"></ion-icon>
+                    Call {{ resource.phone }}
+                  </ion-button>
+                }
+                @if (resource.text) {
+                  <ion-button expand="block" color="primary" (click)="textResource(resource)">
+                    <ion-icon name="chatbubble" slot="start"></ion-icon>
+                    Text {{ resource.text }}
+                  </ion-button>
+                }
+                @if (resource.website) {
+                  <ion-button expand="block" fill="outline" (click)="visitWebsite(resource)">
+                    Visit Website
+                  </ion-button>
+                }
+              </div>
+            </ion-card-content>
+          </ion-card>
+        }
+      }
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <ion-button expand="block" (click)="backToResults()">
+          Back to Results
+        </ion-button>
+      </div>
+    </div>
+  }
+</ion-content>
