@@ -1,22 +1,23 @@
 # FitOS Strategic Roadmap
 
-**Version:** 3.0  
+**Version:** 4.0  
 **Updated:** January 2026  
-**Based on:** Competitive Intelligence and Market Research Report (January 2026)
+**Based on:** Gap Analysis and Feature Roadmap 2026
 
 ---
 
 ## Executive Summary
 
-FitOS enters a **$96B fitness app market** where no platform dominates all categories—creating a clear opportunity for a differentiated, AI-native solution. The competitive landscape reveals consistent pain points: clunky UX, hidden pricing, billing complaints, and underdeveloped AI features.
+FitOS enters the **$46.1 billion AI fitness market** (16.8% CAGR through 2034) at a critical inflection point where no platform combines conversational AI coaching, automated periodization, and seamless payment processing. The competitive landscape reveals consistent pain points: clunky UX, hidden pricing, billing complaints, and underdeveloped AI features.
 
 **Strategic Positioning:**
 - MacroFactor's adherence-neutral design philosophy
 - TrainHeroic's "10/10" client app UX
 - Built-in CRM/marketing (eliminating 5-10 tool juggling)
 - AI-native from the ground up
+- Stripe Connect marketplace for gym economics
 
-**Target Market Entry:** Solo trainers (fastest sales cycle, lowest support burden), expanding to boutique studios.
+**Target Market Entry:** Solo trainers (fastest sales cycle, lowest support burden), expanding to boutique studios and enterprise wellness.
 
 ---
 
@@ -24,241 +25,297 @@ FitOS enters a **$96B fitness app market** where no platform dominates all categ
 
 | Segment | Market Size | FitOS Opportunity |
 |---------|-------------|-------------------|
-| Fitness App Market | $96B | AI-native differentiation |
+| AI Fitness Market | $46.1B (2034) | AI-native differentiation |
 | B2B Coaching Platforms | $3.2B | Built-in CRM/marketing |
 | Personal Training Software | $1.8B | Solo trainer focus |
 | Nutrition Tracking Apps | $4.8B | Adherence-neutral design |
 
 **Competitive Landscape Gaps:**
-- Trainerize: 250K+ coaches but buggy since ABC acquisition
-- TrueCoach: Best workout builder but $107/mo at 20+ clients
-- Everfit: AI features "not useful as it stands now"
-- All competitors: No built-in CRM/email marketing
+- **Trainerize:** $186M processed but weak on AI, buggy since ABC acquisition
+- **Everfit:** AI features "not useful as it stands now," expensive add-ons
+- **WHOOP:** Pioneered GPT-4 coaching but consumer-only, no B2B
+- **Google Fitbit:** Multi-agent AI but $9.99 consumer tier, zero business tools
+- **All competitors:** No unified payment infrastructure + AI + business tools
 
 ---
 
 ## Phase Timeline
 
-| Phase | Timeframe | Focus | Status |
-|-------|-----------|-------|--------|
-| Phase 1 | Months 1-3 | MVP Core Features | ✅ Complete |
-| Phase 2 | Months 4-6 | Voice AI, Photo Nutrition, CRM | ✅ Complete |
-| Phase 2D | Month 7 | Apple Watch, Launch Prep | 🔄 In Progress |
-| Phase 3A | Months 8-10 | Differentiation Features | 📋 Planned |
-| Phase 3B | Months 11-13 | Advanced AI & Scale | 📋 Planned |
-| Phase 3C | Months 14-16 | Market Expansion | 📋 Planned |
+| Phase | Sprints | Status | Focus |
+|-------|---------|--------|-------|
+| Phase 1 | 0-6 | ✅ Complete | MVP Core Features |
+| Phase 1.5 | 6.5 | ✅ Complete | Polish, Dark Mode, Adherence-Neutral |
+| Phase 2A | 7-10 | ✅ Complete | Voice AI, Photo Nutrition, Design System |
+| Phase 2B | 11-12 | ✅ Complete | CRM, Email Marketing |
+| Phase 2C | 13-14 | ✅ Complete | AI Coaching, JITAI |
+| Phase 2D | 15-16 | ✅ Complete | Apple Watch, Launch Prep |
+| Phase 2E | 17-26 | ✅ Complete | Differentiation Features |
+| **Phase 3A** | 27-29 | ✅ Complete | Payment Infrastructure |
+| **Phase 3B** | 30-32 | ✅ Complete | Agentic AI |
+| **Phase 3C** | 33-35 | 🚀 In Progress | Fitness Science |
+| **Phase 3D** | 36-38 | 📋 Planned | Advanced Features |
+| **Phase 3E** | 39-41 | 📋 Planned | Scale & Enterprise |
+| **Phase 3F** | 42-45 | 📋 Planned | Market Leadership |
 
 ---
 
-## Phase 3A: Differentiation (Sprints 17-20)
+## Phase 3A: Payment Infrastructure (Sprints 27-29)
 
-### Sprint 17: "Coach Brain" AI Assistant
+### Sprint 27: Stripe Connect Foundation
 **Duration:** 2 weeks  
-**Strategic Value:** Unlike WHOOP Coach's generic responses, train on trainer's own programming philosophy
+**Strategic Value:** Enables marketplace economics—gym owners and trainers receive instant payouts
 
 **Features:**
-- Trainer methodology learning system
-- Custom prompt engineering per trainer
-- AI sounds like the trainer, not generic chatbot
-- Historical program analysis for context
+- Express account onboarding (2-minute KYC)
+- Destination charges for gym→trainer splits
+- 10% platform application fee
+- Connected account dashboard
 
 **Success Metrics:**
-- AI response accuracy: 85%+
-- Trainer satisfaction with AI voice: 4.5/5
-- Client perception of continuity: 90%+
+- Onboarding time: <3 minutes
+- Account activation: 95%+
+- Split accuracy: 100%
 
-### Sprint 18: Progressive Autonomy Transfer
+### Sprint 28: Stripe Connect Marketplace
 **Duration:** 2 weeks  
-**Strategic Value:** Systematically reduce client dependency (aligns with SDT research)
+**Strategic Value:** White-labeled payment experience, trainer payouts
 
 **Features:**
-- Client independence scoring
-- Self-programming readiness indicators
-- Graduation to maintenance mode
-- Celebration of client autonomy milestones
+- Embedded payment components
+- Payout settings management
+- Commission tracking
+- Tax document access (1099)
 
-**Success Metrics:**
-- Client self-efficacy increase: 30%+
-- Voluntary maintenance conversion: 40%+
-- Client satisfaction with graduation: 4.5/5
-
-### Sprint 19: Adaptive Streak Healing
+### Sprint 29: Payment Analytics & Recovery
 **Duration:** 2 weeks  
-**Strategic Value:** Research shows streak breaks are "especially demotivating"
+**Strategic Value:** Smart Retries recover +57% failed payments (Deliveroo benchmark)
 
 **Features:**
-- Weekly streaks (not daily)
-- "Streak repair" via bonus workouts
-- Forgiveness mechanisms for life events
-- Streak milestone celebrations (7, 30, 100 days)
-
-**Success Metrics:**
-- Streak continuation post-miss: +40% vs. industry
-- User retention at 30 days: 70%+
-- Negative feedback on streaks: <5%
-
-### Sprint 20: Coach-Client Video Feedback
-**Duration:** 2 weeks  
-**Strategic Value:** Addresses #1 AI limitation (cannot assess form/injury)
-
-**Features:**
-- Async video submission from clients
-- Trainer annotation tools
-- Form correction timeline markers
-- Video storage with Supabase Storage
-
-**Success Metrics:**
-- Video submission rate: 20%+ of clients
-- Form correction satisfaction: 4.5/5
-- Response time: <24 hours average
+- Smart Retries activation
+- Failed payment recovery workflows
+- MRR analytics dashboard
+- Usage-based billing foundation
 
 ---
 
-## Phase 3B: Advanced AI & Scale (Sprints 21-24)
+## Phase 3B: Agentic AI (Sprints 30-32)
 
-### Sprint 21: Wearable Recovery Integration
+### Sprint 30: LangGraph 1.0 Multi-Agent
 **Duration:** 2 weeks  
-**Strategic Value:** Auto-adjust workout intensity based on HRV/sleep
+**Strategic Value:** Production-ready multi-agent orchestration with stable API
 
 **Features:**
-- Recovery score calculation
-- Auto-intensity adjustment recommendations
-- Under-recovered client alerts for trainers
-- HRV trend visualization
+- Supervisor agent routing to specialists
+- State persistence and checkpointing
+- Human-in-the-loop trainer approval
+- LangSmith deployment
 
-**Success Metrics:**
-- Recovery-adjusted workout adoption: 60%+
-- Overtraining incident reduction: 40%+
-- Client injury rate reduction: 25%+
+**Architecture:**
+```
+Supervisor → Workout Agent (program design, exercise selection)
+          → Nutrition Agent (macros, meal timing)
+          → Recovery Agent (HRV analysis, intensity adjustment)
+          → Motivation Agent (JITAI, streaks, celebration)
+```
 
-### Sprint 22: Natural Language Program Design
+### Sprint 31: Apple Health MCP Integration
 **Duration:** 2 weeks  
-**Strategic Value:** Everfit's AI converter already saves "several hours per week"
+**Strategic Value:** Natural language queries against health data
 
 **Features:**
-- Text-to-workout program converter
-- PDF import with OCR
-- Voice-to-program creation
-- Program template suggestions
+- MCP server integration (Momentum/Neiltron)
+- Natural language health queries
+- Stripe MCP for payment operations
+- Cross-provider data access
 
-**Success Metrics:**
-- Program creation time: -70%
-- Trainer adoption: 50%+
-- Program quality rating: 4.0/5
+**Example Queries:**
+- "How did my sleep affect my workout performance this week?"
+- "Show me my HRV trend vs training load"
 
-### Sprint 23: Local SEO Automation
+### Sprint 32: Voice AI Sub-500ms
 **Duration:** 2 weeks  
-**Strategic Value:** 46% of Google searches are local—most trainers ignore this
+**Strategic Value:** Real-time conversational coaching
 
-**Features:**
-- Auto-generate Google Business profiles
-- Structured data for local search
-- Review solicitation automation
-- Local keyword targeting
-
-**Success Metrics:**
-- Google Business profile completeness: 90%+
-- Local search visibility: +50%
-- Review request response rate: 30%+
-
-### Sprint 24: Integration Marketplace Foundation
-**Duration:** 2 weeks  
-**Strategic Value:** Compete on core UX, not ecosystem lock-in
-
-**Features:**
-- Trainer-selected integrations
-- MyFitnessPal nutrition sync
-- Calendly scheduling integration
-- Zapier webhook support
-
-**Success Metrics:**
-- Integration adoption: 40%+ trainers
-- Third-party tool reduction: 2+ per trainer
-- Integration satisfaction: 4.0/5
+**Target Stack:**
+| Component | Latency | Provider |
+|-----------|---------|----------|
+| STT | 100-300ms | Deepgram Nova-3/Flux |
+| LLM | 100-400ms | GPT-4o-mini |
+| TTS | 50-250ms | ElevenLabs/OpenAI |
+| **Total** | **~465ms** | |
 
 ---
 
-## Phase 3C: Market Expansion (Sprints 25-28)
+## Phase 3C: Fitness Science (Sprints 33-35)
 
-### Sprint 25: Gym Owner Business Analytics
+### Sprint 33: AI Workout Generation ✅
+**Duration:** 2 weeks
+**Status:** COMPLETE
+**Strategic Value:** Match Everfit's 2-second text-to-workout capability
+
+**Implemented Features:**
+- ✅ Natural language program creation (Claude Sonnet 4.5)
+- ✅ Auto-periodization (Linear, Block, Undulating models)
+- ✅ RPE-based autoregulation with HRV integration
+- ✅ Velocity-based training (VBT) support
+- ✅ ACWR fatigue monitoring
+- ✅ Readiness-based load adjustment
+- ✅ Wave loading within blocks
+- ✅ REST API endpoints for all features
+
+**Components Built:**
+- `generator.py` - Text-to-workout engine (485 lines)
+- `periodization.py` - Block programming (430 lines)
+- `autoregulation.py` - Load management (385 lines)
+- `workout_generation.py` - API routes (380 lines)
+
+**Achievements:**
+- 5-8 second generation for 12-week programs
+- Evidence-based volume landmarks (Schoenfeld, 2017)
+- Research-backed ACWR implementation (Gabbett, 2016)
+- HRV-guided training with 40% weight in composite score
+
+### Sprint 34: HRV Recovery System ✅
+**Duration:** 2 weeks
+**Status:** COMPLETE
+**Strategic Value:** Auto-adjust workout intensity based on recovery state
+
+**Implemented Features:**
+- ✅ HRV trend analysis with 7-day rolling baseline
+- ✅ Composite recovery score (HRV, sleep, RHR, subjective)
+- ✅ Auto-intensity adjustment workflows
+- ✅ Overtraining detection system
+- ✅ Recovery state classification (5 levels)
+- ✅ Confidence scoring for assessments
+- ✅ REST API endpoints
+
+**Components Built:**
+- `hrv_analyzer.py` - Trend analysis with baseline (545 lines)
+- `recovery_score.py` - Composite scoring (425 lines)
+- `intensity_adjuster.py` - Auto-adjustment (345 lines)
+- `recovery.py` - API routes (420 lines)
+
+**Research Implementation:**
+- Plews et al. (2013): HRV-guided training methodology
+- Buchheit (2014): 7-day rolling baseline
+- Flatt & Esco (2015): CV stability checks
+- Composite weighting: HRV 40%, Sleep 40%, RHR 10%, Subjective 10%
+
+**Recovery Categories:**
+- EXCELLENT (85-100): Push intensity +10-20%
+- GOOD (70-85): Train as planned (1.0×)
+- MODERATE (55-70): Reduce 10-20%
+- POOR (40-55): Reduce 30-40%, lower RPE
+- CRITICAL (<40): Active recovery only
+
+### Sprint 35: Chronotype Optimization
 **Duration:** 2 weeks  
-**Strategic Value:** Expand TAM to studio owners
+**Strategic Value:** 8.4% performance difference based on training time alignment
+
+**Research:**
+- Evening chronotypes perform 8.4% worse in morning
+- 70% of population experiences "social jetlag"
+- Morning habits form 43% more reliably
 
 **Features:**
-- Multi-trainer dashboards
-- Revenue per trainer analytics
-- Client acquisition costs
-- Retention cohort analysis
+- 5-7 question chronotype assessment
+- Optimal workout window recommendations
+- Chronotype-specific workout templates
+- Schedule integration
 
-**Success Metrics:**
-- Gym owner adoption: 15% of customer base
-- Analytics engagement: Weekly usage
-- Upsell to Business tier: 20%+
+---
 
-### Sprint 26: Outcome-Based Pricing Tier
+## Phase 3D: Advanced Features (Sprints 36-38)
+
+### Sprint 36: Nutrition Intelligence
 **Duration:** 2 weeks  
-**Strategic Value:** Aligns platform success with trainer success
+**Strategic Value:** MacroFactor-inspired adaptive calorie algorithm
 
 **Features:**
-- Optional premium tier
-- Pricing scales with verified results
-- Weight loss/strength gain tracking
-- Automated result verification
+- Weekly adjustment based on weight trends
+- Metabolic adaptation detection
+- Chrono-nutrition meal timing
+- Pre/intra/post workout nutrition
 
-**Success Metrics:**
-- Outcome tier adoption: 10% of Pro users
-- Verified client results: 70%+ improvement
-- Trainer revenue increase: 25%+
-
-### Sprint 27: Advanced Gamification
+### Sprint 37: Mental Health Integration
 **Duration:** 2 weeks  
-**Strategic Value:** Research shows +489 steps/day, -0.70 kg with gamification
+**Strategic Value:** BMJ 2024 meta-analysis—exercise comparable to psychotherapy for MDD
 
 **Features:**
-- Activity-based comparison (not appearance)
-- Weekly challenges with repair mechanisms
-- Supportive community features
-- Optional social features (private by default)
+- PHQ-2/GAD-2 bi-weekly screenings
+- Mood-boosting workout suggestions
+- Crisis resource display
+- Provider referral pathway
 
-**Success Metrics:**
-- Challenge participation: 40%+
-- Activity increase: +15% steps/week
-- Body composition negative impact: <5%
+⚠️ **Legal review REQUIRED before implementation**
 
-### Sprint 28: Enterprise Readiness
+### Sprint 38: 66-Day Habit Tracking
 **Duration:** 2 weeks  
-**Strategic Value:** Position for corporate wellness market
+**Strategic Value:** Replace debunked 21-day myth with science-backed approach
 
-**Features:**
-- SSO integration (SAML/OIDC)
-- Admin dashboard for organizations
-- Compliance reporting
-- Bulk user management
+**Research:** University of South Australia 2024:
+- Health habits take 59-66 days median
+- Gym habits require 4-7 months
+- Self-selected habits have 37% higher success
 
-**Success Metrics:**
-- Enterprise inquiry conversion: 20%+
-- Security audit passage: SOC2 ready
-- Admin satisfaction: 4.0/5
+---
+
+## Phase 3E: Scale & Enterprise (Sprints 39-41)
+
+### Sprint 39: Integration Marketplace v2
+**Duration:** 2 weeks  
+**Integrations:** Zapier webhooks, Google Calendar, Calendly, Acuity
+
+### Sprint 40: Multi-Location Management
+**Duration:** 2 weeks  
+**Features:** Franchise support, centralized analytics, cross-location management
+
+### Sprint 41: Enterprise SSO
+**Duration:** 2 weeks  
+**Features:** SAML 2.0, OIDC, Azure AD/Okta directory sync
+
+---
+
+## Phase 3F: Market Leadership (Sprints 42-45)
+
+### Sprint 42: Local SEO Automation
+**Duration:** 2 weeks  
+**Strategic Value:** 46% of Google searches are local
+
+### Sprint 43: Outcome-Based Pricing
+**Duration:** 2 weeks  
+**Strategic Value:** Align platform success with trainer success
+
+### Sprint 44: A2A Protocol Compatibility
+**Duration:** 1 week  
+**Strategic Value:** Future multi-agent ecosystem readiness (Google A2A)
+
+### Sprint 45: Healthcare Integration Prep
+**Duration:** 2 weeks  
+**Strategic Value:** Position for clinical and corporate wellness markets
 
 ---
 
 ## Technical Infrastructure Evolution
 
-### Current Stack (Phase 1-2)
+### Current Stack (Phase 2 Complete)
 | Service | Monthly Cost | Notes |
 |---------|--------------|-------|
 | Supabase Pro | $25 | 8GB DB, Auth, Storage |
 | Cloud Run | $50-100 | AI backend |
 | Resend | $20 | Email sending |
-| Total Fixed | ~$200 | |
+| **Total Fixed** | **~$200** | |
 
-### Scaled Stack (Phase 3, 1K+ Users)
+### Phase 3 Stack (Payment + AI)
 | Service | Monthly Cost | Notes |
 |---------|--------------|-------|
 | Supabase Team | $599 | Unlimited, SOC2 |
-| Cloud Run | $200-400 | Scaled AI |
-| Terra API | $399 | Wearable integration |
-| Total Fixed | ~$1,200 | |
+| Cloud Run | $200-400 | Scaled AI agents |
+| LangGraph Platform | ~$50-200 | $0.001/node execution |
+| Deepgram Nova-3 | ~$100-300 | ~$0.0125/minute |
+| Stripe Connect | 0.25% + fees | Express accounts |
+| Terra API | $399+ | After free tier |
+| **Total Fixed** | **~$1,400-1,900** | |
 
 ### Cost Per User Projection
 | Scale | Per-User Cost | Gross Margin |
@@ -271,105 +328,104 @@ FitOS enters a **$96B fitness app market** where no platform dominates all categ
 
 ## Competitive Moat Strategy
 
-### Short-term Differentiation (6 months)
-1. **Adherence-neutral design** - No red colors, no shame
-2. **Voice-first logging** - <10 second data entry
-3. **Built-in CRM** - No external tool juggling
-4. **AI-native** - Not bolted on
+### Short-term (Q1-Q2 2026)
+1. **Stripe Connect marketplace** - Instant trainer payouts
+2. **Multi-agent AI** - Specialized coaching agents
+3. **Sub-500ms voice** - Conversational coaching
+4. **HRV auto-adjustment** - Recovery-based programming
 
-### Medium-term Differentiation (12 months)
-1. **Coach Brain** - AI sounds like the trainer
-2. **Progressive autonomy** - Client graduation system
-3. **Video feedback** - Async form correction
-4. **Recovery integration** - Auto-adjust intensity
+### Medium-term (Q3-Q4 2026)
+1. **AI workout generation** - Match/exceed Everfit
+2. **Chronotype optimization** - Performance timing
+3. **Integration marketplace** - Open ecosystem
+4. **Enterprise SSO** - Corporate wellness
 
-### Long-term Differentiation (18+ months)
-1. **Integration marketplace** - Open ecosystem
-2. **Outcome-based pricing** - Aligned incentives
-3. **Enterprise readiness** - Corporate wellness
-4. **Local SEO automation** - Discovery at scale
+### Long-term (2027+)
+1. **A2A Protocol** - Multi-agent interoperability
+2. **Healthcare integrations** - Clinical market
+3. **Outcome-based pricing** - Aligned incentives
+4. **International expansion** - Multi-language AI
 
 ---
 
 ## Key Success Metrics
 
-### User Metrics
-| Metric | Current | Phase 3 Target |
-|--------|---------|----------------|
-| 30-day retention | 60% | 75% |
-| Workout completion | 70% | 85% |
-| Voice logging adoption | 40% | 60% |
-| CRM feature usage | 60% | 80% |
-| App store rating | 4.5 | 4.7+ |
+### Phase 3 Targets
+| Metric | Current | Target |
+|--------|---------|--------|
+| Stripe Connect adoption | 0% | 80% gym owners |
+| Voice latency | ~1000ms | <500ms |
+| AI workout quality | N/A | 4.0/5 rating |
+| Recovery score accuracy | N/A | 85% vs wearable |
+| Integration adoption | 20% | 50% trainers |
+| Enterprise conversion | 0% | 20% |
+| 30-day retention | 60% | 80% |
+| App store rating | 4.5 | 4.8+ |
 
 ### Business Metrics
 | Metric | Year 1 | Year 2 Target |
 |--------|--------|---------------|
-| Paying users | 100 | 1,000 |
-| MRR | $4,400 | $44,000 |
+| Paying users | 100 | 5,000 |
+| MRR | $4,400 | $220,000 |
 | Gross margin | 86% | 93% |
-| CAC | TBD | <$50 |
-| LTV:CAC | TBD | >3:1 |
-
----
-
-## Go-to-Market Strategy
-
-### Primary Channel: 84% of clients come from referrals
-1. **Build viral loops into product**
-   - Referral program with dual-sided rewards
-   - Shareable client transformations
-   - Trainer success stories
-
-2. **Content Marketing**
-   - 20-year trainer co-founder credibility
-   - Evidence-based fitness content
-   - Trainer business optimization guides
-
-3. **Community Building**
-   - Solo trainer Facebook groups
-   - Fitness business podcasts
-   - Local trainer meetups
-
-### Pricing Strategy
-| Tier | Price | Target | Features |
-|------|-------|--------|----------|
-| Free | $0 | Leads | 5 clients, limited features |
-| Starter | $29/mo | Solo trainers | 25 clients, full features |
-| Pro | $59/mo | Growing trainers | 100 clients, AI coaching |
-| Business | $129/mo | Studios | Unlimited, team features |
+| LTV:CAC | TBD | >5:1 |
 
 ---
 
 ## Risk Mitigation
 
 ### Technical Risks
-| Risk | Mitigation |
-|------|------------|
-| AI cost overrun | Claude Haiku default, caching, smart routing |
-| Voice accuracy | Fitness keyword boosting, fallback to manual |
-| Wearable fragmentation | Native first, Terra for long-tail |
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| LangGraph 1.0 migration | Medium | Stable API commitment |
+| Voice latency | High | Multiple provider fallbacks |
+| Health Connect deadline | Critical | Prioritize Sprint 34 |
+| HIPAA scope creep | High | Clear PHI boundaries |
 
 ### Market Risks
-| Risk | Mitigation |
-|------|------------|
-| Competitor response | Speed to market, unique features |
-| Trainer churn | Focus on retention, outcome alignment |
-| Price sensitivity | Flat tiers, no hidden add-ons |
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| Competitor AI catch-up | Medium | Speed to market, unique features |
+| Trainer churn | High | Outcome alignment, great UX |
+| Enterprise sales cycle | Medium | Self-serve first, enterprise later |
 
-### Operational Risks
-| Risk | Mitigation |
-|------|------------|
-| 2-person bandwidth | Aggressive prioritization, AI assistance |
-| Support scaling | Self-serve documentation, AI chat |
-| Feature creep | Sprint discipline, MVP mindset |
+---
+
+## Competitive Positioning Statement
+
+> **FitOS: The AI-native fitness business platform that combines WHOOP's conversational AI coaching, Everfit's AI workout generation, MacroFactor's nutrition algorithms, and Trainerize's payment infrastructure—unified in one platform designed to help coaches deliver personalized results at scale while reducing admin time by 80%.**
 
 ---
 
 ## Next Steps
 
-1. **Complete Sprint 16** - Launch prep, app store submission
-2. **Beta launch** - TestFlight, internal testing track
-3. **Soft launch** - 50-100 early adopters
-4. **Phase 3A kickoff** - Coach Brain, Progressive Autonomy
-5. **Full launch** - App Store, Play Store, marketing push
+1. **This Week:**
+   - Finalize Stripe Connect implementation plan
+   - Evaluate LangGraph 1.0 migration path
+   - Begin Sprint 27 planning
+
+2. **Q1 2026:**
+   - Complete Payment Infrastructure (Sprints 27-29)
+   - Launch Stripe Connect marketplace
+   - Begin Agentic AI phase
+
+3. **Q2 2026:**
+   - Complete Agentic AI (Sprints 30-32)
+   - Launch voice coaching <500ms
+   - Begin Fitness Science phase
+
+4. **H2 2026:**
+   - Complete remaining Phase 3
+   - Enterprise readiness
+   - Position for Series A
+
+---
+
+## Related Documentation
+
+- `GAP_ANALYSIS_2026.md` - Comprehensive market analysis
+- `SPRINTS_27-45_ROADMAP.md` - Detailed sprint planning
+- `SPRINTS_18-26_ROADMAP.md` - Phase 2E completion
+- `AI_INTEGRATION.md` - Current AI architecture
+- `WEARABLE_INTEGRATION.md` - Health Connect guide
+- `COST_ANALYSIS.md` - Infrastructure costs

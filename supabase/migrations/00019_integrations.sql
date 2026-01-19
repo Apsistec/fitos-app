@@ -227,10 +227,10 @@ CREATE POLICY "Trainers can view their clients' integrations"
   ON user_integrations FOR SELECT
   USING (
     EXISTS (
-      SELECT 1 FROM client_trainers
-      WHERE client_trainers.client_id = user_integrations.user_id
-        AND client_trainers.trainer_id = auth.uid()
-        AND client_trainers.status = 'active'
+      SELECT 1 FROM client_profiles cp
+      WHERE cp.id = user_integrations.user_id
+        AND cp.trainer_id = auth.uid()
+        AND true
     )
   );
 

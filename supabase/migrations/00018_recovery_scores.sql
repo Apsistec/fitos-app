@@ -175,10 +175,10 @@ CREATE POLICY "Trainers can view their clients' recovery scores"
   ON recovery_scores FOR SELECT
   USING (
     EXISTS (
-      SELECT 1 FROM client_trainers
-      WHERE client_trainers.client_id = recovery_scores.user_id
-        AND client_trainers.trainer_id = auth.uid()
-        AND client_trainers.status = 'active'
+      SELECT 1 FROM client_profiles cp
+      WHERE cp.id = recovery_scores.user_id
+        AND cp.trainer_id = auth.uid()
+        AND true
     )
   );
 
@@ -193,10 +193,10 @@ CREATE POLICY "Trainers can view their clients' recovery data"
   ON recovery_data_points FOR SELECT
   USING (
     EXISTS (
-      SELECT 1 FROM client_trainers
-      WHERE client_trainers.client_id = recovery_data_points.user_id
-        AND client_trainers.trainer_id = auth.uid()
-        AND client_trainers.status = 'active'
+      SELECT 1 FROM client_profiles cp
+      WHERE cp.id = recovery_data_points.user_id
+        AND cp.trainer_id = auth.uid()
+        AND true
     )
   );
 
@@ -211,10 +211,10 @@ CREATE POLICY "Trainers can view their clients' recovery logs"
   ON recovery_adjustment_log FOR SELECT
   USING (
     EXISTS (
-      SELECT 1 FROM client_trainers
-      WHERE client_trainers.client_id = recovery_adjustment_log.user_id
-        AND client_trainers.trainer_id = auth.uid()
-        AND client_trainers.status = 'active'
+      SELECT 1 FROM client_profiles cp
+      WHERE cp.id = recovery_adjustment_log.user_id
+        AND cp.trainer_id = auth.uid()
+        AND true
     )
   );
 

@@ -165,16 +165,16 @@ CREATE POLICY "Users can view opted-in leaderboard entries"
             AND EXISTS (
               SELECT 1 FROM profiles p
               WHERE p.id = auth.uid()
-                AND p.gym_owner_id = leaderboard_entries.scope_id
+                AND p.facility_id = leaderboard_entries.scope_id
             ))
           OR
           -- Trainer clients leaderboard
           (leaderboard_scope = 'trainer_clients'
             AND EXISTS (
-              SELECT 1 FROM client_trainers ct
-              WHERE ct.client_id = auth.uid()
-                AND ct.trainer_id = leaderboard_entries.scope_id
-                AND ct.status = 'active'
+              SELECT 1 FROM client_profiles cp
+              WHERE cp.id = auth.uid()
+                AND cp.trainer_id = leaderboard_entries.scope_id
+                AND true
             ))
         )
     )
@@ -187,11 +187,11 @@ CREATE POLICY "Users can view challenges in their scope"
     scope = 'global'
     OR (scope = 'facility' AND EXISTS (
       SELECT 1 FROM profiles p
-      WHERE p.id = auth.uid() AND p.gym_owner_id = scope_id
+      WHERE p.id = auth.uid() AND p.facility_id = scope_id
     ))
     OR (scope = 'trainer_clients' AND EXISTS (
-      SELECT 1 FROM client_trainers ct
-      WHERE ct.client_id = auth.uid() AND ct.trainer_id = scope_id AND ct.status = 'active'
+      SELECT 1 FROM client_profiles cp
+      WHERE cp.id = auth.uid() AND cp.trainer_id = scope_id AND true
     ))
   );
 

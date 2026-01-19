@@ -34,12 +34,28 @@ serve(async (req) => {
         const userId = account.metadata?.fitos_user_id;
 
         if (userId) {
-          // Update trainer profile with onboarding status
+          // Update stripe_connect_accounts table with onboarding status
           const isComplete =
             account.details_submitted &&
             account.charges_enabled &&
             account.payouts_enabled;
 
+          await supabase
+            .from('stripe_connect_accounts')
+            .update({
+              charges_enabled: account.charges_enabled,
+              payouts_enabled: account.payouts_enabled,
+              details_submitted: account.details_submitted,
+              currently_due: account.requirements?.currently_due || [],
+              eventually_due: account.requirements?.eventually_due || [],
+              past_due: account.requirements?.past_due || [],
+              disabled_reason: account.requirements?.disabled_reason || null,
+              onboarding_completed_at: isComplete ? new Date().toISOString() : null,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('stripe_account_id', account.id);
+
+          // Also update trainer_profiles for backward compatibility
           await supabase
             .from('trainer_profiles')
             .update({
@@ -47,7 +63,7 @@ serve(async (req) => {
             })
             .eq('id', userId);
 
-          console.log(`Updated trainer ${userId} Stripe status: complete=${isComplete}`);
+          console.log(`Updated account ${account.id} for user ${userId}: complete=${isComplete}`);
         }
         break;
       }
@@ -148,6 +164,7 @@ serve(async (req) => {
         console.log('Invoice payment failed:', invoice.id);
 
         if (invoice.subscription) {
+          // Update subscription status to past_due
           await supabase
             .from('subscriptions')
             .update({
@@ -156,7 +173,49 @@ serve(async (req) => {
             })
             .eq('stripe_subscription_id', invoice.subscription);
 
-          console.log(`Updated subscription ${invoice.subscription} to past_due`);
+          // Stripe Smart Retries is enabled by default in Stripe Dashboard
+          // It uses ML to optimize retry timing (avg +57% recovery rate)
+          // We just need to log the failure and track it for analytics
+
+          // Get subscription details for recovery tracking
+          const { data: subData } = await supabase
+            .from('subscriptions')
+            .select('client_id, trainer_id, amount_cents')
+            .eq('stripe_subscription_id', invoice.subscription)
+            .single();
+
+          if (subData) {
+            // Log failed payment for analytics
+            await supabase.from('payment_failures').insert({
+              subscription_id: invoice.subscription as string,
+              client_id: subData.client_id,
+              trainer_id: subData.trainer_id,
+              invoice_id: invoice.id,
+              amount_cents: subData.amount_cents,
+              attempt_count: invoice.attempt_count || 1,
+              failure_code: invoice.last_payment_error?.code || null,
+              failure_message: invoice.last_payment_error?.message || null,
+              next_payment_attempt: invoice.next_payment_attempt
+                ? new Date(invoice.next_payment_attempt * 1000).toISOString()
+                : null,
+              smart_retry_enabled: true,
+              status: 'retrying',
+            });
+
+            // Send notification to trainer (via Edge Function or email service)
+            // This allows trainer to reach out proactively to client
+            await supabase.functions.invoke('send-payment-failure-notification', {
+              body: {
+                trainerId: subData.trainer_id,
+                clientId: subData.client_id,
+                invoiceId: invoice.id,
+                amount: subData.amount_cents / 100,
+                attemptCount: invoice.attempt_count || 1,
+              },
+            });
+          }
+
+          console.log(`Payment failed for subscription ${invoice.subscription}, Smart Retries active`);
         }
         break;
       }
@@ -192,6 +251,92 @@ serve(async (req) => {
           })
           .eq('stripe_subscription_id', subscription.id);
 
+        break;
+      }
+
+      // Stripe Connect payout events
+      case 'payout.created':
+      case 'payout.updated':
+      case 'payout.paid':
+      case 'payout.failed':
+      case 'payout.canceled': {
+        const payout = event.data.object as Stripe.Payout;
+        const stripeAccountId = event.account;
+
+        if (stripeAccountId) {
+          // Find the account in our database
+          const { data: accountData } = await supabase
+            .from('stripe_connect_accounts')
+            .select('id')
+            .eq('stripe_account_id', stripeAccountId)
+            .single();
+
+          if (accountData) {
+            // Upsert payout record
+            await supabase.from('stripe_payouts').upsert({
+              account_id: accountData.id,
+              stripe_payout_id: payout.id,
+              amount_cents: payout.amount,
+              currency: payout.currency,
+              status: payout.status,
+              arrival_date: payout.arrival_date
+                ? new Date(payout.arrival_date * 1000).toISOString().split('T')[0]
+                : null,
+              failure_code: payout.failure_code || null,
+              failure_message: payout.failure_message || null,
+              description: payout.description || null,
+              updated_at: new Date().toISOString(),
+            }, {
+              onConflict: 'stripe_payout_id',
+            });
+
+            console.log(`Processed payout ${payout.id} for account ${stripeAccountId}: ${payout.status}`);
+          }
+        }
+        break;
+      }
+
+      // Stripe Connect transfer events
+      case 'transfer.created': {
+        const transfer = event.data.object as Stripe.Transfer;
+
+        // Find destination account
+        const { data: destAccount } = await supabase
+          .from('stripe_connect_accounts')
+          .select('id')
+          .eq('stripe_account_id', transfer.destination)
+          .single();
+
+        // Find source account (if available)
+        let sourceAccountId = null;
+        if (transfer.source_transaction) {
+          const { data: sourceAccount } = await supabase
+            .from('stripe_connect_accounts')
+            .select('id')
+            .eq('stripe_account_id', event.account || '')
+            .single();
+          sourceAccountId = sourceAccount?.id || null;
+        }
+
+        if (destAccount) {
+          await supabase.from('stripe_transfers').insert({
+            stripe_transfer_id: transfer.id,
+            source_account_id: sourceAccountId,
+            destination_account_id: destAccount.id,
+            source_transaction_id: transfer.source_transaction,
+            amount_cents: transfer.amount,
+            currency: transfer.currency,
+            description: transfer.description || null,
+            trainer_id: transfer.metadata?.fitos_trainer_id || null,
+            facility_id: transfer.metadata?.fitos_facility_id || null,
+            client_id: transfer.metadata?.fitos_client_id || null,
+            commission_percent: transfer.metadata?.commission_percent
+              ? parseFloat(transfer.metadata.commission_percent)
+              : null,
+          });
+
+          console.log(`Recorded transfer ${transfer.id} to account ${transfer.destination}`);
+        }
         break;
       }
 

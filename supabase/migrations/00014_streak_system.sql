@@ -291,10 +291,9 @@ CREATE POLICY "Trainers can view client streaks"
   ON streaks FOR SELECT
   USING (
     EXISTS (
-      SELECT 1 FROM client_trainer_relationships ctr
-      WHERE ctr.client_id = user_id
-        AND ctr.trainer_id = auth.uid()
-        AND ctr.status = 'active'
+      SELECT 1 FROM client_profiles cp
+      WHERE cp.id = user_id
+        AND cp.trainer_id = auth.uid()
     )
   );
 
