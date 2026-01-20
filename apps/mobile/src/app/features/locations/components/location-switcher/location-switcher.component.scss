@@ -1,0 +1,226 @@
+/**
+ * Location Switcher Component Styles
+ * Sprint 40: Multi-Location Management
+ */
+
+// Loading
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  padding: 2rem;
+  text-align: center;
+
+  ion-spinner {
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+  }
+}
+
+// Section Headers
+.section-header {
+  padding: 1.5rem 1rem 0.75rem;
+  background: var(--ion-background-color);
+
+  h2 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--ion-color-medium);
+    margin: 0;
+  }
+
+  p {
+    font-size: 0.75rem;
+    color: var(--ion-color-medium);
+    margin: 0.25rem 0 0 0;
+  }
+}
+
+// Current Location
+.current-location {
+  ion-item {
+    --padding-start: 1rem;
+    --padding-end: 1rem;
+    --background: var(--ion-color-primary-tint);
+    border-left: 4px solid var(--ion-color-primary);
+
+    ion-icon[slot="start"] {
+      font-size: 32px;
+      margin-right: 1rem;
+    }
+
+    ion-label {
+      h2 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--ion-text-color);
+        margin: 0.25rem 0;
+      }
+
+      p {
+        font-size: 0.875rem;
+        color: var(--ion-color-medium);
+        margin: 0.125rem 0;
+      }
+    }
+
+    ion-badge {
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.6875rem;
+      letter-spacing: 0.5px;
+    }
+  }
+}
+
+// Other Locations
+ion-list {
+  padding: 0;
+  background: transparent;
+
+  ion-item {
+    --padding-start: 1rem;
+    --padding-end: 1rem;
+    margin-bottom: 0.5rem;
+
+    ion-icon[slot="start"] {
+      font-size: 28px;
+      margin-right: 1rem;
+    }
+
+    ion-label {
+      h2 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--ion-text-color);
+        margin: 0.25rem 0;
+      }
+
+      p {
+        font-size: 0.875rem;
+        color: var(--ion-color-medium);
+        margin: 0.125rem 0;
+      }
+    }
+
+    ion-badge {
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.6875rem;
+      letter-spacing: 0.5px;
+    }
+  }
+}
+
+// Check-in Count
+.check-in-count {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--ion-color-success);
+  font-weight: 500;
+
+  ion-icon {
+    font-size: 14px;
+  }
+}
+
+// Empty State
+.empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 2rem;
+  text-align: center;
+
+  ion-icon {
+    font-size: 64px;
+    color: var(--ion-color-medium);
+    opacity: 0.5;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+    color: var(--ion-text-color);
+  }
+
+  p {
+    font-size: 0.9375rem;
+    margin: 0;
+    color: var(--ion-color-medium);
+  }
+}
+
+// Help Section
+.help-section {
+  padding: 1rem;
+  padding-bottom: 2rem;
+
+  ion-card {
+    margin: 0;
+    box-shadow: none;
+    border: 1px solid var(--ion-color-light-shade);
+  }
+
+  ion-card-header {
+    padding-bottom: 0.5rem;
+  }
+
+  ion-card-subtitle {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--ion-color-medium);
+    margin-bottom: 0.25rem;
+  }
+
+  ion-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  ion-card-content {
+    padding-top: 0.75rem;
+
+    ul {
+      margin: 0;
+      padding-left: 1.25rem;
+
+      li {
+        font-size: 0.875rem;
+        line-height: 1.6;
+        color: var(--ion-color-medium);
+        margin-bottom: 0.5rem;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+}
+
+// Dark Mode
+@media (prefers-color-scheme: dark) {
+  .current-location ion-item {
+    --background: rgba(var(--ion-color-primary-rgb), 0.15);
+  }
+
+  .help-section ion-card {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}

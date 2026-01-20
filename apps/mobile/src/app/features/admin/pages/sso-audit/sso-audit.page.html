@@ -1,0 +1,169 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/admin/sso/config"></ion-back-button>
+    </ion-buttons>
+    <ion-title>SSO Audit Log</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="exportLog()">
+        <ion-icon slot="icon-only" name="download-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <!-- Filters Toolbar -->
+  <ion-toolbar>
+    <ion-searchbar
+      placeholder="Search by user, IP, or message..."
+      (ionInput)="handleSearch($event)"
+      debounce="300"
+    ></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Summary Stats -->
+  <div class="stats-section">
+    <ion-card>
+      <ion-card-content>
+        <div class="stats-grid">
+          <div class="stat">
+            <ion-icon name="list-outline"></ion-icon>
+            <div>
+              <h3>{{ eventCounts().total }}</h3>
+              <p>Total Events</p>
+            </div>
+          </div>
+          <div class="stat">
+            <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+            <div>
+              <h3>{{ eventCounts().success }}</h3>
+              <p>Successful</p>
+            </div>
+          </div>
+          <div class="stat">
+            <ion-icon name="close-circle-outline" color="danger"></ion-icon>
+            <div>
+              <h3>{{ eventCounts().failure }}</h3>
+              <p>Failed</p>
+            </div>
+          </div>
+          <div class="stat">
+            <ion-icon name="time-outline" color="warning"></ion-icon>
+            <div>
+              <h3>{{ eventCounts().pending }}</h3>
+              <p>Pending</p>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <ion-chip
+      [outline]="selectedEventType() !== 'all'"
+      (click)="selectedEventType.set('all')"
+    >
+      <ion-label>All Events</ion-label>
+    </ion-chip>
+    <ion-chip
+      [outline]="selectedEventType() !== 'login_success'"
+      (click)="selectedEventType.set('login_success')"
+    >
+      <ion-label>Logins</ion-label>
+    </ion-chip>
+    <ion-chip
+      [outline]="selectedEventType() !== 'login_failure'"
+      (click)="selectedEventType.set('login_failure')"
+    >
+      <ion-label>Failures</ion-label>
+    </ion-chip>
+    <ion-chip
+      [outline]="selectedEventType() !== 'jit_provision'"
+      (click)="selectedEventType.set('jit_provision')"
+    >
+      <ion-label>Provisioning</ion-label>
+    </ion-chip>
+    <ion-chip
+      [outline]="selectedEventType() !== 'config_updated'"
+      (click)="selectedEventType.set('config_updated')"
+    >
+      <ion-label>Config Changes</ion-label>
+    </ion-chip>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-container">
+      <ion-spinner></ion-spinner>
+      <p>Loading audit log...</p>
+    </div>
+  }
+
+  <!-- Events List -->
+  @if (!loading()) {
+    @if (filteredEvents().length === 0) {
+      <div class="empty-container">
+        <ion-icon name="document-text-outline"></ion-icon>
+        <h2>No Events Found</h2>
+        <p>No audit events match your current filters</p>
+      </div>
+    } @else {
+      <ion-list>
+        @for (event of filteredEvents(); track event.id) {
+          <ion-item>
+            <ion-icon
+              slot="start"
+              [name]="getEventIcon(event.eventType)"
+              [color]="getEventColor(event.eventStatus)"
+            ></ion-icon>
+            <ion-label>
+              <h2>{{ getEventTypeDisplay(event.eventType) }}</h2>
+              <p>{{ event.eventMessage || 'No message' }}</p>
+              <div class="event-meta">
+                <span class="meta-item">
+                  <ion-icon name="time-outline"></ion-icon>
+                  {{ event.createdAt | date:'short' }}
+                </span>
+                @if (event.ipAddress) {
+                  <span class="meta-item">
+                    <ion-icon name="location-outline"></ion-icon>
+                    {{ event.ipAddress }}
+                  </span>
+                }
+                @if (event.userId) {
+                  <span class="meta-item">
+                    <ion-icon name="person-outline"></ion-icon>
+                    {{ event.userId.substring(0, 8) }}...
+                  </span>
+                }
+              </div>
+            </ion-label>
+            <ion-badge
+              slot="end"
+              [color]="getEventColor(event.eventStatus)"
+            >
+              {{ event.eventStatus }}
+            </ion-badge>
+          </ion-item>
+
+          <!-- Error Details (if failure) -->
+          @if (event.eventStatus === 'failure' && event.errorDetails) {
+            <ion-item class="error-details">
+              <ion-label>
+                <p class="error-code">Error: {{ event.errorCode }}</p>
+                <p class="error-message">{{ event.errorDetails.message }}</p>
+              </ion-label>
+            </ion-item>
+          }
+        }
+      </ion-list>
+    }
+  }
+</ion-content>

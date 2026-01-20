@@ -1,0 +1,116 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Switch Location</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-container">
+      <ion-spinner></ion-spinner>
+      <p>Loading locations...</p>
+    </div>
+  }
+
+  <!-- Locations List -->
+  @if (!loading()) {
+    <!-- Current Location -->
+    @if (currentLocation()) {
+      <div class="section-header">
+        <h2>Current Location</h2>
+      </div>
+      <ion-list class="current-location">
+        <ion-item>
+          <ion-icon
+            slot="start"
+            [name]="getLocationIcon(currentLocation()!)"
+            [color]="getLocationColor(currentLocation()!)"
+          ></ion-icon>
+          <ion-label>
+            <h2>{{ currentLocation()!.name }}</h2>
+            <p>{{ currentLocation()!.address }}</p>
+            <p>{{ currentLocation()!.city }}, {{ currentLocation()!.state }}</p>
+            @if (currentLocation()!.checkInCount) {
+              <div class="check-in-count">
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+                {{ currentLocation()!.checkInCount }} check-ins
+              </div>
+            }
+          </ion-label>
+          <ion-badge slot="end" color="primary">Current</ion-badge>
+        </ion-item>
+      </ion-list>
+    }
+
+    <!-- Other Accessible Locations -->
+    @if (otherLocations().length > 0) {
+      <div class="section-header">
+        <h2>Other Locations</h2>
+        <p>{{ otherLocations().length }} available</p>
+      </div>
+      <ion-list>
+        @for (location of otherLocations(); track location.id) {
+          <ion-item button (click)="switchLocation(location)">
+            <ion-icon
+              slot="start"
+              [name]="getLocationIcon(location)"
+              [color]="getLocationColor(location)"
+            ></ion-icon>
+            <ion-label>
+              <h2>{{ location.name }}</h2>
+              <p>{{ location.address }}</p>
+              <p>{{ location.city }}, {{ location.state }}</p>
+              @if (location.checkInCount) {
+                <div class="check-in-count">
+                  <ion-icon name="checkmark-circle-outline"></ion-icon>
+                  {{ location.checkInCount }} check-ins
+                </div>
+              }
+            </ion-label>
+            @if (location.membershipStatus) {
+              <ion-badge
+                slot="end"
+                [color]="getMembershipBadgeColor(location.membershipStatus)"
+              >
+                {{ location.membershipStatus }}
+              </ion-badge>
+            }
+          </ion-item>
+        }
+      </ion-list>
+    }
+
+    <!-- No Other Locations -->
+    @if (otherLocations().length === 0) {
+      <div class="empty-container">
+        <ion-icon name="location-outline"></ion-icon>
+        <h3>No Other Locations</h3>
+        <p>You currently have access to only one location.</p>
+      </div>
+    }
+
+    <!-- Help Section -->
+    <div class="help-section">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-subtitle>Multi-Location Access</ion-card-subtitle>
+          <ion-card-title>How It Works</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ul>
+            <li>Switch between locations you have access to instantly</li>
+            <li>Your data and settings sync across all locations</li>
+            <li>Check-ins are tracked per location</li>
+            <li>Contact your trainer to request access to additional locations</li>
+          </ul>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  }
+</ion-content>
