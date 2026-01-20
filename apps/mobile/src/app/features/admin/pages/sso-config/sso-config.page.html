@@ -1,0 +1,491 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/admin"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Enterprise SSO Configuration</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="saveConfig()" [disabled]="saving()">
+        <ion-icon slot="icon-only" name="save-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <!-- Tab Navigation -->
+  <ion-toolbar>
+    <ion-segment [(ngModel)]="selectedTab" (ionChange)="selectedTab.set($event.detail.value)">
+      <ion-segment-button value="basic">
+        <ion-label>Basic</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="saml" [disabled]="basicForm.get('providerType')?.value !== 'saml'">
+        <ion-label>SAML</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="oidc" [disabled]="basicForm.get('providerType')?.value !== 'oidc'">
+        <ion-label>OIDC</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="scim">
+        <ion-label>Directory Sync</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="audit">
+        <ion-label>Audit Log</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-container">
+      <ion-spinner></ion-spinner>
+      <p>Loading SSO configuration...</p>
+    </div>
+  }
+
+  <!-- Content -->
+  @if (!loading()) {
+    <!-- Basic Configuration Tab -->
+    @if (selectedTab() === 'basic') {
+      <div class="config-section">
+        <form [formGroup]="basicForm">
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>Provider Configuration</ion-card-title>
+              <ion-card-subtitle>Select your identity provider type</ion-card-subtitle>
+            </ion-card-header>
+            <ion-card-content>
+              <!-- Provider Type -->
+              <ion-item>
+                <ion-select label="Provider Type" formControlName="providerType" interface="popover">
+                  <ion-select-option value="saml">SAML 2.0</ion-select-option>
+                  <ion-select-option value="oidc">OpenID Connect (OIDC)</ion-select-option>
+                </ion-select>
+              </ion-item>
+
+              <!-- Provider Name -->
+              <ion-item>
+                <ion-select label="Provider Name" formControlName="providerName" interface="popover">
+                  <ion-select-option value="azure_ad">Microsoft Azure AD</ion-select-option>
+                  <ion-select-option value="okta">Okta</ion-select-option>
+                  <ion-select-option value="google_workspace">Google Workspace</ion-select-option>
+                  <ion-select-option value="onelogin">OneLogin</ion-select-option>
+                  <ion-select-option value="auth0">Auth0</ion-select-option>
+                  <ion-select-option value="other">Other</ion-select-option>
+                </ion-select>
+              </ion-item>
+            </ion-card-content>
+          </ion-card>
+
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>SSO Settings</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <!-- Enable SSO -->
+              <ion-item>
+                <ion-toggle formControlName="enabled">Enable SSO</ion-toggle>
+              </ion-item>
+
+              <!-- Enforce SSO -->
+              <ion-item>
+                <ion-toggle formControlName="enforceSso">
+                  Enforce SSO (disable email/password login)
+                </ion-toggle>
+              </ion-item>
+
+              <!-- Allow JIT Provisioning -->
+              <ion-item>
+                <ion-toggle formControlName="allowJitProvisioning">
+                  Allow Just-in-Time User Provisioning
+                </ion-toggle>
+              </ion-item>
+
+              <!-- Default Role -->
+              <ion-item>
+                <ion-select label="Default User Role" formControlName="defaultRole" interface="popover">
+                  <ion-select-option value="client">Client</ion-select-option>
+                  <ion-select-option value="trainer">Trainer</ion-select-option>
+                  <ion-select-option value="gym_owner">Gym Owner</ion-select-option>
+                  <ion-select-option value="admin">Admin</ion-select-option>
+                </ion-select>
+              </ion-item>
+            </ion-card-content>
+          </ion-card>
+
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>Session Settings</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <!-- Session Duration -->
+              <ion-item>
+                <ion-input
+                  label="Session Duration (minutes)"
+                  type="number"
+                  formControlName="sessionDurationMinutes"
+                  min="30"
+                ></ion-input>
+              </ion-item>
+
+              <!-- Idle Timeout -->
+              <ion-item>
+                <ion-input
+                  label="Idle Timeout (minutes)"
+                  type="number"
+                  formControlName="idleTimeoutMinutes"
+                  min="5"
+                ></ion-input>
+              </ion-item>
+            </ion-card-content>
+          </ion-card>
+        </form>
+      </div>
+    }
+
+    <!-- SAML Configuration Tab -->
+    @if (selectedTab() === 'saml') {
+      <div class="config-section">
+        <form [formGroup]="samlForm">
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>SAML 2.0 Configuration</ion-card-title>
+              <ion-card-subtitle>Identity Provider (IdP) Settings</ion-card-subtitle>
+            </ion-card-header>
+            <ion-card-content>
+              <!-- Entity ID -->
+              <ion-item>
+                <ion-input
+                  label="Entity ID"
+                  formControlName="samlEntityId"
+                  placeholder="http://www.okta.com/exampleapp"
+                ></ion-input>
+              </ion-item>
+
+              <!-- SSO URL -->
+              <ion-item>
+                <ion-input
+                  label="SSO URL"
+                  formControlName="samlSsoUrl"
+                  placeholder="https://dev-12345.okta.com/app/.../sso/saml"
+                ></ion-input>
+              </ion-item>
+
+              <!-- Certificate -->
+              <ion-item>
+                <ion-textarea
+                  label="X.509 Certificate"
+                  formControlName="samlCertificate"
+                  rows="8"
+                  placeholder="-----BEGIN CERTIFICATE-----&#10;...&#10;-----END CERTIFICATE-----"
+                ></ion-textarea>
+              </ion-item>
+
+              <!-- Logout URL -->
+              <ion-item>
+                <ion-input
+                  label="Logout URL (Optional)"
+                  formControlName="samlLogoutUrl"
+                  placeholder="https://dev-12345.okta.com/app/.../slo/saml"
+                ></ion-input>
+              </ion-item>
+
+              <!-- Sign Requests -->
+              <ion-item>
+                <ion-toggle formControlName="samlSignRequests">
+                  Sign SAML Requests
+                </ion-toggle>
+              </ion-item>
+            </ion-card-content>
+          </ion-card>
+
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>Service Provider Metadata</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <p>Download this metadata file and upload it to your identity provider:</p>
+              <ion-button expand="block" fill="outline" (click)="downloadSamlMetadata()">
+                <ion-icon slot="start" name="download-outline"></ion-icon>
+                Download SAML Metadata
+              </ion-button>
+
+              <div class="metadata-info">
+                <p><strong>ACS URL:</strong></p>
+                <p class="code-block">https://app.fitos.ai/auth/saml/acs</p>
+
+                <p><strong>Entity ID:</strong></p>
+                <p class="code-block">https://app.fitos.ai</p>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </form>
+      </div>
+    }
+
+    <!-- OIDC Configuration Tab -->
+    @if (selectedTab() === 'oidc') {
+      <div class="config-section">
+        <form [formGroup]="oidcForm">
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>OpenID Connect Configuration</ion-card-title>
+              <ion-card-subtitle>Identity Provider Settings</ion-card-subtitle>
+            </ion-card-header>
+            <ion-card-content>
+              <!-- Issuer -->
+              <ion-item>
+                <ion-input
+                  label="Issuer"
+                  formControlName="oidcIssuer"
+                  placeholder="https://accounts.google.com"
+                ></ion-input>
+              </ion-item>
+
+              <!-- Client ID -->
+              <ion-item>
+                <ion-input
+                  label="Client ID"
+                  formControlName="oidcClientId"
+                  placeholder="1234567890-abcdefg.apps.googleusercontent.com"
+                ></ion-input>
+              </ion-item>
+
+              <!-- Client Secret -->
+              <ion-item>
+                <ion-input
+                  label="Client Secret"
+                  type="password"
+                  formControlName="oidcClientSecret"
+                  placeholder="GOCSPX-..."
+                ></ion-input>
+              </ion-item>
+
+              <!-- Authorization URL -->
+              <ion-item>
+                <ion-input
+                  label="Authorization URL"
+                  formControlName="oidcAuthorizationUrl"
+                  placeholder="https://accounts.google.com/o/oauth2/v2/auth"
+                ></ion-input>
+              </ion-item>
+
+              <!-- Token URL -->
+              <ion-item>
+                <ion-input
+                  label="Token URL"
+                  formControlName="oidcTokenUrl"
+                  placeholder="https://oauth2.googleapis.com/token"
+                ></ion-input>
+              </ion-item>
+
+              <!-- UserInfo URL -->
+              <ion-item>
+                <ion-input
+                  label="UserInfo URL (Optional)"
+                  formControlName="oidcUserinfoUrl"
+                  placeholder="https://openidconnect.googleapis.com/v1/userinfo"
+                ></ion-input>
+              </ion-item>
+
+              <!-- JWKS URL -->
+              <ion-item>
+                <ion-input
+                  label="JWKS URL (Optional)"
+                  formControlName="oidcJwksUrl"
+                  placeholder="https://www.googleapis.com/oauth2/v3/certs"
+                ></ion-input>
+              </ion-item>
+            </ion-card-content>
+          </ion-card>
+
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>Callback Configuration</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <p>Add this redirect URI to your identity provider:</p>
+              <div class="metadata-info">
+                <p><strong>Redirect URI:</strong></p>
+                <p class="code-block">https://app.fitos.ai/auth/oidc/callback</p>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </form>
+      </div>
+    }
+
+    <!-- SCIM Directory Sync Tab -->
+    @if (selectedTab() === 'scim') {
+      <div class="config-section">
+        <form [formGroup]="scimForm">
+          @if (!directorySyncConfig()) {
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title>Enable Directory Sync</ion-card-title>
+                <ion-card-subtitle>Automatic user provisioning via SCIM 2.0</ion-card-subtitle>
+              </ion-card-header>
+              <ion-card-content>
+                <p>
+                  Directory sync automatically provisions and deprovisions users based on your
+                  identity provider's directory.
+                </p>
+
+                <!-- Enable SCIM -->
+                <ion-item>
+                  <ion-toggle formControlName="scimEnabled">Enable Directory Sync</ion-toggle>
+                </ion-item>
+
+                <!-- Auto Provision -->
+                <ion-item>
+                  <ion-toggle formControlName="autoProvision">
+                    Auto-Provision Users
+                  </ion-toggle>
+                </ion-item>
+
+                <!-- Auto Deprovision -->
+                <ion-item>
+                  <ion-toggle formControlName="autoDeprovision">
+                    Auto-Deprovision Users
+                  </ion-toggle>
+                </ion-item>
+
+                <!-- Sync Interval -->
+                <ion-item>
+                  <ion-input
+                    label="Sync Interval (minutes)"
+                    type="number"
+                    formControlName="syncIntervalMinutes"
+                    min="15"
+                  ></ion-input>
+                </ion-item>
+
+                <ion-button
+                  expand="block"
+                  (click)="enableDirectorySync()"
+                  [disabled]="!scimForm.valid || saving()"
+                >
+                  Enable Directory Sync
+                </ion-button>
+              </ion-card-content>
+            </ion-card>
+          } @else {
+            <ion-card color="success">
+              <ion-card-header>
+                <ion-card-title>Directory Sync Enabled</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <div class="sync-stats">
+                  <div class="stat-item">
+                    <ion-icon name="people-outline"></ion-icon>
+                    <div>
+                      <h3>{{ directorySyncConfig()!.totalUsersSynced }}</h3>
+                      <p>Users Synced</p>
+                    </div>
+                  </div>
+                  <div class="stat-item">
+                    <ion-icon name="albums-outline"></ion-icon>
+                    <div>
+                      <h3>{{ directorySyncConfig()!.totalGroupsSynced }}</h3>
+                      <p>Groups Synced</p>
+                    </div>
+                  </div>
+                </div>
+
+                @if (directorySyncConfig()!.lastSyncAt) {
+                  <p class="last-sync">
+                    Last sync: {{ directorySyncConfig()!.lastSyncAt | date:'short' }}
+                  </p>
+                }
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title>SCIM Endpoint Configuration</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <p>Configure your identity provider with these details:</p>
+
+                <div class="scim-config">
+                  <ion-item>
+                    <ion-label position="stacked">SCIM Endpoint</ion-label>
+                    <ion-input
+                      [value]="directorySyncConfig()!.scimEndpoint"
+                      readonly
+                    ></ion-input>
+                    <ion-button
+                      slot="end"
+                      fill="clear"
+                      (click)="navigator.clipboard.writeText(directorySyncConfig()!.scimEndpoint)"
+                    >
+                      <ion-icon slot="icon-only" name="copy-outline"></ion-icon>
+                    </ion-button>
+                  </ion-item>
+
+                  <ion-item>
+                    <ion-label position="stacked">Bearer Token</ion-label>
+                    <ion-input
+                      value="••••••••••••••••••••"
+                      readonly
+                    ></ion-input>
+                  </ion-item>
+                </div>
+
+                <ion-note>
+                  The bearer token was displayed when directory sync was first enabled.
+                  If you've lost it, you'll need to regenerate it.
+                </ion-note>
+              </ion-card-content>
+            </ion-card>
+          }
+        </form>
+      </div>
+    }
+
+    <!-- Audit Log Tab -->
+    @if (selectedTab() === 'audit') {
+      <div class="config-section">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>SSO Audit Log</ion-card-title>
+            <ion-card-subtitle>View SSO authentication events</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <p>
+              The audit log tracks all SSO-related events including logins, logouts,
+              configuration changes, and errors.
+            </p>
+            <ion-button expand="block" (click)="viewAuditLog()">
+              <ion-icon slot="start" name="list-outline"></ion-icon>
+              View Full Audit Log
+            </ion-button>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    }
+
+    <!-- Action Buttons -->
+    <div class="actions-section">
+      <ion-button
+        expand="block"
+        (click)="saveConfig()"
+        [disabled]="saving() || !basicForm.valid"
+      >
+        <ion-icon slot="start" name="save-outline"></ion-icon>
+        {{ saving() ? 'Saving...' : 'Save Configuration' }}
+      </ion-button>
+
+      @if (hasConfig() && isEnabled()) {
+        <ion-button
+          expand="block"
+          fill="outline"
+          (click)="testConnection()"
+          [disabled]="saving()"
+        >
+          <ion-icon slot="start" name="flash-outline"></ion-icon>
+          Test Connection
+        </ion-button>
+      }
+    </div>
+  }
+</ion-content>

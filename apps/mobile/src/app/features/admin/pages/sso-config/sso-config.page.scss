@@ -1,0 +1,220 @@
+/**
+ * SSO Configuration Page Styles
+ * Sprint 41: Enterprise Single Sign-On
+ */
+
+// Loading
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 2rem;
+  text-align: center;
+
+  ion-spinner {
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+  }
+}
+
+// Config Section
+.config-section {
+  padding: 1rem;
+  padding-bottom: 2rem;
+
+  ion-card {
+    margin-bottom: 1rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+// Metadata Info
+.metadata-info {
+  margin-top: 1rem;
+
+  p {
+    margin: 0.5rem 0;
+    font-size: 0.875rem;
+
+    strong {
+      color: var(--ion-text-color);
+    }
+  }
+
+  .code-block {
+    background: var(--ion-color-light);
+    padding: 0.75rem;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8125rem;
+    color: var(--ion-color-dark);
+    word-break: break-all;
+    margin: 0.5rem 0 1rem 0;
+  }
+}
+
+// SCIM Configuration
+.scim-config {
+  margin: 1rem 0;
+
+  ion-item {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    margin-bottom: 1rem;
+  }
+
+  ion-button {
+    margin-top: 1.5rem;
+  }
+}
+
+// Sync Stats
+.sync-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  padding: 1rem 0;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  ion-icon {
+    font-size: 40px;
+    color: white;
+    opacity: 0.9;
+  }
+
+  h3 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0;
+    color: white;
+  }
+
+  p {
+    font-size: 0.875rem;
+    margin: 0;
+    color: white;
+    opacity: 0.8;
+  }
+}
+
+.last-sync {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: white;
+  opacity: 0.8;
+}
+
+// Actions Section
+.actions-section {
+  padding: 0 1rem 2rem;
+
+  ion-button {
+    margin-bottom: 0.75rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+// Form Styling
+ion-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  margin-bottom: 0.5rem;
+
+  ion-label {
+    font-weight: 500;
+  }
+
+  ion-input,
+  ion-textarea,
+  ion-select {
+    font-size: 0.9375rem;
+  }
+
+  ion-textarea {
+    margin-top: 0.5rem;
+  }
+
+  ion-toggle {
+    margin-left: 1rem;
+  }
+}
+
+ion-note {
+  display: block;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: var(--ion-color-warning-tint);
+  border-left: 3px solid var(--ion-color-warning);
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+// Segment
+ion-segment {
+  --background: var(--ion-color-light);
+
+  ion-segment-button {
+    --indicator-color: var(--ion-color-primary);
+    font-size: 0.875rem;
+    min-width: auto;
+
+    ion-label {
+      margin: 0.5rem 0;
+    }
+  }
+}
+
+// Card Headers
+ion-card-header {
+  ion-card-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+
+  ion-card-subtitle {
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+  }
+}
+
+// Responsive
+@media (max-width: 576px) {
+  .sync-stats {
+    grid-template-columns: 1fr;
+  }
+
+  ion-segment {
+    ion-segment-button {
+      font-size: 0.75rem;
+    }
+  }
+}
+
+// Dark mode
+@media (prefers-color-scheme: dark) {
+  .metadata-info .code-block {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--ion-color-light);
+  }
+
+  ion-note {
+    background: rgba(var(--ion-color-warning-rgb), 0.2);
+  }
+}
