@@ -10,7 +10,7 @@ import uvicorn
 
 from app.core.config import settings
 from app.core.logging import setup_logging
-from app.routes import coach, nutrition, voice, jitai, health, coach_brain, workout_generation, recovery, chronotype, nutrition_intelligence, wellness, habits, integrations, franchise, sso
+from app.routes import coach, nutrition, voice, jitai, health, coach_brain, workout_generation, recovery, chronotype, nutrition_intelligence, wellness, habits, integrations, franchise, sso, scim
 
 # Setup logging
 logger = setup_logging()
@@ -49,6 +49,7 @@ app.include_router(habits.router, tags=["Habits"])
 app.include_router(integrations.router, tags=["Integrations"])
 app.include_router(franchise.router, tags=["Franchise"])
 app.include_router(sso.router, prefix="/api/v1", tags=["Enterprise SSO"])
+app.include_router(scim.router, prefix="/api/v1", tags=["SCIM 2.0"])
 
 
 @app.get("/")

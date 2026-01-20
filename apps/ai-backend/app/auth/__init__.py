@@ -9,6 +9,7 @@ from .saml_handler import SAMLHandler
 from .oidc_handler import OIDCHandler
 from .session_manager import SessionManager
 from .audit_logger import AuditLogger
+from .scim_service import SCIMService
 
 __all__ = [
     'SSOConfigService',
@@ -16,4 +17,5 @@ __all__ = [
     'OIDCHandler',
     'SessionManager',
     'AuditLogger',
+    'SCIMService',
 ]
