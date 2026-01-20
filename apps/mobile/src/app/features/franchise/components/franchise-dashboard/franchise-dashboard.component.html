@@ -1,0 +1,214 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ organization()?.name || 'Multi-Location Dashboard' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleViewMode()">
+        <ion-icon
+          slot="icon-only"
+          [name]="viewMode() === 'grid' ? 'list' : 'grid'">
+        </ion-icon>
+      </ion-button>
+      <ion-button (click)="addLocation()">
+        <ion-icon slot="icon-only" name="add"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-container">
+      <ion-spinner></ion-spinner>
+      <p>Loading dashboard...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error() && !loading()) {
+    <div class="error-container">
+      <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+      <h2>{{ error() }}</h2>
+      <ion-button (click)="loadDashboardData()">Retry</ion-button>
+    </div>
+  }
+
+  <!-- Dashboard Content -->
+  @if (!loading() && !error()) {
+    <!-- Quick Stats -->
+    <div class="quick-stats">
+      <ion-card>
+        <ion-card-content>
+          <div class="stat-grid">
+            <!-- Total Revenue -->
+            <div class="stat-item" (click)="viewAnalytics()">
+              <ion-icon name="cash-outline" color="success"></ion-icon>
+              <div class="stat-details">
+                <p class="stat-label">Total Revenue</p>
+                <h2 class="stat-value">{{ formatCurrency(totalRevenue()) }}</h2>
+                <p class="stat-sublabel">Last 30 days</p>
+              </div>
+            </div>
+
+            <!-- Total Locations -->
+            <div class="stat-item" (click)="viewAnalytics()">
+              <ion-icon name="location-outline" color="primary"></ion-icon>
+              <div class="stat-details">
+                <p class="stat-label">Locations</p>
+                <h2 class="stat-value">{{ activeLocations() }}/{{ totalLocations() }}</h2>
+                <p class="stat-sublabel">Active</p>
+              </div>
+            </div>
+
+            <!-- Total Members -->
+            <div class="stat-item" (click)="viewAnalytics()">
+              <ion-icon name="people-outline" color="tertiary"></ion-icon>
+              <div class="stat-details">
+                <p class="stat-label">Active Members</p>
+                <h2 class="stat-value">{{ totalMembers() }}</h2>
+                <p class="stat-sublabel">{{ retentionRate() }}% retention</p>
+              </div>
+            </div>
+
+            <!-- Overdue Payments -->
+            @if (totalOverdue() > 0) {
+              <div class="stat-item" (click)="viewRoyalties()">
+                <ion-icon name="warning-outline" color="danger"></ion-icon>
+                <div class="stat-details">
+                  <p class="stat-label">Overdue</p>
+                  <h2 class="stat-value">{{ formatCurrency(totalOverdue()) }}</h2>
+                  <p class="stat-sublabel">{{ overduePayments().length }} payments</p>
+                </div>
+              </div>
+            }
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <h3 class="section-title">Quick Actions</h3>
+      <div class="action-buttons">
+        <ion-button expand="block" (click)="addLocation()">
+          <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+          Add Location
+        </ion-button>
+        <ion-button expand="block" fill="outline" (click)="viewRoyalties()">
+          <ion-icon slot="start" name="calculator-outline"></ion-icon>
+          View Royalties
+        </ion-button>
+        <ion-button expand="block" fill="outline" (click)="viewAnalytics()">
+          <ion-icon slot="start" name="analytics-outline"></ion-icon>
+          View Analytics
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Locations List/Grid -->
+    <div class="locations-section">
+      <div class="section-header">
+        <h3 class="section-title">Locations</h3>
+        <ion-chip>{{ activeLocations() }} Active</ion-chip>
+      </div>
+
+      @if (locations().length === 0) {
+        <ion-card>
+          <ion-card-content class="empty-state">
+            <ion-icon name="storefront-outline" color="medium"></ion-icon>
+            <h3>No locations yet</h3>
+            <p>Add your first location to get started</p>
+            <ion-button (click)="addLocation()">
+              <ion-icon slot="start" name="add"></ion-icon>
+              Add Location
+            </ion-button>
+          </ion-card-content>
+        </ion-card>
+      }
+
+      <!-- Grid View -->
+      @if (viewMode() === 'grid' && locations().length > 0) {
+        <div class="locations-grid">
+          @for (location of locations(); track location.id) {
+            <ion-card button (click)="viewLocation(location)">
+              <ion-card-header>
+                <div class="location-header">
+                  <ion-icon [name]="getLocationIcon(location.locationType)"></ion-icon>
+                  <ion-badge [color]="location.status === 'active' ? 'success' : 'medium'">
+                    {{ location.status }}
+                  </ion-badge>
+                </div>
+                <ion-card-title>{{ location.name }}</ion-card-title>
+                <ion-card-subtitle>
+                  {{ location.city }}, {{ location.state }}
+                </ion-card-subtitle>
+              </ion-card-header>
+              <ion-card-content>
+                <div class="location-stats">
+                  <div class="stat-mini">
+                    <ion-icon name="people-outline"></ion-icon>
+                    <span>N/A</span>
+                  </div>
+                  <div class="stat-mini">
+                    <ion-icon name="cash-outline"></ion-icon>
+                    <span>N/A</span>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          }
+        </div>
+      }
+
+      <!-- List View -->
+      @if (viewMode() === 'list' && locations().length > 0) {
+        <ion-list>
+          @for (location of locations(); track location.id) {
+            <ion-item button (click)="viewLocation(location)">
+              <ion-icon
+                slot="start"
+                [name]="getLocationIcon(location.locationType)">
+              </ion-icon>
+              <ion-label>
+                <h2>{{ location.name }}</h2>
+                <p>{{ location.city }}, {{ location.state }}</p>
+              </ion-label>
+              <ion-badge
+                slot="end"
+                [color]="location.status === 'active' ? 'success' : 'medium'">
+                {{ location.status }}
+              </ion-badge>
+            </ion-item>
+          }
+        </ion-list>
+      }
+    </div>
+
+    <!-- Overdue Payments Alert -->
+    @if (overduePayments().length > 0) {
+      <div class="overdue-section">
+        <ion-card color="danger">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="warning-outline"></ion-icon>
+              Overdue Royalty Payments
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <p>{{ overduePayments().length }} payment(s) overdue totaling {{ formatCurrency(totalOverdue()) }}</p>
+            <ion-button expand="block" fill="outline" (click)="viewRoyalties()">
+              View Details
+            </ion-button>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    }
+  }
+</ion-content>
