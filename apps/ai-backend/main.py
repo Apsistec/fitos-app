@@ -10,7 +10,7 @@ import uvicorn
 
 from app.core.config import settings
 from app.core.logging import setup_logging
-from app.routes import coach, nutrition, voice, jitai, health, coach_brain, workout_generation, recovery, chronotype, nutrition_intelligence, wellness
+from app.routes import coach, nutrition, voice, jitai, health, coach_brain, workout_generation, recovery, chronotype, nutrition_intelligence, wellness, habits
 
 # Setup logging
 logger = setup_logging()
@@ -45,6 +45,7 @@ app.include_router(recovery.router, prefix="/api/v1", tags=["Recovery"])
 app.include_router(chronotype.router, tags=["Chronotype"])
 app.include_router(nutrition_intelligence.router, tags=["Nutrition Intelligence"])
 app.include_router(wellness.router, tags=["Wellness"])
+app.include_router(habits.router, tags=["Habits"])
 
 
 @app.get("/")
