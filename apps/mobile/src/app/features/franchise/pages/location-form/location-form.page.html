@@ -1,0 +1,259 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/franchise/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ isEditMode() ? 'Edit' : 'Add' }} Location</ion-title>
+    <ion-buttons slot="end">
+      <ion-button
+        (click)="saveLocation()"
+        [disabled]="saving() || locationForm.invalid">
+        <span *ngIf="!saving()">Save</span>
+        <ion-spinner *ngIf="saving()" name="circular"></ion-spinner>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-container">
+      <ion-spinner></ion-spinner>
+      <p>Loading location...</p>
+    </div>
+  }
+
+  <!-- Error Alert -->
+  @if (error()) {
+    <ion-card color="danger">
+      <ion-card-content>
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        {{ error() }}
+      </ion-card-content>
+    </ion-card>
+  }
+
+  <!-- Form -->
+  @if (!loading()) {
+    <form [formGroup]="locationForm" (ngSubmit)="saveLocation()">
+      <!-- Basic Information -->
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Basic Information</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-item>
+            <ion-label position="stacked">Location Name *</ion-label>
+            <ion-input
+              formControlName="name"
+              placeholder="Downtown Fitness"
+              type="text">
+            </ion-input>
+            @if (locationForm.get('name')?.touched && locationForm.get('name')?.invalid) {
+              <ion-note slot="error">{{ getErrorMessage('name') }}</ion-note>
+            }
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">URL Slug *</ion-label>
+            <ion-input
+              formControlName="slug"
+              placeholder="downtown-fitness"
+              type="text">
+            </ion-input>
+            <ion-note slot="helper">Used in URLs (lowercase, numbers, hyphens only)</ion-note>
+            @if (locationForm.get('slug')?.touched && locationForm.get('slug')?.invalid) {
+              <ion-note slot="error">{{ getErrorMessage('slug') }}</ion-note>
+            }
+          </ion-item>
+
+          <ion-item>
+            <ion-label>Location Type *</ion-label>
+            <ion-select formControlName="locationType" interface="popover">
+              <ion-select-option value="headquarters">Headquarters</ion-select-option>
+              <ion-select-option value="branch">Branch</ion-select-option>
+              <ion-select-option value="franchise">Franchise</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>Status *</ion-label>
+            <ion-select formControlName="status" interface="popover">
+              <ion-select-option value="active">Active</ion-select-option>
+              <ion-select-option value="inactive">Inactive</ion-select-option>
+              <ion-select-option value="pending">Pending</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Address -->
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Address</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-item>
+            <ion-label position="stacked">Street Address</ion-label>
+            <ion-input
+              formControlName="addressLine1"
+              placeholder="123 Main Street"
+              type="text">
+            </ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Address Line 2</ion-label>
+            <ion-input
+              formControlName="addressLine2"
+              placeholder="Suite 100"
+              type="text">
+            </ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">City</ion-label>
+            <ion-input
+              formControlName="city"
+              placeholder="New York"
+              type="text">
+            </ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">State</ion-label>
+            <ion-input
+              formControlName="state"
+              placeholder="NY"
+              type="text">
+            </ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Postal Code</ion-label>
+            <ion-input
+              formControlName="postalCode"
+              placeholder="10001"
+              type="text">
+            </ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>Country</ion-label>
+            <ion-select formControlName="country" interface="popover">
+              <ion-select-option value="US">United States</ion-select-option>
+              <ion-select-option value="CA">Canada</ion-select-option>
+              <ion-select-option value="GB">United Kingdom</ion-select-option>
+              <ion-select-option value="AU">Australia</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>Timezone *</ion-label>
+            <ion-select formControlName="timezone" interface="popover">
+              <ion-select-option value="America/New_York">Eastern Time</ion-select-option>
+              <ion-select-option value="America/Chicago">Central Time</ion-select-option>
+              <ion-select-option value="America/Denver">Mountain Time</ion-select-option>
+              <ion-select-option value="America/Los_Angeles">Pacific Time</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Contact Information -->
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Contact Information</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-item>
+            <ion-label position="stacked">Phone</ion-label>
+            <ion-input
+              formControlName="phone"
+              placeholder="(555) 123-4567"
+              type="tel">
+            </ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Email</ion-label>
+            <ion-input
+              formControlName="email"
+              placeholder="location@example.com"
+              type="email">
+            </ion-input>
+            @if (locationForm.get('email')?.touched && locationForm.get('email')?.invalid) {
+              <ion-note slot="error">{{ getErrorMessage('email') }}</ion-note>
+            }
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Website</ion-label>
+            <ion-input
+              formControlName="website"
+              placeholder="https://example.com"
+              type="url">
+            </ion-input>
+          </ion-item>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Advanced Settings -->
+      <ion-card>
+        <ion-card-header (click)="toggleAdvancedSettings()" style="cursor: pointer;">
+          <ion-card-title>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span>Advanced Settings</span>
+              <ion-icon [name]="showAdvancedSettings() ? 'chevron-up' : 'chevron-down'"></ion-icon>
+            </div>
+          </ion-card-title>
+        </ion-card-header>
+
+        @if (showAdvancedSettings()) {
+          <ion-card-content>
+            <ion-item>
+              <ion-label position="stacked">Opened Date</ion-label>
+              <ion-input formControlName="openedDate" type="date"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-label position="stacked">Latitude</ion-label>
+              <ion-input
+                formControlName="latitude"
+                placeholder="40.7128"
+                type="number">
+              </ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-label position="stacked">Longitude</ion-label>
+              <ion-input
+                formControlName="longitude"
+                placeholder="-74.0060"
+                type="number">
+              </ion-input>
+            </ion-item>
+          </ion-card-content>
+        }
+      </ion-card>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <ion-button expand="block" (click)="cancel()" fill="outline">
+          Cancel
+        </ion-button>
+        <ion-button
+          expand="block"
+          type="submit"
+          [disabled]="saving() || locationForm.invalid">
+          @if (saving()) {
+            <ion-spinner name="circular"></ion-spinner>
+          } @else {
+            {{ isEditMode() ? 'Update' : 'Create' }} Location
+          }
+        </ion-button>
+      </div>
+    </form>
+  }
+</ion-content>

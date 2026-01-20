@@ -1,0 +1,94 @@
+/**
+ * Location Form Page Styles
+ * Sprint 40: Multi-Location Management
+ */
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 2rem;
+  text-align: center;
+
+  ion-spinner {
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+  }
+}
+
+// Form
+form {
+  padding-bottom: 2rem;
+}
+
+ion-card {
+  margin: 1rem;
+
+  ion-card-header {
+    padding-bottom: 0;
+  }
+
+  ion-card-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+
+  ion-card-content {
+    padding-top: 0;
+  }
+}
+
+ion-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  margin-bottom: 1rem;
+
+  ion-label[position="stacked"] {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  ion-note[slot="helper"] {
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+  }
+
+  ion-note[slot="error"] {
+    color: var(--ion-color-danger);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+  }
+}
+
+// Form Actions
+.form-actions {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1rem;
+  padding: 0 1rem;
+  margin-top: 2rem;
+
+  @media (max-width: 576px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Error Card
+ion-card[color="danger"] {
+  ion-card-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    ion-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+  }
+}
