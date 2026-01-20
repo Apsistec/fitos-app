@@ -1,0 +1,269 @@
+/**
+ * Royalty Dashboard Page Styles
+ * Sprint 40: Multi-Location Management
+ */
+
+// Loading & Error
+.loading-container,
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 2rem;
+  text-align: center;
+
+  ion-icon {
+    font-size: 64px;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    margin-top: 0.5rem;
+    color: var(--ion-color-medium);
+  }
+}
+
+// Summary Section
+.summary-section {
+  padding: 1rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.summary-card {
+  margin: 0;
+
+  ion-card-content {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  &.overdue {
+    border-left: 3px solid var(--ion-color-danger);
+  }
+}
+
+.summary-icon {
+  flex-shrink: 0;
+
+  ion-icon {
+    font-size: 40px;
+  }
+}
+
+.summary-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.summary-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ion-color-medium);
+  margin: 0 0 0.25rem 0;
+}
+
+.summary-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--ion-text-color);
+}
+
+.summary-sublabel {
+  font-size: 0.75rem;
+  color: var(--ion-color-medium);
+  margin: 0.25rem 0 0 0;
+}
+
+// Filter Section
+.filter-section {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0 1rem 1rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  ion-chip {
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+}
+
+// Payments Section
+.payments-section {
+  padding: 0 1rem 2rem;
+}
+
+.payment-card {
+  margin-bottom: 1rem;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.payment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--ion-color-light);
+}
+
+.payment-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.payment-location {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+  color: var(--ion-text-color);
+}
+
+.payment-period {
+  font-size: 0.875rem;
+  color: var(--ion-color-medium);
+  margin: 0;
+}
+
+// Payment Details
+.payment-details {
+  margin-bottom: 1rem;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--ion-color-light-shade);
+  }
+
+  &.total {
+    margin-top: 0.5rem;
+    padding-top: 1rem;
+    border-top: 2px solid var(--ion-color-medium);
+    font-weight: 600;
+    font-size: 1rem;
+
+    .detail-value {
+      font-size: 1.25rem;
+      color: var(--ion-color-primary);
+    }
+  }
+}
+
+.detail-label {
+  color: var(--ion-color-medium);
+}
+
+.detail-value {
+  font-weight: 600;
+  color: var(--ion-text-color);
+}
+
+// Payment Footer
+.payment-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ion-color-light);
+}
+
+.footer-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--ion-color-medium);
+
+  ion-icon {
+    font-size: 16px;
+  }
+
+  &.overdue {
+    color: var(--ion-color-danger);
+    font-weight: 600;
+  }
+}
+
+// Empty State
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+
+  ion-icon {
+    font-size: 64px;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    margin: 1rem 0 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    margin-bottom: 1.5rem;
+  }
+}
+
+// Responsive
+@media (max-width: 576px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .payment-header {
+    flex-direction: column;
+    gap: 0.5rem;
+
+    ion-badge {
+      align-self: flex-start;
+    }
+  }
+
+  .detail-row {
+    font-size: 0.8125rem;
+  }
+}
+
+// Dark mode
+@media (prefers-color-scheme: dark) {
+  .summary-value,
+  .payment-location,
+  .detail-value {
+    color: var(--ion-color-light);
+  }
+
+  .detail-row:not(:last-child) {
+    border-bottom-color: var(--ion-color-dark);
+  }
+
+  .payment-header {
+    border-bottom-color: var(--ion-color-dark);
+  }
+}

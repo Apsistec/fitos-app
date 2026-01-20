@@ -1,0 +1,315 @@
+/**
+ * Analytics Page Styles
+ * Sprint 40: Multi-Location Management
+ */
+
+// Loading & Error
+.loading-container,
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 2rem;
+  text-align: center;
+
+  ion-icon {
+    font-size: 64px;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    margin-top: 0.5rem;
+    color: var(--ion-color-medium);
+  }
+}
+
+// Period Selector
+.period-section {
+  padding: 1rem;
+
+  ion-segment {
+    --background: var(--ion-color-light);
+  }
+}
+
+// Section Titles
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  padding: 0 1rem;
+  color: var(--ion-text-color);
+}
+
+.subsection-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  padding: 0 1rem;
+  color: var(--ion-text-color);
+
+  ion-icon {
+    font-size: 20px;
+  }
+}
+
+// Summary Section
+.summary-section {
+  padding: 0 1rem 1rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.metric-card {
+  margin: 0;
+
+  ion-card-content {
+    text-align: center;
+    padding: 1.5rem 1rem;
+
+    ion-icon {
+      font-size: 32px;
+      margin-bottom: 0.5rem;
+    }
+
+    h3 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0.5rem 0 0.25rem;
+      color: var(--ion-text-color);
+    }
+
+    p {
+      font-size: 0.875rem;
+      color: var(--ion-color-medium);
+      margin: 0;
+    }
+
+    .subtext {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--ion-color-medium);
+      margin-top: 0.25rem;
+    }
+  }
+}
+
+// Breakdown Section
+.breakdown-section {
+  padding: 0 1rem 1rem;
+
+  ion-card {
+    margin: 0;
+  }
+}
+
+.breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--ion-color-light);
+  }
+}
+
+.breakdown-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.color-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.breakdown-value {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+
+  .percentage {
+    font-size: 0.8125rem;
+    color: var(--ion-color-medium);
+    font-weight: 500;
+  }
+}
+
+// Metric Selector
+.metric-selector {
+  padding: 1rem 0;
+}
+
+.metric-chips {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  ion-chip {
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+}
+
+// Rankings Section
+.rankings-section {
+  padding: 0 1rem 1rem;
+}
+
+.ranking-card {
+  margin: 0 0 0.75rem 0;
+
+  ion-card-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+  }
+}
+
+.rank-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+  flex-shrink: 0;
+
+  &.top {
+    background: linear-gradient(135deg, var(--ion-color-success), var(--ion-color-success-shade));
+    color: white;
+  }
+
+  &.bottom {
+    background: linear-gradient(135deg, var(--ion-color-warning), var(--ion-color-warning-shade));
+    color: white;
+  }
+}
+
+.location-info {
+  flex: 1;
+  min-width: 0;
+
+  h4 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+    color: var(--ion-text-color);
+  }
+
+  .metric-value {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--ion-color-primary);
+    margin: 0;
+  }
+}
+
+.ranking-card {
+  ion-icon[name="chevron-forward-outline"] {
+    color: var(--ion-color-medium);
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+}
+
+// Activity Section
+.activity-section {
+  padding: 0 1rem 2rem;
+
+  ion-card {
+    margin: 0;
+  }
+}
+
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  ion-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+  }
+
+  h4 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 0.125rem 0;
+    color: var(--ion-text-color);
+  }
+
+  p {
+    font-size: 0.8125rem;
+    color: var(--ion-color-medium);
+    margin: 0;
+  }
+}
+
+// Responsive
+@media (max-width: 576px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .metric-card ion-card-content {
+    padding: 1rem 0.75rem;
+
+    ion-icon {
+      font-size: 28px;
+    }
+
+    h3 {
+      font-size: 1.5rem;
+    }
+  }
+
+  .activity-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Dark mode
+@media (prefers-color-scheme: dark) {
+  .metric-card h3,
+  .location-info h4,
+  .activity-item h4 {
+    color: var(--ion-color-light);
+  }
+
+  .breakdown-item:not(:last-child) {
+    border-bottom-color: var(--ion-color-dark);
+  }
+}

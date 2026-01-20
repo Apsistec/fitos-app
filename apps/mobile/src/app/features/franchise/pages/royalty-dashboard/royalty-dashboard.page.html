@@ -1,0 +1,210 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/franchise/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Royalty Payments</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="exportPayments()" [disabled]="filteredPayments().length === 0">
+        <ion-icon slot="icon-only" name="download-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <!-- Search Bar -->
+  <ion-toolbar>
+    <ion-searchbar
+      placeholder="Search payments..."
+      (ionInput)="onSearchChange($event)"
+      debounce="300">
+    </ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-container">
+      <ion-spinner></ion-spinner>
+      <p>Loading royalty payments...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error() && !loading()) {
+    <div class="error-container">
+      <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+      <h2>{{ error() }}</h2>
+      <ion-button (click)="loadRoyaltyPayments()">Retry</ion-button>
+    </div>
+  }
+
+  <!-- Content -->
+  @if (!loading() && !error()) {
+    <!-- Summary Cards -->
+    <div class="summary-section">
+      <div class="summary-grid">
+        <ion-card class="summary-card">
+          <ion-card-content>
+            <div class="summary-icon" style="color: var(--ion-color-primary);">
+              <ion-icon name="cash-outline"></ion-icon>
+            </div>
+            <div class="summary-details">
+              <p class="summary-label">Total Amount</p>
+              <h2 class="summary-value">{{ formatCurrency(totalAmount()) }}</h2>
+              <p class="summary-sublabel">{{ totalPayments() }} payments</p>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="summary-card">
+          <ion-card-content>
+            <div class="summary-icon" style="color: var(--ion-color-warning);">
+              <ion-icon name="time-outline"></ion-icon>
+            </div>
+            <div class="summary-details">
+              <p class="summary-label">Pending</p>
+              <h2 class="summary-value">{{ formatCurrency(pendingAmount()) }}</h2>
+              <p class="summary-sublabel">{{ statusCounts().pending }} payments</p>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="summary-card">
+          <ion-card-content>
+            <div class="summary-icon" style="color: var(--ion-color-success);">
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+            </div>
+            <div class="summary-details">
+              <p class="summary-label">Paid</p>
+              <h2 class="summary-value">{{ formatCurrency(paidAmount()) }}</h2>
+              <p class="summary-sublabel">{{ statusCounts().paid }} payments</p>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        @if (overdueAmount() > 0) {
+          <ion-card class="summary-card overdue">
+            <ion-card-content>
+              <div class="summary-icon" style="color: var(--ion-color-danger);">
+                <ion-icon name="warning-outline"></ion-icon>
+              </div>
+              <div class="summary-details">
+                <p class="summary-label">Overdue</p>
+                <h2 class="summary-value">{{ formatCurrency(overdueAmount()) }}</h2>
+                <p class="summary-sublabel">{{ statusCounts().overdue }} payments</p>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        }
+      </div>
+    </div>
+
+    <!-- Status Filter Chips -->
+    <div class="filter-section">
+      <ion-chip
+        [color]="selectedStatus() === 'all' ? 'primary' : 'medium'"
+        [outline]="selectedStatus() !== 'all'"
+        (click)="filterByStatus('all')">
+        <ion-label>All ({{ statusCounts().all }})</ion-label>
+      </ion-chip>
+      <ion-chip
+        [color]="selectedStatus() === 'pending' ? 'warning' : 'medium'"
+        [outline]="selectedStatus() !== 'pending'"
+        (click)="filterByStatus('pending')">
+        <ion-label>Pending ({{ statusCounts().pending }})</ion-label>
+      </ion-chip>
+      <ion-chip
+        [color]="selectedStatus() === 'paid' ? 'success' : 'medium'"
+        [outline]="selectedStatus() !== 'paid'"
+        (click)="filterByStatus('paid')">
+        <ion-label>Paid ({{ statusCounts().paid }})</ion-label>
+      </ion-chip>
+      @if (statusCounts().overdue > 0) {
+        <ion-chip
+          [color]="selectedStatus() === 'overdue' ? 'danger' : 'medium'"
+          [outline]="selectedStatus() !== 'overdue'"
+          (click)="filterByStatus('overdue')">
+          <ion-label>Overdue ({{ statusCounts().overdue }})</ion-label>
+        </ion-chip>
+      }
+    </div>
+
+    <!-- Payments List -->
+    <div class="payments-section">
+      @if (filteredPayments().length === 0) {
+        <ion-card>
+          <ion-card-content class="empty-state">
+            <ion-icon name="receipt-outline" color="medium"></ion-icon>
+            <h3>No payments found</h3>
+            <p>Try adjusting your filters or search term</p>
+          </ion-card-content>
+        </ion-card>
+      }
+
+      @for (payment of filteredPayments(); track payment.id) {
+        <ion-card button (click)="viewPaymentDetail(payment)" class="payment-card">
+          <ion-card-content>
+            <div class="payment-header">
+              <div class="payment-info">
+                <h3 class="payment-location">Location: {{ payment.locationId }}</h3>
+                <p class="payment-period">
+                  {{ formatDate(payment.periodStart) }} - {{ formatDate(payment.periodEnd) }}
+                </p>
+              </div>
+              <ion-badge [color]="getStatusColor(payment.paymentStatus)">
+                {{ payment.paymentStatus }}
+              </ion-badge>
+            </div>
+
+            <div class="payment-details">
+              <div class="detail-row">
+                <span class="detail-label">Gross Revenue:</span>
+                <span class="detail-value">{{ formatCurrency(payment.grossRevenue) }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Royalty ({{ payment.royaltyRate * 100 }}%):</span>
+                <span class="detail-value">{{ formatCurrency(payment.royaltyAmount) }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Marketing Fee ({{ payment.marketingFeeRate * 100 }}%):</span>
+                <span class="detail-value">{{ formatCurrency(payment.marketingFeeAmount) }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Technology Fee:</span>
+                <span class="detail-value">{{ formatCurrency(payment.technologyFee) }}</span>
+              </div>
+              <div class="detail-row total">
+                <span class="detail-label">Total Fees:</span>
+                <span class="detail-value">{{ formatCurrency(payment.totalFees) }}</span>
+              </div>
+            </div>
+
+            <div class="payment-footer">
+              <div class="footer-item">
+                <ion-icon name="calendar-outline"></ion-icon>
+                <span>Due: {{ formatDate(payment.paymentDueDate) }}</span>
+              </div>
+              @if (payment.paymentDate) {
+                <div class="footer-item">
+                  <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+                  <span>Paid: {{ formatDate(payment.paymentDate) }}</span>
+                </div>
+              }
+              @if (payment.daysOverdue && payment.daysOverdue > 0) {
+                <div class="footer-item overdue">
+                  <ion-icon name="warning-outline" color="danger"></ion-icon>
+                  <span>{{ payment.daysOverdue }} days overdue</span>
+                </div>
+              }
+            </div>
+          </ion-card-content>
+        </ion-card>
+      }
+    </div>
+  }
+</ion-content>

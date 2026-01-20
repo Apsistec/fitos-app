@@ -1,0 +1,300 @@
+/**
+ * Location Detail Page Styles
+ * Sprint 40: Multi-Location Management
+ */
+
+// Loading & Error
+.loading-container,
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 2rem;
+  text-align: center;
+
+  ion-icon {
+    font-size: 64px;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    margin-top: 0.5rem;
+    color: var(--ion-color-medium);
+  }
+}
+
+// Section Titles
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 1.5rem 0 1rem 0;
+  padding: 0 1rem;
+  color: var(--ion-text-color);
+}
+
+// Location Header
+.location-header {
+  padding: 1rem;
+
+  ion-card {
+    margin: 0;
+  }
+}
+
+.header-content {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.location-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  ion-icon {
+    font-size: 32px;
+    color: white;
+  }
+}
+
+.location-info {
+  flex: 1;
+  min-width: 0;
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    color: var(--ion-text-color);
+  }
+
+  .location-address {
+    font-size: 0.9375rem;
+    color: var(--ion-color-medium);
+    margin: 0 0 0.5rem 0;
+  }
+}
+
+// Actions Section
+.actions-section {
+  padding: 0 1rem 1rem;
+}
+
+.action-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+
+  @media (max-width: 576px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Performance Section
+.performance-section {
+  padding: 0 1rem 1rem;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.metric-card {
+  margin: 0;
+
+  ion-card-content {
+    text-align: center;
+    padding: 1.5rem 1rem;
+
+    ion-icon {
+      font-size: 32px;
+      margin-bottom: 0.5rem;
+    }
+
+    h3 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0.5rem 0 0.25rem;
+      color: var(--ion-text-color);
+    }
+
+    p {
+      font-size: 0.875rem;
+      color: var(--ion-color-medium);
+      margin: 0 0 0.5rem 0;
+    }
+
+    .subtext {
+      font-size: 0.75rem;
+      color: var(--ion-color-medium);
+    }
+  }
+}
+
+.comparison {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+
+  ion-icon {
+    font-size: 16px;
+  }
+}
+
+// Breakdown Section
+.breakdown-section,
+.members-section,
+.info-section,
+.danger-section {
+  padding: 0 1rem 1rem;
+
+  ion-card {
+    margin: 0;
+  }
+}
+
+.revenue-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--ion-color-light);
+  }
+}
+
+.revenue-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9375rem;
+}
+
+.color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.revenue-value {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+// Members Section
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  padding: 1rem 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--ion-color-light);
+  }
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  ion-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+  }
+
+  h4 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 0.125rem 0;
+    color: var(--ion-text-color);
+  }
+
+  p {
+    font-size: 0.8125rem;
+    color: var(--ion-color-medium);
+    margin: 0;
+  }
+}
+
+// Info Section
+.info-row {
+  display: flex;
+  gap: 1rem;
+  padding: 0.75rem 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--ion-color-light);
+  }
+
+  ion-icon {
+    font-size: 24px;
+    color: var(--ion-color-primary);
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+  }
+
+  p {
+    font-size: 0.9375rem;
+    margin: 0;
+    line-height: 1.5;
+  }
+}
+
+// Danger Zone
+.danger-section {
+  padding-bottom: 2rem;
+
+  ion-card {
+    p {
+      margin: 0 0 1rem 0;
+      font-size: 0.9375rem;
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 576px) {
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+
+  .location-info h1 {
+    font-size: 1.25rem;
+  }
+}
+
+// Dark mode
+@media (prefers-color-scheme: dark) {
+  .metric-card h3,
+  .stat-item h4,
+  .location-info h1 {
+    color: var(--ion-color-light);
+  }
+
+  .revenue-item:not(:last-child),
+  .stats-row:not(:last-child),
+  .info-row:not(:last-child) {
+    border-bottom-color: var(--ion-color-dark);
+  }
+}

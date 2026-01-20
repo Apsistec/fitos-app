@@ -1,0 +1,274 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/franchise/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ location()?.name || 'Location Details' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="editLocation()">
+        <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-container">
+      <ion-spinner></ion-spinner>
+      <p>Loading location details...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error() && !loading()) {
+    <div class="error-container">
+      <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+      <h2>{{ error() }}</h2>
+      <ion-button (click)="refresh()">Retry</ion-button>
+    </div>
+  }
+
+  <!-- Content -->
+  @if (!loading() && !error() && location() && analytics()) {
+    <!-- Location Header -->
+    <div class="location-header">
+      <ion-card>
+        <ion-card-content>
+          <div class="header-content">
+            <div class="location-icon">
+              <ion-icon [name]="franchiseService.getLocationTypeIcon(location()!.locationType)"></ion-icon>
+            </div>
+            <div class="location-info">
+              <h1>{{ location()!.name }}</h1>
+              <p class="location-address">
+                {{ location()!.city }}, {{ location()!.state }}
+              </p>
+              <ion-badge [color]="location()!.status === 'active' ? 'success' : 'medium'">
+                {{ location()!.status }}
+              </ion-badge>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="actions-section">
+      <div class="action-buttons">
+        <ion-button fill="outline" (click)="editLocation()">
+          <ion-icon slot="start" name="create-outline"></ion-icon>
+          Edit
+        </ion-button>
+        <ion-button fill="outline" (click)="viewStaff()">
+          <ion-icon slot="start" name="people-outline"></ion-icon>
+          Staff
+        </ion-button>
+        <ion-button fill="outline" (click)="viewRoyalties()">
+          <ion-icon slot="start" name="cash-outline"></ion-icon>
+          Royalties
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Performance Overview -->
+    <div class="performance-section">
+      <h2 class="section-title">Performance Overview</h2>
+      <div class="metrics-grid">
+        <ion-card class="metric-card">
+          <ion-card-content>
+            <ion-icon name="cash-outline" color="success"></ion-icon>
+            <h3>{{ formatCurrency(analytics()!.grossRevenue) }}</h3>
+            <p>Monthly Revenue</p>
+            <div class="comparison">
+              <ion-icon
+                [name]="getComparisonIcon(revenueVsAverage())"
+                [color]="getComparisonColor(revenueVsAverage())">
+              </ion-icon>
+              <span [style.color]="'var(--ion-color-' + getComparisonColor(revenueVsAverage()) + ')'">
+                {{ Math.abs(revenueVsAverage()).toFixed(1) }}% vs network
+              </span>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="metric-card">
+          <ion-card-content>
+            <ion-icon name="people-outline" color="primary"></ion-icon>
+            <h3>{{ formatNumber(analytics()!.activeMembers) }}</h3>
+            <p>Active Members</p>
+            <div class="comparison">
+              <ion-icon
+                [name]="getComparisonIcon(membersVsAverage())"
+                [color]="getComparisonColor(membersVsAverage())">
+              </ion-icon>
+              <span [style.color]="'var(--ion-color-' + getComparisonColor(membersVsAverage()) + ')'">
+                {{ Math.abs(membersVsAverage()).toFixed(1) }}% vs network
+              </span>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="metric-card">
+          <ion-card-content>
+            <ion-icon name="trophy-outline" color="warning"></ion-icon>
+            <h3>{{ analytics()!.memberRetentionRate.toFixed(1) }}%</h3>
+            <p>Retention Rate</p>
+            <div class="comparison">
+              <ion-icon
+                [name]="getComparisonIcon(retentionVsAverage())"
+                [color]="getComparisonColor(retentionVsAverage())">
+              </ion-icon>
+              <span [style.color]="'var(--ion-color-' + getComparisonColor(retentionVsAverage()) + ')'">
+                {{ Math.abs(retentionVsAverage()).toFixed(1) }}% vs network
+              </span>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="metric-card">
+          <ion-card-content>
+            <ion-icon name="fitness-outline" color="tertiary"></ion-icon>
+            <h3>{{ formatNumber(analytics()!.totalWorkouts) }}</h3>
+            <p>Total Workouts</p>
+            <span class="subtext">{{ analytics()!.averageAttendanceRate.toFixed(1) }}% attendance</span>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </div>
+
+    <!-- Revenue Breakdown -->
+    <div class="breakdown-section">
+      <h2 class="section-title">Revenue Breakdown</h2>
+      <ion-card>
+        <ion-card-content>
+          <div class="revenue-item">
+            <div class="revenue-label">
+              <span class="color-dot" style="background: var(--ion-color-primary);"></span>
+              <span>Membership</span>
+            </div>
+            <span class="revenue-value">{{ formatCurrency(analytics()!.membershipRevenue) }}</span>
+          </div>
+
+          <div class="revenue-item">
+            <div class="revenue-label">
+              <span class="color-dot" style="background: var(--ion-color-success);"></span>
+              <span>Training</span>
+            </div>
+            <span class="revenue-value">{{ formatCurrency(analytics()!.trainingRevenue) }}</span>
+          </div>
+
+          <div class="revenue-item">
+            <div class="revenue-label">
+              <span class="color-dot" style="background: var(--ion-color-tertiary);"></span>
+              <span>Retail</span>
+            </div>
+            <span class="revenue-value">{{ formatCurrency(analytics()!.retailRevenue) }}</span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Member Metrics -->
+    <div class="members-section">
+      <h2 class="section-title">Member Metrics</h2>
+      <ion-card>
+        <ion-card-content>
+          <div class="stats-row">
+            <div class="stat-item">
+              <ion-icon name="add-circle-outline" color="success"></ion-icon>
+              <div>
+                <h4>{{ formatNumber(analytics()!.newMembers) }}</h4>
+                <p>New Members</p>
+              </div>
+            </div>
+
+            <div class="stat-item">
+              <ion-icon name="remove-circle-outline" color="danger"></ion-icon>
+              <div>
+                <h4>{{ formatNumber(analytics()!.canceledMembers) }}</h4>
+                <p>Canceled</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="stats-row">
+            <div class="stat-item">
+              <ion-icon name="pulse-outline" color="primary"></ion-icon>
+              <div>
+                <h4>{{ formatNumber(analytics()!.uniqueActiveClients) }}</h4>
+                <p>Active Clients</p>
+              </div>
+            </div>
+
+            <div class="stat-item">
+              <ion-icon name="trending-up-outline" color="success"></ion-icon>
+              <div>
+                <h4>{{ analytics()!.memberRetentionRate.toFixed(1) }}%</h4>
+                <p>Retention</p>
+              </div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Location Info -->
+    <div class="info-section">
+      <h2 class="section-title">Location Information</h2>
+      <ion-card>
+        <ion-card-content>
+          @if (location()!.addressLine1) {
+            <div class="info-row">
+              <ion-icon name="location-outline"></ion-icon>
+              <div>
+                <p>{{ location()!.addressLine1 }}</p>
+                @if (location()!.addressLine2) {
+                  <p>{{ location()!.addressLine2 }}</p>
+                }
+                <p>{{ location()!.city }}, {{ location()!.state }} {{ location()!.postalCode }}</p>
+              </div>
+            </div>
+          }
+
+          @if (location()!.phone) {
+            <div class="info-row">
+              <ion-icon name="call-outline"></ion-icon>
+              <p>{{ location()!.phone }}</p>
+            </div>
+          }
+
+          @if (location()!.email) {
+            <div class="info-row">
+              <ion-icon name="mail-outline"></ion-icon>
+              <p>{{ location()!.email }}</p>
+            </div>
+          }
+
+          <div class="info-row">
+            <ion-icon name="time-outline"></ion-icon>
+            <p>{{ location()!.timezone }}</p>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="danger-section">
+      <h2 class="section-title">Danger Zone</h2>
+      <ion-card color="danger">
+        <ion-card-content>
+          <p>Deactivating this location will hide it from analytics and prevent new bookings.</p>
+          <ion-button expand="block" fill="outline" (click)="deactivateLocation()">
+            Deactivate Location
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  }
+</ion-content>
