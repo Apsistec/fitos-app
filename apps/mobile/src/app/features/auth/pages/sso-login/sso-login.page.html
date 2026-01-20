@@ -1,0 +1,90 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/auth/login"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Enterprise Sign-In</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-container">
+      <ion-spinner></ion-spinner>
+      <p>Loading SSO configuration...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error() && !loading()) {
+    <div class="error-container">
+      <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+      <h2>{{ error() }}</h2>
+      <ion-button expand="block" (click)="useStandardLogin()">
+        Use Standard Login
+      </ion-button>
+    </div>
+  }
+
+  <!-- SSO Login -->
+  @if (!loading() && !error() && ssoConfig()) {
+    <div class="sso-container">
+      <!-- Branding -->
+      <div class="branding">
+        <ion-icon name="business-outline" class="org-icon"></ion-icon>
+        <h1>Sign in with SSO</h1>
+        <p>You'll be redirected to your organization's identity provider</p>
+      </div>
+
+      <!-- Provider Card -->
+      <ion-card class="provider-card">
+        <ion-card-content>
+          <div class="provider-info">
+            <ion-icon [name]="getProviderIcon()" class="provider-icon"></ion-icon>
+            <div>
+              <h3>{{ getProviderName() }}</h3>
+              <p>{{ ssoConfig()!.organizationId }}</p>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Sign In Button -->
+      <ion-button
+        expand="block"
+        size="large"
+        (click)="loginWithSSO()"
+        [disabled]="loading()"
+        class="sso-button"
+      >
+        <ion-icon slot="start" name="shield-checkmark-outline"></ion-icon>
+        Sign in with {{ getProviderName() }}
+      </ion-button>
+
+      <!-- Alternative Login -->
+      @if (!ssoConfig()!.enforceSso) {
+        <div class="divider">
+          <span>or</span>
+        </div>
+
+        <ion-button
+          expand="block"
+          fill="outline"
+          (click)="useStandardLogin()"
+        >
+          Sign in with Email/Password
+        </ion-button>
+      }
+
+      <!-- Info -->
+      <div class="info-section">
+        <ion-icon name="information-circle-outline"></ion-icon>
+        <p>
+          Your organization uses Single Sign-On for secure access.
+          You'll be redirected to authenticate with your corporate credentials.
+        </p>
+      </div>
+    </div>
+  }
+</ion-content>
