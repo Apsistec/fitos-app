@@ -1,0 +1,219 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/seo"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Keyword Rankings</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="addKeyword()">
+        <ion-icon slot="icon-only" name="add-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <ion-toolbar>
+    <ion-segment [value]="selectedType()" (ionChange)="selectedType.set($event.detail.value)">
+      <ion-segment-button value="all">
+        <ion-label>All</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="primary">
+        <ion-label>Primary</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="local">
+        <ion-label>Local</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="long_tail">
+        <ion-label>Long-tail</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-container">
+      <ion-spinner></ion-spinner>
+      <p>Loading keywords...</p>
+    </div>
+  }
+
+  @if (!loading()) {
+    <!-- Summary Stats -->
+    <div class="stats-section">
+      <div class="stats-grid">
+        <ion-card>
+          <ion-card-content>
+            <div class="stat">
+              <ion-icon name="list-outline" color="primary"></ion-icon>
+              <div>
+                <h3>{{ keywords().length }}</h3>
+                <p>Total Keywords</p>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card>
+          <ion-card-content>
+            <div class="stat">
+              <ion-icon name="trophy-outline" color="warning"></ion-icon>
+              <div>
+                <h3>{{ topThree().length }}</h3>
+                <p>Top 3 Rankings</p>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card>
+          <ion-card-content>
+            <div class="stat">
+              <ion-icon name="podium-outline" color="success"></ion-icon>
+              <div>
+                <h3>{{ topTen().length }}</h3>
+                <p>Top 10 Rankings</p>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card>
+          <ion-card-content>
+            <div class="stat">
+              <ion-icon name="bar-chart-outline" color="medium"></ion-icon>
+              <div>
+                <h3>{{ avgRank().toFixed(1) }}</h3>
+                <p>Average Rank</p>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <div class="trends-section">
+        <div class="trend-stat success">
+          <ion-icon name="trending-up"></ion-icon>
+          <span>{{ improving().length }} improving</span>
+        </div>
+        <div class="trend-stat danger">
+          <ion-icon name="trending-down"></ion-icon>
+          <span>{{ declining().length }} declining</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Keywords List -->
+    <div class="keywords-section">
+      <div class="section-header">
+        <h2>{{ filteredKeywords().length }} Keywords</h2>
+      </div>
+
+      @if (filteredKeywords().length === 0) {
+        <div class="empty-container">
+          <ion-icon name="search-outline"></ion-icon>
+          <h3>No Keywords</h3>
+          <p>Add keywords to start tracking your rankings</p>
+          <ion-button expand="block" (click)="addKeyword()">
+            <ion-icon slot="start" name="add-outline"></ion-icon>
+            Add First Keyword
+          </ion-button>
+        </div>
+      } @else {
+        <ion-list>
+          @for (keyword of filteredKeywords(); track keyword.id) {
+            <ion-card>
+              <ion-card-content>
+                <div class="keyword-header">
+                  <div class="keyword-info">
+                    <h3>{{ keyword.keyword }}</h3>
+                    <div class="keyword-meta">
+                      <ion-badge [color]="getTypeColor(keyword.type)">
+                        {{ getTypeLabel(keyword.type) }}
+                      </ion-badge>
+                      @if (keyword.competition) {
+                        <ion-badge [color]="getCompetitionColor(keyword.competition)">
+                          {{ keyword.competition }} competition
+                        </ion-badge>
+                      }
+                      @if (keyword.searchVolume) {
+                        <span class="search-volume">
+                          <ion-icon name="search-outline"></ion-icon>
+                          {{ keyword.searchVolume }}/mo
+                        </span>
+                      }
+                    </div>
+                  </div>
+                  <div class="keyword-rank">
+                    @if (keyword.currentRank) {
+                      <div class="rank-badge" [attr.data-color]="getRankColor(keyword.currentRank)">
+                        <span class="rank-number">#{{ keyword.currentRank }}</span>
+                        <span class="rank-label">Rank</span>
+                      </div>
+                    } @else {
+                      <div class="rank-badge unranked">
+                        <span class="rank-label">Not Ranked</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                <div class="keyword-details">
+                  <div class="detail-row">
+                    <div class="detail-item">
+                      <ion-icon
+                        [name]="getTrendIcon(getRankTrend(keyword))"
+                        [color]="getTrendColor(getRankTrend(keyword))"
+                      ></ion-icon>
+                      <div>
+                        <span class="detail-label">Trend</span>
+                        @if (keyword.previousRank && keyword.currentRank) {
+                          <span class="detail-value">
+                            {{ keyword.previousRank }} → {{ keyword.currentRank }}
+                          </span>
+                        } @else {
+                          <span class="detail-value">No data</span>
+                        }
+                      </div>
+                    </div>
+
+                    @if (keyword.bestRank) {
+                      <div class="detail-item">
+                        <ion-icon name="star-outline" color="warning"></ion-icon>
+                        <div>
+                          <span class="detail-label">Best</span>
+                          <span class="detail-value">#{{ keyword.bestRank }}</span>
+                        </div>
+                      </div>
+                    }
+
+                    @if (keyword.url) {
+                      <div class="detail-item">
+                        <ion-icon name="link-outline" color="primary"></ion-icon>
+                        <div>
+                          <span class="detail-label">URL</span>
+                          <span class="detail-value truncate">{{ keyword.url }}</span>
+                        </div>
+                      </div>
+                    }
+                  </div>
+
+                  @if (keyword.lastChecked) {
+                    <div class="last-checked">
+                      <ion-icon name="time-outline"></ion-icon>
+                      Last checked {{ keyword.lastChecked | date:'short' }}
+                    </div>
+                  }
+                </div>
+              </ion-card-content>
+            </ion-card>
+          }
+        </ion-list>
+      }
+    </div>
+  }
+</ion-content>

@@ -1,0 +1,273 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/seo"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Reviews & Ratings</ion-title>
+  </ion-toolbar>
+
+  <ion-toolbar>
+    <ion-segment [value]="selectedTab()" (ionChange)="selectedTab.set($event.detail.value)">
+      <ion-segment-button value="reviews">
+        <ion-label>Reviews</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="requests">
+        <ion-label>Requests</ion-label>
+        @if (pendingRequests().length > 0) {
+          <ion-badge color="primary">{{ pendingRequests().length }}</ion-badge>
+        }
+      </ion-segment-button>
+      <ion-segment-button value="send">
+        <ion-label>Send</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-container">
+      <ion-spinner></ion-spinner>
+      <p>Loading reviews...</p>
+    </div>
+  }
+
+  <!-- Reviews Tab -->
+  @if (!loading() && selectedTab() === 'reviews') {
+    <!-- Summary Stats -->
+    <div class="stats-section">
+      <ion-card>
+        <ion-card-content>
+          <div class="rating-summary">
+            <div class="avg-rating">
+              <h1>{{ avgRating().toFixed(1) }}</h1>
+              <div class="stars">
+                @for (star of getStars(Math.round(avgRating())); track $index) {
+                  <ion-icon [name]="star" color="warning"></ion-icon>
+                }
+              </div>
+              <p>{{ reviews().length }} reviews</p>
+            </div>
+            <div class="rating-bars">
+              @for (rating of [5, 4, 3, 2, 1]; track rating) {
+                <div class="rating-bar">
+                  <span class="rating-label">{{ rating }}</span>
+                  <ion-icon name="star" color="warning"></ion-icon>
+                  <div class="bar-track">
+                    <div class="bar-fill" [style.width]="getRatingBarWidth(rating)"></div>
+                  </div>
+                  <span class="rating-count">{{ ratingDistribution()[rating] }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Unanswered Reviews Alert -->
+    @if (unansweredReviews().length > 0) {
+      <div class="alert-section">
+        <ion-card color="warning">
+          <ion-card-content>
+            <div class="alert-content">
+              <ion-icon name="alert-circle-outline"></ion-icon>
+              <div>
+                <h3>{{ unansweredReviews().length }} unanswered review(s)</h3>
+                <p>Respond quickly to improve your reputation</p>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    }
+
+    <!-- Reviews List -->
+    <div class="reviews-section">
+      <div class="section-header">
+        <h2>All Reviews</h2>
+      </div>
+      <ion-list>
+        @for (review of reviews(); track review.id) {
+          <ion-card>
+            <ion-card-content>
+              <div class="review-header">
+                <div class="review-client">
+                  <ion-icon
+                    [name]="getSourceIcon(review.source)"
+                    [color]="getSourceColor(review.source)"
+                  ></ion-icon>
+                  <div>
+                    <h3>{{ review.clientName }}</h3>
+                    <p>{{ review.createdAt | date:'mediumDate' }}</p>
+                  </div>
+                </div>
+                <div class="review-rating">
+                  @for (star of getStars(review.rating); track $index) {
+                    <ion-icon [name]="star" color="warning"></ion-icon>
+                  }
+                </div>
+              </div>
+
+              <div class="review-comment">
+                <p>{{ review.comment }}</p>
+              </div>
+
+              @if (review.responded && review.response) {
+                <div class="review-response">
+                  <div class="response-header">
+                    <ion-icon name="arrow-undo-outline" color="primary"></ion-icon>
+                    <span>Your response</span>
+                  </div>
+                  <p>{{ review.response }}</p>
+                </div>
+              } @else {
+                <ion-button
+                  expand="block"
+                  fill="outline"
+                  size="small"
+                  (click)="respondToReview(review)"
+                >
+                  <ion-icon slot="start" name="chatbubble-outline"></ion-icon>
+                  Respond to Review
+                </ion-button>
+              }
+            </ion-card-content>
+          </ion-card>
+        }
+      </ion-list>
+    </div>
+  }
+
+  <!-- Requests Tab -->
+  @if (!loading() && selectedTab() === 'requests') {
+    <div class="requests-section">
+      <div class="section-header">
+        <h2>Review Requests</h2>
+        <p>Track automated review request campaigns</p>
+      </div>
+
+      @if (reviewRequests().length === 0) {
+        <div class="empty-container">
+          <ion-icon name="mail-outline"></ion-icon>
+          <h3>No Review Requests</h3>
+          <p>Send your first review request from the Send tab</p>
+        </div>
+      } @else {
+        <ion-list>
+          @for (request of reviewRequests(); track request.id) {
+            <ion-item>
+              <ion-icon
+                slot="start"
+                [name]="request.method === 'email' ? 'mail-outline' : 'chatbubble-outline'"
+                [color]="getStatusColor(request.status)"
+              ></ion-icon>
+              <ion-label>
+                <h3>{{ request.clientName }}</h3>
+                <p>{{ request.method === 'email' ? request.clientEmail : request.clientPhone }}</p>
+                @if (request.sentAt) {
+                  <p class="timestamp">Sent {{ request.sentAt | date:'short' }}</p>
+                }
+                @if (request.completedAt) {
+                  <p class="timestamp success">Completed {{ request.completedAt | date:'short' }}</p>
+                }
+              </ion-label>
+              <ion-badge slot="end" [color]="getStatusColor(request.status)">
+                {{ request.status }}
+              </ion-badge>
+            </ion-item>
+          }
+        </ion-list>
+      }
+    </div>
+  }
+
+  <!-- Send Tab -->
+  @if (!loading() && selectedTab() === 'send') {
+    <div class="send-section">
+      <div class="section-header">
+        <h2>Send Review Requests</h2>
+        <p>Request reviews from satisfied clients</p>
+      </div>
+
+      <ion-card>
+        <ion-card-header>
+          <ion-card-subtitle>Eligibility Criteria</ion-card-subtitle>
+          <ion-card-title>Who Should I Ask?</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ul class="criteria-list">
+            <li>
+              <ion-icon name="checkmark-circle" color="success"></ion-icon>
+              Clients with 5+ completed sessions
+            </li>
+            <li>
+              <ion-icon name="checkmark-circle" color="success"></ion-icon>
+              Recent training activity (last 30 days)
+            </li>
+            <li>
+              <ion-icon name="checkmark-circle" color="success"></ion-icon>
+              Not recently asked for review
+            </li>
+            <li>
+              <ion-icon name="checkmark-circle" color="success"></ion-icon>
+              Positive training progress
+            </li>
+          </ul>
+        </ion-card-content>
+      </ion-card>
+
+      <div class="section-header">
+        <h2>Eligible Clients</h2>
+        <p>{{ eligibleClients().length }} ready for review request</p>
+      </div>
+
+      @if (eligibleClients().length === 0) {
+        <div class="empty-container">
+          <ion-icon name="people-outline"></ion-icon>
+          <h3>No Eligible Clients</h3>
+          <p>Continue training sessions to build your review base</p>
+        </div>
+      } @else {
+        <ion-list>
+          @for (client of eligibleClients(); track client.id) {
+            <ion-item>
+              <ion-icon slot="start" name="person-circle-outline" color="primary"></ion-icon>
+              <ion-label>
+                <h3>{{ client.name }}</h3>
+                <p>{{ client.email }}</p>
+                <p class="client-stats">{{ client.totalSessions }} sessions</p>
+                @if (client.lastSession) {
+                  <p class="timestamp">Last session: {{ client.lastSession | date:'mediumDate' }}</p>
+                }
+              </ion-label>
+              <div class="client-actions" slot="end">
+                <ion-button
+                  fill="outline"
+                  size="small"
+                  (click)="sendReviewRequest(client, 'email')"
+                >
+                  <ion-icon slot="icon-only" name="mail-outline"></ion-icon>
+                </ion-button>
+                @if (client.phone) {
+                  <ion-button
+                    fill="outline"
+                    size="small"
+                    (click)="sendReviewRequest(client, 'sms')"
+                  >
+                    <ion-icon slot="icon-only" name="chatbubble-outline"></ion-icon>
+                  </ion-button>
+                }
+              </div>
+            </ion-item>
+          }
+        </ion-list>
+      }
+    </div>
+  }
+</ion-content>
