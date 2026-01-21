@@ -1,0 +1,314 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Local SEO</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="loadDashboard()">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <!-- Time Range Selector -->
+  <ion-toolbar>
+    <ion-segment [value]="selectedTimeRange()" (ionChange)="changeTimeRange($event.detail.value)">
+      <ion-segment-button value="7d">
+        <ion-label>7 Days</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="30d">
+        <ion-label>30 Days</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="90d">
+        <ion-label>90 Days</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-container">
+      <ion-spinner></ion-spinner>
+      <p>Loading SEO dashboard...</p>
+    </div>
+  }
+
+  <!-- Dashboard Content -->
+  @if (!loading() && stats()) {
+    <!-- Overall SEO Score -->
+    <div class="score-section">
+      <ion-card>
+        <ion-card-content>
+          <div class="score-container">
+            <div class="score-circle" [attr.data-color]="scoreColor()">
+              <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" class="score-bg"></circle>
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="45"
+                  class="score-fill"
+                  [style.stroke-dashoffset]="283 - (283 * overallScore() / 100)"
+                ></circle>
+              </svg>
+              <div class="score-value">
+                <h1>{{ overallScore() }}</h1>
+                <p>SEO Score</p>
+              </div>
+            </div>
+            <div class="score-details">
+              <h3>Local SEO Performance</h3>
+              <p>{{ getTimeRangeLabel(selectedTimeRange()) }}</p>
+              @if (overallScore() >= 80) {
+                <ion-note color="success">Excellent! Keep up the great work.</ion-note>
+              } @else if (overallScore() >= 60) {
+                <ion-note color="warning">Good progress. Focus on key areas below.</ion-note>
+              } @else {
+                <ion-note color="danger">Needs improvement. Review recommendations.</ion-note>
+              }
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Google Business Profile -->
+    <div class="metrics-section">
+      <div class="section-header">
+        <h2>Google Business Profile</h2>
+      </div>
+      <ion-card button (click)="navigateToGoogleBusiness()">
+        <ion-card-content>
+          @if (stats()!.googleBusinessProfile.connected) {
+            <div class="metric-grid">
+              <div class="metric">
+                <ion-icon name="eye-outline" color="primary"></ion-icon>
+                <div>
+                  <h3>{{ formatNumber(stats()!.googleBusinessProfile.views) }}</h3>
+                  <p>Profile Views</p>
+                </div>
+              </div>
+              <div class="metric">
+                <ion-icon name="search-outline" color="primary"></ion-icon>
+                <div>
+                  <h3>{{ formatNumber(stats()!.googleBusinessProfile.searches) }}</h3>
+                  <p>Searches</p>
+                </div>
+              </div>
+              <div class="metric">
+                <ion-icon name="call-outline" color="success"></ion-icon>
+                <div>
+                  <h3>{{ formatNumber(stats()!.googleBusinessProfile.actions) }}</h3>
+                  <p>Actions</p>
+                </div>
+              </div>
+              <div class="metric">
+                <ion-icon
+                  [name]="stats()!.googleBusinessProfile.verified ? 'checkmark-circle' : 'alert-circle-outline'"
+                  [color]="stats()!.googleBusinessProfile.verified ? 'success' : 'warning'"
+                ></ion-icon>
+                <div>
+                  <h3>{{ stats()!.googleBusinessProfile.verified ? 'Verified' : 'Pending' }}</h3>
+                  <p>Status</p>
+                </div>
+              </div>
+            </div>
+          } @else {
+            <div class="empty-state">
+              <ion-icon name="business-outline"></ion-icon>
+              <h3>Connect Google Business</h3>
+              <p>Manage your Google Business Profile and track performance</p>
+              <ion-button expand="block" (click)="connectGoogleBusiness()">
+                <ion-icon slot="start" name="logo-google"></ion-icon>
+                Connect Now
+              </ion-button>
+            </div>
+          }
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Keywords -->
+    <div class="metrics-section">
+      <div class="section-header">
+        <h2>Keyword Rankings</h2>
+      </div>
+      <ion-card button (click)="navigateToKeywords()">
+        <ion-card-content>
+          <div class="metric-grid">
+            <div class="metric">
+              <ion-icon name="list-outline" color="primary"></ion-icon>
+              <div>
+                <h3>{{ stats()!.keywords.total }}</h3>
+                <p>Tracked</p>
+              </div>
+            </div>
+            <div class="metric">
+              <ion-icon name="trophy-outline" color="warning"></ion-icon>
+              <div>
+                <h3>{{ stats()!.keywords.topThree }}</h3>
+                <p>Top 3</p>
+              </div>
+            </div>
+            <div class="metric">
+              <ion-icon name="podium-outline" color="success"></ion-icon>
+              <div>
+                <h3>{{ stats()!.keywords.topTen }}</h3>
+                <p>Top 10</p>
+              </div>
+            </div>
+            <div class="metric">
+              <ion-icon name="bar-chart-outline" color="medium"></ion-icon>
+              <div>
+                <h3>{{ stats()!.keywords.avgRank.toFixed(1) }}</h3>
+                <p>Avg Rank</p>
+              </div>
+            </div>
+          </div>
+          <div class="keyword-trends">
+            <span class="trend-item success">
+              <ion-icon name="trending-up"></ion-icon>
+              {{ stats()!.keywords.improving }} improving
+            </span>
+            <span class="trend-item danger">
+              <ion-icon name="trending-down"></ion-icon>
+              {{ stats()!.keywords.declining }} declining
+            </span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Reviews -->
+    <div class="metrics-section">
+      <div class="section-header">
+        <h2>Reviews & Ratings</h2>
+      </div>
+      <ion-card button (click)="navigateToReviews()">
+        <ion-card-content>
+          <div class="metric-grid">
+            <div class="metric">
+              <ion-icon name="star" color="warning"></ion-icon>
+              <div>
+                <h3>{{ stats()!.reviews.avgRating.toFixed(1) }}</h3>
+                <p>Avg Rating</p>
+              </div>
+            </div>
+            <div class="metric">
+              <ion-icon name="chatbubbles-outline" color="primary"></ion-icon>
+              <div>
+                <h3>{{ stats()!.reviews.total }}</h3>
+                <p>Total Reviews</p>
+              </div>
+            </div>
+            <div class="metric">
+              <ion-icon name="time-outline" color="warning"></ion-icon>
+              <div>
+                <h3>{{ stats()!.reviews.pending }}</h3>
+                <p>Pending</p>
+              </div>
+            </div>
+            <div class="metric">
+              <ion-icon name="checkmark-done-outline" color="success"></ion-icon>
+              <div>
+                <h3>{{ formatPercentage(stats()!.reviews.responseRate) }}</h3>
+                <p>Response Rate</p>
+              </div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- NAP Consistency -->
+    <div class="metrics-section">
+      <div class="section-header">
+        <h2>NAP Consistency</h2>
+      </div>
+      <ion-card button (click)="navigateToNAP()">
+        <ion-card-content>
+          <div class="nap-score">
+            <div class="nap-circle" [attr.data-score]="stats()!.napConsistency.score">
+              <h2>{{ stats()!.napConsistency.score }}%</h2>
+              <p>Consistency</p>
+            </div>
+            <div class="nap-details">
+              <div class="nap-stat">
+                <ion-icon
+                  [name]="stats()!.napConsistency.issues === 0 ? 'checkmark-circle' : 'alert-circle'"
+                  [color]="stats()!.napConsistency.issues === 0 ? 'success' : 'warning'"
+                ></ion-icon>
+                <span>{{ stats()!.napConsistency.issues }} issues found</span>
+              </div>
+              <div class="nap-stat">
+                <ion-icon name="globe-outline" color="primary"></ion-icon>
+                <span>{{ stats()!.napConsistency.platforms }} platforms checked</span>
+              </div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Schema.org -->
+    <div class="metrics-section">
+      <div class="section-header">
+        <h2>Schema Markup</h2>
+      </div>
+      <ion-card button (click)="navigateToSchema()">
+        <ion-card-content>
+          <div class="schema-status">
+            <ion-icon
+              [name]="stats()!.schemaOrg.implemented ? 'code-working' : 'code-slash-outline'"
+              [color]="stats()!.schemaOrg.implemented ? 'success' : 'medium'"
+              size="large"
+            ></ion-icon>
+            <div>
+              <h3>{{ stats()!.schemaOrg.implemented ? 'Implemented' : 'Not Implemented' }}</h3>
+              @if (stats()!.schemaOrg.implemented) {
+                <p>{{ stats()!.schemaOrg.types.length }} schema types active</p>
+                <div class="schema-badges">
+                  @for (type of stats()!.schemaOrg.types; track type) {
+                    <ion-badge color="primary">{{ type }}</ion-badge>
+                  }
+                </div>
+              } @else {
+                <p>Add structured data to improve search visibility</p>
+              }
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="activity-section">
+      <div class="section-header">
+        <h2>Recent Activity</h2>
+      </div>
+      <ion-list>
+        @for (activity of activities(); track activity.id) {
+          <ion-item>
+            <ion-icon
+              slot="start"
+              [name]="getActivityIcon(activity.type)"
+              [color]="getActivityColor(activity.status)"
+            ></ion-icon>
+            <ion-label>
+              <h3>{{ activity.title }}</h3>
+              <p>{{ activity.message }}</p>
+              <p class="timestamp">{{ activity.timestamp | date:'short' }}</p>
+            </ion-label>
+          </ion-item>
+        }
+      </ion-list>
+    </div>
+  }
+</ion-content>
