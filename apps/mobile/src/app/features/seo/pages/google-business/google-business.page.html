@@ -1,0 +1,343 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/seo"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Google Business Profile</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="loadProfile()">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  @if (connected()) {
+    <ion-toolbar>
+      <ion-segment [value]="selectedTab()" (ionChange)="selectedTab.set($event.detail.value)">
+        <ion-segment-button value="info">
+          <ion-label>Profile</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="hours">
+          <ion-label>Hours</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="insights">
+          <ion-label>Insights</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </ion-toolbar>
+  }
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-container">
+      <ion-spinner></ion-spinner>
+      <p>Loading Google Business Profile...</p>
+    </div>
+  }
+
+  <!-- Not Connected -->
+  @if (!loading() && !connected()) {
+    <div class="connect-section">
+      <ion-card>
+        <ion-card-content>
+          <div class="connect-content">
+            <ion-icon name="logo-google" color="primary"></ion-icon>
+            <h2>Connect Google Business Profile</h2>
+            <p>Manage your Google Business Profile directly from FitOS. Update your business information, track insights, and respond to reviews.</p>
+
+            <div class="benefits">
+              <div class="benefit">
+                <ion-icon name="checkmark-circle" color="success"></ion-icon>
+                <span>Update business info instantly</span>
+              </div>
+              <div class="benefit">
+                <ion-icon name="checkmark-circle" color="success"></ion-icon>
+                <span>Track views and searches</span>
+              </div>
+              <div class="benefit">
+                <ion-icon name="checkmark-circle" color="success"></ion-icon>
+                <span>Manage customer actions</span>
+              </div>
+              <div class="benefit">
+                <ion-icon name="checkmark-circle" color="success"></ion-icon>
+                <span>Monitor performance metrics</span>
+              </div>
+            </div>
+
+            <ion-button expand="block" size="large" (click)="connectGoogle()">
+              <ion-icon slot="start" name="logo-google"></ion-icon>
+              Connect Google Business
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  }
+
+  <!-- Connected - Profile Tab -->
+  @if (!loading() && connected() && selectedTab() === 'info') {
+    <div class="profile-section">
+      <form [formGroup]="profileForm">
+        <ion-list>
+          <ion-list-header>
+            <ion-label>Business Information</ion-label>
+          </ion-list-header>
+
+          <ion-item>
+            <ion-input
+              label="Business Name"
+              labelPlacement="stacked"
+              formControlName="name"
+              placeholder="Enter business name"
+            ></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-textarea
+              label="Description"
+              labelPlacement="stacked"
+              formControlName="description"
+              placeholder="Describe your business..."
+              rows="4"
+              maxlength="750"
+            ></ion-textarea>
+            <ion-note slot="helper">{{ profileForm.get('description')?.value?.length || 0 }}/750</ion-note>
+          </ion-item>
+
+          <ion-item>
+            <ion-input
+              label="Phone Number"
+              labelPlacement="stacked"
+              formControlName="phone"
+              type="tel"
+              placeholder="(555) 123-4567"
+            ></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-input
+              label="Website"
+              labelPlacement="stacked"
+              formControlName="website"
+              type="url"
+              placeholder="https://example.com"
+            ></ion-input>
+          </ion-item>
+
+          <ion-list-header>
+            <ion-label>Address</ion-label>
+          </ion-list-header>
+
+          <ion-item>
+            <ion-input
+              label="Street Address"
+              labelPlacement="stacked"
+              formControlName="street"
+              placeholder="123 Main St"
+            ></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-input
+              label="City"
+              labelPlacement="stacked"
+              formControlName="city"
+              placeholder="Chicago"
+            ></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-input
+              label="State"
+              labelPlacement="stacked"
+              formControlName="state"
+              placeholder="IL"
+            ></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-input
+              label="ZIP Code"
+              labelPlacement="stacked"
+              formControlName="zip"
+              placeholder="60601"
+            ></ion-input>
+          </ion-item>
+        </ion-list>
+
+        <div class="button-container">
+          <ion-button expand="block" (click)="saveProfile()" [disabled]="profileForm.invalid">
+            <ion-icon slot="start" name="save-outline"></ion-icon>
+            Save Profile
+          </ion-button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- Connected - Hours Tab -->
+  @if (!loading() && connected() && selectedTab() === 'hours') {
+    <div class="hours-section">
+      <div class="hours-header">
+        <h3>Business Hours</h3>
+        <ion-button fill="outline" size="small" (click)="copyAllHours()">
+          <ion-icon slot="start" name="copy-outline"></ion-icon>
+          Copy to All
+        </ion-button>
+      </div>
+
+      <form [formGroup]="hoursForm">
+        <ion-list>
+          @for (day of daysOfWeek; track day) {
+            <ion-item>
+              <ion-label>{{ getDayLabel(day) }}</ion-label>
+              <div class="hours-controls">
+                @if (!hoursForm.get(day + '_closed')?.value) {
+                  <ion-input
+                    [formControlName]="day + '_open'"
+                    type="time"
+                  ></ion-input>
+                  <span class="time-separator">-</span>
+                  <ion-input
+                    [formControlName]="day + '_close'"
+                    type="time"
+                  ></ion-input>
+                } @else {
+                  <span class="closed-label">Closed</span>
+                }
+                <ion-toggle
+                  [formControlName]="day + '_closed'"
+                  slot="end"
+                ></ion-toggle>
+              </div>
+            </ion-item>
+          }
+        </ion-list>
+
+        <div class="button-container">
+          <ion-button expand="block" (click)="saveHours()">
+            <ion-icon slot="start" name="save-outline"></ion-icon>
+            Save Hours
+          </ion-button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- Connected - Insights Tab -->
+  @if (!loading() && connected() && selectedTab() === 'insights' && insights()) {
+    <div class="insights-section">
+      <div class="insights-grid">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Profile Views</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="insight-value">
+              <ion-icon name="eye-outline" color="primary"></ion-icon>
+              <h2>{{ formatNumber(insights()!.views) }}</h2>
+            </div>
+            <p>Total views in last 30 days</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Searches</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="insight-value">
+              <ion-icon name="search-outline" color="primary"></ion-icon>
+              <h2>{{ formatNumber(insights()!.searches) }}</h2>
+            </div>
+            <p>How customers found you</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Website Clicks</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="insight-value">
+              <ion-icon name="globe-outline" color="success"></ion-icon>
+              <h2>{{ formatNumber(insights()!.actions.website) }}</h2>
+            </div>
+            <p>Visitors to your website</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Phone Calls</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="insight-value">
+              <ion-icon name="call-outline" color="success"></ion-icon>
+              <h2>{{ formatNumber(insights()!.actions.phone) }}</h2>
+            </div>
+            <p>Calls from your profile</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Direction Requests</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="insight-value">
+              <ion-icon name="navigate-outline" color="success"></ion-icon>
+              <h2>{{ formatNumber(insights()!.actions.directions) }}</h2>
+            </div>
+            <p>Requests for directions</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Photos</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="insight-value">
+              <ion-icon name="images-outline" color="primary"></ion-icon>
+              <h2>{{ formatNumber(insights()!.photos) }}</h2>
+            </div>
+            <p>Photos on your profile</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Reviews</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="insight-value">
+              <ion-icon name="star" color="warning"></ion-icon>
+              <h2>{{ insights()!.reviews.rating.toFixed(1) }}</h2>
+            </div>
+            <p>{{ insights()!.reviews.count }} total reviews</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Total Actions</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="insight-value">
+              <ion-icon name="analytics-outline" color="success"></ion-icon>
+              <h2>{{ formatNumber(insights()!.actions.website + insights()!.actions.phone + insights()!.actions.directions) }}</h2>
+            </div>
+            <p>Customer interactions</p>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </div>
+  }
+</ion-content>

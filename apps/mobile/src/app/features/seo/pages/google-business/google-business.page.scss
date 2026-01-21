@@ -1,0 +1,259 @@
+/**
+ * Google Business Profile Page Styles
+ * Sprint 42: Local SEO Automation
+ */
+
+// Loading
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 2rem;
+  text-align: center;
+
+  ion-spinner {
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+  }
+}
+
+// Connect Section
+.connect-section {
+  padding: 2rem 1rem;
+}
+
+.connect-content {
+  text-align: center;
+  padding: 2rem 1rem;
+
+  ion-icon {
+    font-size: 80px;
+    margin-bottom: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    color: var(--ion-text-color);
+  }
+
+  > p {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0 0 2rem 0;
+    color: var(--ion-color-medium);
+  }
+}
+
+.benefits {
+  margin: 2rem 0;
+  text-align: left;
+}
+
+.benefit {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+
+  ion-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+  span {
+    font-size: 0.9375rem;
+    color: var(--ion-text-color);
+  }
+}
+
+// Profile Section
+.profile-section {
+  padding: 1rem;
+  padding-bottom: 2rem;
+}
+
+ion-list {
+  padding: 0;
+  margin-bottom: 1rem;
+
+  ion-list-header {
+    padding: 1.5rem 1rem 0.75rem;
+
+    ion-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--ion-color-medium);
+    }
+  }
+
+  ion-item {
+    --padding-start: 1rem;
+    --padding-end: 1rem;
+    margin-bottom: 0.5rem;
+
+    ion-input,
+    ion-textarea {
+      font-size: 0.9375rem;
+    }
+
+    ion-textarea {
+      margin-top: 0.5rem;
+    }
+  }
+}
+
+// Hours Section
+.hours-section {
+  padding: 1rem;
+  padding-bottom: 2rem;
+}
+
+.hours-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  margin-bottom: 1rem;
+
+  h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--ion-text-color);
+  }
+}
+
+.hours-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  justify-content: flex-end;
+
+  ion-input {
+    max-width: 90px;
+    font-size: 0.875rem;
+  }
+
+  .time-separator {
+    color: var(--ion-color-medium);
+  }
+
+  .closed-label {
+    font-size: 0.875rem;
+    color: var(--ion-color-medium);
+    font-style: italic;
+  }
+
+  ion-toggle {
+    margin-left: 0.5rem;
+  }
+}
+
+// Insights Section
+.insights-section {
+  padding: 1rem;
+  padding-bottom: 2rem;
+}
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+
+  ion-card {
+    margin: 0;
+  }
+
+  ion-card-header {
+    padding-bottom: 0.5rem;
+  }
+
+  ion-card-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  ion-card-content {
+    padding-top: 0.75rem;
+  }
+}
+
+.insight-value {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+
+  ion-icon {
+    font-size: 40px;
+  }
+
+  h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--ion-text-color);
+  }
+}
+
+.insights-grid ion-card-content p {
+  font-size: 0.875rem;
+  margin: 0;
+  color: var(--ion-color-medium);
+}
+
+// Button Container
+.button-container {
+  padding: 1.5rem 1rem;
+
+  ion-button {
+    margin: 0;
+  }
+}
+
+// Segment
+ion-segment {
+  --background: var(--ion-color-light);
+
+  ion-segment-button {
+    --indicator-color: var(--ion-color-primary);
+    font-size: 0.875rem;
+    min-width: auto;
+
+    ion-label {
+      margin: 0.5rem 0;
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 576px) {
+  .hours-controls {
+    flex-wrap: wrap;
+
+    ion-input {
+      max-width: 80px;
+    }
+  }
+
+  .insights-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Dark Mode
+@media (prefers-color-scheme: dark) {
+  .connect-content ion-icon {
+    opacity: 0.9;
+  }
+}
