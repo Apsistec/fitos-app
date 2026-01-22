@@ -41,14 +41,7 @@ import { Device } from '@capacitor/device';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SupportService } from '../../../../core/services/support.service';
-import type { SupportTicketPayload } from '../../models/help.models';
-
-interface DeviceInfo {
-  appVersion: string;
-  platform: string;
-  osVersion: string;
-  deviceModel: string;
-}
+import type { SupportTicketPayload, DeviceInfo } from '../../models/help.models';
 
 @Component({
   selector: 'app-contact-support',
@@ -134,7 +127,7 @@ export class ContactSupportPage implements OnInit {
 
       this.deviceInfo.set({
         appVersion: '1.0.0', // TODO: Get from environment or package.json
-        platform: info.platform,
+        platform: info.platform as 'ios' | 'android' | 'web',
         osVersion: info.osVersion,
         deviceModel: info.model,
       });

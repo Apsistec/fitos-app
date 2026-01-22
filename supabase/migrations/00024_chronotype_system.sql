@@ -135,10 +135,9 @@ CREATE POLICY "Trainers can view client chronotypes"
   ON user_chronotypes FOR SELECT
   USING (
     EXISTS (
-      SELECT 1 FROM trainer_clients
-      WHERE trainer_clients.trainer_id = auth.uid()
-        AND trainer_clients.client_id = user_chronotypes.user_id
-        AND trainer_clients.status = 'active'
+      SELECT 1 FROM client_profiles
+      WHERE client_profiles.trainer_id = auth.uid()
+        AND client_profiles.id = user_chronotypes.user_id
     )
   );
 
@@ -162,5 +161,3 @@ COMMENT ON TABLE chronotype_assessment_history IS 'Historical record of chronoty
 -- Grant permissions
 GRANT SELECT, INSERT, UPDATE ON user_chronotypes TO authenticated;
 GRANT SELECT, INSERT ON chronotype_assessment_history TO authenticated;
-GRANT USAGE ON SEQUENCE user_chronotypes_id_seq TO authenticated;
-GRANT USAGE ON SEQUENCE chronotype_assessment_history_id_seq TO authenticated;

@@ -13,7 +13,7 @@
 -- INTEGRATIONS
 -- =====================================================================
 
-CREATE TABLE integrations (
+CREATE TABLE IF NOT EXISTS integrations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
 
@@ -52,10 +52,10 @@ CREATE TABLE integrations (
 );
 
 -- Indexes
-CREATE INDEX idx_integrations_user_id ON integrations(user_id);
-CREATE INDEX idx_integrations_type ON integrations(integration_type);
-CREATE INDEX idx_integrations_status ON integrations(status);
-CREATE INDEX idx_integrations_next_sync ON integrations(next_sync_at) WHERE next_sync_at IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_integrations_user_id ON integrations(user_id);
+CREATE INDEX IF NOT EXISTS idx_integrations_type ON integrations(integration_type);
+CREATE INDEX IF NOT EXISTS idx_integrations_status ON integrations(status);
+CREATE INDEX IF NOT EXISTS idx_integrations_next_sync ON integrations(next_sync_at) WHERE next_sync_at IS NOT NULL;
 
 -- Updated at trigger
 CREATE TRIGGER update_integrations_updated_at
@@ -74,7 +74,7 @@ CREATE POLICY "Users can manage own integrations"
 -- WEBHOOK EVENTS
 -- =====================================================================
 
-CREATE TABLE webhook_events (
+CREATE TABLE IF NOT EXISTS webhook_events (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     integration_id UUID NOT NULL REFERENCES integrations(id) ON DELETE CASCADE,
 
@@ -118,7 +118,7 @@ CREATE POLICY "Users can view own webhook events"
 -- WEBHOOK SUBSCRIPTIONS
 -- =====================================================================
 
-CREATE TABLE webhook_subscriptions (
+CREATE TABLE IF NOT EXISTS webhook_subscriptions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     integration_id UUID NOT NULL REFERENCES integrations(id) ON DELETE CASCADE,
 
@@ -164,7 +164,7 @@ CREATE POLICY "Users can manage own webhook subscriptions"
 -- INTEGRATION SYNC LOG
 -- =====================================================================
 
-CREATE TABLE integration_sync_log (
+CREATE TABLE IF NOT EXISTS integration_sync_log (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     integration_id UUID NOT NULL REFERENCES integrations(id) ON DELETE CASCADE,
 
@@ -211,7 +211,7 @@ CREATE POLICY "Users can view own integration sync logs"
 -- CALENDAR EVENTS (For Google Calendar sync)
 -- =====================================================================
 
-CREATE TABLE calendar_events (
+CREATE TABLE IF NOT EXISTS calendar_events (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     integration_id UUID NOT NULL REFERENCES integrations(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -278,10 +278,10 @@ CREATE POLICY "Trainers can view client calendar events"
     ON calendar_events FOR SELECT
     USING (
         EXISTS (
-            SELECT 1 FROM trainer_clients
-            WHERE trainer_clients.client_id = calendar_events.user_id
-            AND trainer_clients.trainer_id = auth.uid()
-            AND trainer_clients.status = 'active'
+            SELECT 1 FROM client_profiles
+            WHERE client_profiles.id = calendar_events.user_id
+            AND client_profiles.trainer_id = auth.uid()
+            AND TRUE
         )
     );
 
@@ -289,7 +289,7 @@ CREATE POLICY "Trainers can view client calendar events"
 -- APPOINTMENT BOOKINGS (For Calendly/Acuity)
 -- =====================================================================
 
-CREATE TABLE appointment_bookings (
+CREATE TABLE IF NOT EXISTS appointment_bookings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     integration_id UUID NOT NULL REFERENCES integrations(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -350,7 +350,7 @@ CREATE POLICY "Users can manage own appointment bookings"
 -- ZAPIER TRIGGERS (Outbound webhooks)
 -- =====================================================================
 
-CREATE TABLE zapier_triggers (
+CREATE TABLE IF NOT EXISTS zapier_triggers (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     integration_id UUID NOT NULL REFERENCES integrations(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,

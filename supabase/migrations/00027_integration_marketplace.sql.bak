@@ -1,0 +1,452 @@
+-- Integration Marketplace v2
+-- Sprint 39: Integration Marketplace
+--
+-- Enables Zapier webhooks, Google Calendar 2-way sync, Calendly, and Acuity Scheduling
+-- integrations to reduce platform switching and enable existing tool usage.
+--
+-- Research:
+-- - 46% of trainers use 5-10 different tools daily
+-- - Calendar sync is #1 requested integration feature
+-- - Zapier enables 5,000+ app integrations
+
+-- =====================================================================
+-- INTEGRATIONS
+-- =====================================================================
+
+CREATE TABLE integrations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+
+    -- Integration details
+    integration_type TEXT NOT NULL CHECK (integration_type IN ('zapier', 'google_calendar', 'calendly', 'acuity')),
+    name TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'paused', 'disconnected', 'error')),
+
+    -- Authentication
+    auth_type TEXT NOT NULL CHECK (auth_type IN ('api_key', 'oauth', 'webhook_signature')),
+    encrypted_credentials JSONB NOT NULL, -- API keys, OAuth tokens, etc. (encrypted by Supabase Vault)
+
+    -- Configuration
+    config JSONB DEFAULT '{}', -- Integration-specific settings
+    sync_direction TEXT CHECK (sync_direction IN ('one_way_to_fitos', 'one_way_from_fitos', 'two_way')),
+
+    -- Sync state (for Google Calendar)
+    last_sync_at TIMESTAMPTZ,
+    sync_token TEXT, -- Google Calendar incremental sync token
+    next_sync_at TIMESTAMPTZ,
+
+    -- Webhook details (for Zapier, Calendly, Acuity)
+    webhook_url TEXT,
+    webhook_secret TEXT,
+
+    -- Error tracking
+    last_error TEXT,
+    error_count INT NOT NULL DEFAULT 0,
+    last_error_at TIMESTAMPTZ,
+
+    -- Metadata
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    UNIQUE(user_id, integration_type, name)
+);
+
+-- Indexes
+CREATE INDEX idx_integrations_user_id ON integrations(user_id);
+CREATE INDEX idx_integrations_type ON integrations(integration_type);
+CREATE INDEX idx_integrations_status ON integrations(status);
+CREATE INDEX idx_integrations_next_sync ON integrations(next_sync_at) WHERE next_sync_at IS NOT NULL;
+
+-- Updated at trigger
+CREATE TRIGGER update_integrations_updated_at
+    BEFORE UPDATE ON integrations
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- RLS Policies
+ALTER TABLE integrations ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage own integrations"
+    ON integrations FOR ALL
+    USING (auth.uid() = user_id);
+
+-- =====================================================================
+-- WEBHOOK EVENTS
+-- =====================================================================
+
+CREATE TABLE webhook_events (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    integration_id UUID NOT NULL REFERENCES integrations(id) ON DELETE CASCADE,
+
+    -- Event details
+    event_type TEXT NOT NULL,
+    event_data JSONB NOT NULL,
+    signature TEXT, -- For verification
+    headers JSONB, -- Store all headers for debugging
+
+    -- Processing
+    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'failed', 'retrying')),
+    processed_at TIMESTAMPTZ,
+    error_message TEXT,
+    retry_count INT NOT NULL DEFAULT 0,
+    next_retry_at TIMESTAMPTZ,
+
+    -- Metadata
+    received_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Indexes
+CREATE INDEX idx_webhook_events_integration_id ON webhook_events(integration_id);
+CREATE INDEX idx_webhook_events_status ON webhook_events(status);
+CREATE INDEX idx_webhook_events_received_at ON webhook_events(received_at DESC);
+CREATE INDEX idx_webhook_events_next_retry ON webhook_events(next_retry_at) WHERE next_retry_at IS NOT NULL;
+
+-- RLS Policies
+ALTER TABLE webhook_events ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own webhook events"
+    ON webhook_events FOR SELECT
+    USING (
+        EXISTS (
+            SELECT 1 FROM integrations
+            WHERE integrations.id = webhook_events.integration_id
+            AND integrations.user_id = auth.uid()
+        )
+    );
+
+-- =====================================================================
+-- WEBHOOK SUBSCRIPTIONS
+-- =====================================================================
+
+CREATE TABLE webhook_subscriptions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    integration_id UUID NOT NULL REFERENCES integrations(id) ON DELETE CASCADE,
+
+    -- Subscription details
+    external_subscription_id TEXT, -- Calendly/Acuity subscription ID
+    event_types TEXT[] NOT NULL, -- Array of event types to subscribe to
+    target_url TEXT NOT NULL, -- FitOS webhook endpoint
+
+    -- Status
+    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'paused', 'expired', 'failed')),
+    expires_at TIMESTAMPTZ, -- For Google Calendar push notifications (renew every 24h)
+
+    -- Metadata
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Indexes
+CREATE INDEX idx_webhook_subscriptions_integration_id ON webhook_subscriptions(integration_id);
+CREATE INDEX idx_webhook_subscriptions_status ON webhook_subscriptions(status);
+CREATE INDEX idx_webhook_subscriptions_expires_at ON webhook_subscriptions(expires_at) WHERE expires_at IS NOT NULL;
+
+-- Updated at trigger
+CREATE TRIGGER update_webhook_subscriptions_updated_at
+    BEFORE UPDATE ON webhook_subscriptions
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- RLS Policies
+ALTER TABLE webhook_subscriptions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage own webhook subscriptions"
+    ON webhook_subscriptions FOR ALL
+    USING (
+        EXISTS (
+            SELECT 1 FROM integrations
+            WHERE integrations.id = webhook_subscriptions.integration_id
+            AND integrations.user_id = auth.uid()
+        )
+    );
+
+-- =====================================================================
+-- INTEGRATION SYNC LOG
+-- =====================================================================
+
+CREATE TABLE integration_sync_log (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    integration_id UUID NOT NULL REFERENCES integrations(id) ON DELETE CASCADE,
+
+    -- Sync details
+    sync_type TEXT NOT NULL CHECK (sync_type IN ('full', 'incremental')),
+    direction TEXT NOT NULL CHECK (direction IN ('to_fitos', 'from_fitos', 'bidirectional')),
+
+    -- Metrics
+    items_synced INT NOT NULL DEFAULT 0,
+    items_created INT NOT NULL DEFAULT 0,
+    items_updated INT NOT NULL DEFAULT 0,
+    items_deleted INT NOT NULL DEFAULT 0,
+    items_failed INT NOT NULL DEFAULT 0,
+
+    -- Status
+    status TEXT NOT NULL CHECK (status IN ('success', 'partial', 'failed')),
+    error_message TEXT,
+    duration_ms INT,
+
+    -- Metadata
+    started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    completed_at TIMESTAMPTZ
+);
+
+-- Indexes
+CREATE INDEX idx_integration_sync_log_integration_id ON integration_sync_log(integration_id);
+CREATE INDEX idx_integration_sync_log_started_at ON integration_sync_log(started_at DESC);
+CREATE INDEX idx_integration_sync_log_status ON integration_sync_log(status);
+
+-- RLS Policies
+ALTER TABLE integration_sync_log ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own integration sync logs"
+    ON integration_sync_log FOR SELECT
+    USING (
+        EXISTS (
+            SELECT 1 FROM integrations
+            WHERE integrations.id = integration_sync_log.integration_id
+            AND integrations.user_id = auth.uid()
+        )
+    );
+
+-- =====================================================================
+-- CALENDAR EVENTS (For Google Calendar sync)
+-- =====================================================================
+
+CREATE TABLE calendar_events (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    integration_id UUID NOT NULL REFERENCES integrations(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+
+    -- External event details
+    external_event_id TEXT NOT NULL, -- Google Calendar event ID
+    external_calendar_id TEXT NOT NULL,
+
+    -- Event details
+    title TEXT NOT NULL,
+    description TEXT,
+    location TEXT,
+    start_time TIMESTAMPTZ NOT NULL,
+    end_time TIMESTAMPTZ NOT NULL,
+    all_day BOOLEAN NOT NULL DEFAULT false,
+
+    -- Attendees
+    attendees JSONB DEFAULT '[]',
+
+    -- Recurrence
+    recurrence_rule TEXT, -- iCal RRULE format
+    is_recurring BOOLEAN NOT NULL DEFAULT false,
+
+    -- FitOS mapping
+    linked_workout_id UUID REFERENCES workout_sessions(id),
+    linked_client_id UUID REFERENCES auth.users(id),
+
+    -- Sync metadata
+    last_modified_external TIMESTAMPTZ,
+    last_synced_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    sync_status TEXT NOT NULL DEFAULT 'synced' CHECK (sync_status IN ('synced', 'pending_push', 'conflict')),
+
+    -- Conflict resolution
+    conflict_data JSONB,
+
+    -- Metadata
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    UNIQUE(integration_id, external_event_id)
+);
+
+-- Indexes
+CREATE INDEX idx_calendar_events_integration_id ON calendar_events(integration_id);
+CREATE INDEX idx_calendar_events_user_id ON calendar_events(user_id);
+CREATE INDEX idx_calendar_events_start_time ON calendar_events(start_time DESC);
+CREATE INDEX idx_calendar_events_sync_status ON calendar_events(sync_status);
+CREATE INDEX idx_calendar_events_linked_workout ON calendar_events(linked_workout_id);
+
+-- Updated at trigger
+CREATE TRIGGER update_calendar_events_updated_at
+    BEFORE UPDATE ON calendar_events
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- RLS Policies
+ALTER TABLE calendar_events ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage own calendar events"
+    ON calendar_events FOR ALL
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "Trainers can view client calendar events"
+    ON calendar_events FOR SELECT
+    USING (
+        EXISTS (
+            SELECT 1 FROM client_profiles
+            WHERE client_profiles.id = calendar_events.user_id
+            AND client_profiles.trainer_id = auth.uid()
+            AND trainer_clients.status = 'active'
+        )
+    );
+
+-- =====================================================================
+-- APPOINTMENT BOOKINGS (For Calendly/Acuity)
+-- =====================================================================
+
+CREATE TABLE appointment_bookings (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    integration_id UUID NOT NULL REFERENCES integrations(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+
+    -- External booking details
+    external_booking_id TEXT NOT NULL, -- Calendly/Acuity booking ID
+    external_event_type_id TEXT,
+
+    -- Appointment details
+    title TEXT NOT NULL,
+    start_time TIMESTAMPTZ NOT NULL,
+    end_time TIMESTAMPTZ NOT NULL,
+    timezone TEXT NOT NULL,
+
+    -- Client details
+    client_name TEXT NOT NULL,
+    client_email TEXT NOT NULL,
+    client_phone TEXT,
+
+    -- FitOS mapping
+    linked_client_id UUID REFERENCES auth.users(id),
+    linked_workout_id UUID REFERENCES workout_sessions(id),
+
+    -- Status
+    status TEXT NOT NULL DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'canceled', 'rescheduled', 'completed')),
+    canceled_at TIMESTAMPTZ,
+    cancelation_reason TEXT,
+
+    -- Metadata
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    UNIQUE(integration_id, external_booking_id)
+);
+
+-- Indexes
+CREATE INDEX idx_appointment_bookings_integration_id ON appointment_bookings(integration_id);
+CREATE INDEX idx_appointment_bookings_user_id ON appointment_bookings(user_id);
+CREATE INDEX idx_appointment_bookings_start_time ON appointment_bookings(start_time DESC);
+CREATE INDEX idx_appointment_bookings_status ON appointment_bookings(status);
+CREATE INDEX idx_appointment_bookings_client_email ON appointment_bookings(client_email);
+CREATE INDEX idx_appointment_bookings_linked_client ON appointment_bookings(linked_client_id);
+
+-- Updated at trigger
+CREATE TRIGGER update_appointment_bookings_updated_at
+    BEFORE UPDATE ON appointment_bookings
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- RLS Policies
+ALTER TABLE appointment_bookings ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage own appointment bookings"
+    ON appointment_bookings FOR ALL
+    USING (auth.uid() = user_id);
+
+-- =====================================================================
+-- ZAPIER TRIGGERS (Outbound webhooks)
+-- =====================================================================
+
+CREATE TABLE zapier_triggers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    integration_id UUID NOT NULL REFERENCES integrations(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+
+    -- Trigger configuration
+    trigger_name TEXT NOT NULL,
+    trigger_event TEXT NOT NULL, -- 'client.created', 'workout.completed', etc.
+    webhook_url TEXT NOT NULL,
+
+    -- Filters
+    event_filters JSONB DEFAULT '{}', -- Optional filters for events
+
+    -- Status
+    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'paused', 'error')),
+    last_triggered_at TIMESTAMPTZ,
+    total_triggers INT NOT NULL DEFAULT 0,
+    failed_triggers INT NOT NULL DEFAULT 0,
+    last_error TEXT,
+
+    -- Metadata
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Indexes
+CREATE INDEX idx_zapier_triggers_integration_id ON zapier_triggers(integration_id);
+CREATE INDEX idx_zapier_triggers_user_id ON zapier_triggers(user_id);
+CREATE INDEX idx_zapier_triggers_event ON zapier_triggers(trigger_event);
+CREATE INDEX idx_zapier_triggers_status ON zapier_triggers(status);
+
+-- Updated at trigger
+CREATE TRIGGER update_zapier_triggers_updated_at
+    BEFORE UPDATE ON zapier_triggers
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- RLS Policies
+ALTER TABLE zapier_triggers ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage own zapier triggers"
+    ON zapier_triggers FOR ALL
+    USING (auth.uid() = user_id);
+
+-- =====================================================================
+-- HELPER FUNCTIONS
+-- =====================================================================
+
+-- Function to clean up old webhook events (retention: 30 days)
+CREATE OR REPLACE FUNCTION cleanup_old_webhook_events()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    DELETE FROM webhook_events
+    WHERE received_at < NOW() - INTERVAL '30 days'
+    AND status IN ('completed', 'failed');
+END;
+$$;
+
+-- Function to renew expiring Google Calendar push notifications
+CREATE OR REPLACE FUNCTION get_expiring_calendar_subscriptions()
+RETURNS TABLE (
+    subscription_id UUID,
+    integration_id UUID,
+    user_id UUID,
+    expires_at TIMESTAMPTZ
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        ws.id,
+        ws.integration_id,
+        i.user_id,
+        ws.expires_at
+    FROM webhook_subscriptions ws
+    JOIN integrations i ON i.id = ws.integration_id
+    WHERE ws.expires_at < NOW() + INTERVAL '2 hours'
+    AND ws.status = 'active'
+    AND i.integration_type = 'google_calendar';
+END;
+$$;
+
+-- =====================================================================
+-- COMMENTS
+-- =====================================================================
+
+COMMENT ON TABLE integrations IS 'Third-party integrations (Zapier, Google Calendar, Calendly, Acuity)';
+COMMENT ON TABLE webhook_events IS 'Incoming webhook events from integrations with retry logic';
+COMMENT ON TABLE webhook_subscriptions IS 'Webhook subscriptions for push notifications';
+COMMENT ON TABLE integration_sync_log IS 'Audit log of sync operations';
+COMMENT ON TABLE calendar_events IS 'Google Calendar events synchronized to FitOS';
+COMMENT ON TABLE appointment_bookings IS 'Calendly/Acuity appointment bookings';
+COMMENT ON TABLE zapier_triggers IS 'Outbound webhook triggers to Zapier';
+COMMENT ON FUNCTION cleanup_old_webhook_events IS 'Clean up webhook events older than 30 days';
+COMMENT ON FUNCTION get_expiring_calendar_subscriptions IS 'Get Google Calendar subscriptions expiring within 2 hours';

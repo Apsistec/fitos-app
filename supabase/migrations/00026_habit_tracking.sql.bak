@@ -69,7 +69,7 @@ CREATE POLICY "Trainers can view client habits"
             SELECT 1 FROM client_profiles
             WHERE client_profiles.id = habits.user_id
             AND client_profiles.trainer_id = auth.uid()
-            AND TRUE
+            AND trainer_clients.status = 'active'
         )
     );
 
@@ -117,7 +117,7 @@ CREATE POLICY "Trainers can view client habit completions"
             SELECT 1 FROM client_profiles
             WHERE client_profiles.id = habit_completions.user_id
             AND client_profiles.trainer_id = auth.uid()
-            AND TRUE
+            AND trainer_clients.status = 'active'
         )
     );
 
@@ -181,7 +181,7 @@ CREATE POLICY "Trainers can view client habit progress"
             SELECT 1 FROM client_profiles
             WHERE client_profiles.id = habit_progress.user_id
             AND client_profiles.trainer_id = auth.uid()
-            AND TRUE
+            AND trainer_clients.status = 'active'
         )
     );
 

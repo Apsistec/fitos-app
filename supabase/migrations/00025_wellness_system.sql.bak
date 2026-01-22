@@ -82,7 +82,7 @@ CREATE POLICY "Trainers can view client wellness screenings"
             SELECT 1 FROM client_profiles
             WHERE client_profiles.id = wellness_screenings.user_id
             AND client_profiles.trainer_id = auth.uid()
-            AND TRUE
+            AND trainer_clients.status = 'active'
         )
     );
 
@@ -146,7 +146,7 @@ CREATE POLICY "Trainers can view client wellness workout plans"
             SELECT 1 FROM client_profiles
             WHERE client_profiles.id = wellness_workout_plans.user_id
             AND client_profiles.trainer_id = auth.uid()
-            AND TRUE
+            AND trainer_clients.status = 'active'
         )
     );
 
@@ -206,7 +206,7 @@ CREATE POLICY "Trainers can view client wellness workout sessions"
             SELECT 1 FROM client_profiles
             WHERE client_profiles.id = wellness_workout_sessions.user_id
             AND client_profiles.trainer_id = auth.uid()
-            AND TRUE
+            AND trainer_clients.status = 'active'
         )
     );
 
@@ -259,7 +259,7 @@ CREATE POLICY "Trainers can view client crisis resource access"
             SELECT 1 FROM client_profiles
             WHERE client_profiles.id = wellness_crisis_resource_access.user_id
             AND client_profiles.trainer_id = auth.uid()
-            AND TRUE
+            AND trainer_clients.status = 'active'
         )
     );
 
@@ -329,7 +329,7 @@ CREATE POLICY "Trainers can view client wellness progress"
             SELECT 1 FROM client_profiles
             WHERE client_profiles.id = wellness_progress.user_id
             AND client_profiles.trainer_id = auth.uid()
-            AND TRUE
+            AND trainer_clients.status = 'active'
         )
     );
 
