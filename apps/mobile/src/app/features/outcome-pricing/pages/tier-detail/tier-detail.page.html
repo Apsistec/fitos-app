@@ -1,0 +1,209 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/outcome-pricing/tiers"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ tier()?.name || 'Pricing Tier' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="editTier()" [disabled]="!tier()">
+        <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="tier-detail-container">
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="loading-state">
+        <ion-spinner name="crescent"></ion-spinner>
+        <ion-text color="medium">
+          <p>Loading tier details...</p>
+        </ion-text>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (error() && !isLoading()) {
+      <div class="error-state">
+        <ion-text color="danger">
+          <h3>{{ error() }}</h3>
+        </ion-text>
+        <ion-button fill="outline" routerLink="/outcome-pricing/tiers">
+          Back to Tiers
+        </ion-button>
+      </div>
+    }
+
+    <!-- Tier Details -->
+    @if (tier() && !isLoading()) {
+      <!-- Tier Header -->
+      <ion-card class="tier-header-card">
+        <ion-card-header>
+          <div class="tier-header-content">
+            <div>
+              <ion-card-title>{{ tier()!.name }}</ion-card-title>
+              <ion-card-subtitle>{{ tier()!.description }}</ion-card-subtitle>
+            </div>
+            <ion-chip [color]="getVerificationMethodColor(tier()!.verification_method)">
+              {{ getVerificationMethodLabel(tier()!.verification_method) }}
+            </ion-chip>
+          </div>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-grid>
+            <ion-row>
+              <ion-col size="6">
+                <div class="price-info">
+                  <ion-label color="medium">Base Price</ion-label>
+                  <ion-text color="primary">
+                    <h2>${{ formatCurrency(tier()!.base_price_cents) }}</h2>
+                  </ion-text>
+                </div>
+              </ion-col>
+              <ion-col size="6">
+                <div class="price-info">
+                  <ion-label color="medium">Outcome Bonus</ion-label>
+                  <ion-text color="success">
+                    <h2>+${{ formatCurrency(tier()!.outcome_bonus_cents || 0) }}</h2>
+                  </ion-text>
+                </div>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Performance Metrics -->
+      @if (metrics()) {
+        <ion-card class="metrics-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="stats-chart-outline"></ion-icon>
+              Performance Metrics
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="6" size-md="4">
+                  <div class="metric-item">
+                    <ion-icon name="people-outline" color="primary"></ion-icon>
+                    <div class="metric-content">
+                      <ion-label color="medium">Total Clients</ion-label>
+                      <ion-text>
+                        <h3>{{ metrics()!.totalClients }}</h3>
+                      </ion-text>
+                    </div>
+                  </div>
+                </ion-col>
+                <ion-col size="6" size-md="4">
+                  <div class="metric-item">
+                    <ion-icon name="trending-up-outline" color="tertiary"></ion-icon>
+                    <div class="metric-content">
+                      <ion-label color="medium">Active Goals</ion-label>
+                      <ion-text>
+                        <h3>{{ metrics()!.activeGoals }}</h3>
+                      </ion-text>
+                    </div>
+                  </div>
+                </ion-col>
+                <ion-col size="6" size-md="4">
+                  <div class="metric-item">
+                    <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+                    <div class="metric-content">
+                      <ion-label color="medium">Goals Achieved</ion-label>
+                      <ion-text>
+                        <h3>{{ metrics()!.achievedGoals }}</h3>
+                      </ion-text>
+                    </div>
+                  </div>
+                </ion-col>
+                <ion-col size="6" size-md="4">
+                  <div class="metric-item">
+                    <ion-icon name="trophy-outline" color="warning"></ion-icon>
+                    <div class="metric-content">
+                      <ion-label color="medium">Completion Rate</ion-label>
+                      <ion-text>
+                        <h3>{{ metrics()!.avgCompletionRate }}%</h3>
+                      </ion-text>
+                    </div>
+                  </div>
+                </ion-col>
+                <ion-col size="6" size-md="4">
+                  <div class="metric-item">
+                    <ion-icon name="cash-outline" color="success"></ion-icon>
+                    <div class="metric-content">
+                      <ion-label color="medium">Bonus Revenue</ion-label>
+                      <ion-text>
+                        <h3>${{ metrics()!.totalBonusRevenue.toFixed(2) }}</h3>
+                      </ion-text>
+                    </div>
+                  </div>
+                </ion-col>
+                <ion-col size="6" size-md="4">
+                  <div class="metric-item">
+                    <ion-icon name="time-outline" color="medium"></ion-icon>
+                    <div class="metric-content">
+                      <ion-label color="medium">Avg. Time</ion-label>
+                      <ion-text>
+                        <h3>{{ metrics()!.avgTimeToCompletion }} days</h3>
+                      </ion-text>
+                    </div>
+                  </div>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-card-content>
+        </ion-card>
+      }
+
+      <!-- Actions -->
+      <ion-card class="actions-card">
+        <ion-card-content>
+          <ion-list>
+            <ion-item button (click)="viewClients()" detail>
+              <ion-icon slot="start" name="people-outline" color="primary"></ion-icon>
+              <ion-label>
+                <h3>View Clients on This Tier</h3>
+                <p>See all clients using this pricing tier</p>
+              </ion-label>
+              @if (metrics()) {
+                <ion-badge slot="end" color="primary">{{ metrics()!.totalClients }}</ion-badge>
+              }
+            </ion-item>
+
+            <ion-item button (click)="editTier()" detail>
+              <ion-icon slot="start" name="create-outline" color="tertiary"></ion-icon>
+              <ion-label>
+                <h3>Edit Tier</h3>
+                <p>Modify pricing and settings</p>
+              </ion-label>
+            </ion-item>
+
+            <ion-item button (click)="deactivateTier()" detail lines="none">
+              <ion-icon slot="start" name="trash-outline" color="danger"></ion-icon>
+              <ion-label color="danger">
+                <h3>Deactivate Tier</h3>
+                <p>Remove tier from available options</p>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Configuration Details -->
+      @if (tier()!.tier_config && Object.keys(tier()!.tier_config).length > 0) {
+        <ion-card class="config-card">
+          <ion-card-header>
+            <ion-card-title>Configuration</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <pre>{{ tier()!.tier_config | json }}</pre>
+          </ion-card-content>
+        </ion-card>
+      }
+    }
+  </div>
+</ion-content>

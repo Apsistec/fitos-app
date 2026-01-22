@@ -1,0 +1,166 @@
+.tier-detail-container {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 16px;
+}
+
+.error-state ion-text h3 {
+  text-align: center;
+}
+
+// Tier Header Card
+.tier-header-card {
+  margin-bottom: 16px;
+
+  .tier-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+
+    ion-card-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    ion-card-subtitle {
+      font-size: 0.9rem;
+      color: var(--ion-color-medium);
+    }
+
+    ion-chip {
+      flex-shrink: 0;
+    }
+  }
+
+  .price-info {
+    text-align: center;
+    padding: 8px 0;
+
+    ion-label {
+      display: block;
+      font-size: 0.875rem;
+      margin-bottom: 4px;
+    }
+
+    h2 {
+      margin: 0;
+      font-weight: 600;
+    }
+  }
+}
+
+// Metrics Card
+.metrics-card {
+  margin-bottom: 16px;
+
+  ion-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    ion-icon {
+      font-size: 1.5rem;
+    }
+  }
+
+  .metric-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+
+    ion-icon {
+      font-size: 2rem;
+      flex-shrink: 0;
+    }
+
+    .metric-content {
+      flex: 1;
+      min-width: 0;
+
+      ion-label {
+        display: block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+      }
+
+      h3 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// Actions Card
+.actions-card {
+  margin-bottom: 16px;
+
+  ion-list {
+    padding: 0;
+  }
+
+  ion-item {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+
+    h3 {
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    p {
+      font-size: 0.875rem;
+      color: var(--ion-color-medium);
+      margin: 0;
+    }
+  }
+}
+
+// Configuration Card
+.config-card {
+  margin-bottom: 16px;
+
+  pre {
+    background: var(--ion-color-step-50);
+    padding: 12px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.875rem;
+    margin: 0;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .tier-header-card .tier-header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .metrics-card .metric-item {
+    ion-icon {
+      font-size: 1.5rem;
+    }
+
+    .metric-content h3 {
+      font-size: 1.25rem;
+    }
+  }
+}

@@ -1,0 +1,309 @@
+.goal-detail-container {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 16px;
+}
+
+.error-state ion-text h3 {
+  text-align: center;
+}
+
+// Progress Card
+.progress-card {
+  margin-bottom: 16px;
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+
+    ion-card-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    ion-card-subtitle {
+      font-size: 0.9rem;
+      color: var(--ion-color-medium);
+    }
+  }
+
+  .progress-section {
+    margin-bottom: 24px;
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+
+      h2 {
+        margin: 0;
+        font-weight: 600;
+        color: var(--ion-color-success);
+      }
+
+      ion-label {
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+
+    ion-progress-bar {
+      height: 8px;
+      border-radius: 4px;
+    }
+  }
+
+  .values-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+
+    .value-item {
+      text-align: center;
+
+      ion-label {
+        display: block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+      }
+
+      h3 {
+        margin: 0;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// Timeline Card
+.timeline-card {
+  margin-bottom: 16px;
+
+  ion-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    ion-icon {
+      font-size: 1.5rem;
+    }
+  }
+
+  ion-list {
+    padding: 0;
+  }
+
+  ion-item {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+
+    h3 {
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    p {
+      font-size: 0.875rem;
+      color: var(--ion-color-medium);
+      margin: 0;
+    }
+  }
+}
+
+// Milestones Card
+.milestones-card {
+  margin-bottom: 16px;
+
+  ion-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    ion-icon {
+      font-size: 1.5rem;
+    }
+  }
+
+  .milestones-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+
+    .milestone-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 8px;
+      border-radius: 12px;
+      background: var(--ion-color-step-50);
+      transition: all 0.3s ease;
+
+      &.achieved {
+        background: var(--ion-color-success-tint);
+
+        ion-icon {
+          color: var(--ion-color-success);
+        }
+
+        h4 {
+          color: var(--ion-color-success);
+        }
+      }
+
+      &.current {
+        border: 2px solid var(--ion-color-primary);
+        background: var(--ion-color-primary-tint);
+      }
+
+      ion-icon {
+        font-size: 2rem;
+      }
+
+      h4 {
+        margin: 0;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// History Card
+.history-card {
+  margin-bottom: 16px;
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 32px;
+
+    ion-icon {
+      font-size: 4rem;
+    }
+
+    p {
+      font-size: 0.875rem;
+      margin: 0;
+    }
+  }
+
+  ion-list {
+    padding: 0;
+  }
+
+  .verification-item {
+    width: 100%;
+    padding: 12px 0;
+
+    .verification-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+
+      h3 {
+        margin: 0;
+        font-weight: 600;
+      }
+    }
+
+    .verification-details {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+
+      p {
+        margin: 0;
+        font-size: 0.875rem;
+      }
+
+      ion-chip {
+        height: 24px;
+      }
+    }
+  }
+}
+
+// Verify Card
+.verify-card {
+  margin-bottom: 16px;
+
+  ion-list {
+    padding: 0;
+    margin-bottom: 16px;
+  }
+
+  ion-item {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    margin-bottom: 16px;
+  }
+
+  .verify-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .verify-info {
+    padding: 12px;
+    background: var(--ion-color-step-50);
+    border-radius: 8px;
+
+    p {
+      margin: 0;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .progress-card {
+    .progress-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .values-grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+  }
+
+  .milestones-card .milestones-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+
+    .milestone-item {
+      padding: 12px 8px;
+
+      ion-icon {
+        font-size: 1.5rem;
+      }
+    }
+  }
+}

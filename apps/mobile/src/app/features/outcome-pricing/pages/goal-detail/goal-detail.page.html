@@ -1,0 +1,306 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/outcome-pricing/goals"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ goal() ? getGoalTypeLabel(goal()!.goal_type) : 'Goal Details' }}</ion-title>
+  </ion-toolbar>
+
+  <ion-toolbar>
+    <ion-segment [(ngModel)]="selectedTab" (ionChange)="onTabChange($event)">
+      <ion-segment-button value="overview">
+        <ion-label>Overview</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="history">
+        <ion-label>History</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="verify">
+        <ion-label>Verify</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="goal-detail-container">
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="loading-state">
+        <ion-spinner name="crescent"></ion-spinner>
+        <ion-text color="medium">
+          <p>Loading goal details...</p>
+        </ion-text>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (error() && !isLoading()) {
+      <div class="error-state">
+        <ion-text color="danger">
+          <h3>{{ error() }}</h3>
+        </ion-text>
+        <ion-button fill="outline" routerLink="/outcome-pricing/goals">
+          Back to Goals
+        </ion-button>
+      </div>
+    }
+
+    <!-- Goal Content -->
+    @if (goal() && !isLoading()) {
+      <!-- Overview Tab -->
+      @if (selectedTab() === 'overview') {
+        <!-- Progress Card -->
+        <ion-card class="progress-card">
+          <ion-card-header>
+            <div class="progress-header">
+              <div>
+                <ion-card-title>{{ getGoalTypeLabel(goal()!.goal_type) }}</ion-card-title>
+                <ion-card-subtitle>{{ goal()!.notes }}</ion-card-subtitle>
+              </div>
+              <ion-chip [color]="getStatusColor(goal()!.status)">
+                {{ goal()!.status }}
+              </ion-chip>
+            </div>
+          </ion-card-header>
+          <ion-card-content>
+            <!-- Progress Bar -->
+            <div class="progress-section">
+              <div class="progress-info">
+                <ion-text>
+                  <h2>{{ progressPercent() }}%</h2>
+                </ion-text>
+                <ion-label color="medium">Progress</ion-label>
+              </div>
+              <ion-progress-bar
+                [value]="progressPercent() / 100"
+                color="success"
+              ></ion-progress-bar>
+            </div>
+
+            <!-- Values -->
+            <div class="values-grid">
+              <div class="value-item">
+                <ion-label color="medium">Start</ion-label>
+                <ion-text>
+                  <h3>{{ goal()!.start_value }} {{ goal()!.unit }}</h3>
+                </ion-text>
+              </div>
+              <div class="value-item">
+                <ion-label color="medium">Current</ion-label>
+                <ion-text color="primary">
+                  <h3>{{ goal()!.current_value }} {{ goal()!.unit }}</h3>
+                </ion-text>
+              </div>
+              <div class="value-item">
+                <ion-label color="medium">Target</ion-label>
+                <ion-text color="success">
+                  <h3>{{ goal()!.target_value }} {{ goal()!.unit }}</h3>
+                </ion-text>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Timeline Card -->
+        <ion-card class="timeline-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="time-outline"></ion-icon>
+              Timeline
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list>
+              <ion-item lines="none">
+                <ion-icon slot="start" name="calendar-outline" color="medium"></ion-icon>
+                <ion-label>
+                  <h3>Target Date</h3>
+                  <p>{{ formatDate(goal()!.target_date) }}</p>
+                </ion-label>
+                @if (daysRemaining() > 0) {
+                  <ion-badge slot="end" color="primary">{{ daysRemaining() }} days</ion-badge>
+                } @else {
+                  <ion-badge slot="end" color="danger">Overdue</ion-badge>
+                }
+              </ion-item>
+
+              <ion-item lines="none">
+                <ion-icon slot="start" name="flash-outline" color="tertiary"></ion-icon>
+                <ion-label>
+                  <h3>Next Verification</h3>
+                  <p>{{ formatDate(goal()!.next_verification_due) }}</p>
+                </ion-label>
+              </ion-item>
+
+              @if (goal()!.last_verified_at) {
+                <ion-item lines="none">
+                  <ion-icon slot="start" name="checkmark-circle-outline" color="success"></ion-icon>
+                  <ion-label>
+                    <h3>Last Verified</h3>
+                    <p>{{ formatDateTime(goal()!.last_verified_at) }}</p>
+                  </ion-label>
+                </ion-item>
+              }
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Milestones Card -->
+        <ion-card class="milestones-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="trophy-outline"></ion-icon>
+              Milestones
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="milestones-grid">
+              @for (milestone of [25, 50, 75, 100]; track milestone) {
+                <div
+                  class="milestone-item"
+                  [class.achieved]="progressPercent() >= milestone"
+                  [class.current]="nextMilestone() === milestone"
+                >
+                  <ion-icon
+                    [name]="progressPercent() >= milestone ? 'checkmark-circle-outline' : 'trophy-outline'"
+                    [color]="progressPercent() >= milestone ? 'success' : 'medium'"
+                  ></ion-icon>
+                  <ion-text>
+                    <h4>{{ milestone }}%</h4>
+                  </ion-text>
+                </div>
+              }
+            </div>
+          </ion-card-content>
+        </ion-card>
+      }
+
+      <!-- History Tab -->
+      @if (selectedTab() === 'history') {
+        <ion-card class="history-card">
+          <ion-card-header>
+            <ion-card-title>Verification History</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            @if (verifications().length === 0) {
+              <div class="empty-state">
+                <ion-icon name="eye-outline" color="medium"></ion-icon>
+                <ion-text color="medium">
+                  <p>No verifications yet</p>
+                </ion-text>
+              </div>
+            } @else {
+              <ion-list>
+                @for (verification of verifications(); track verification.id) {
+                  <ion-item>
+                    <div class="verification-item">
+                      <div class="verification-header">
+                        <ion-text>
+                          <h3>{{ verification.measured_value }} {{ verification.unit }}</h3>
+                        </ion-text>
+                        <ion-badge
+                          [color]="verification.confidence_score >= 0.8 ? 'success' : 'warning'"
+                        >
+                          {{ (verification.confidence_score * 100).toFixed(0) }}% confidence
+                        </ion-badge>
+                      </div>
+                      <div class="verification-details">
+                        <ion-text color="medium">
+                          <p>
+                            {{ formatDateTime(verification.verified_at) }} •
+                            {{ verification.verification_method }}
+                          </p>
+                        </ion-text>
+                        @if (verification.anomaly_detected) {
+                          <ion-chip color="warning" size="small">
+                            <ion-icon name="warning-outline"></ion-icon>
+                            Anomaly Detected
+                          </ion-chip>
+                        }
+                        @if (verification.requires_manual_review) {
+                          <ion-chip color="warning" size="small">
+                            <ion-icon name="eye-outline"></ion-icon>
+                            Needs Review
+                          </ion-chip>
+                        }
+                      </div>
+                    </div>
+                  </ion-item>
+                }
+              </ion-list>
+            }
+          </ion-card-content>
+        </ion-card>
+      }
+
+      <!-- Verify Tab -->
+      @if (selectedTab() === 'verify') {
+        <ion-card class="verify-card">
+          <ion-card-header>
+            <ion-card-title>Manual Verification</ion-card-title>
+            <ion-card-subtitle>
+              Record current progress manually
+            </ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list>
+              <ion-item>
+                <ion-label position="stacked">Current Value ({{ goal()!.unit }})</ion-label>
+                <ion-input
+                  type="number"
+                  [(ngModel)]="manualValue"
+                  placeholder="Enter current value"
+                  [disabled]="isVerifying()"
+                ></ion-input>
+              </ion-item>
+
+              <ion-item>
+                <ion-label position="stacked">Notes (Optional)</ion-label>
+                <ion-textarea
+                  [(ngModel)]="verificationNotes"
+                  placeholder="Add any notes about this measurement"
+                  rows="3"
+                  [disabled]="isVerifying()"
+                ></ion-textarea>
+              </ion-item>
+            </ion-list>
+
+            <div class="verify-actions">
+              <ion-button
+                expand="block"
+                (click)="submitVerification()"
+                [disabled]="manualValue() === null || isVerifying()"
+              >
+                @if (isVerifying()) {
+                  <ion-spinner name="crescent"></ion-spinner>
+                } @else {
+                  <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
+                  Submit Verification
+                }
+              </ion-button>
+
+              <ion-button
+                expand="block"
+                fill="outline"
+                color="medium"
+                [disabled]="isVerifying()"
+              >
+                <ion-icon slot="start" name="camera-outline"></ion-icon>
+                Upload Photo (Coming Soon)
+              </ion-button>
+            </div>
+
+            <div class="verify-info">
+              <ion-text color="medium">
+                <p>
+                  Manual verifications will be reviewed for confidence scoring.
+                  Photo verifications provide higher confidence.
+                </p>
+              </ion-text>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      }
+    }
+  </div>
+</ion-content>
