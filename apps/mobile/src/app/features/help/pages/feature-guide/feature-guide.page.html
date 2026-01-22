@@ -1,0 +1,113 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/settings/help"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ guide()?.title || 'Feature Guide' }}</ion-title>
+    @if (guide()) {
+      <ion-buttons slot="end">
+        <ion-button (click)="onShareGuide()" fill="clear">
+          <ion-icon slot="icon-only" name="share-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    }
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="feature-guide-container">
+    @if (guide(); as currentGuide) {
+      <!-- Header Card -->
+      <ion-card class="header-card">
+        <ion-card-header>
+          <div class="header-content">
+            <div class="icon-wrapper">
+              <ion-icon [name]="currentGuide.icon" color="primary"></ion-icon>
+            </div>
+            <div class="text-content">
+              <ion-card-title>{{ currentGuide.title }}</ion-card-title>
+              <ion-card-subtitle>{{ currentGuide.description }}</ion-card-subtitle>
+              <div class="meta-info">
+                <ion-badge color="medium">
+                  <ion-icon name="time-outline"></ion-icon>
+                  {{ currentGuide.estimatedReadTime }} min read
+                </ion-badge>
+                <ion-badge color="medium">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  Updated {{ currentGuide.lastUpdated | date: 'MMM d, y' }}
+                </ion-badge>
+              </div>
+            </div>
+          </div>
+        </ion-card-header>
+      </ion-card>
+
+      <!-- Guide Sections -->
+      @for (section of currentGuide.sections; track section.id) {
+        <ion-card class="section-card">
+          <ion-card-header>
+            <div class="section-header">
+              @if (section.icon) {
+                <ion-icon [name]="section.icon" color="primary" class="section-icon"></ion-icon>
+              }
+              <ion-card-title>{{ section.title }}</ion-card-title>
+            </div>
+          </ion-card-header>
+
+          <ion-card-content>
+            <div [innerHTML]="section.content" class="section-content"></div>
+
+            <!-- Tips Section -->
+            @if (section.tips && section.tips.length > 0) {
+              <div class="tips-section">
+                <div class="tips-header">
+                  <ion-icon name="bulb-outline" color="warning"></ion-icon>
+                  <span>Pro Tips</span>
+                </div>
+                <ul class="tips-list">
+                  @for (tip of section.tips; track $index) {
+                    <li>{{ tip }}</li>
+                  }
+                </ul>
+              </div>
+            }
+          </ion-card-content>
+        </ion-card>
+      }
+
+      <!-- Related Guides -->
+      @if (relatedGuides().length > 0) {
+        <div class="related-guides-section">
+          <h3 class="related-guides-title">Related Guides</h3>
+          @for (relatedGuide of relatedGuides(); track relatedGuide.id) {
+            <ion-card button (click)="onRelatedGuideClick(relatedGuide)" class="related-guide-card">
+              <ion-card-content>
+                <div class="related-guide-content">
+                  <ion-icon [name]="relatedGuide.icon" color="primary" class="related-guide-icon"></ion-icon>
+                  <div class="related-guide-text">
+                    <h4>{{ relatedGuide.title }}</h4>
+                    <p>{{ relatedGuide.description }}</p>
+                  </div>
+                  <ion-icon name="chevron-forward-outline" color="medium" class="chevron"></ion-icon>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          }
+        </div>
+      }
+
+      <!-- Bottom Padding -->
+      <div class="bottom-padding"></div>
+    } @else {
+      <!-- Not Found State -->
+      <div class="not-found-state">
+        <ion-icon name="book-outline" class="not-found-icon"></ion-icon>
+        <h3>Guide Not Found</h3>
+        <p>The requested guide could not be found.</p>
+        <ion-button routerLink="/tabs/settings/help" fill="outline">
+          Back to Help Center
+        </ion-button>
+      </div>
+    }
+  </div>
+</ion-content>

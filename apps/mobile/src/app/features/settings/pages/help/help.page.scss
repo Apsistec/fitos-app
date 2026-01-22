@@ -1,0 +1,104 @@
+.help-page-container {
+  padding: 16px;
+  max-width: 800px;
+  margin: 0 auto;
+
+  .welcome-section {
+    margin-bottom: 32px;
+    text-align: center;
+
+    .welcome-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, var(--ion-text-color));
+      margin: 0 0 8px 0;
+    }
+
+    .welcome-subtitle {
+      font-size: 15px;
+      color: var(--fitos-text-secondary, var(--ion-color-step-600));
+      margin: 0 0 20px 0;
+      line-height: 1.5;
+    }
+
+    app-help-search {
+      display: block;
+      margin: 0 auto;
+    }
+  }
+
+  .quick-actions-section,
+  .role-specific-section {
+    margin-bottom: 24px;
+
+    ion-list-header {
+      padding: 0 0 12px 0;
+      margin-bottom: 8px;
+
+      ion-label {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, var(--ion-text-color));
+        margin: 0;
+      }
+    }
+  }
+
+  .role-specific-section {
+    .guides-list {
+      background: transparent;
+      padding: 0;
+
+      .guide-link-item {
+        --background: var(--fitos-bg-secondary, var(--ion-color-step-50));
+        --padding-start: 16px;
+        --padding-end: 16px;
+        --inner-padding-end: 0;
+        --min-height: 60px;
+        border: 1px solid var(--fitos-border-subtle, var(--ion-border-color));
+        border-radius: 12px;
+        margin-bottom: 8px;
+        transition: transform 150ms ease-in-out;
+
+        &:active {
+          transform: scale(0.99);
+        }
+
+        ion-icon[slot='start'] {
+          font-size: 24px;
+          margin-right: 12px;
+        }
+
+        ion-label {
+          h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--fitos-text-primary, var(--ion-text-color));
+            margin: 0;
+          }
+        }
+
+        ion-icon[slot='end'] {
+          font-size: 20px;
+          opacity: 0.6;
+        }
+      }
+    }
+  }
+
+  .version-info {
+    text-align: center;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--fitos-border-subtle, var(--ion-border-color));
+
+    p {
+      font-size: 13px;
+      margin: 0;
+    }
+  }
+
+  .bottom-padding {
+    height: 32px;
+  }
+}

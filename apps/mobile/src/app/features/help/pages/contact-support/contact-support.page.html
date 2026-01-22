@@ -1,0 +1,196 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/settings/help"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Contact Support</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="contact-support-container">
+    <!-- Header Card -->
+    <ion-card class="header-card">
+      <ion-card-header>
+        <div class="header-content">
+          <div class="icon-wrapper">
+            <ion-icon name="mail-outline"></ion-icon>
+          </div>
+          <div class="text-content">
+            <ion-card-title>Get Help</ion-card-title>
+            <ion-card-subtitle>
+              We typically respond within 24 hours. For faster answers, try searching our FAQs first.
+            </ion-card-subtitle>
+          </div>
+        </div>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="quick-links">
+          <ion-button fill="outline" size="small" (click)="navigateToFAQ()">
+            <ion-icon slot="start" name="help-circle-outline"></ion-icon>
+            Browse FAQs
+          </ion-button>
+          <ion-button fill="outline" size="small" (click)="navigateToGettingStarted()">
+            <ion-icon slot="start" name="rocket-outline"></ion-icon>
+            Getting Started
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Support Form -->
+    <ion-card class="form-card">
+      <ion-card-header>
+        <ion-card-title>Submit a Support Request</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <form [formGroup]="supportForm" (ngSubmit)="onSubmit()">
+          <ion-list lines="none" class="form-list">
+            <!-- Category -->
+            <ion-item class="form-item">
+              <ion-label position="stacked">
+                Category <span class="required">*</span>
+              </ion-label>
+              <ion-select
+                formControlName="category"
+                placeholder="Select a category"
+                interface="popover"
+              >
+                @for (cat of supportCategories; track cat.value) {
+                  <ion-select-option [value]="cat.value">
+                    {{ cat.label }}
+                  </ion-select-option>
+                }
+              </ion-select>
+            </ion-item>
+
+            <!-- Subject -->
+            <ion-item class="form-item">
+              <ion-label position="stacked">
+                Subject <span class="required">*</span>
+              </ion-label>
+              <ion-input
+                formControlName="subject"
+                placeholder="Brief summary of your issue"
+                type="text"
+              ></ion-input>
+              @if (supportForm.get('subject')?.touched && supportForm.get('subject')?.hasError('required')) {
+                <ion-note color="danger">Subject is required</ion-note>
+              }
+              @if (supportForm.get('subject')?.touched && supportForm.get('subject')?.hasError('minlength')) {
+                <ion-note color="danger">Subject must be at least 5 characters</ion-note>
+              }
+            </ion-item>
+
+            <!-- Description -->
+            <ion-item class="form-item description-item">
+              <ion-label position="stacked">
+                Description <span class="required">*</span>
+              </ion-label>
+              <ion-textarea
+                formControlName="description"
+                placeholder="Please provide as much detail as possible about your issue or question..."
+                rows="8"
+                [counter]="true"
+                [maxlength]="2000"
+              ></ion-textarea>
+              <div class="char-count">
+                <ion-text color="medium">
+                  {{ getDescriptionCharCount() }} / 2000 characters
+                  @if (getDescriptionCharCount() < 20) {
+                    <span class="min-char-warning">(minimum 20 characters)</span>
+                  }
+                </ion-text>
+              </div>
+              @if (supportForm.get('description')?.touched && supportForm.get('description')?.hasError('required')) {
+                <ion-note color="danger">Description is required</ion-note>
+              }
+              @if (supportForm.get('description')?.touched && supportForm.get('description')?.hasError('minlength')) {
+                <ion-note color="danger">Description must be at least 20 characters</ion-note>
+              }
+            </ion-item>
+
+            <!-- Screenshot Attachment -->
+            <div class="screenshot-section">
+              <div class="screenshot-header">
+                <ion-label>Screenshot (Optional)</ion-label>
+              </div>
+
+              @if (!screenshot()) {
+                <ion-button fill="outline" (click)="takeScreenshot()">
+                  <ion-icon slot="start" name="camera-outline"></ion-icon>
+                  Add Screenshot
+                </ion-button>
+              } @else {
+                <div class="screenshot-preview">
+                  <img [src]="screenshot()" alt="Screenshot preview" />
+                  <ion-button
+                    fill="clear"
+                    color="danger"
+                    size="small"
+                    class="remove-screenshot"
+                    (click)="removeScreenshot()"
+                  >
+                    <ion-icon slot="icon-only" name="close-circle-outline"></ion-icon>
+                  </ion-button>
+                </div>
+              }
+            </div>
+
+            <!-- Device Info -->
+            @if (deviceInfo()) {
+              <div class="device-info-section">
+                <ion-label class="section-label">Device Information</ion-label>
+                <ion-text color="medium" class="device-info-text">
+                  <p>App Version: {{ deviceInfo()?.appVersion }}</p>
+                  <p>Platform: {{ deviceInfo()?.platform }}</p>
+                  <p>OS Version: {{ deviceInfo()?.osVersion }}</p>
+                  <p>Device: {{ deviceInfo()?.deviceModel }}</p>
+                </ion-text>
+                <ion-note>
+                  This information helps us diagnose technical issues faster.
+                </ion-note>
+              </div>
+            }
+          </ion-list>
+
+          <!-- Submit Button -->
+          <div class="submit-section">
+            <ion-button
+              expand="block"
+              type="submit"
+              [disabled]="!isFormValid() || isSubmitting()"
+            >
+              <ion-icon slot="start" name="send-outline"></ion-icon>
+              @if (isSubmitting()) {
+                Submitting...
+              } @else {
+                Submit Request
+              }
+            </ion-button>
+          </div>
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Alternative Contact -->
+    <ion-card class="alternative-contact-card">
+      <ion-card-content>
+        <div class="alternative-content">
+          <ion-text color="medium">
+            <p>You can also email us directly at:</p>
+          </ion-text>
+          <ion-button fill="clear" (click)="openEmailClient()">
+            <ion-icon slot="start" name="mail-outline"></ion-icon>
+            support@fitos.app
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Bottom Padding -->
+    <div class="bottom-padding"></div>
+  </div>
+</ion-content>

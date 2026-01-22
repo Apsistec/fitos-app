@@ -1,0 +1,69 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/settings"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Help & Support</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="help-page-container">
+    <!-- Welcome Section with Search -->
+    <div class="welcome-section">
+      <h2 class="welcome-title">How can we help you?</h2>
+      <p class="welcome-subtitle">
+        Search our help center or browse by category below
+      </p>
+      <app-help-search (resultSelected)="onSearchResultSelected($event)"></app-help-search>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions-section">
+      <ion-list-header>
+        <ion-label>Quick Actions</ion-label>
+      </ion-list-header>
+      @for (action of quickActions(); track action.title) {
+        <app-help-card
+          [title]="action.title"
+          [description]="action.description"
+          [icon]="action.icon"
+          [route]="action.route"
+          [color]="action.color"
+        ></app-help-card>
+      }
+    </div>
+
+    <!-- Role-Specific Quick Links -->
+    <div class="role-specific-section">
+      <ion-list-header>
+        <ion-label>Popular Guides for You</ion-label>
+      </ion-list-header>
+      <ion-list lines="none" class="guides-list">
+        @for (link of roleSpecificLinks(); track link.slug) {
+          <ion-item
+            button
+            (click)="navigateToGuide(link.slug)"
+            class="guide-link-item"
+          >
+            <ion-icon slot="start" name="book-outline" color="primary"></ion-icon>
+            <ion-label>
+              <h3>{{ link.title }}</h3>
+            </ion-label>
+            <ion-icon slot="end" name="chevron-forward" color="medium"></ion-icon>
+          </ion-item>
+        }
+      </ion-list>
+    </div>
+
+    <!-- App Version Info -->
+    <div class="version-info">
+      <ion-text color="medium">
+        <p>FitOS Version {{ appVersion() }}</p>
+      </ion-text>
+    </div>
+
+    <!-- Bottom Padding -->
+    <div class="bottom-padding"></div>
+  </div>
+</ion-content>

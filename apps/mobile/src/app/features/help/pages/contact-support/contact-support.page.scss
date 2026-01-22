@@ -1,0 +1,280 @@
+.contact-support-container {
+  padding: 16px;
+  max-width: 800px;
+  margin: 0 auto;
+
+  .header-card {
+    margin-bottom: 20px;
+    background: var(--fitos-bg-secondary, var(--ion-color-step-50));
+
+    ion-card-header {
+      .header-content {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+
+        .icon-wrapper {
+          flex-shrink: 0;
+          width: 48px;
+          height: 48px;
+          border-radius: 12px;
+          background: var(--fitos-accent-primary, var(--ion-color-primary));
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          ion-icon {
+            font-size: 28px;
+            color: white;
+          }
+        }
+
+        .text-content {
+          flex: 1;
+
+          ion-card-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--fitos-text-primary, var(--ion-text-color));
+            margin-bottom: 8px;
+          }
+
+          ion-card-subtitle {
+            font-size: 15px;
+            color: var(--fitos-text-secondary, var(--ion-color-step-600));
+            line-height: 1.5;
+          }
+        }
+      }
+    }
+
+    ion-card-content {
+      .quick-links {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+
+        ion-button {
+          margin: 0;
+          font-size: 14px;
+
+          ion-icon {
+            font-size: 18px;
+          }
+        }
+      }
+    }
+  }
+
+  .form-card {
+    margin-bottom: 16px;
+    background: var(--fitos-bg-secondary, var(--ion-color-step-50));
+
+    ion-card-header {
+      ion-card-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, var(--ion-text-color));
+      }
+    }
+
+    ion-card-content {
+      padding: 16px;
+
+      .form-list {
+        background: transparent;
+        padding: 0;
+        margin-bottom: 24px;
+
+        .form-item {
+          --background: transparent;
+          --padding-start: 0;
+          --padding-end: 0;
+          --inner-padding-end: 0;
+          margin-bottom: 20px;
+
+          ion-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--fitos-text-primary, var(--ion-text-color));
+            margin-bottom: 8px;
+
+            .required {
+              color: var(--ion-color-danger);
+              margin-left: 2px;
+            }
+          }
+
+          ion-input,
+          ion-select {
+            --background: var(--fitos-bg-tertiary, var(--ion-color-step-100));
+            --padding-start: 12px;
+            --padding-end: 12px;
+            border: 1px solid var(--fitos-border-subtle, var(--ion-border-color));
+            border-radius: 8px;
+            margin-top: 8px;
+            min-height: 44px;
+            font-size: 15px;
+          }
+
+          ion-note {
+            display: block;
+            margin-top: 6px;
+            font-size: 13px;
+          }
+
+          &.description-item {
+            ion-textarea {
+              --background: var(--fitos-bg-tertiary, var(--ion-color-step-100));
+              --padding-start: 12px;
+              --padding-end: 12px;
+              --padding-top: 12px;
+              --padding-bottom: 12px;
+              border: 1px solid var(--fitos-border-subtle, var(--ion-border-color));
+              border-radius: 8px;
+              margin-top: 8px;
+              font-size: 15px;
+              line-height: 1.5;
+            }
+
+            .char-count {
+              margin-top: 8px;
+              font-size: 13px;
+
+              .min-char-warning {
+                color: var(--ion-color-warning);
+                margin-left: 8px;
+              }
+            }
+          }
+        }
+      }
+
+      .screenshot-section {
+        margin-bottom: 24px;
+
+        .screenshot-header {
+          margin-bottom: 12px;
+
+          ion-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--fitos-text-primary, var(--ion-text-color));
+          }
+        }
+
+        ion-button {
+          margin: 0;
+        }
+
+        .screenshot-preview {
+          position: relative;
+          display: inline-block;
+          border: 1px solid var(--fitos-border-subtle, var(--ion-border-color));
+          border-radius: 8px;
+          overflow: hidden;
+          max-width: 100%;
+
+          img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            max-height: 300px;
+          }
+
+          .remove-screenshot {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            --background: rgba(0, 0, 0, 0.7);
+            --background-hover: rgba(0, 0, 0, 0.85);
+            --border-radius: 50%;
+
+            ion-icon {
+              font-size: 28px;
+            }
+          }
+        }
+      }
+
+      .device-info-section {
+        background: var(--fitos-bg-tertiary, var(--ion-color-step-100));
+        border: 1px solid var(--fitos-border-subtle, var(--ion-border-color));
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 24px;
+
+        .section-label {
+          font-size: 15px;
+          font-weight: 600;
+          color: var(--fitos-text-primary, var(--ion-text-color));
+          display: block;
+          margin-bottom: 12px;
+        }
+
+        .device-info-text {
+          p {
+            font-size: 14px;
+            margin: 0 0 6px 0;
+            line-height: 1.5;
+
+            &:last-child {
+              margin-bottom: 0;
+            }
+          }
+        }
+
+        ion-note {
+          display: block;
+          margin-top: 12px;
+          font-size: 12px;
+          line-height: 1.4;
+        }
+      }
+
+      .submit-section {
+        margin-top: 24px;
+
+        ion-button {
+          --padding-top: 14px;
+          --padding-bottom: 14px;
+          font-size: 16px;
+          font-weight: 600;
+
+          ion-icon {
+            font-size: 20px;
+          }
+        }
+      }
+    }
+  }
+
+  .alternative-contact-card {
+    background: var(--fitos-bg-secondary, var(--ion-color-step-50));
+    border: 1px solid var(--fitos-border-subtle, var(--ion-border-color));
+
+    ion-card-content {
+      .alternative-content {
+        text-align: center;
+
+        p {
+          margin: 0 0 12px 0;
+          font-size: 14px;
+        }
+
+        ion-button {
+          margin: 0;
+          font-size: 15px;
+
+          ion-icon {
+            font-size: 20px;
+          }
+        }
+      }
+    }
+  }
+
+  .bottom-padding {
+    height: 32px;
+  }
+}
