@@ -1,0 +1,39 @@
+.help-center-container {
+  padding: 16px;
+  max-width: 800px;
+  margin: 0 auto;
+
+  .search-section {
+    margin-bottom: 32px;
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, var(--ion-text-color));
+      margin: 0 0 16px 0;
+      text-align: center;
+    }
+  }
+
+  .quick-actions-section,
+  .categories-section,
+  .feature-guides-section {
+    margin-bottom: 24px;
+
+    ion-list-header {
+      padding: 0 0 12px 0;
+      margin-bottom: 8px;
+
+      ion-label {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, var(--ion-text-color));
+        margin: 0;
+      }
+    }
+  }
+
+  .bottom-padding {
+    height: 32px;
+  }
+}

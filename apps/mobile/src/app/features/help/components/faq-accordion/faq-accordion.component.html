@@ -1,0 +1,39 @@
+<div class="faq-accordion" [class.expanded]="expanded()">
+  <div class="faq-question" (click)="onToggle()">
+    <h3>{{ question() }}</h3>
+    <ion-icon
+      [name]="expanded() ? 'chevron-up-outline' : 'chevron-down-outline'"
+      class="toggle-icon"
+    ></ion-icon>
+  </div>
+
+  @if (expanded()) {
+    <div class="faq-answer">
+      <div [innerHTML]="answer()" class="answer-content"></div>
+
+      <div class="feedback-section">
+        <p class="feedback-prompt">Was this helpful?</p>
+        <div class="feedback-buttons">
+          <ion-button
+            fill="clear"
+            size="small"
+            (click)="onHelpful()"
+            class="feedback-btn"
+          >
+            <ion-icon slot="start" name="thumbs-up-outline"></ion-icon>
+            Yes
+          </ion-button>
+          <ion-button
+            fill="clear"
+            size="small"
+            (click)="onNotHelpful()"
+            class="feedback-btn"
+          >
+            <ion-icon slot="start" name="thumbs-down-outline"></ion-icon>
+            No
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

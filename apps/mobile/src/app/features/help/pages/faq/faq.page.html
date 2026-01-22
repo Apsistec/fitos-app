@@ -1,0 +1,71 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/settings/help"></ion-back-button>
+    </ion-buttons>
+    <ion-title>FAQ</ion-title>
+  </ion-toolbar>
+
+  <!-- Category Filter -->
+  <ion-toolbar class="category-toolbar">
+    <ion-segment
+      [value]="selectedCategory()"
+      (ionChange)="onCategoryChange($event)"
+      scrollable="true"
+    >
+      <ion-segment-button value="all">
+        <ion-label>All</ion-label>
+      </ion-segment-button>
+      @for (category of categories(); track category.id) {
+        <ion-segment-button [value]="category.id">
+          <ion-label>{{ category.title }}</ion-label>
+        </ion-segment-button>
+      }
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="faq-container">
+    <!-- Search Bar -->
+    <div class="search-section">
+      <ion-searchbar
+        [(ngModel)]="searchQuery"
+        (ionInput)="onSearchInput($event)"
+        (ionClear)="onSearchClear()"
+        placeholder="Search FAQs..."
+        [debounce]="300"
+      ></ion-searchbar>
+    </div>
+
+    <!-- FAQ List -->
+    <div class="faq-list">
+      @if (filteredFaqs().length > 0) {
+        @for (faq of filteredFaqs(); track faq.id) {
+          <app-faq-accordion
+            [question]="faq.question"
+            [answer]="faq.answer"
+            [expanded]="isFaqExpanded(faq.id)"
+            (toggleExpanded)="toggleFaq(faq.id)"
+            (feedbackHelpful)="onFeedbackHelpful(faq.id)"
+            (feedbackNotHelpful)="onFeedbackNotHelpful(faq.id)"
+          ></app-faq-accordion>
+        }
+      } @else {
+        <div class="no-results">
+          <ion-icon name="help-circle-outline" class="no-results-icon"></ion-icon>
+          <h3>No FAQs found</h3>
+          @if (searchQuery().trim().length >= 2) {
+            <p>No results for "{{ searchQuery() }}"</p>
+            <p class="suggestion">Try different keywords or <a href="/tabs/settings/help/contact">contact support</a></p>
+          } @else {
+            <p>Select a category or search for help</p>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Bottom Padding -->
+    <div class="bottom-padding"></div>
+  </div>
+</ion-content>

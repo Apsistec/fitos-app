@@ -1,0 +1,60 @@
+<div class="help-search-wrapper">
+  <ion-searchbar
+    [(ngModel)]="searchQuery"
+    (ionInput)="onSearchInput($event)"
+    (ionFocus)="onSearchFocus()"
+    (ionBlur)="onSearchBlur()"
+    (ionClear)="onSearchClear()"
+    placeholder="Search help articles..."
+    [debounce]="0"
+    class="help-searchbar"
+  ></ion-searchbar>
+
+  @if (showResults() && searchQuery().trim().length >= 2) {
+    <div class="search-results">
+      @if (isSearching()) {
+        <ion-list class="results-list">
+          <ion-item lines="none">
+            <ion-label class="ion-text-center">
+              <ion-text color="medium">Searching...</ion-text>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      } @else if (searchResults().length > 0) {
+        <ion-list class="results-list">
+          @for (result of searchResults(); track result.id) {
+            <ion-item button (click)="onResultClick(result)" detail="false">
+              <ion-icon
+                [name]="getResultIcon(result.type)"
+                slot="start"
+                [color]="result.type === 'faq' ? 'primary' : 'medium'"
+              ></ion-icon>
+              <ion-label>
+                <h3>{{ result.title }}</h3>
+                <p>{{ result.excerpt }}</p>
+                <ion-note>{{ getResultTypeLabel(result.type) }}</ion-note>
+              </ion-label>
+            </ion-item>
+          }
+        </ion-list>
+      } @else {
+        <ion-list class="results-list">
+          <ion-item lines="none">
+            <ion-label class="ion-text-center">
+              <p>
+                <ion-text color="medium">
+                  No results found for "{{ searchQuery() }}"
+                </ion-text>
+              </p>
+              <p>
+                <ion-text color="medium" class="no-results-help">
+                  Try different keywords or <a href="/tabs/settings/help/contact">contact support</a>
+                </ion-text>
+              </p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      }
+    </div>
+  }
+</div>

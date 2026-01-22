@@ -425,10 +425,57 @@ export const routes: Routes = [
           {
             // Help & Support
             path: 'help',
-            loadComponent: () =>
-              import('./features/settings/pages/help/help.page').then(
-                (m) => m.HelpPage
-              ),
+            children: [
+              {
+                path: '',
+                loadComponent: () =>
+                  import('./features/settings/pages/help/help.page').then(
+                    (m) => m.HelpPage
+                  ),
+              },
+              {
+                path: 'center',
+                loadComponent: () =>
+                  import('./features/help/pages/help-center/help-center.page').then(
+                    (m) => m.HelpCenterPage
+                  ),
+              },
+              {
+                path: 'faq',
+                loadComponent: () =>
+                  import('./features/help/pages/faq/faq.page').then(
+                    (m) => m.FAQPage
+                  ),
+              },
+              {
+                path: 'faq/:category',
+                loadComponent: () =>
+                  import('./features/help/pages/faq/faq.page').then(
+                    (m) => m.FAQPage
+                  ),
+              },
+              {
+                path: 'getting-started',
+                loadComponent: () =>
+                  import('./features/help/pages/getting-started/getting-started.page').then(
+                    (m) => m.GettingStartedPage
+                  ),
+              },
+              {
+                path: 'guide/:slug',
+                loadComponent: () =>
+                  import('./features/help/pages/feature-guide/feature-guide.page').then(
+                    (m) => m.FeatureGuidePage
+                  ),
+              },
+              {
+                path: 'contact',
+                loadComponent: () =>
+                  import('./features/help/pages/contact-support/contact-support.page').then(
+                    (m) => m.ContactSupportPage
+                  ),
+              },
+            ],
           },
           {
             // Terms & Privacy Policy

@@ -1,0 +1,19 @@
+<ion-card [routerLink]="route()" button class="help-card">
+  <ion-card-header>
+    <div class="card-header-content">
+      <div class="icon-wrapper">
+        <ion-icon [name]="icon()" [color]="color()"></ion-icon>
+      </div>
+      <div class="text-content">
+        <ion-card-title>{{ title() }}</ion-card-title>
+        <ion-card-subtitle>{{ description() }}</ion-card-subtitle>
+      </div>
+      @if (articleCount()) {
+        <ion-badge color="medium" class="article-count">
+          {{ articleCount() }}
+        </ion-badge>
+      }
+    </div>
+  </ion-card-header>
+  <ion-icon name="chevron-forward-outline" class="chevron-icon" color="medium"></ion-icon>
+</ion-card>

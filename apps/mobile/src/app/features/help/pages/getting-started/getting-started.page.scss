@@ -1,0 +1,206 @@
+.getting-started-container {
+  padding: 16px;
+  max-width: 800px;
+  margin: 0 auto;
+
+  .header-card {
+    margin-bottom: 20px;
+    background: var(--fitos-bg-secondary, var(--ion-color-step-50));
+
+    ion-card-header {
+      .header-content {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+
+        .icon-wrapper {
+          flex-shrink: 0;
+          width: 48px;
+          height: 48px;
+          border-radius: 12px;
+          background: var(--fitos-accent-primary, var(--ion-color-primary));
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          ion-icon {
+            font-size: 28px;
+            color: white;
+          }
+        }
+
+        .text-content {
+          flex: 1;
+
+          ion-card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--fitos-text-primary, var(--ion-text-color));
+            margin-bottom: 6px;
+          }
+
+          ion-card-subtitle {
+            font-size: 14px;
+            color: var(--fitos-text-secondary, var(--ion-color-step-600));
+            line-height: 1.5;
+            margin-bottom: 8px;
+          }
+
+          .meta-info {
+            ion-badge {
+              font-size: 12px;
+              padding: 4px 8px;
+              display: inline-flex;
+              align-items: center;
+              gap: 4px;
+
+              ion-icon {
+                font-size: 14px;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    ion-card-content {
+      .progress-section {
+        .progress-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 8px;
+
+          .progress-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--fitos-text-primary, var(--ion-text-color));
+          }
+
+          .progress-percentage {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--fitos-accent-primary, var(--ion-color-primary));
+          }
+        }
+
+        ion-progress-bar {
+          height: 8px;
+          border-radius: 4px;
+        }
+      }
+
+      .completion-message {
+        text-align: center;
+        padding: 24px 16px 8px;
+        border-top: 1px solid var(--fitos-border-subtle, var(--ion-border-color));
+        margin-top: 20px;
+
+        ion-icon {
+          font-size: 48px;
+          margin-bottom: 12px;
+        }
+
+        h3 {
+          font-size: 18px;
+          font-weight: 700;
+          color: var(--fitos-text-primary, var(--ion-text-color));
+          margin: 0 0 8px 0;
+        }
+
+        p {
+          font-size: 14px;
+          color: var(--fitos-text-secondary, var(--ion-color-step-600));
+          margin: 0 0 16px 0;
+        }
+
+        ion-button {
+          margin-top: 8px;
+        }
+      }
+    }
+  }
+
+  .steps-list {
+    background: transparent;
+    padding: 0;
+
+    .step-item {
+      --background: var(--fitos-bg-secondary, var(--ion-color-step-50));
+      --padding-start: 16px;
+      --padding-end: 16px;
+      --inner-padding-end: 0;
+      --min-height: 88px;
+      border: 1px solid var(--fitos-border-subtle, var(--ion-border-color));
+      border-radius: 12px;
+      margin-bottom: 12px;
+      transition: all 150ms ease-in-out;
+
+      &:active {
+        transform: scale(0.99);
+      }
+
+      &.completed {
+        opacity: 0.7;
+
+        .step-title {
+          text-decoration: line-through;
+          color: var(--fitos-text-secondary, var(--ion-color-step-600));
+        }
+      }
+
+      .completion-icon {
+        font-size: 28px;
+        margin-right: 12px;
+      }
+
+      .step-content {
+        .step-title {
+          font-size: 16px;
+          font-weight: 600;
+          color: var(--fitos-text-primary, var(--ion-text-color));
+          margin-bottom: 6px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+
+          .optional-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+        }
+
+        .step-description {
+          font-size: 14px;
+          color: var(--fitos-text-secondary, var(--ion-color-step-600));
+          line-height: 1.5;
+          margin: 0;
+        }
+      }
+
+      .action-button {
+        --padding-start: 12px;
+        --padding-end: 12px;
+        font-size: 14px;
+        font-weight: 600;
+
+        ion-icon {
+          font-size: 16px;
+        }
+      }
+    }
+  }
+
+  .loading-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--fitos-text-secondary, var(--ion-color-step-600));
+  }
+
+  .bottom-padding {
+    height: 32px;
+  }
+}

@@ -1,0 +1,84 @@
+.category-toolbar {
+  --background: var(--fitos-bg-primary, var(--ion-background-color));
+  border-bottom: 1px solid var(--fitos-border-subtle, var(--ion-border-color));
+
+  ion-segment {
+    --background: transparent;
+    padding: 8px 16px;
+
+    ion-segment-button {
+      --indicator-color: var(--fitos-accent-primary, var(--ion-color-primary));
+      --color: var(--fitos-text-secondary, var(--ion-color-step-600));
+      --color-checked: var(--fitos-accent-primary, var(--ion-color-primary));
+      min-width: 80px;
+      font-size: 14px;
+      text-transform: none;
+    }
+  }
+}
+
+.faq-container {
+  padding: 16px;
+  max-width: 800px;
+  margin: 0 auto;
+
+  .search-section {
+    margin-bottom: 16px;
+
+    ion-searchbar {
+      --background: var(--fitos-bg-secondary, var(--ion-color-step-50));
+      --border-radius: 12px;
+      --box-shadow: none;
+      --icon-color: var(--fitos-text-secondary, var(--ion-color-step-600));
+      --placeholder-color: var(--fitos-text-tertiary, var(--ion-color-step-500));
+      --color: var(--fitos-text-primary, var(--ion-text-color));
+      padding: 0;
+    }
+  }
+
+  .faq-list {
+    margin-top: 8px;
+  }
+
+  .no-results {
+    text-align: center;
+    padding: 48px 24px;
+
+    .no-results-icon {
+      font-size: 64px;
+      color: var(--fitos-text-tertiary, var(--ion-color-step-400));
+      margin-bottom: 16px;
+    }
+
+    h3 {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--fitos-text-primary, var(--ion-text-color));
+      margin: 0 0 8px 0;
+    }
+
+    p {
+      font-size: 15px;
+      color: var(--fitos-text-secondary, var(--ion-color-step-600));
+      margin: 8px 0;
+      line-height: 1.5;
+
+      &.suggestion {
+        margin-top: 16px;
+
+        a {
+          color: var(--fitos-accent-primary, var(--ion-color-primary));
+          text-decoration: none;
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
+
+  .bottom-padding {
+    height: 32px;
+  }
+}

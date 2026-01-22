@@ -1,0 +1,126 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/settings/help"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Getting Started</ion-title>
+    @if (!isComplete()) {
+      <ion-buttons slot="end">
+        <ion-button (click)="onResetProgress()" fill="clear">
+          <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    }
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="getting-started-container">
+    @if (guide(); as currentGuide) {
+      <!-- Header Card -->
+      <ion-card class="header-card">
+        <ion-card-header>
+          <div class="header-content">
+            <div class="icon-wrapper">
+              <ion-icon name="rocket-outline" color="primary"></ion-icon>
+            </div>
+            <div class="text-content">
+              <ion-card-title>{{ currentGuide.title }}</ion-card-title>
+              <ion-card-subtitle>{{ currentGuide.description }}</ion-card-subtitle>
+              <div class="meta-info">
+                <ion-badge color="medium">
+                  <ion-icon name="time-outline"></ion-icon>
+                  {{ currentGuide.estimatedTime }}
+                </ion-badge>
+              </div>
+            </div>
+          </div>
+        </ion-card-header>
+
+        <ion-card-content>
+          <!-- Progress Bar -->
+          <div class="progress-section">
+            <div class="progress-header">
+              <span class="progress-text">
+                {{ progress().completed }} of {{ progress().total }} completed
+              </span>
+              <span class="progress-percentage">{{ progress().percentage }}%</span>
+            </div>
+            <ion-progress-bar
+              [value]="progress().percentage / 100"
+              color="primary"
+            ></ion-progress-bar>
+          </div>
+
+          <!-- Completion Message -->
+          @if (isComplete()) {
+            <div class="completion-message">
+              <ion-icon name="checkmark-circle" color="success"></ion-icon>
+              <h3>All done! 🎉</h3>
+              <p>You've completed all the getting started steps. Great job!</p>
+              <ion-button (click)="onResetProgress()" fill="outline" size="small">
+                <ion-icon slot="start" name="refresh-outline"></ion-icon>
+                Reset Checklist
+              </ion-button>
+            </div>
+          }
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Steps List -->
+      <ion-list class="steps-list">
+        @for (step of currentGuide.steps; track step.id) {
+          <ion-item
+            button
+            [detail]="false"
+            class="step-item"
+            [class.completed]="step.completed"
+            [class.optional]="step.optional"
+            (click)="onStepClick(step)"
+          >
+            <!-- Completion Icon -->
+            <ion-icon
+              slot="start"
+              [name]="step.completed ? 'checkmark-circle' : 'checkmark-circle-outline'"
+              [color]="step.completed ? 'success' : 'medium'"
+              class="completion-icon"
+            ></ion-icon>
+
+            <!-- Step Content -->
+            <ion-label class="step-content">
+              <h3 class="step-title">
+                {{ step.title }}
+                @if (step.optional) {
+                  <ion-badge color="medium" class="optional-badge">Optional</ion-badge>
+                }
+              </h3>
+              <p class="step-description">{{ step.description }}</p>
+            </ion-label>
+
+            <!-- Action Button -->
+            @if (!step.completed && step.route) {
+              <ion-button
+                slot="end"
+                fill="clear"
+                size="small"
+                (click)="onStepNavigate(step, $event)"
+                class="action-button"
+              >
+                Start
+                <ion-icon slot="end" name="chevron-forward-outline"></ion-icon>
+              </ion-button>
+            }
+          </ion-item>
+        }
+      </ion-list>
+    } @else {
+      <!-- Loading State -->
+      <div class="loading-state">
+        <p>Loading getting started guide...</p>
+      </div>
+    }
+
+    <!-- Bottom Padding -->
+    <div class="bottom-padding"></div>
+  </div>
+</ion-content>

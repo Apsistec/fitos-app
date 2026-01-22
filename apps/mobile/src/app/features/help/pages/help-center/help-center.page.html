@@ -1,0 +1,74 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/settings"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Help Center</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="help-center-container">
+    <!-- Search Section -->
+    <div class="search-section">
+      <h2 class="section-title">How can we help you?</h2>
+      <app-help-search></app-help-search>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions-section">
+      <ion-list-header>
+        <ion-label>Quick Actions</ion-label>
+      </ion-list-header>
+      @for (action of quickActions(); track action.title) {
+        <app-help-card
+          [title]="action.title"
+          [description]="action.description"
+          [icon]="action.icon"
+          [route]="action.route"
+          [color]="action.color"
+        ></app-help-card>
+      }
+    </div>
+
+    <!-- Categories (if available) -->
+    @if (categories().length > 0) {
+      <div class="categories-section">
+        <ion-list-header>
+          <ion-label>Browse by Category</ion-label>
+        </ion-list-header>
+        @for (category of categories(); track category.id) {
+          <app-help-card
+            [title]="category.title"
+            [description]="category.description"
+            [icon]="category.icon"
+            [route]="category.route || '/tabs/settings/help/faq/' + category.id"
+            [articleCount]="category.articleCount"
+            color="primary"
+          ></app-help-card>
+        }
+      </div>
+    }
+
+    <!-- Feature Guides -->
+    @if (featuresGuides().length > 0) {
+      <div class="feature-guides-section">
+        <ion-list-header>
+          <ion-label>Feature Guides</ion-label>
+        </ion-list-header>
+        @for (guide of featuresGuides(); track guide.title) {
+          <app-help-card
+            [title]="guide.title"
+            [description]="guide.description"
+            [icon]="guide.icon"
+            [route]="guide.route"
+            [color]="guide.color"
+          ></app-help-card>
+        }
+      </div>
+    }
+
+    <!-- Bottom Padding -->
+    <div class="bottom-padding"></div>
+  </div>
+</ion-content>
