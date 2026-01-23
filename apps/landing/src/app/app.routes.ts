@@ -30,6 +30,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/help/help.component').then(m => m.HelpComponent),
   },
   {
+    path: 'docs',
+    loadComponent: () => import('./pages/docs/docs.component').then(m => m.DocsComponent),
+  },
+  {
     path: 'privacy',
     loadComponent: () => import('./pages/privacy/privacy.component').then(m => m.PrivacyComponent),
   },

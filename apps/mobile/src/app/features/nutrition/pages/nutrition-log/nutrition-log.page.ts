@@ -612,7 +612,7 @@ export class NutritionLogPage implements OnInit {
     }
 
     const summaries = await Promise.all(promises);
-    const validSummaries = summaries.filter(s => s !== null) as NutritionSummary[];
+    const validSummaries = summaries.filter((s: any) => s !== null) as NutritionSummary[];
 
     if (validSummaries.length === 0) {
       this.weeklyAverage.set(null);

@@ -1,0 +1,47 @@
+{
+  "versions": [
+    {
+      "version": "1.0.0",
+      "date": "2026-01-10",
+      "released": true,
+      "changes": [
+        {
+          "type": "feature",
+          "description": "Exercise library with 500+ exercises"
+        },
+        {
+          "type": "feature",
+          "description": "Workout builder and intelligent logging"
+        },
+        {
+          "type": "feature",
+          "description": "Nutrition tracking with macro targets"
+        },
+        {
+          "type": "feature",
+          "description": "Client messaging and progress tracking"
+        },
+        {
+          "type": "feature",
+          "description": "Stripe Connect payment integration"
+        },
+        {
+          "type": "feature",
+          "description": "Wearable device integration (Apple Health, Google Fit, Terra API)"
+        },
+        {
+          "type": "feature",
+          "description": "Dark mode design optimized for gym environments"
+        },
+        {
+          "type": "feature",
+          "description": "Adherence-neutral nutrition display (purple for over-target)"
+        },
+        {
+          "type": "feature",
+          "description": "Offline-first architecture with background sync"
+        }
+      ]
+    }
+  ]
+}

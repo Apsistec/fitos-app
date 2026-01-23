@@ -44,6 +44,7 @@ import {
   personAddOutline,
   bulbOutline,
   starOutline,
+  bookOutline,
 } from 'ionicons/icons';
 import { AuthService } from '@app/core/services/auth.service';
 import { StripeService } from '@app/core/services/stripe.service';
@@ -308,7 +309,12 @@ import { ThemeService, ThemeMode } from '@app/core/services/theme.service';
 
           <ion-item button detail routerLink="/tabs/settings/help">
             <ion-icon name="help-circle-outline" slot="start"></ion-icon>
-            <ion-label>Help & Support</ion-label>
+            <ion-label>Help Center</ion-label>
+          </ion-item>
+
+          <ion-item button detail (click)="openDocs()">
+            <ion-icon name="book-outline" slot="start"></ion-icon>
+            <ion-label>Documentation</ion-label>
           </ion-item>
 
           <ion-item button detail routerLink="/tabs/settings/terms">
@@ -495,6 +501,7 @@ export class SettingsPage implements OnInit {
       personAddOutline,
       bulbOutline,
       starOutline,
+      bookOutline,
     });
   }
 
@@ -567,6 +574,10 @@ export class SettingsPage implements OnInit {
 
   toggleDarkMode(event: any): void {
     this.themeService.setDarkMode(event.detail.checked);
+  }
+
+  openDocs(): void {
+    window.open('https://github.com/anthropics/fitos-app/tree/main/docs', '_blank');
   }
 
   async signOut(): Promise<void> {

@@ -335,7 +335,7 @@ export class ChatPage implements OnInit, AfterViewChecked {
     try {
       await this.clientService.loadClients();
       const clients = this.clientService.clients();
-      const client = clients.find(c => c.id === this.otherUserId());
+      const client = clients.find((c: any) => c.id === this.otherUserId());
 
       if (client) {
         this.otherUserName.set(client.full_name || 'Unknown');
@@ -366,7 +366,7 @@ export class ChatPage implements OnInit, AfterViewChecked {
             trainerId,
             content,
             'message'
-          ).catch(err => {
+          ).catch((err: any) => {
             console.warn('Failed to collect training data:', err);
             // Silent fail - don't disrupt user experience
           });

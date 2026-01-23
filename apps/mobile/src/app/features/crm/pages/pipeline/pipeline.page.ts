@@ -475,8 +475,8 @@ export class PipelinePage implements OnInit {
 
   conversionRate = computed(() => {
     const leads = this.leadService.leads();
-    const won = leads.filter(l => l.status === 'won').length;
-    const completed = leads.filter(l => l.status === 'won' || l.status === 'lost').length;
+    const won = leads.filter((l: any) => l.status === 'won').length;
+    const completed = leads.filter((l: any) => l.status === 'won' || l.status === 'lost').length;
 
     if (completed === 0) return 0;
     return Math.round((won / completed) * 100);

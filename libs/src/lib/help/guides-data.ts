@@ -5,7 +5,7 @@
  * Each guide includes actionable steps with deep links to relevant features.
  */
 
-import type { GettingStartedGuide } from '../models/help.models';
+import type { GettingStartedGuide } from './help.models';
 
 /**
  * All Getting Started Guides (one per role)

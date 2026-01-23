@@ -7,7 +7,7 @@
  * Total Guides: 8 comprehensive feature guides
  */
 
-import type { FeatureGuide } from '../models/help.models';
+import type { FeatureGuide } from './help.models';
 
 /**
  * All Feature Guides

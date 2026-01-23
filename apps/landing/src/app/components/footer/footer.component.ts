@@ -39,7 +39,7 @@ import { IconComponent } from '../icon/icon.component';
           <div>
             <h4 class="text-white font-semibold mb-4">Resources</h4>
             <ul class="space-y-2 text-sm">
-              <li><a href="https://docs.fitos.app" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">Documentation</a></li>
+              <li><a routerLink="/docs" class="hover:text-white transition-colors">Documentation</a></li>
               <li><a routerLink="/blog" class="hover:text-white transition-colors">Blog</a></li>
               <li><a routerLink="/help" class="hover:text-white transition-colors">Help Center</a></li>
             </ul>

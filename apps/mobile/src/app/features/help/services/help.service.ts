@@ -11,6 +11,7 @@ import type {
   FAQItem,
   HelpCategory,
   GettingStartedGuide,
+  GettingStartedStep,
   FeatureGuide,
   SearchResult,
   HelpCategoryId,
@@ -164,11 +165,11 @@ export class HelpService {
    * Get related feature guides
    */
   getRelatedGuides(guideId: string, userRole: UserRole): FeatureGuide[] {
-    const guide = FEATURE_GUIDES.find((g) => g.id === guideId);
+    const guide = FEATURE_GUIDES.find((g: FeatureGuide) => g.id === guideId);
     if (!guide || !guide.relatedGuides) return [];
 
     return FEATURE_GUIDES.filter(
-      (g) =>
+      (g: FeatureGuide) =>
         guide.relatedGuides?.includes(g.id) && g.roles.includes(userRole)
     );
   }
@@ -208,7 +209,7 @@ export class HelpService {
     if (!guide) return { completed: 0, total: 0, percentage: 0 };
 
     const total = guide.steps.length;
-    const completed = guide.steps.filter((step) => step.completed).length;
+    const completed = guide.steps.filter((step: GettingStartedStep) => step.completed).length;
     const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 
     return { completed, total, percentage };

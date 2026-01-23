@@ -7,7 +7,7 @@
  * Total FAQs: 58 items across 9 categories
  */
 
-import type { FAQItem, HelpCategory } from '../models/help.models';
+import type { FAQItem, HelpCategory } from './help.models';
 
 /**
  * FAQ Categories with metadata

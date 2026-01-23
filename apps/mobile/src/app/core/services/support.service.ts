@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
-import type { SupportTicketPayload, SupportTicketResponse } from '../../features/help/models/help.models';
+import type { SupportTicketPayload, SupportTicketResponse } from '@fitos/libs';
 
 export interface SupportTicket {
   id: string;

@@ -30,7 +30,7 @@ import { IconComponent } from '../icon/icon.component';
                class="nav-link">
               Pricing
             </a>
-            <a href="https://docs.fitos.app" target="_blank" rel="noopener noreferrer"
+            <a routerLink="/docs" routerLinkActive="nav-link-active"
                class="nav-link">
               Docs
             </a>
@@ -75,7 +75,7 @@ import { IconComponent } from '../icon/icon.component';
                  class="mobile-nav-link">
                 Pricing
               </a>
-              <a href="https://docs.fitos.app" target="_blank" rel="noopener noreferrer"
+              <a routerLink="/docs" (click)="closeMobileMenu()"
                  class="mobile-nav-link">
                 Docs
               </a>
