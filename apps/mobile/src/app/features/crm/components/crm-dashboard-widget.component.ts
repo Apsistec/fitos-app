@@ -16,9 +16,7 @@ import {
   IonCardContent,
   IonButton,
   IonIcon,
-  IonBadge,
   IonSpinner,
-  IonText,
   IonChip,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -64,11 +62,9 @@ interface QuickStat {
     IonCardContent,
     IonButton,
     IonIcon,
-    IonBadge,
     IonSpinner,
-    IonText,
-    IonChip,
-  ],
+    IonChip
+],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ion-card class="crm-widget">

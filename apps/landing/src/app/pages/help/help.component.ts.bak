@@ -1,8 +1,12 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FAQ_ITEMS, FAQ_CATEGORIES } from '@fitos/libs';
-import type { FAQItem, HelpCategory } from '@fitos/libs';
+
+interface FAQItem {
+  question: string;
+  answer: string;
+  category: string;
+}
 
 @Component({
   selector: 'app-help',
@@ -26,20 +30,13 @@ import type { FAQItem, HelpCategory } from '@fitos/libs';
       </div>
 
       <div class="categories">
-        <button
-          class="category-pill"
-          [class.active]="selectedCategory() === null"
-          (click)="selectCategory(null)"
-        >
-          All
-        </button>
-        @for (category of categories; track category.id) {
+        @for (category of categories; track category) {
           <button
             class="category-pill"
-            [class.active]="selectedCategory() === category.id"
-            (click)="selectCategory(category.id)"
+            [class.active]="selectedCategory() === category"
+            (click)="selectCategory(category)"
           >
-            {{ category.title }}
+            {{ category }}
           </button>
         }
       </div>
@@ -51,10 +48,10 @@ import type { FAQItem, HelpCategory } from '@fitos/libs';
             <p class="hint">Try different keywords or browse by category</p>
           </div>
         } @else {
-          @for (faq of filteredFAQs(); track faq.id) {
+          @for (faq of filteredFAQs(); track faq.question) {
             <div class="faq-item">
               <h3 class="question">{{ faq.question }}</h3>
-              <div class="answer" [innerHTML]="faq.answer"></div>
+              <p class="answer">{{ faq.answer }}</p>
             </div>
           }
         }
@@ -181,28 +178,6 @@ import type { FAQItem, HelpCategory } from '@fitos/libs';
       color: var(--fitos-text-secondary);
     }
 
-    .answer :deep(ul) {
-      margin: 12px 0;
-      padding-left: 24px;
-    }
-
-    .answer :deep(li) {
-      margin: 8px 0;
-    }
-
-    .answer :deep(strong) {
-      color: var(--fitos-text-primary);
-      font-weight: 600;
-    }
-
-    .answer :deep(code) {
-      background-color: var(--fitos-bg-tertiary);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: monospace;
-      font-size: 0.875rem;
-    }
-
     .no-results {
       text-align: center;
       padding: 64px 32px;
@@ -277,23 +252,96 @@ import type { FAQItem, HelpCategory } from '@fitos/libs';
 })
 export class HelpComponent {
   searchQuery = '';
-  selectedCategory = signal<string | null>(null);
+  selectedCategory = signal<string>('All');
 
-  // Use shared comprehensive FAQ data (58 FAQs across 9 categories)
-  categories: HelpCategory[] = FAQ_CATEGORIES.filter(cat =>
-    // Show all categories for public help center
-    cat.roles.includes('client') || cat.roles.includes('trainer')
-  );
+  categories = ['All', 'Getting Started', 'Workouts', 'Nutrition', 'Clients', 'Billing', 'Technical'];
 
-  allFAQs: FAQItem[] = FAQ_ITEMS;
+  allFAQs: FAQItem[] = [
+    {
+      question: 'How do I get started with FitOS?',
+      answer: 'Sign up at app.fitos.app, choose your role (trainer or client), complete the onboarding flow, and start exploring! Trainers can immediately create workouts and invite clients. Clients need an invitation from their trainer.',
+      category: 'Getting Started',
+    },
+    {
+      question: 'What is the pricing model for trainers?',
+      answer: 'FitOS costs $49/month for trainers with unlimited clients. There are no per-client fees, allowing you to scale your business without increasing costs.',
+      category: 'Billing',
+    },
+    {
+      question: 'Do clients pay separately?',
+      answer: 'No. Clients access FitOS for free. You (the trainer) set your own coaching fees and handle payments directly with your clients outside the platform.',
+      category: 'Billing',
+    },
+    {
+      question: 'How do I create a workout program?',
+      answer: 'Navigate to the Workouts tab, tap "New Program", select exercises from our 500+ exercise library, set sets/reps/rest periods, and assign to clients. Programs can be one-time or recurring.',
+      category: 'Workouts',
+    },
+    {
+      question: 'Can clients log workouts with voice commands?',
+      answer: 'Voice logging is coming in Q1 2026! This feature will allow hands-free workout tracking with commands like "10 reps at 185 pounds".',
+      category: 'Workouts',
+    },
+    {
+      question: 'How does nutrition tracking work?',
+      answer: 'Clients can log meals manually by searching our food database, or use voice logging (e.g., "two eggs and toast"). Photo nutrition analysis is coming in Q1-Q2 2026.',
+      category: 'Nutrition',
+    },
+    {
+      question: 'What does "adherence-neutral" mean?',
+      answer: 'We never use red or "danger" colors when clients exceed nutrition targets. Going over isn\'t a failure - it\'s data. This reduces guilt and promotes a healthier relationship with tracking.',
+      category: 'Nutrition',
+    },
+    {
+      question: 'How do I invite clients to FitOS?',
+      answer: 'Go to the Clients tab, tap "Invite Client", enter their email, and they\'ll receive an invitation link to create their account and connect with you.',
+      category: 'Clients',
+    },
+    {
+      question: 'Can I see my clients\' workout history?',
+      answer: 'Yes! Tap any client in the Clients tab to view their workout logs, nutrition data, progress photos, and wearable metrics (if connected).',
+      category: 'Clients',
+    },
+    {
+      question: 'Which wearable devices are supported?',
+      answer: 'FitOS integrates with Apple Health, Google Fit, Fitbit, Garmin, Oura, and WHOOP via Terra API. Clients can connect their devices in Settings.',
+      category: 'Technical',
+    },
+    {
+      question: 'Does FitOS work offline?',
+      answer: 'Yes! Workout logging and nutrition tracking work offline. Data syncs automatically when you reconnect to the internet.',
+      category: 'Technical',
+    },
+    {
+      question: 'Is there a dark mode?',
+      answer: 'Dark mode is the default! FitOS is designed dark-first for optimal visibility in gym environments. You can switch to light mode in Settings if preferred.',
+      category: 'Technical',
+    },
+    {
+      question: 'How do I cancel my subscription?',
+      answer: 'Go to Settings > Billing > Manage Subscription. You can cancel anytime - no long-term contracts. Your access continues until the end of your billing period.',
+      category: 'Billing',
+    },
+    {
+      question: 'What happens to my data if I cancel?',
+      answer: 'Your data is retained for 90 days after cancellation. You can export all client data before canceling. After 90 days, data is permanently deleted per our privacy policy.',
+      category: 'Billing',
+    },
+  ];
 
-  filteredFAQs = computed(() => {
+  filteredFAQs = signal<FAQItem[]>(this.allFAQs);
+
+  selectCategory(category: string): void {
+    this.selectedCategory.set(category);
+    this.filterFAQs();
+  }
+
+  filterFAQs(): void {
     let filtered = this.allFAQs;
 
     // Filter by category
-    const category = this.selectedCategory();
-    if (category) {
-      filtered = filtered.filter(faq => faq.categoryId === category);
+    if (this.selectedCategory() !== 'All') {
+      filtered = filtered.filter(faq => faq.category === this.selectedCategory());
     }
 
     // Filter by search query
@@ -301,20 +349,10 @@ export class HelpComponent {
       const query = this.searchQuery.toLowerCase();
       filtered = filtered.filter(faq =>
         faq.question.toLowerCase().includes(query) ||
-        faq.answer.toLowerCase().includes(query) ||
-        faq.keywords.some(keyword => keyword.toLowerCase().includes(query))
+        faq.answer.toLowerCase().includes(query)
       );
     }
 
-    return filtered;
-  });
-
-  selectCategory(categoryId: string | null): void {
-    this.selectedCategory.set(categoryId);
-  }
-
-  filterFAQs(): void {
-    // Trigger computed signal update
-    // The computed signal will automatically recalculate
+    this.filteredFAQs.set(filtered);
   }
 }

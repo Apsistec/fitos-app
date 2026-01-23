@@ -26,7 +26,6 @@ import {
   IonButton,
   IonProgressBar,
   IonBadge,
-  IonText,
   AlertController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -39,7 +38,7 @@ import {
 } from 'ionicons/icons';
 import { HelpService } from '../../services/help.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import type { GettingStartedGuide, GettingStartedStep } from '../../models/help.models';
+import type { GettingStartedGuide, GettingStartedStep } from '@fitos/libs';
 
 @Component({
   selector: 'app-getting-started',
@@ -62,9 +61,8 @@ import type { GettingStartedGuide, GettingStartedStep } from '../../models/help.
     IonIcon,
     IonButton,
     IonProgressBar,
-    IonBadge,
-    IonText,
-  ],
+    IonBadge
+],
   templateUrl: './getting-started.page.html',
   styleUrls: ['./getting-started.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

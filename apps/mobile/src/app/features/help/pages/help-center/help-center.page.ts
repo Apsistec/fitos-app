@@ -13,8 +13,6 @@ import {
   IonContent,
   IonButtons,
   IonBackButton,
-  IonText,
-  IonList,
   IonListHeader,
   IonLabel,
 } from '@ionic/angular/standalone';
@@ -36,7 +34,7 @@ import { HelpSearchComponent } from '../../components/help-search/help-search.co
 import { HelpCardComponent } from '../../components/help-card/help-card.component';
 import { HelpService } from '../../services/help.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import type { HelpCategory } from '../../models/help.models';
+import type { HelpCategory } from '@fitos/libs';
 
 @Component({
   selector: 'app-help-center',
@@ -48,13 +46,11 @@ import type { HelpCategory } from '../../models/help.models';
     IonContent,
     IonButtons,
     IonBackButton,
-    IonText,
-    IonList,
     IonListHeader,
     IonLabel,
     HelpSearchComponent,
-    HelpCardComponent,
-  ],
+    HelpCardComponent
+],
   templateUrl: './help-center.page.html',
   styleUrls: ['./help-center.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -73,7 +69,6 @@ export class HelpCenterPage {
   // Quick action cards
   quickActions = computed(() => {
     const role = this.authService.profile()?.role;
-    const isTrainerOrOwner = this.authService.isTrainer() || this.authService.isOwner();
 
     const actions = [
       {

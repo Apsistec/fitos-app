@@ -546,7 +546,7 @@ export class VideoUploadComponent implements OnInit {
     this.uploadProgress.set(0);
 
     try {
-      const clientId = this.authService.currentUser()?.id;
+      const clientId = this.authService.user()?.id;
       if (!clientId) {
         throw new Error('Not authenticated');
       }

@@ -25,6 +25,7 @@ import {
   IonTextarea,
   IonBadge,
   IonList,
+  IonSpinner,
   ModalController,
   ToastController,
 } from '@ionic/angular/standalone';
@@ -76,6 +77,7 @@ import { AuthService } from '../../../../core/services/auth.service';
     IonTextarea,
     IonBadge,
     IonList,
+    IonSpinner,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -567,7 +569,7 @@ export class AssessmentFormComponent implements OnInit {
     this.saving.set(true);
 
     try {
-      const trainerId = this.authService.currentUser()?.id;
+      const trainerId = this.authService.user()?.id;
       if (!trainerId) {
         throw new Error('No trainer ID found');
       }

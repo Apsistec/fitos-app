@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectionStrategy, inject, signal, input, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   IonHeader,
   IonToolbar,
@@ -37,7 +37,8 @@ import {
   addCircleOutline,
 } from 'ionicons/icons';
 
-import { EmailTemplateService, EmailTemplate, TemplateVariable } from '../../../core/services/email-template.service';
+import { EmailTemplateService, TemplateVariable } from '../../../core/services/email-template.service';
+import type { EmailTemplate } from '@fitos/shared';
 import { AuthService } from '../../../core/services/auth.service';
 import { HapticService } from '../../../core/services/haptic.service';
 
@@ -88,6 +89,7 @@ import { HapticService } from '../../../core/services/haptic.service';
     IonSpinner,
     IonSegment,
     IonSegmentButton,
+    FormsModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -137,7 +139,7 @@ import { HapticService } from '../../../core/services/haptic.service';
         </div>
       } @else {
         <!-- Edit Tab -->
-        @if (activeTab === 'edit') {
+        @if (activeTab() === 'edit') {
           <form [formGroup]="templateForm">
             <!-- Template Name -->
             <div class="section-header">
@@ -187,7 +189,7 @@ import { HapticService } from '../../../core/services/haptic.service';
                 <ion-input
                   formControlName="subject"
                   type="text"
-                  placeholder="e.g., Welcome to {trainer_business_name}!"
+                  [placeholder]="'e.g., Welcome to {trainer_business_name}!'"
                   [clearInput]="true"
                 />
                 @if (templateForm.get('subject')?.invalid && templateForm.get('subject')?.touched) {
@@ -218,7 +220,7 @@ import { HapticService } from '../../../core/services/haptic.service';
             <!-- Email Body -->
             <div class="section-header">
               <h2>Email Body</h2>
-              <p class="section-description">Use variables like {first_name} for personalization</p>
+              <p class="section-description">Use variables like {{ '{' }}first_name{{ '}' }} for personalization</p>
             </div>
 
             <ion-list [inset]="true">
@@ -227,7 +229,7 @@ import { HapticService } from '../../../core/services/haptic.service';
                   #bodyTextarea
                   formControlName="body"
                   rows="12"
-                  placeholder="Hi {first_name},&#10;&#10;Welcome to {trainer_business_name}! I'm excited to help you reach your fitness goals.&#10;&#10;Best,&#10;{trainer_name}"
+                  [placeholder]="'Hi {first_name},\n\nWelcome to {trainer_business_name}! I\\'m excited to help you reach your fitness goals.\n\nBest,\n{trainer_name}'"
                 />
                 @if (templateForm.get('body')?.invalid && templateForm.get('body')?.touched) {
                   <div class="error-text">Email body is required</div>
@@ -253,7 +255,7 @@ import { HapticService } from '../../../core/services/haptic.service';
         }
 
         <!-- Preview Tab -->
-        @if (activeTab === 'preview') {
+        @if (activeTab() === 'preview') {
           <ion-card>
             <ion-card-header>
               <ion-card-title>Email Preview</ion-card-title>
@@ -562,7 +564,15 @@ export class EmailTemplateEditorComponent implements OnInit {
     this.loading.set(true);
 
     try {
-      const template = await this.emailTemplateService.getTemplate(templateId);
+      // Fetch template directly from database since service doesn't have getTemplate()
+      const { data: template, error } = await this.emailTemplateService['supabase'].client
+        .from('email_templates')
+        .select('*')
+        .eq('id', templateId)
+        .single();
+
+      if (error) throw error;
+
       if (template) {
         this.patchForm(template);
       }

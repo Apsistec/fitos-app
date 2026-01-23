@@ -17,7 +17,6 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonCardContent,
-  IonText,
   IonSegment,
   IonSegmentButton,
   IonTextarea,
@@ -26,6 +25,7 @@ import {
   IonSpinner,
   ModalController,
   ToastController,
+  IonCheckbox,
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
@@ -94,14 +94,14 @@ import { HapticService } from '@app/core/services/haptic.service';
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
-    IonText,
     IonSegment,
     IonSegmentButton,
     IonTextarea,
     IonSelect,
     IonSelectOption,
     IonSpinner,
-  ],
+    IonCheckbox,
+],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ion-header>
@@ -284,7 +284,7 @@ import { HapticService } from '@app/core/services/haptic.service';
                       <ion-item>
                         <ion-label>
                           <h3>Last Contacted</h3>
-                          <p>{{ formatDate(lead()!.last_contacted_at) }}</p>
+                          <p>{{ formatDate(lead()!.last_contacted_at!) }}</p>
                         </ion-label>
                       </ion-item>
                     }

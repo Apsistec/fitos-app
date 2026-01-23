@@ -12,8 +12,7 @@ import {
   IonListHeader,
   IonLabel,
   IonText,
-  IonNote,
-} from '@ionic/angular/standalone';
+  IonIcon, IonItem } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   rocketOutline,
@@ -35,11 +34,15 @@ interface QuickAction {
   color: string;
 }
 
+interface SearchResult {
+  route: string;
+}
+
 @Component({
   selector: 'app-help',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [IonItem, IonIcon,
     CommonModule,
     IonContent,
     IonHeader,
@@ -51,10 +54,8 @@ interface QuickAction {
     IonListHeader,
     IonLabel,
     IonText,
-    IonNote,
     HelpSearchComponent,
-    HelpCardComponent,
-  ],
+    HelpCardComponent],
   templateUrl: './help.page.html',
   styleUrls: ['./help.page.scss'],
 })
@@ -64,8 +65,6 @@ export class HelpPage {
 
   // Quick actions available to all users
   quickActions = computed<QuickAction[]>(() => {
-    const isTrainer = this.authService.isTrainer();
-    const isOwner = this.authService.isOwner();
 
     const baseActions: QuickAction[] = [
       {
@@ -152,7 +151,7 @@ export class HelpPage {
     });
   }
 
-  onSearchResultSelected(result: any) {
+  onSearchResultSelected(result: SearchResult) {
     this.router.navigateByUrl(result.route);
   }
 

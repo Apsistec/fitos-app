@@ -14,10 +14,10 @@ import type {
   FeatureGuide,
   SearchResult,
   HelpCategoryId,
-} from '../models/help.models';
-import { FAQ_ITEMS, FAQ_CATEGORIES } from '../data/faq-data';
-import { GETTING_STARTED_GUIDES } from '../data/guides-data';
-import { FEATURE_GUIDES } from '../data/feature-docs-data';
+} from '@fitos/libs';
+import { FAQ_ITEMS, FAQ_CATEGORIES } from '@fitos/libs';
+import { GETTING_STARTED_GUIDES } from '@fitos/libs';
+import { FEATURE_GUIDES } from '@fitos/libs';
 
 @Injectable({
   providedIn: 'root',

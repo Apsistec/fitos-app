@@ -17,6 +17,8 @@ export interface Profile {
   city?: string;
   state?: string;
   zipCode?: string;
+  gym_owner_id?: string; // All users connected to a gym (owner's profile id)
+  facility_id?: string; // Alternative: direct facility reference
   createdAt: Date;
   updatedAt: Date;
 }
@@ -47,6 +49,23 @@ export interface ClientProfile extends Profile {
   activityLevel?: 'sedentary' | 'light' | 'moderate' | 'active' | 'very-active';
   stripeCustomerId?: string;
   onboardingCompleted: boolean;
+}
+
+export interface GymOwnerProfile extends Profile {
+  businessName: string;
+  bio?: string;
+  facilityCount: number;
+  staffCount: number;
+  stripeAccountId?: string;
+  subscriptionStatus: SubscriptionStatus;
+  subscriptionEndsAt?: Date;
+}
+
+export interface GymStaffProfile extends Profile {
+  gym_owner_id: string; // Required for staff
+  position?: string;
+  permissions: string[];
+  hireDate?: Date;
 }
 
 // ============================================================================
@@ -351,4 +370,198 @@ export interface ApiError {
   code: string;
   message: string;
   details?: Record<string, unknown>;
+}
+
+// ============================================================================
+// CRM & Lead Management Types
+// ============================================================================
+
+export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'consultation' | 'won' | 'lost';
+export type LeadSource = 'referral' | 'social' | 'website' | 'gym' | 'event' | 'other';
+export type ContactMethod = 'email' | 'phone' | 'text' | 'none';
+
+export interface Lead {
+  id: string;
+  trainer_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone?: string;
+  status: LeadStatus;
+  source?: LeadSource;
+  source_details?: string;
+  lead_score: number;
+  converted_to_client_id?: string;
+  converted_at?: string;
+  lost_reason?: string;
+  preferred_contact_method: ContactMethod;
+  do_not_contact: boolean;
+  notes?: string;
+  tags?: string[];
+  custom_fields?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+  last_contacted_at?: string;
+}
+
+export interface LeadWithExtras extends Lead {
+  full_name: string;
+  activities?: LeadActivity[];
+  tasks?: LeadTask[];
+}
+
+export interface CreateLeadInput {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone?: string;
+  source?: LeadSource;
+  source_details?: string;
+  preferred_contact_method?: ContactMethod;
+  notes?: string;
+  tags?: string[];
+}
+
+export interface UpdateLeadInput {
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  phone?: string;
+  status?: LeadStatus;
+  source?: LeadSource;
+  source_details?: string;
+  lead_score?: number;
+  lost_reason?: string;
+  preferred_contact_method?: ContactMethod;
+  do_not_contact?: boolean;
+  notes?: string;
+  tags?: string[];
+  custom_fields?: Record<string, unknown>;
+}
+
+export type ActivityType =
+  | 'email_sent'
+  | 'email_opened'
+  | 'email_clicked'
+  | 'phone_call'
+  | 'text_message'
+  | 'meeting'
+  | 'note'
+  | 'status_change'
+  | 'task_completed';
+
+export interface LeadActivity {
+  id: string;
+  lead_id: string;
+  trainer_id: string;
+  activity_type: ActivityType;
+  subject?: string;
+  description?: string;
+  email_template_id?: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface LeadTask {
+  id: string;
+  trainer_id: string;
+  lead_id: string;
+  title: string;
+  description?: string;
+  task_type?: 'call' | 'email' | 'meeting' | 'follow_up' | 'other';
+  due_date?: string;
+  completed_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// ============================================================================
+// Email Marketing Types
+// ============================================================================
+
+export interface EmailTemplate {
+  id: string;
+  trainer_id: string;
+  name: string;
+  subject: string;
+  body_html: string;
+  body?: string; // Alias for body_html for convenience
+  body_text?: string;
+  variables: string[];
+  category?: string;
+  is_system: boolean;
+  is_active?: boolean;
+  usage_count?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EmailSequence {
+  id: string;
+  trainer_id: string;
+  name: string;
+  description?: string;
+  trigger_event: TriggerEvent;
+  trigger_status?: string; // Used when trigger_event is 'status_change'
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SequenceWithDetails extends EmailSequence {
+  steps?: SequenceStep[];
+  usage_count?: number;
+  enrolledCount?: number;
+  activeEnrollments?: number;
+}
+
+export interface SequenceStep {
+  id: string;
+  sequence_id: string;
+  template_id: string;
+  email_template_id?: string;
+  delay_days: number;
+  delay_hours: number;
+  condition_type: 'always' | 'if_not_opened' | 'if_not_clicked';
+  step_order: number;
+  created_at: string;
+}
+
+export interface CreateSequenceInput {
+  name: string;
+  description?: string;
+  trigger_event: TriggerEvent;
+  trigger_status?: string; // Used when trigger_event is 'status_change'
+  is_active?: boolean;
+}
+
+/**
+ * Consolidated trigger event types for email sequences
+ * Combines what was previously split between TriggerEvent and trigger_on
+ */
+export type TriggerEvent =
+  | 'lead_created'
+  | 'client_onboarded'
+  | 'workout_missed'
+  | 'subscription_expiring'
+  | 'status_change'
+  | 'date'
+  | 'manual';
+
+export interface EmailSend {
+  id: string;
+  template_id?: string;
+  sequence_id?: string;
+  step_id?: string;
+  recipient_email: string;
+  recipient_type: 'lead' | 'client';
+  recipient_id?: string;
+  subject: string;
+  sent_at: string;
+  opened_at?: string;
+  clicked_at?: string;
+  bounced_at?: string;
+  unsubscribed_at?: string;
+  provider_message_id?: string;
+  metadata?: Record<string, unknown>;
 }

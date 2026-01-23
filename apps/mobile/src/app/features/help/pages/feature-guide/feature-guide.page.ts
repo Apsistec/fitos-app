@@ -5,7 +5,7 @@
  * Content includes sections with HTML rendering, tips, and related guides.
  */
 
-import { Component, ChangeDetectionStrategy, inject, computed, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   IonHeader,
@@ -21,7 +21,6 @@ import {
   IonCardContent,
   IonIcon,
   IonBadge,
-  IonText,
   IonButton,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -34,7 +33,8 @@ import {
 } from 'ionicons/icons';
 import { HelpService } from '../../services/help.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import type { FeatureGuide } from '../../models/help.models';
+import type { FeatureGuide } from '@fitos/libs';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-feature-guide',
@@ -53,8 +53,8 @@ import type { FeatureGuide } from '../../models/help.models';
     IonCardContent,
     IonIcon,
     IonBadge,
-    IonText,
     IonButton,
+    DatePipe,
   ],
   templateUrl: './feature-guide.page.html',
   styleUrls: ['./feature-guide.page.scss'],

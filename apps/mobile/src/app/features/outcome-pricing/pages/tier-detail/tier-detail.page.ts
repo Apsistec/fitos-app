@@ -78,6 +78,9 @@ export class TierDetailPage implements OnInit {
   isLoading = signal(true);
   error = signal<string | null>(null);
 
+  // Expose Object to template
+  protected readonly Object = Object;
+
   // Performance metrics (mock data for now - would come from analytics API)
   metrics = computed(() => {
     if (!this.tier()) return null;

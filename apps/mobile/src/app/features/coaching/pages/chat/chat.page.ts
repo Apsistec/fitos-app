@@ -490,7 +490,7 @@ export class ChatPage implements OnInit {
 
   async ngOnInit() {
     // TODO: Load conversation history from Supabase
-    // const userId = this.auth.currentUser()?.id;
+    // const userId = this.auth.user()?.id;
     // if (userId) {
     //   await this.loadConversationHistory(userId);
     // }
@@ -528,9 +528,10 @@ export class ChatPage implements OnInit {
   /**
    * Handle Enter key press
    */
-  onEnterPress(event: KeyboardEvent): void {
+  onEnterPress(event: Event): void {
+    const keyboardEvent = event as KeyboardEvent;
     // Send on Enter, new line on Shift+Enter
-    if (!event.shiftKey) {
+    if (!keyboardEvent.shiftKey) {
       event.preventDefault();
       this.sendMessage();
     }
@@ -613,11 +614,23 @@ export class ChatPage implements OnInit {
    * Get user context for AI
    */
   private getUserContext(): UserContext {
-    const user = this.auth.currentUser();
+    const user = this.auth.user();
+    const profile = this.auth.profile();
+
+    // Return appropriate context based on user role
+    if (profile?.role === 'trainer') {
+      return {
+        user_id: user?.id || '',
+        role: 'trainer',
+        specializations: [],
+        preferences: {},
+      };
+    }
+
+    // Default to client context
     return {
       user_id: user?.id || '',
-      role: user?.role || 'client',
-      // TODO: Load from user profile
+      role: 'client',
       goals: [],
       fitness_level: 'intermediate',
       preferences: {},

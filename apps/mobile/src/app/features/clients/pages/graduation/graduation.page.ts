@@ -22,14 +22,13 @@ import {
   IonSelect,
   IonSelectOption,
   IonTextarea,
-  IonChip,
   IonBadge,
   IonProgressBar,
   IonItem,
   IonLabel,
-  IonList,
   IonRadioGroup,
   IonRadio,
+  IonSpinner,
   ModalController,
   ToastController,
 } from '@ionic/angular/standalone';
@@ -94,15 +93,14 @@ interface JourneyStats {
     IonSelect,
     IonSelectOption,
     IonTextarea,
-    IonChip,
     IonBadge,
     IonProgressBar,
     IonItem,
     IonLabel,
-    IonList,
     IonRadioGroup,
     IonRadio,
-  ],
+    IonSpinner
+],
   template: `
     <ion-header>
       <ion-toolbar>
@@ -157,7 +155,7 @@ interface JourneyStats {
                     </div>
                     <div class="score-label">
                       <ion-badge color="success">
-                        {{ assessment()?.readiness_level.toUpperCase() }}
+                        {{ assessment()?.readiness_level!.toUpperCase() }}
                       </ion-badge>
                       <p>Independence Score</p>
                     </div>
@@ -898,7 +896,7 @@ export class GraduationPage implements OnInit {
     this.loading.set(true);
 
     try {
-      const trainerId = this.authService.currentUser()?.id;
+      const trainerId = this.authService.user()?.id;
       if (!trainerId) {
         throw new Error('No trainer ID found');
       }

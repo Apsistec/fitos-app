@@ -1,10 +1,3 @@
-/**
- * FAQ Page
- *
- * Searchable FAQ system with category filtering and accordion display.
- * Content is automatically filtered based on user role.
- */
-
 import { Component, ChangeDetectionStrategy, inject, signal, computed, effect } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -18,10 +11,7 @@ import {
   IonSegmentButton,
   IonLabel,
   IonSearchbar,
-  IonList,
-  IonText,
-  ToastController,
-} from '@ionic/angular/standalone';
+  ToastController, IonIcon } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
 import {
@@ -31,12 +21,12 @@ import {
 import { FAQAccordionComponent } from '../../components/faq-accordion/faq-accordion.component';
 import { HelpService } from '../../services/help.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import type { FAQItem, HelpCategory, HelpCategoryId } from '../../models/help.models';
+import type { FAQItem, HelpCategory, HelpCategoryId } from '@fitos/libs';
 
 @Component({
   selector: 'app-faq',
   standalone: true,
-  imports: [
+  imports: [IonIcon,
     FormsModule,
     IonHeader,
     IonToolbar,
@@ -48,10 +38,7 @@ import type { FAQItem, HelpCategory, HelpCategoryId } from '../../models/help.mo
     IonSegmentButton,
     IonLabel,
     IonSearchbar,
-    IonList,
-    IonText,
-    FAQAccordionComponent,
-  ],
+    FAQAccordionComponent],
   templateUrl: './faq.page.html',
   styleUrls: ['./faq.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

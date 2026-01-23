@@ -481,7 +481,7 @@ export class ChronotypeAssessmentPage {
    * Save results and exit
    */
   async saveAndExit(): Promise<void> {
-    const user = this.authService.currentUser();
+    const user = this.authService.user();
     if (!user || !this.result()) return;
 
     await this.loadingService.show('Saving your chronotype...');

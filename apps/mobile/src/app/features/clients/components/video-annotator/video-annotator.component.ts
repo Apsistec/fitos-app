@@ -8,7 +8,6 @@ import {
   ViewChild,
   ElementRef,
   ChangeDetectionStrategy,
-  effect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -17,7 +16,6 @@ import {
   IonCardContent,
   IonButton,
   IonIcon,
-  IonButtons,
   IonSegment,
   IonSegmentButton,
   IonLabel,
@@ -30,7 +28,6 @@ import {
   IonSpinner,
   ToastController,
   AlertController,
-  ModalController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -50,18 +47,9 @@ import {
   VideoFeedbackService,
   VideoAnnotation,
   DrawingData,
-  AnnotationType,
   CorrectionType,
-  CorrectionTemplate,
 } from '../../../../core/services/video-feedback.service';
 
-interface CanvasAnnotation {
-  id: string;
-  timestamp: number;
-  type: 'arrow' | 'circle' | 'line' | 'text';
-  data: DrawingData;
-  textContent?: string;
-}
 
 /**
  * VideoAnnotatorComponent - Interactive video annotation tool for trainers
@@ -86,7 +74,6 @@ interface CanvasAnnotation {
     IonCardContent,
     IonButton,
     IonIcon,
-    IonButtons,
     IonSegment,
     IonSegmentButton,
     IonLabel,
@@ -96,8 +83,8 @@ interface CanvasAnnotation {
     IonSelect,
     IonSelectOption,
     IonBadge,
-    IonSpinner,
-  ],
+    IonSpinner
+],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="annotator-container">
@@ -111,7 +98,7 @@ interface CanvasAnnotation {
               (timeupdate)="onTimeUpdate()"
               (loadedmetadata)="onVideoLoaded()"
               playsinline
-            />
+            ></video>
             <canvas
               #drawingCanvas
               class="drawing-canvas"
@@ -121,7 +108,7 @@ interface CanvasAnnotation {
               (touchstart)="onCanvasTouchStart($event)"
               (touchmove)="onCanvasTouchMove($event)"
               (touchend)="onCanvasTouchEnd()"
-            />
+            ></canvas>
           </div>
 
           <!-- Video Controls -->
@@ -137,13 +124,13 @@ interface CanvasAnnotation {
               <div
                 class="progress"
                 [style.width.%]="(currentTime() / duration()) * 100"
-              />
+              ></div>
               @for (marker of annotationMarkers(); track marker.id) {
                 <div
                   class="marker"
                   [style.left.%]="(marker.timestamp / duration()) * 100"
                   [title]="'Annotation at ' + formatTime(marker.timestamp)"
-                />
+                ></div>
               }
             </div>
 

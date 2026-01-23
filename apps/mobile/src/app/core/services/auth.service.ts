@@ -1,5 +1,5 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import { SupabaseService } from './supabase.service';
 import {
   AuthChangeEvent,
@@ -245,7 +245,7 @@ export class AuthService {
     try {
       this._state.update((s) => ({ ...s, loading: true }));
 
-      const { data, error } = await this.supabase.auth.signUp({
+      const { error } = await this.supabase.auth.signUp({
         email,
         password,
         options: {

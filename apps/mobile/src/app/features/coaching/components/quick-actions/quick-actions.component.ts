@@ -1,6 +1,6 @@
 import { Component, output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonButton, IonIcon } from '@ionic/angular/standalone';
+import { IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   nutritionOutline,
@@ -37,7 +37,7 @@ export interface QuickAction {
 @Component({
   selector: 'app-quick-actions',
   standalone: true,
-  imports: [CommonModule, IonButton, IonIcon],
+  imports: [CommonModule, IonIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="quick-actions">

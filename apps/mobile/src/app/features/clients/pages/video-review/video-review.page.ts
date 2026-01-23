@@ -336,7 +336,7 @@ export class VideoReviewPage implements OnInit {
     this.videoId.set(id);
 
     // Get trainer ID
-    const user = this.authService.currentUser();
+    const user = this.authService.user();
     if (!user || user.role !== 'trainer') {
       this.error.set('Only trainers can review videos');
       this.loading.set(false);

@@ -28,7 +28,6 @@ import {
   IonFab,
   IonFabButton,
   IonSpinner,
-  IonText,
   IonGrid,
   IonRow,
   IonCol,
@@ -77,11 +76,10 @@ import { EmailTemplate } from '@fitos/shared';
     IonFab,
     IonFabButton,
     IonSpinner,
-    IonText,
     IonGrid,
     IonRow,
-    IonCol,
-  ],
+    IonCol
+],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ion-header>
@@ -182,7 +180,7 @@ import { EmailTemplate } from '@fitos/shared';
                         <span>{{ template.subject }}</span>
                       </div>
                       <div class="body-preview">
-                        {{ getBodyPreview(template.body) }}
+                        {{ getBodyPreview(template.body!) }}
                       </div>
                     </div>
 
@@ -448,7 +446,7 @@ export class TemplatesPage implements OnInit {
         (t) =>
           t.name.toLowerCase().includes(query) ||
           t.subject.toLowerCase().includes(query) ||
-          t.body.toLowerCase().includes(query) ||
+          t.body?.toLowerCase().includes(query) ||
           (t.category && t.category.toLowerCase().includes(query))
       );
     }
@@ -624,9 +622,9 @@ export class TemplatesPage implements OnInit {
         trainerId,
         {
           name: `${template.name} (Copy)`,
-          category: template.category || undefined,
+          category: (template.category as any) || 'general',
           subject: template.subject,
-          body: template.body,
+          body: template.body || '',
         }
       );
 

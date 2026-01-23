@@ -25,8 +25,7 @@ import {
   IonText,
   IonNote,
   ToastController,
-  LoadingController,
-} from '@ionic/angular/standalone';
+  LoadingController, IonCardSubtitle } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   mailOutline,
@@ -41,7 +40,7 @@ import { Device } from '@capacitor/device';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SupportService } from '../../../../core/services/support.service';
-import type { SupportTicketPayload, DeviceInfo } from '../../models/help.models';
+import type { SupportTicketPayload, DeviceInfo } from '@fitos/libs';
 
 @Component({
   selector: 'app-contact-support',
@@ -49,7 +48,7 @@ import type { SupportTicketPayload, DeviceInfo } from '../../models/help.models'
   styleUrls: ['./contact-support.page.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [IonCardSubtitle, 
     CommonModule,
     ReactiveFormsModule,
     IonHeader,
@@ -198,7 +197,7 @@ export class ContactSupportPage implements OnInit {
       const profile = this.authService.profile();
 
       const payload: SupportTicketPayload = {
-        category: formValue.category,
+        category: formValue.category as 'bug' | 'feature_request' | 'billing' | 'other',
         subject: formValue.subject,
         description: formValue.description,
         deviceInfo: this.deviceInfo(),

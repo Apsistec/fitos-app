@@ -6,6 +6,7 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
   IonHeader,
@@ -21,8 +22,6 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonCardContent,
-  IonList,
-  IonItem,
   IonIcon,
   IonBadge,
   IonButton,
@@ -73,6 +72,7 @@ import { AuthService } from '../../../../core/services/auth.service';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     IonHeader,
     IonToolbar,
     IonTitle,
@@ -86,14 +86,12 @@ import { AuthService } from '../../../../core/services/auth.service';
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
-    IonList,
-    IonItem,
     IonIcon,
     IonBadge,
     IonButton,
     IonNote,
     IonSpinner,
-  ],
+],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ion-header>
@@ -502,7 +500,7 @@ export class IntegrationsPage implements OnInit {
     this.loading.set(true);
 
     try {
-      const user = this.authService.currentUser();
+      const user = this.authService.user();
       if (!user) return;
 
       // Load available and user integrations in parallel
@@ -539,7 +537,7 @@ export class IntegrationsPage implements OnInit {
   }
 
   async connectIntegration(integration: Integration): Promise<void> {
-    const user = this.authService.currentUser();
+    const user = this.authService.user();
     if (!user) return;
 
     const alert = await this.alertCtrl.create({

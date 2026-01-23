@@ -12,7 +12,6 @@ import {
   IonCardContent,
   IonIcon,
   IonButton,
-  IonBadge,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -54,9 +53,8 @@ interface ActionConfig {
     IonCard,
     IonCardContent,
     IonIcon,
-    IonButton,
-    IonBadge,
-  ],
+    IonButton
+],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (assessment && shouldShowAlert()) {

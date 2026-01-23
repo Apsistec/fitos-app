@@ -150,8 +150,8 @@ export interface SupportTicketPayload {
   category: SupportCategory;
   subject: string;
   description: string;
-  deviceInfo: DeviceInfo;
-  screenshotUrl?: string;
+  deviceInfo: DeviceInfo | null;
+  screenshotUrl?: string | null;
 }
 
 /**

@@ -300,14 +300,13 @@ export class GamificationService {
         .eq('user_id', userId)
         .eq('leaderboard_type', type)
         .eq('leaderboard_scope', scope)
-        .eq('period_start', periodStart)
-        .maybeSingle();
+        .eq('period_start', periodStart);
 
       if (scopeId) {
         query = query.eq('scope_id', scopeId);
       }
 
-      const { data, error } = await query;
+      const { data, error } = await query.maybeSingle();
 
       if (error) throw error;
 

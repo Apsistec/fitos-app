@@ -34,7 +34,7 @@ import {
 } from 'ionicons/icons';
 import { HelpService } from '../../services/help.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import type { SearchResult } from '../../models/help.models';
+import type { SearchResult } from '@fitos/libs';
 
 @Component({
   selector: 'app-help-search',

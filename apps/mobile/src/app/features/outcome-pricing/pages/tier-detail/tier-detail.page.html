@@ -194,7 +194,7 @@
       </ion-card>
 
       <!-- Configuration Details -->
-      @if (tier()!.tier_config && Object.keys(tier()!.tier_config).length > 0) {
+      @if (tier()!.tier_config && tier()!.tier_config && Object.keys(tier()!.tier_config || {}).length > 0) {
         <ion-card class="config-card">
           <ion-card-header>
             <ion-card-title>Configuration</ion-card-title>

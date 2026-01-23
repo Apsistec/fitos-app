@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { OutcomePricingService, ClientGoal, GoalStatus } from '../../services/outcome-pricing.service';
@@ -11,9 +12,9 @@ import { OutcomePricingService, ClientGoal, GoalStatus } from '../../services/ou
  * Shows progress, milestones, and next verification dates.
  */
 @Component({
-  selector: 'fit-my-goals',
+  selector: 'app-fit-my-goals',
   standalone: true,
-  imports: [CommonModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonicModule],
   template: `
     <ion-header>
       <ion-toolbar>

@@ -152,7 +152,7 @@ interface SequenceWithDetails extends EmailSequence {
                   <div class="info-row">
                     <ion-icon name="play-outline" />
                     <span>
-                      <strong>Trigger:</strong> {{ formatTrigger(sequence.trigger_on) }}
+                      <strong>Trigger:</strong> {{ formatTrigger(sequence.trigger_event) }}
                     </span>
                   </div>
                   @if (sequence.trigger_status) {
@@ -176,7 +176,7 @@ interface SequenceWithDetails extends EmailSequence {
                         <ion-item lines="none">
                           <div class="step-number" slot="start">{{ i + 1 }}</div>
                           <ion-label>
-                            <h3>{{ getTemplateName(step.email_template_id) }}</h3>
+                            <h3>{{ getTemplateName(step.email_template_id!) }}</h3>
                             <p>
                               @if (step.delay_days === 0 && step.delay_hours === 0) {
                                 Send immediately

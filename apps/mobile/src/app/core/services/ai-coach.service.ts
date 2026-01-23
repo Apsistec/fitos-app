@@ -16,15 +16,36 @@ export interface ChatMessage {
 }
 
 /**
- * User context for AI coaching
+ * Base user context for AI coaching
  */
-export interface UserContext {
+export interface BaseUserContext {
   user_id: string;
-  role: 'client' | 'trainer';
-  goals?: string[];
-  fitness_level?: 'beginner' | 'intermediate' | 'advanced';
   preferences?: Record<string, any>;
 }
+
+/**
+ * Client-specific user context for AI coaching
+ */
+export interface ClientUserContext extends BaseUserContext {
+  role: 'client';
+  goals?: string[];
+  fitness_level?: 'beginner' | 'intermediate' | 'advanced';
+  trainer_id?: string;
+}
+
+/**
+ * Trainer-specific user context for AI coaching
+ */
+export interface TrainerUserContext extends BaseUserContext {
+  role: 'trainer';
+  specializations?: string[];
+  client_count?: number;
+}
+
+/**
+ * Union type for all user contexts
+ */
+export type UserContext = ClientUserContext | TrainerUserContext;
 
 /**
  * AI Coach chat request

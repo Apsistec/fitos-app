@@ -82,7 +82,7 @@ import { ChatMessage } from '@app/core/services/ai-coach.service';
         </div>
 
         <!-- Low Confidence Warning -->
-        @if (message().confidence && message().confidence < 0.7) {
+        @if (message().confidence && message().confidence! < 0.7) {
           <div class="confidence-warning">
             <ion-icon name="warning-outline"></ion-icon>
             <ion-text color="warning">

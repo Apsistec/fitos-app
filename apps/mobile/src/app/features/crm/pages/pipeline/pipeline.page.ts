@@ -15,7 +15,6 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonCardContent,
-  IonText,
   IonSpinner,
   IonFab,
   IonFabButton,
@@ -42,6 +41,7 @@ import {
 } from '@app/core/services/lead.service';
 import { AuthService } from '@app/core/services/auth.service';
 import { HapticService } from '@app/core/services/haptic.service';
+import { FormsModule } from '@angular/forms';
 
 /**
  * PipelinePage - Kanban-style lead pipeline view
@@ -76,11 +76,11 @@ import { HapticService } from '@app/core/services/haptic.service';
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
-    IonText,
     IonSpinner,
     IonFab,
     IonFabButton,
-  ],
+    FormsModule,
+],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ion-header>

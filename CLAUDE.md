@@ -72,6 +72,8 @@ npm test               # Unit tests
 
 | Document | Purpose |
 |----------|---------|
+| `docs/REPOSITORY_STRUCTURE.md` | **CRITICAL** Repository organization, file locations |
+| `docs/TYPE_SYSTEM_GUIDELINES.md` | **CRITICAL** Type definitions, naming conventions |
 | `docs/DESIGN_SYSTEM.md` | Colors, typography, spacing, components |
 | `docs/THEMING.md` | Dark/light mode implementation |
 | `docs/UX_PATTERNS.md` | Friction reduction, navigation patterns |
@@ -122,6 +124,18 @@ const doubled = computed(() => count() * 2);
 
 ## Critical Rules
 
+### Type System (READ FIRST!)
+**BEFORE creating any type, interface, or service property:**
+1. **Check `libs/shared/src/lib/types.ts`** - Does it exist there?
+2. **Check the service definition** - What properties actually exist?
+3. **Match database column names** - Use `snake_case`, exact names
+4. **Read `docs/TYPE_SYSTEM_GUIDELINES.md`** for full rules
+
+**Common violations that cause build errors:**
+- Creating duplicate types in services (❌ `export interface EmailTemplate`)
+- Making up service property names (❌ `authService.currentUser()`)
+- Mismatching DB field names (❌ `body` when DB has `body_html`)
+
 ### Adherence-Neutral Nutrition
 **NEVER use red/danger colors for nutrition "over target".**
 ```scss
@@ -167,25 +181,42 @@ Examples of settings that require user approval before modification:
 
 ---
 
-## File Structure
+## Repository Structure
+
+**Full details:** `docs/REPOSITORY_STRUCTURE.md`
+
+### Key Locations
 
 ```
-apps/mobile/src/
-├── app/
-│   ├── core/           # Services, guards, interceptors
-│   ├── features/       # Feature modules
-│   │   ├── auth/
-│   │   ├── workouts/
-│   │   ├── nutrition/
-│   │   ├── clients/
-│   │   ├── dashboard/
-│   │   ├── messages/
-│   │   └── settings/
-│   ├── shared/         # Shared components, pipes
-│   └── app.routes.ts
-├── theme/              # variables.scss, design tokens
-└── environments/
+apps/
+├── mobile/             # Ionic Angular app (port 4200)
+│   └── src/app/
+│       ├── core/       # Services, guards
+│       └── features/   # Feature modules
+├── landing/            # Marketing site (port 4201)
+└── ai-backend/         # Python FastAPI
+    └── app/            # Python code (NOT apps/)
+
+libs/
+├── shared/             # @fitos/shared (types, utils)
+└── src/                # @fitos/libs (UI components)
+
+docs/                   # ALL documentation
 ```
+
+### Critical Repository Rules
+
+**NEVER:**
+- ❌ Create `.env.example` files (use commented `.env` instead)
+- ❌ Put documentation in root (use `docs/` folder)
+- ❌ Create types in services (use `@fitos/shared`)
+- ❌ Use `apps/` folder in Python backend (use `app/` folder)
+
+**ALWAYS:**
+- ✅ Import types from `@fitos/shared`
+- ✅ Match database column names exactly (`snake_case`)
+- ✅ Put new docs in `docs/` folder
+- ✅ Check `docs/REPOSITORY_STRUCTURE.md` before creating files
 
 ---
 

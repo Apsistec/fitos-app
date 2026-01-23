@@ -3,7 +3,6 @@ import {
   Input,
   ChangeDetectionStrategy,
   computed,
-  signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -15,8 +14,6 @@ import {
   IonProgressBar,
   IonBadge,
   IonIcon,
-  IonButton,
-  IonChip,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -61,10 +58,8 @@ interface ReadinessConfig {
     IonCardContent,
     IonProgressBar,
     IonBadge,
-    IonIcon,
-    IonButton,
-    IonChip,
-  ],
+    IonIcon
+],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ion-card class="autonomy-indicator-card">

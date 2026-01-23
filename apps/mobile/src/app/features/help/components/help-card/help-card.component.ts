@@ -12,7 +12,6 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonCardSubtitle,
-  IonCardContent,
   IonIcon,
   IonBadge,
 } from '@ionic/angular/standalone';
@@ -28,10 +27,9 @@ import { chevronForwardOutline } from 'ionicons/icons';
     IonCardHeader,
     IonCardTitle,
     IonCardSubtitle,
-    IonCardContent,
     IonIcon,
-    IonBadge,
-  ],
+    IonBadge
+],
   templateUrl: './help-card.component.html',
   styleUrls: ['./help-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

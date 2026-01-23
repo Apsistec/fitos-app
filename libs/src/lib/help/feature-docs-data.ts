@@ -416,7 +416,7 @@ export const FEATURE_GUIDES: FeatureGuide[] = [
         tips: [
           'AI responses typically take 2-3 seconds. For complex questions, it may take longer.',
           'If you get an error, check your internet connection and try again.',
-          'The AI improves over time as it learns your preferences and your trainer's style.',
+          'The AI improves over time as it learns your preferences and your trainer\'s style.',
         ],
       },
     ],

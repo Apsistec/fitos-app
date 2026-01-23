@@ -7,8 +7,6 @@
 
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import {
-  IonItem,
-  IonLabel,
   IonIcon,
   IonButton,
 } from '@ionic/angular/standalone';
@@ -23,7 +21,7 @@ import {
 @Component({
   selector: 'app-faq-accordion',
   standalone: true,
-  imports: [IonItem, IonLabel, IonIcon, IonButton],
+  imports: [IonIcon, IonButton],
   templateUrl: './faq-accordion.component.html',
   styleUrls: ['./faq-accordion.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

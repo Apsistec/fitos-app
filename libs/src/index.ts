@@ -5,3 +5,6 @@ export * from './lib/legal/cookie-policy';
 
 // Components
 export * from './lib/components/legal-page/legal-page.component';
+
+// Help System (shared across landing and mobile)
+export * from './lib/help';

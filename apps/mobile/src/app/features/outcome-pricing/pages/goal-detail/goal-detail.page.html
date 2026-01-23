@@ -128,7 +128,7 @@
                 <ion-icon slot="start" name="flash-outline" color="tertiary"></ion-icon>
                 <ion-label>
                   <h3>Next Verification</h3>
-                  <p>{{ formatDate(goal()!.next_verification_due) }}</p>
+                  <p>{{ goal()!.next_verification_due ? formatDate(goal()!.next_verification_due!) : 'Not scheduled' }}</p>
                 </ion-label>
               </ion-item>
 
@@ -137,7 +137,7 @@
                   <ion-icon slot="start" name="checkmark-circle-outline" color="success"></ion-icon>
                   <ion-label>
                     <h3>Last Verified</h3>
-                    <p>{{ formatDateTime(goal()!.last_verified_at) }}</p>
+                    <p>{{ formatDateTime(goal()!.last_verified_at!) }}</p>
                   </ion-label>
                 </ion-item>
               }
@@ -199,9 +199,9 @@
                           <h3>{{ verification.measured_value }} {{ verification.unit }}</h3>
                         </ion-text>
                         <ion-badge
-                          [color]="verification.confidence_score >= 0.8 ? 'success' : 'warning'"
+                          [color]="(verification.confidence_score ?? 0) >= 0.8 ? 'success' : 'warning'"
                         >
-                          {{ (verification.confidence_score * 100).toFixed(0) }}% confidence
+                          {{ ((verification.confidence_score ?? 0) * 100).toFixed(0) }}% confidence
                         </ion-badge>
                       </div>
                       <div class="verification-details">
@@ -211,13 +211,13 @@
                             {{ verification.verification_method }}
                           </p>
                         </ion-text>
-                        @if (verification.anomaly_detected) {
+                        @if (verification.metadata?.['anomaly_detected']) {
                           <ion-chip color="warning" size="small">
                             <ion-icon name="warning-outline"></ion-icon>
                             Anomaly Detected
                           </ion-chip>
                         }
-                        @if (verification.requires_manual_review) {
+                        @if (verification.metadata?.['requires_manual_review']) {
                           <ion-chip color="warning" size="small">
                             <ion-icon name="eye-outline"></ion-icon>
                             Needs Review

@@ -15,6 +15,8 @@ import {
   LeaderboardEntry,
 } from '../../../../core/services/gamification.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { SupabaseService } from '../../../../core/services/supabase.service';
+import { FormsModule } from '@angular/forms';
 
 /**
  * LeaderboardPage
@@ -39,7 +41,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 @Component({
   selector: 'app-leaderboard',
   standalone: true,
-  imports: [CommonModule, IonicModule],
+  imports: [CommonModule, IonicModule, FormsModule,],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ion-header>
@@ -429,6 +431,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 export class LeaderboardPage implements OnInit {
   private gamificationService = inject(GamificationService);
   private authService = inject(AuthService);
+  private supabase = inject(SupabaseService);
 
   // State
   selectedType = signal<LeaderboardType>('weekly_steps');
@@ -447,19 +450,19 @@ export class LeaderboardPage implements OnInit {
   hasOptedIn = computed(() => this.gamificationService.hasOptedIn());
 
   async ngOnInit() {
-    const user = this.authService.currentUser();
+    const user = this.authService.user();
     if (!user) return;
 
     // Load preferences
     await this.gamificationService.getPreferences(user.id);
 
     // Set user context
-    const profile = await this.authService.getProfile(user.id);
+    const profile = this.authService.profile();
     if (profile) {
       this.userFacilityId.set(profile.gym_owner_id || null);
       // Get trainer if client
       if (profile.role === 'client') {
-        const { data } = await this.authService.supabase.client
+        const { data } = await this.supabase.client
           .from('client_trainers')
           .select('trainer_id')
           .eq('client_id', user.id)
@@ -482,7 +485,7 @@ export class LeaderboardPage implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    const user = this.authService.currentUser();
+    const user = this.authService.user();
     if (!user) return;
 
     try {
@@ -548,7 +551,7 @@ export class LeaderboardPage implements OnInit {
    * Opt in to leaderboards
    */
   async optIn(): Promise<void> {
-    const user = this.authService.currentUser();
+    const user = this.authService.user();
     if (!user) return;
 
     const success = await this.gamificationService.updatePreferences(user.id, {

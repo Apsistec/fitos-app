@@ -1194,7 +1194,7 @@ export const FAQ_ITEMS: FAQItem[] = [
   },
   {
     id: 'wearable-004',
-    question: 'Why isn't my wearable syncing?',
+    question: `Why isn't my wearable syncing?`,
     answer: `
       <p>If your wearable isn't syncing, try these troubleshooting steps:</p>
       <ol>
@@ -1251,7 +1251,7 @@ export const FAQ_ITEMS: FAQItem[] = [
   },
   {
     id: 'tech-002',
-    question: 'My data isn't syncing across devices',
+    question: `My data isn't syncing across devices`,
     answer: `
       <p>To fix sync issues:</p>
       <ol>

@@ -56,6 +56,7 @@ import {
   SequenceStep,
   EmailTemplate,
   CreateSequenceInput,
+  TriggerEvent,
 } from '@fitos/shared';
 
 interface SequenceStepForm {
@@ -106,7 +107,7 @@ interface SequenceStepForm {
             <ion-icon slot="icon-only" name="close" />
           </ion-button>
         </ion-buttons>
-        <ion-title>{{ isEditMode ? 'Edit' : 'Create' }} Sequence</ion-title>
+        <ion-title>{{ isEditMode() ? 'Edit' : 'Create' }} Sequence</ion-title>
         <ion-buttons slot="end">
           <ion-button
             (click)="save()"
@@ -166,15 +167,27 @@ interface SequenceStepForm {
                 <ion-select
                   label="Trigger"
                   labelPlacement="stacked"
-                  [(ngModel)]="triggerOn"
+                  [(ngModel)]="triggerEvent"
                   placeholder="Select trigger"
                   interface="action-sheet"
                 >
                   <ion-select-option value="lead_created"
                     >When lead is created</ion-select-option
                   >
+                  <ion-select-option value="client_onboarded"
+                    >When client onboards</ion-select-option
+                  >
+                  <ion-select-option value="workout_missed"
+                    >When workout is missed</ion-select-option
+                  >
+                  <ion-select-option value="subscription_expiring"
+                    >When subscription is expiring</ion-select-option
+                  >
                   <ion-select-option value="status_change"
                     >When lead status changes</ion-select-option
+                  >
+                  <ion-select-option value="date"
+                    >On specific date</ion-select-option
                   >
                   <ion-select-option value="manual"
                     >Manual enrollment</ion-select-option
@@ -182,7 +195,7 @@ interface SequenceStepForm {
                 </ion-select>
               </ion-item>
 
-              @if (triggerOn === 'status_change') {
+              @if (triggerEvent === 'status_change') {
                 <ion-item>
                   <ion-select
                     label="When Status Becomes"
@@ -345,10 +358,10 @@ interface SequenceStepForm {
                   @if (!sequenceName) {
                     <li>Sequence name is required</li>
                   }
-                  @if (!triggerOn) {
+                  @if (!triggerEvent) {
                     <li>Trigger is required</li>
                   }
-                  @if (triggerOn === 'status_change' && !triggerStatus) {
+                  @if (triggerEvent === 'status_change' && !triggerStatus) {
                     <li>Trigger status is required</li>
                   }
                   @if (steps().length === 0) {
@@ -519,7 +532,7 @@ export class SequenceBuilderComponent implements OnInit {
   // Form fields
   sequenceName = '';
   sequenceDescription = '';
-  triggerOn: EmailSequence['trigger_on'] = 'lead_created';
+  triggerEvent: TriggerEvent = 'lead_created';
   triggerStatus = '';
 
   // Computed
@@ -529,8 +542,8 @@ export class SequenceBuilderComponent implements OnInit {
   );
 
   isValid = computed(() => {
-    if (!this.sequenceName || !this.triggerOn) return false;
-    if (this.triggerOn === 'status_change' && !this.triggerStatus)
+    if (!this.sequenceName || !this.triggerEvent) return false;
+    if (this.triggerEvent === 'status_change' && !this.triggerStatus)
       return false;
     if (this.steps().length === 0) return false;
     if (this.hasInvalidSteps()) return false;
@@ -578,14 +591,14 @@ export class SequenceBuilderComponent implements OnInit {
       // Edit mode
       this.sequenceName = this.sequence.name;
       this.sequenceDescription = this.sequence.description || '';
-      this.triggerOn = this.sequence.trigger_on;
+      this.triggerEvent = this.sequence.trigger_event;
       this.triggerStatus = this.sequence.trigger_status || '';
 
       if (this.existingSteps) {
         const stepsForm: SequenceStepForm[] = this.existingSteps.map(
           (step) => ({
             id: step.id,
-            email_template_id: step.email_template_id,
+            email_template_id: step.email_template_id || '',
             delay_days: step.delay_days,
             delay_hours: step.delay_hours,
             step_order: step.step_order,
@@ -683,9 +696,9 @@ export class SequenceBuilderComponent implements OnInit {
       const sequenceInput: CreateSequenceInput = {
         name: this.sequenceName,
         description: this.sequenceDescription || undefined,
-        trigger_on: this.triggerOn,
+        trigger_event: this.triggerEvent,
         trigger_status:
-          this.triggerOn === 'status_change'
+          this.triggerEvent === 'status_change'
             ? this.triggerStatus
             : undefined,
       };

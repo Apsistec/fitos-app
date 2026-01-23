@@ -1,5 +1,12 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { SupabaseService } from './supabase.service';
+import type {
+  EmailTemplate,
+  EmailSequence,
+  SequenceStep,
+  CreateSequenceInput,
+  TriggerEvent,
+} from '@fitos/shared';
 
 /**
  * Email template category
@@ -13,51 +20,10 @@ export type TemplateCategory =
   | 'custom';
 
 /**
- * Email template data
- */
-export interface EmailTemplate {
-  id: string;
-  trainer_id: string;
-  name: string;
-  subject: string;
-  body: string;
-  category: TemplateCategory;
-  is_active: boolean;
-  times_used: number;
-  last_used_at?: string;
-  variables: string[];
-  created_at: string;
-  updated_at: string;
-}
-
-/**
- * Email sequence data
- */
-export interface EmailSequence {
-  id: string;
-  trainer_id: string;
-  name: string;
-  description?: string;
-  trigger_on: 'lead_created' | 'status_change' | 'manual' | 'date';
-  trigger_status?: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-/**
  * Sequence step data
+ * NOTE: Using SequenceStep from @fitos/shared
+ * Local interface removed to prevent conflicts
  */
-export interface SequenceStep {
-  id: string;
-  sequence_id: string;
-  email_template_id: string;
-  step_order: number;
-  delay_days: number;
-  delay_hours: number;
-  conditions?: Record<string, any>;
-  created_at: string;
-}
 
 /**
  * Lead sequence enrollment
@@ -131,13 +97,9 @@ export interface CreateTemplateInput {
 
 /**
  * Create sequence input
+ * NOTE: Using CreateSequenceInput from @fitos/shared
+ * Local interface removed to prevent conflicts
  */
-export interface CreateSequenceInput {
-  name: string;
-  description?: string;
-  trigger_on: EmailSequence['trigger_on'];
-  trigger_status?: string;
-}
 
 /**
  * EmailTemplateService - Email template and sequence management
@@ -184,10 +146,13 @@ export class EmailTemplateService {
     const byCategory: Partial<Record<TemplateCategory, EmailTemplate[]>> = {};
 
     templateList.forEach((template) => {
-      if (!byCategory[template.category]) {
-        byCategory[template.category] = [];
+      const category = template.category as TemplateCategory | undefined;
+      if (category) {
+        if (!byCategory[category]) {
+          byCategory[category] = [];
+        }
+        byCategory[category]!.push(template);
       }
-      byCategory[template.category]!.push(template);
     });
 
     return byCategory;
@@ -393,7 +358,8 @@ export class EmailTemplateService {
     variables: Record<string, string>
   ): { subject: string; body: string } {
     let subject = template.subject;
-    let body = template.body;
+    // Use body_html as primary field, fall back to body alias
+    let body = template.body_html || template.body || '';
 
     // Replace all {variable_name} with values
     Object.entries(variables).forEach(([key, value]) => {

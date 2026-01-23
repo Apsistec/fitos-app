@@ -44,6 +44,7 @@ import {
   FacilityMetrics,
 } from '../../../../core/services/trainer-performance.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { FormsModule } from '@angular/forms';
 
 /**
  * OwnerAnalyticsPage - Facility-wide business analytics
@@ -83,6 +84,7 @@ import { AuthService } from '../../../../core/services/auth.service';
     IonSpinner,
     IonRefresher,
     IonRefresherContent,
+    FormsModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -272,7 +274,7 @@ import { AuthService } from '../../../../core/services/auth.service';
                   <h4>Revenue</h4>
                   @for (trainer of service.topRevenueTrainers(); track trainer.trainer_id; let i = $index) {
                     <div class="ranking-item">
-                      <span class="rank">#{i + 1}</span>
+                      <span class="rank">#{{ i + 1 }}</span>
                       <span class="name">{{ trainer.trainer_name }}</span>
                       <span class="value">
                         {{ service.formatCurrency(trainer.total_revenue_month) }}
@@ -285,7 +287,7 @@ import { AuthService } from '../../../../core/services/auth.service';
                   <h4>Retention</h4>
                   @for (trainer of service.topRetentionTrainers(); track trainer.trainer_id; let i = $index) {
                     <div class="ranking-item">
-                      <span class="rank">#{i + 1}</span>
+                      <span class="rank">#{{ i + 1 }}</span>
                       <span class="name">{{ trainer.trainer_name }}</span>
                       <span class="value">
                         {{ service.formatPercentage(trainer.retention_rate) }}
@@ -616,7 +618,7 @@ export class OwnerAnalyticsPage implements OnInit {
   }
 
   async loadAnalytics(): Promise<void> {
-    const user = this.authService.currentUser();
+    const user = this.authService.user();
     if (!user || user.role !== 'gym_owner') {
       console.error('Only gym owners can view this page');
       return;

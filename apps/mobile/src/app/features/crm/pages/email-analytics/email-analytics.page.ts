@@ -179,7 +179,7 @@ interface RecentEmail {
               <div class="rate-item">
                 <div class="rate-header">
                   <span class="rate-label">Open Rate</span>
-                  <span class="rate-value">{{ emailStats()?.open_rate.toFixed(1) }}%</span>
+                  <span class="rate-value">{{ emailStats()!.open_rate.toFixed(1) }}%</span>
                 </div>
                 <ion-progress-bar
                   [value]="emailStats()!.open_rate / 100"
@@ -194,7 +194,7 @@ interface RecentEmail {
               <div class="rate-item">
                 <div class="rate-header">
                   <span class="rate-label">Click Rate</span>
-                  <span class="rate-value">{{ emailStats()?.click_rate.toFixed(1) }}%</span>
+                  <span class="rate-value">{{ emailStats()!.click_rate.toFixed(1) }}%</span>
                 </div>
                 <ion-progress-bar
                   [value]="emailStats()!.click_rate / 100"
