@@ -1,5 +1,5 @@
-import { Component, OnInit, ElementRef, AfterViewInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ElementRef, AfterViewInit, PLATFORM_ID, inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-features',
@@ -597,10 +597,15 @@ import { CommonModule } from '@angular/common';
   `],
 })
 export class FeaturesComponent implements AfterViewInit {
+  private platformId = inject(PLATFORM_ID);
+
   constructor(private elementRef: ElementRef) {}
 
   ngAfterViewInit() {
-    this.setupScrollAnimations();
+    // Only run animations in browser, not during SSR
+    if (isPlatformBrowser(this.platformId)) {
+      this.setupScrollAnimations();
+    }
   }
 
   private setupScrollAnimations() {

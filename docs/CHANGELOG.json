@@ -1,9 +1,48 @@
 {
   "versions": [
     {
+      "version": "0.1.0",
+      "date": "2026-01-23",
+      "released": true,
+      "changes": [
+        {
+          "type": "feature",
+          "description": "Initial alpha release deployed to Firebase Hosting"
+        },
+        {
+          "type": "feature",
+          "description": "Landing page with features, pricing, help center, and documentation browser"
+        },
+        {
+          "type": "feature",
+          "description": "Mobile PWA with full app functionality and offline support"
+        },
+        {
+          "type": "feature",
+          "description": "Help Center with searchable FAQ system and accordion interface"
+        },
+        {
+          "type": "feature",
+          "description": "Interactive documentation browser linking to GitHub repository"
+        },
+        {
+          "type": "improvement",
+          "description": "Settings page updated with Help Center and Documentation access"
+        },
+        {
+          "type": "improvement",
+          "description": "All FAQ lists now use accordion components with single-expand behavior"
+        },
+        {
+          "type": "improvement",
+          "description": "Features page with scroll-triggered animations"
+        }
+      ]
+    },
+    {
       "version": "1.0.0",
       "date": "2026-01-10",
-      "released": true,
+      "released": false,
       "changes": [
         {
           "type": "feature",

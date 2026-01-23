@@ -17,7 +17,14 @@
     "db:reset": "supabase db reset",
     "db:migrate": "supabase migration up",
     "db:gen-types": "supabase gen types typescript --local > libs/shared/src/lib/database.types.ts",
-    "ai:dev": "cd apps/ai-backend && poetry run python -m uvicorn main:app --reload"
+    "ai:dev": "cd apps/ai-backend && poetry run python -m uvicorn main:app --reload",
+    "deploy:landing": "npm run build:landing && firebase deploy --only hosting:fitos-88fff",
+    "deploy:mobile:web": "npm run build && firebase deploy --only hosting:fitos-mobile",
+    "deploy:both": "npm run build:all && firebase deploy --only hosting,functions",
+    "deploy:preview:landing": "npm run build:landing && firebase hosting:channel:deploy preview --only fitos-88fff",
+    "deploy:preview:mobile": "npm run build && firebase hosting:channel:deploy preview --only fitos-mobile",
+    "deploy:mobile:android": "cd apps/mobile && npx cap sync android && cd android && ./gradlew assembleRelease",
+    "deploy:mobile:ios": "cd apps/mobile && npx cap sync ios"
   },
   "workspaces": [
     "apps/*",
