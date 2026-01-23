@@ -152,13 +152,20 @@ libs/src/
 ├── lib/
 │   ├── components/        # Shared UI components
 │   ├── legal/             # Legal documents (privacy, terms, cookies)
-│   └── help/              # Help content
+│   └── help/              # ✅ Help system content (FAQs, guides, feature docs)
+│       ├── faq-data.ts           # 58 comprehensive FAQs
+│       ├── feature-docs-data.ts  # Feature documentation
+│       ├── guides-data.ts        # Getting started guides
+│       ├── help.models.ts        # Type definitions
+│       └── index.ts              # Barrel exports
 └── index.ts
 ```
 
-**Purpose:** Shared Angular components, legal documents, and content that's used across apps.
+**Purpose:** Shared Angular components, legal documents, and help content used across apps.
 
-**Note:** Different from `libs/shared` - this contains UI components while `libs/shared` contains types/utils.
+**Help System:** Unified help content shared between landing page and mobile app. Both platforms access the same 58 FAQs, feature guides, and getting started documentation for consistency.
+
+**Note:** Different from `libs/shared` - this contains UI components and content while `libs/shared` contains types/utils.
 
 ---
 
