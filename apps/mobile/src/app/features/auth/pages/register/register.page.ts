@@ -404,15 +404,26 @@ export class RegisterPage {
 
       if (error) {
         console.error('Sign up error:', error);
+        console.error('Sign up error type:', typeof error);
+        console.error('Sign up error keys:', Object.keys(error));
 
         // Show error message with more details
-        const errorMsg = error.message || 'Failed to create account. Please try again.';
+        let errorMsg = error.message || 'Failed to create account. Please try again.';
+
+        // Check for network errors
+        if (errorMsg.includes('fetch') || errorMsg.includes('Failed to fetch')) {
+          errorMsg = 'Network error: Unable to connect to server. Please check:\n' +
+                     '1. Your internet connection\n' +
+                     '2. If you\'re using a VPN, try disabling it\n' +
+                     '3. Your firewall settings';
+        }
+
         this.errorMessage.set(errorMsg);
 
         // Show error toast
         const toast = await this.toastController.create({
           message: errorMsg,
-          duration: 5000,
+          duration: 8000,
           position: 'bottom',
           color: 'danger',
           buttons: [{ text: 'Dismiss', role: 'cancel' }]
