@@ -1,5 +1,6 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
+import { ToastController } from '@ionic/angular/standalone';
 import { SupabaseService } from './supabase.service';
 import {
   AuthChangeEvent,
@@ -23,6 +24,7 @@ export interface AuthState {
 export class AuthService {
   private supabase = inject(SupabaseService);
   private router = inject(Router);
+  private toastController = inject(ToastController);
 
   private readonly RETURN_URL_KEY = 'fitos_return_url';
 
@@ -315,7 +317,45 @@ export class AuthService {
    * Sign out
    */
   async signOut(): Promise<void> {
-    await this.supabase.auth.signOut();
+    try {
+      this._state.update((s) => ({ ...s, loading: true }));
+
+      await this.supabase.auth.signOut();
+
+      // Clear state
+      this._state.set({
+        user: null,
+        profile: null,
+        session: null,
+        loading: false,
+        initialized: true,
+      });
+
+      // Show success toast
+      const toast = await this.toastController.create({
+        message: 'Signed out successfully',
+        duration: 2000,
+        position: 'bottom',
+        color: 'success',
+      });
+      await toast.present();
+
+      // Navigate to login
+      await this.router.navigate(['/auth/login']);
+    } catch (error) {
+      console.error('Sign out error:', error);
+
+      // Show error toast
+      const toast = await this.toastController.create({
+        message: 'Error signing out. Please try again.',
+        duration: 3000,
+        position: 'bottom',
+        color: 'danger',
+      });
+      await toast.present();
+
+      this._state.update((s) => ({ ...s, loading: false }));
+    }
   }
 
   /**
