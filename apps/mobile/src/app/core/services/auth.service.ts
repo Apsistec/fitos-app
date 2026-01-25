@@ -268,10 +268,27 @@ export class AuthService {
         throw error;
       }
 
+      // Check if user was auto-confirmed (should NOT happen in production)
+      const session = data.session;
+      if (session) {
+        console.warn('[AuthService] User was auto-confirmed. Signing out to force email verification.');
+        // Sign out immediately to prevent auto-login without email verification
+        await this.supabase.auth.signOut();
+
+        // Clear any auth state
+        this._state.update((s) => ({
+          ...s,
+          user: null,
+          session: null,
+          profile: null,
+          loading: false,
+        }));
+      }
+
       // Note: The database trigger (handle_new_user) automatically creates:
       // 1. A profile in the profiles table with the role
       // 2. A role-specific profile (trainer_profiles or client_profiles)
-      // No need to manually insert here - the trigger handles it all
+      // This only happens AFTER email verification in production
 
       this._state.update((s) => ({ ...s, loading: false }));
 

@@ -20,6 +20,7 @@ import {
   IonBackButton,
   IonButtons,
   ToastController,
+  AlertController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -309,6 +310,7 @@ export class RegisterPage {
   private authService = inject(AuthService);
   private router = inject(Router);
   private toastController = inject(ToastController);
+  private alertController = inject(AlertController);
 
   loading = signal(false);
   errorMessage = signal<string | null>(null);
@@ -419,22 +421,23 @@ export class RegisterPage {
       } else {
         console.log('Sign up successful!');
 
-        // Show success toast with email verification message
-        const toast = await this.toastController.create({
-          message: 'Account created! Please check your email to verify your account before signing in.',
-          duration: 6000,
-          position: 'bottom',
-          color: 'success',
+        // Show persistent alert that user must dismiss
+        const alert = await this.alertController.create({
+          header: 'Verify Your Email',
+          message: `We've sent a verification link to <strong>${email}</strong>.<br><br>Please check your email and click the verification link before signing in.<br><br>Don't forget to check your spam folder!`,
+          backdropDismiss: false, // User must click OK
+          buttons: [
+            {
+              text: 'OK',
+              handler: () => {
+                // Navigate to login page when user clicks OK
+                this.router.navigate(['/auth/login']);
+              }
+            }
+          ]
         });
-        await toast.present();
 
-        // Set success message for display
-        this.successMessage.set('Account created successfully! Please check your email to verify your account before signing in.');
-
-        // Navigate to login after delay to show message
-        setTimeout(() => {
-          this.router.navigate(['/auth/login']);
-        }, 5000);
+        await alert.present();
       }
     } catch (err) {
       console.error('Unexpected error during sign up:', err);
