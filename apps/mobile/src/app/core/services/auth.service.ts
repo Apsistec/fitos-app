@@ -239,15 +239,17 @@ export class AuthService {
    * Sign up with email and password
    */
   async signUp(
-    email: string, 
-    password: string, 
+    email: string,
+    password: string,
     role: UserRole,
     fullName?: string
   ): Promise<{ error: Error | null }> {
     try {
       this._state.update((s) => ({ ...s, loading: true }));
 
-      const { error } = await this.supabase.auth.signUp({
+      console.log('[AuthService] Starting signUp:', { email, role, fullName });
+
+      const { data, error } = await this.supabase.auth.signUp({
         email,
         password,
         options: {
@@ -255,18 +257,27 @@ export class AuthService {
             full_name: fullName,
             role,
           },
+          emailRedirectTo: `${window.location.origin}/auth/verify-email`,
         },
       });
 
-      if (error) throw error;
+      console.log('[AuthService] SignUp response:', { data, error });
+
+      if (error) {
+        console.error('[AuthService] SignUp error:', error);
+        throw error;
+      }
 
       // Note: The database trigger (handle_new_user) automatically creates:
       // 1. A profile in the profiles table with the role
       // 2. A role-specific profile (trainer_profiles or client_profiles)
       // No need to manually insert here - the trigger handles it all
 
+      this._state.update((s) => ({ ...s, loading: false }));
+
       return { error: null };
     } catch (error) {
+      console.error('[AuthService] SignUp catch block:', error);
       this._state.update((s) => ({ ...s, loading: false }));
       return { error: error as Error };
     }

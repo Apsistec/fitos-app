@@ -289,7 +289,12 @@ export class LoginPage {
     this.loading.set(false);
 
     if (error) {
-      this.errorMessage.set(error.message);
+      // Check if error is about email not verified
+      if (error.message.includes('Email not confirmed')) {
+        this.errorMessage.set('Please verify your email address before signing in. Check your inbox for the verification link.');
+      } else {
+        this.errorMessage.set(error.message);
+      }
     }
   }
 

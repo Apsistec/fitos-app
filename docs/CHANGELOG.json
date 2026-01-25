@@ -1,6 +1,33 @@
 {
   "versions": [
     {
+      "version": "0.1.1",
+      "date": "2026-01-25",
+      "released": true,
+      "changes": [
+        {
+          "type": "security",
+          "description": "Email verification now required for all new account registrations"
+        },
+        {
+          "type": "feature",
+          "description": "Added email verification page with auto-redirect after confirmation"
+        },
+        {
+          "type": "improvement",
+          "description": "Enhanced sign-out experience with success toast and navigation to login"
+        },
+        {
+          "type": "improvement",
+          "description": "Improved registration error handling with detailed toast notifications"
+        },
+        {
+          "type": "fix",
+          "description": "Fixed login error messaging for unverified email addresses"
+        }
+      ]
+    },
+    {
       "version": "0.1.0",
       "date": "2026-01-23",
       "released": true,

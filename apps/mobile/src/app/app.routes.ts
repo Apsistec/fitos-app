@@ -9,7 +9,6 @@ export const routes: Routes = [
   },
   {
     path: 'auth',
-    canActivate: [noAuthGuard],
     children: [
       {
         path: '',
@@ -18,19 +17,29 @@ export const routes: Routes = [
       },
       {
         path: 'login',
+        canActivate: [noAuthGuard],
         loadComponent: () =>
           import('./features/auth/pages/login/login.page').then((m) => m.LoginPage),
       },
       {
         path: 'register',
+        canActivate: [noAuthGuard],
         loadComponent: () =>
           import('./features/auth/pages/register/register.page').then((m) => m.RegisterPage),
       },
       {
         path: 'forgot-password',
+        canActivate: [noAuthGuard],
         loadComponent: () =>
           import('./features/auth/pages/forgot-password/forgot-password.page').then(
             (m) => m.ForgotPasswordPage
+          ),
+      },
+      {
+        path: 'verify-email',
+        loadComponent: () =>
+          import('./features/auth/pages/verify-email/verify-email.page').then(
+            (m) => m.VerifyEmailPage
           ),
       },
     ],

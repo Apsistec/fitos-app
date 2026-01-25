@@ -19,6 +19,7 @@ import {
   IonSegmentButton,
   IonBackButton,
   IonButtons,
+  ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -307,6 +308,7 @@ export class RegisterPage {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private toastController = inject(ToastController);
 
   loading = signal(false);
   errorMessage = signal<string | null>(null);
@@ -384,24 +386,71 @@ export class RegisterPage {
     this.errorMessage.set(null);
     this.successMessage.set(null);
 
-    const { fullName, email, password } = this.registerForm.value;
-    const { error } = await this.authService.signUp(
-      email,
-      password,
-      this.selectedRole(),
-      fullName
-    );
+    try {
+      const { fullName, email, password } = this.registerForm.value;
 
-    this.loading.set(false);
+      console.log('Starting sign up for:', email, 'role:', this.selectedRole());
 
-    if (error) {
-      this.errorMessage.set(error.message);
-    } else {
-      this.successMessage.set(
-        'Account created! Please check your email to verify your account before logging in.'
+      const { error } = await this.authService.signUp(
+        email,
+        password,
+        this.selectedRole(),
+        fullName
       );
-      // Don't auto-redirect since email verification is required
-      // User will be automatically logged in when they click the verification link
+
+      this.loading.set(false);
+
+      if (error) {
+        console.error('Sign up error:', error);
+
+        // Show error message with more details
+        const errorMsg = error.message || 'Failed to create account. Please try again.';
+        this.errorMessage.set(errorMsg);
+
+        // Show error toast
+        const toast = await this.toastController.create({
+          message: errorMsg,
+          duration: 5000,
+          position: 'bottom',
+          color: 'danger',
+          buttons: [{ text: 'Dismiss', role: 'cancel' }]
+        });
+        await toast.present();
+      } else {
+        console.log('Sign up successful!');
+
+        // Show success toast with email verification message
+        const toast = await this.toastController.create({
+          message: 'Account created! Please check your email to verify your account before signing in.',
+          duration: 6000,
+          position: 'bottom',
+          color: 'success',
+        });
+        await toast.present();
+
+        // Set success message for display
+        this.successMessage.set('Account created successfully! Please check your email to verify your account before signing in.');
+
+        // Navigate to login after delay to show message
+        setTimeout(() => {
+          this.router.navigate(['/auth/login']);
+        }, 5000);
+      }
+    } catch (err) {
+      console.error('Unexpected error during sign up:', err);
+      this.loading.set(false);
+
+      const errorMsg = 'An unexpected error occurred. Please check your internet connection and try again.';
+      this.errorMessage.set(errorMsg);
+
+      const toast = await this.toastController.create({
+        message: errorMsg,
+        duration: 5000,
+        position: 'bottom',
+        color: 'danger',
+        buttons: [{ text: 'Dismiss', role: 'cancel' }]
+      });
+      await toast.present();
     }
   }
 }
