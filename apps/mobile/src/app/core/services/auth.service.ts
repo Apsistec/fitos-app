@@ -49,6 +49,18 @@ export class AuthService {
   readonly isOwner = computed(() => this._state().profile?.role === 'gym_owner');
   readonly accessToken = computed(() => this._state().session?.access_token ?? null);
 
+  // Get role directly from JWT claims (faster than DB query)
+  readonly roleFromToken = computed(() => {
+    const session = this._state().session;
+    if (!session?.access_token) return null;
+    try {
+      const payload = JSON.parse(atob(session.access_token.split('.')[1]));
+      return payload.user_role as UserRole | null;
+    } catch {
+      return null;
+    }
+  });
+
   /**
    * Wait for auth initialization to complete
    * Returns a promise that resolves when auth is initialized
@@ -143,7 +155,13 @@ export class AuthService {
             loading: false,
             initialized: true,
           }));
-          this.router.navigate(['/auth/login']);
+          // Only navigate to login if not already on an auth page
+          // This prevents interrupting the registration flow when we sign out
+          // after auto-confirm to force email verification
+          const currentUrl = this.router.url;
+          if (!currentUrl.startsWith('/auth')) {
+            this.router.navigate(['/auth/login']);
+          }
         } else if (event === 'INITIAL_SESSION') {
           // This fires on page load/refresh - getSession() already handles it
           // Don't do anything here to avoid race conditions
@@ -243,7 +261,7 @@ export class AuthService {
     password: string,
     role: UserRole,
     fullName?: string
-  ): Promise<{ error: Error | null }> {
+  ): Promise<{ error: Error | null; rateLimited?: boolean }> {
     try {
       this._state.update((s) => ({ ...s, loading: true }));
 
@@ -264,8 +282,17 @@ export class AuthService {
       });
 
       console.log('[AuthService] SignUp response:', { data, error });
+      console.log('[AuthService] Session exists?:', !!data.session);
+      console.log('[AuthService] User exists?:', !!data.user);
+      console.log('[AuthService] User confirmed?:', data.user?.confirmed_at);
 
-      if (error) {
+      // Check if user was created successfully even if there's a rate limit error
+      // Supabase returns the user but may fail to send the email due to rate limiting
+      const userCreatedSuccessfully = data.user && data.user.id;
+      const isRateLimitError = error?.message?.toLowerCase().includes('rate limit');
+
+      if (error && !userCreatedSuccessfully) {
+        // Real error - no user created
         console.error('[AuthService] SignUp error:', error);
         console.error('[AuthService] Error message:', error.message);
         console.error('[AuthService] Error status:', (error as any).status);
@@ -273,12 +300,25 @@ export class AuthService {
         throw error;
       }
 
+      // Track if we hit rate limiting
+      let wasRateLimited = false;
+
+      if (isRateLimitError && userCreatedSuccessfully) {
+        // User was created but email couldn't be sent due to rate limiting
+        // This is still a success - just warn the user about the email
+        console.warn('[AuthService] User created but email rate limited. User ID:', data.user?.id);
+        wasRateLimited = true;
+      }
+
       // Check if user was auto-confirmed (should NOT happen in production)
       const session = data.session;
       if (session) {
-        console.warn('[AuthService] User was auto-confirmed. Signing out to force email verification.');
+        console.warn('[AuthService] ⚠️ User was auto-confirmed! Session detected.');
+        console.warn('[AuthService] This should NOT happen if email confirmation is enabled in Supabase.');
+        console.warn('[AuthService] Signing out to force email verification...');
         // Sign out immediately to prevent auto-login without email verification
         await this.supabase.auth.signOut();
+        console.log('[AuthService] User signed out successfully.');
 
         // Clear any auth state
         this._state.update((s) => ({
@@ -297,11 +337,11 @@ export class AuthService {
 
       this._state.update((s) => ({ ...s, loading: false }));
 
-      return { error: null };
+      return { error: null, rateLimited: wasRateLimited };
     } catch (error) {
       console.error('[AuthService] SignUp catch block:', error);
       this._state.update((s) => ({ ...s, loading: false }));
-      return { error: error as Error };
+      return { error: error as Error, rateLimited: false };
     }
   }
 
@@ -398,6 +438,27 @@ export class AuthService {
     try {
       const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
+
+      if (error) throw error;
+
+      return { error: null };
+    } catch (error) {
+      return { error: error as Error };
+    }
+  }
+
+  /**
+   * Resend verification email
+   */
+  async resendVerificationEmail(email: string): Promise<{ error: Error | null }> {
+    try {
+      const { error } = await this.supabase.auth.resend({
+        type: 'signup',
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/verify-email`,
+        },
       });
 
       if (error) throw error;

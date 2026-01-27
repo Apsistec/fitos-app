@@ -22,10 +22,58 @@ export const routes: Routes = [
           import('./features/auth/pages/login/login.page').then((m) => m.LoginPage),
       },
       {
+        path: 'login/trainer',
+        canActivate: [noAuthGuard],
+        loadComponent: () =>
+          import('./features/auth/pages/login/trainer/trainer-login.page').then(
+            (m) => m.TrainerLoginPage
+          ),
+      },
+      {
+        path: 'login/client',
+        canActivate: [noAuthGuard],
+        loadComponent: () =>
+          import('./features/auth/pages/login/client/client-login.page').then(
+            (m) => m.ClientLoginPage
+          ),
+      },
+      {
+        path: 'login/gym-owner',
+        canActivate: [noAuthGuard],
+        loadComponent: () =>
+          import('./features/auth/pages/login/gym-owner/gym-owner-login.page').then(
+            (m) => m.GymOwnerLoginPage
+          ),
+      },
+      {
         path: 'register',
         canActivate: [noAuthGuard],
         loadComponent: () =>
           import('./features/auth/pages/register/register.page').then((m) => m.RegisterPage),
+      },
+      {
+        path: 'register/trainer',
+        canActivate: [noAuthGuard],
+        loadComponent: () =>
+          import('./features/auth/pages/register/trainer/trainer-register.page').then(
+            (m) => m.TrainerRegisterPage
+          ),
+      },
+      {
+        path: 'register/client',
+        canActivate: [noAuthGuard],
+        loadComponent: () =>
+          import('./features/auth/pages/register/client/client-register.page').then(
+            (m) => m.ClientRegisterPage
+          ),
+      },
+      {
+        path: 'register/gym-owner',
+        canActivate: [noAuthGuard],
+        loadComponent: () =>
+          import('./features/auth/pages/register/gym-owner/gym-owner-register.page').then(
+            (m) => m.GymOwnerRegisterPage
+          ),
       },
       {
         path: 'forgot-password',
@@ -40,6 +88,29 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/auth/pages/verify-email/verify-email.page').then(
             (m) => m.VerifyEmailPage
+          ),
+      },
+      {
+        path: 'reset-password',
+        loadComponent: () =>
+          import('./features/auth/pages/reset-password/reset-password.page').then(
+            (m) => m.ResetPasswordPage
+          ),
+      },
+      {
+        path: 'mfa-setup',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./features/auth/pages/mfa-setup/mfa-setup.page').then(
+            (m) => m.MfaSetupPage
+          ),
+      },
+      {
+        path: 'mfa-verify',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./features/auth/pages/mfa-verify/mfa-verify.page').then(
+            (m) => m.MfaVerifyPage
           ),
       },
     ],

@@ -81,7 +81,9 @@ import { AuthService } from '@app/core/services/auth.service';
             </ion-card-header>
             <ion-card-content class="ion-text-center">
               <p>{{ errorMessage() }}</p>
-              <p>The verification link may have expired or is invalid.</p>
+              @if (isExpiredLink()) {
+                <p>You can request a new verification email from the login page.</p>
+              }
               <ion-button expand="block" (click)="goToLogin()">
                 Go to Login
               </ion-button>
@@ -148,16 +150,31 @@ export class VerifyEmailPage implements OnInit {
   verified = signal(false);
   error = signal(false);
   errorMessage = signal<string>('');
+  isExpiredLink = signal(false);
 
   constructor() {
     addIcons({ mailOutline, checkmarkCircleOutline, closeCircleOutline });
   }
 
   ngOnInit() {
-    // Check if there's a verification token in the URL
+    // Check if there's a verification token or error in the URL
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const accessToken = hashParams.get('access_token');
     const type = hashParams.get('type');
+    const errorCode = hashParams.get('error_code');
+    const errorDescription = hashParams.get('error_description');
+
+    // Handle error cases first
+    if (errorCode) {
+      this.error.set(true);
+      if (errorCode === 'otp_expired') {
+        this.isExpiredLink.set(true);
+        this.errorMessage.set('This verification link has expired.');
+      } else {
+        this.errorMessage.set(errorDescription?.replace(/\+/g, ' ') || 'Verification failed.');
+      }
+      return;
+    }
 
     if (accessToken && type === 'signup') {
       this.verifyEmail();

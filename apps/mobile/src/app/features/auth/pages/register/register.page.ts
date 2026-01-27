@@ -1,61 +1,42 @@
-import {  Component, inject, signal, computed , ChangeDetectionStrategy } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import {
   IonContent,
   IonHeader,
   IonTitle,
   IonToolbar,
   IonButton,
-  IonInput,
-  IonInputPasswordToggle,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonSpinner,
   IonIcon,
-  IonNote,
-  IonSegment,
-  IonSegmentButton,
+  IonCard,
+  IonCardContent,
   IonBackButton,
   IonButtons,
-  ToastController,
-  AlertController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   fitnessOutline,
   peopleOutline,
   businessOutline,
+  arrowForward,
 } from 'ionicons/icons';
-import { AuthService } from '@app/core/services/auth.service';
-import type { UserRole } from '@fitos/shared';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    ReactiveFormsModule,
     RouterLink,
     IonContent,
     IonHeader,
     IonTitle,
     IonToolbar,
     IonButton,
-    IonInput,
-    IonInputPasswordToggle,
-    IonItem,
-    IonLabel,
-    IonList,
-    IonSpinner,
     IonIcon,
-    IonNote,
-    IonSegment,
-    IonSegmentButton,
+    IonCard,
+    IonCardContent,
     IonBackButton,
-    IonButtons
-],
+    IonButtons,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ion-header>
       <ion-toolbar>
@@ -67,404 +48,191 @@ import type { UserRole } from '@fitos/shared';
     </ion-header>
 
     <ion-content class="ion-padding">
-      <div class="register-container">
-        <!-- Role Selection -->
-        <div class="role-selection">
-          <h2>I am a...</h2>
-          <ion-segment [value]="selectedRole()" (ionChange)="onRoleChange($event)">
-            <ion-segment-button value="trainer">
-              <ion-icon name="fitness-outline"></ion-icon>
-              <ion-label>Trainer</ion-label>
-            </ion-segment-button>
-            <ion-segment-button value="client">
-              <ion-icon name="people-outline"></ion-icon>
-              <ion-label>Client</ion-label>
-            </ion-segment-button>
-            <ion-segment-button value="gym_owner">
-              <ion-icon name="business-outline"></ion-icon>
-              <ion-label>Gym Owner</ion-label>
-            </ion-segment-button>
-          </ion-segment>
-          <p class="role-description">
-            @if (selectedRole() === 'trainer') {
-              Create programs, track clients, and grow your business.
-            } @else if (selectedRole() === 'client') {
-              Track workouts, nutrition, and work with your trainer.
-            } @else {
-              Manage your facility, trainers, and members.
-            }
-          </p>
+      <div class="register-selector-container">
+        <!-- Header -->
+        <div class="header">
+          <h1>Join FitOS</h1>
+          <p class="subtitle">Select your account type to get started</p>
         </div>
 
-        <!-- Error Message -->
-        @if (errorMessage()) {
-          <ion-note color="danger" class="error-message">
-            {{ errorMessage() }}
-          </ion-note>
-        }
+        <!-- Role Selection Cards -->
+        <div class="role-cards">
+          <!-- Trainer Card -->
+          <ion-card routerLink="/auth/register/trainer" class="role-card trainer-card">
+            <ion-card-content>
+              <div class="card-icon">
+                <ion-icon name="fitness-outline"></ion-icon>
+              </div>
+              <div class="card-content">
+                <h2>I'm a Trainer</h2>
+                <p>Create programs, manage clients, and grow your coaching business</p>
+              </div>
+              <ion-icon name="arrow-forward" class="arrow-icon"></ion-icon>
+            </ion-card-content>
+          </ion-card>
 
-        <!-- Success Message -->
-        @if (successMessage()) {
-          <ion-note color="success" class="success-message">
-            {{ successMessage() }}
-          </ion-note>
-        }
+          <!-- Client Card -->
+          <ion-card routerLink="/auth/register/client" class="role-card client-card">
+            <ion-card-content>
+              <div class="card-icon">
+                <ion-icon name="people-outline"></ion-icon>
+              </div>
+              <div class="card-content">
+                <h2>I'm a Client</h2>
+                <p>Track workouts, log nutrition, and connect with your trainer</p>
+              </div>
+              <ion-icon name="arrow-forward" class="arrow-icon"></ion-icon>
+            </ion-card-content>
+          </ion-card>
 
-        <!-- Registration Form -->
-        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-          <ion-list lines="none">
-            <ion-item lines="none">
-              <ion-input
-                formControlName="fullName"
-                type="text"
-                label="Full Name"
-                labelPlacement="floating"
-                fill="outline"
-                placeholder="John Doe"
-                autocomplete="name"
-                helperText="Enter your full name"
-                [errorText]="fullNameError()"
-              />
-            </ion-item>
-
-            <ion-item lines="none">
-              <ion-input
-                formControlName="email"
-                type="email"
-                label="Email"
-                labelPlacement="floating"
-                fill="outline"
-                placeholder="you@example.com"
-                autocomplete="email"
-                helperText="Enter your email address"
-                [errorText]="emailError()"
-              />
-            </ion-item>
-
-            <ion-item lines="none">
-              <ion-input
-                formControlName="password"
-                type="password"
-                label="Password"
-                labelPlacement="floating"
-                fill="outline"
-                placeholder="At least 8 characters"
-                autocomplete="new-password"
-                helperText="Choose a strong password (min 8 characters)"
-                [errorText]="passwordError()"
-                [counter]="true"
-                [minlength]="8"
-              >
-                <ion-input-password-toggle slot="end" />
-              </ion-input>
-            </ion-item>
-
-            <ion-item lines="none">
-              <ion-input
-                formControlName="confirmPassword"
-                type="password"
-                label="Confirm Password"
-                labelPlacement="floating"
-                fill="outline"
-                placeholder="Re-enter your password"
-                autocomplete="new-password"
-                helperText="Re-enter your password to confirm"
-                [errorText]="confirmPasswordError()"
-              >
-                <ion-input-password-toggle slot="end" />
-              </ion-input>
-            </ion-item>
-          </ion-list>
-
-          <ion-button
-            expand="block"
-            type="submit"
-            [disabled]="registerForm.invalid || loading()"
-          >
-            @if (loading()) {
-              <ion-spinner name="crescent"></ion-spinner>
-            } @else {
-              Create Account
-            }
-          </ion-button>
-        </form>
-
-        <!-- Terms -->
-        <div class="terms">
-          <p>
-            By creating an account, you agree to our
-            <a href="#">Terms of Service</a> and
-            <a href="#">Privacy Policy</a>.
-          </p>
+          <!-- Gym Owner Card -->
+          <ion-card routerLink="/auth/register/gym-owner" class="role-card gym-card">
+            <ion-card-content>
+              <div class="card-icon">
+                <ion-icon name="business-outline"></ion-icon>
+              </div>
+              <div class="card-content">
+                <h2>I'm a Gym Owner</h2>
+                <p>Manage your facility, staff trainers, and member experience</p>
+              </div>
+              <ion-icon name="arrow-forward" class="arrow-icon"></ion-icon>
+            </ion-card-content>
+          </ion-card>
         </div>
 
         <!-- Sign In Link -->
-        <div class="signin-link">
-          <p>
-            Already have an account?
-            <a routerLink="/auth/login">Sign in</a>
-          </p>
+        <div class="signin-section">
+          <p>Already have an account?</p>
+          <ion-button fill="outline" routerLink="/auth/login">
+            Sign In
+          </ion-button>
         </div>
       </div>
     </ion-content>
   `,
   styles: [`
-    .register-container {
-      max-width: 400px;
+    .register-selector-container {
+      max-width: 500px;
       margin: 0 auto;
+      padding-top: 16px;
     }
 
-    .role-selection {
-      margin-bottom: 24px;
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
 
-      h2 {
-        margin: 0 0 16px;
-        font-size: 1.25rem;
-        font-weight: 600;
+      h1 {
+        margin: 0 0 8px;
+        font-size: 1.75rem;
+        font-weight: 700;
       }
 
-      ion-segment {
-        --background: var(--ion-color-light);
+      .subtitle {
+        margin: 0;
+        color: var(--ion-color-medium);
+      }
+    }
+
+    .role-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .role-card {
+      margin: 0;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       }
 
-      ion-segment-button {
-        --indicator-color: var(--ion-color-primary);
+      &:active {
+        transform: translateY(0);
+      }
+
+      ion-card-content {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 20px;
+      }
+
+      .card-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
 
         ion-icon {
-          font-size: 24px;
-          margin-bottom: 4px;
+          font-size: 28px;
+          color: white;
         }
       }
 
-      .role-description {
-        margin: 12px 0 0;
-        font-size: 0.875rem;
+      .card-content {
+        flex: 1;
+
+        h2 {
+          margin: 0 0 4px;
+          font-size: 1.1rem;
+          font-weight: 600;
+        }
+
+        p {
+          margin: 0;
+          font-size: 0.85rem;
+          color: var(--ion-color-medium);
+        }
+      }
+
+      .arrow-icon {
+        font-size: 20px;
         color: var(--ion-color-medium);
-        text-align: center;
       }
     }
 
-    .error-message,
-    .success-message {
-      display: block;
-      padding: 12px;
-      margin-bottom: 16px;
-      border-radius: 8px;
+    .trainer-card .card-icon {
+      background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));
     }
 
-    .error-message {
-      background: rgba(var(--ion-color-danger-rgb), 0.1);
+    .client-card .card-icon {
+      background: linear-gradient(135deg, #10B981, #059669);
     }
 
-    .success-message {
-      background: rgba(var(--ion-color-success-rgb), 0.1);
+    .gym-card .card-icon {
+      background: linear-gradient(135deg, #8B5CF6, #7C3AED);
     }
 
-    ion-list {
-      background: transparent;
-      margin-bottom: 24px;
-
-      ion-item {
-        --background: transparent;
-        --padding-start: 0;
-        --inner-padding-end: 0;
-        margin-bottom: 16px;
-      }
-    }
-
-    .terms {
-      margin-top: 24px;
+    .signin-section {
       text-align: center;
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid var(--ion-color-light-shade);
 
       p {
-        font-size: 0.75rem;
-        color: var(--ion-color-medium);
-        margin: 0;
-      }
-
-      a {
-        color: var(--ion-color-primary);
-        text-decoration: none;
-      }
-    }
-
-    .signin-link {
-      text-align: center;
-      margin-top: 24px;
-
-      p {
-        margin: 0;
+        margin: 0 0 16px;
         color: var(--ion-color-medium);
       }
 
-      a {
-        color: var(--ion-color-primary);
-        text-decoration: none;
-        font-weight: 600;
+      ion-button {
+        min-width: 200px;
       }
     }
   `],
 })
 export class RegisterPage {
-  private fb = inject(FormBuilder);
-  private authService = inject(AuthService);
-  private router = inject(Router);
-  private toastController = inject(ToastController);
-  private alertController = inject(AlertController);
-
-  loading = signal(false);
-  errorMessage = signal<string | null>(null);
-  successMessage = signal<string | null>(null);
-  selectedRole = signal<UserRole>('trainer');
-
-  registerForm: FormGroup = this.fb.group(
-    {
-      fullName: ['', [Validators.required]],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(8)]],
-      confirmPassword: ['', [Validators.required]],
-    },
-    {
-      validators: this.passwordMatchValidator,
-    }
-  );
-
-  // Computed error messages for ion-input errorText property
-  fullNameError = computed(() => {
-    const control = this.registerForm.get('fullName');
-    if (!control?.touched) return '';
-    if (control.hasError('required')) return 'Full name is required';
-    return '';
-  });
-
-  emailError = computed(() => {
-    const control = this.registerForm.get('email');
-    if (!control?.touched) return '';
-    if (control.hasError('required')) return 'Email is required';
-    if (control.hasError('email')) return 'Please enter a valid email address';
-    return '';
-  });
-
-  passwordError = computed(() => {
-    const control = this.registerForm.get('password');
-    if (!control?.touched) return '';
-    if (control.hasError('required')) return 'Password is required';
-    if (control.hasError('minlength')) return 'Password must be at least 8 characters';
-    return '';
-  });
-
-  confirmPasswordError = computed(() => {
-    const control = this.registerForm.get('confirmPassword');
-    if (!control?.touched) return '';
-    if (control.hasError('required')) return 'Please confirm your password';
-    if (this.registerForm.hasError('passwordMismatch') && control.touched) {
-      return 'Passwords do not match';
-    }
-    return '';
-  });
-
   constructor() {
     addIcons({
       fitnessOutline,
       peopleOutline,
       businessOutline,
+      arrowForward,
     });
-  }
-
-  passwordMatchValidator(form: FormGroup) {
-    const password = form.get('password')?.value;
-    const confirmPassword = form.get('confirmPassword')?.value;
-    return password === confirmPassword ? null : { passwordMismatch: true };
-  }
-
-  onRoleChange(event: CustomEvent): void {
-    this.selectedRole.set(event.detail.value as UserRole);
-  }
-
-  async onSubmit(): Promise<void> {
-    if (this.registerForm.invalid) return;
-
-    this.loading.set(true);
-    this.errorMessage.set(null);
-    this.successMessage.set(null);
-
-    try {
-      const { fullName, email, password } = this.registerForm.value;
-
-      console.log('Starting sign up for:', email, 'role:', this.selectedRole());
-
-      const { error } = await this.authService.signUp(
-        email,
-        password,
-        this.selectedRole(),
-        fullName
-      );
-
-      this.loading.set(false);
-
-      if (error) {
-        console.error('Sign up error:', error);
-        console.error('Sign up error type:', typeof error);
-        console.error('Sign up error keys:', Object.keys(error));
-
-        // Show error message with more details
-        let errorMsg = error.message || 'Failed to create account. Please try again.';
-
-        // Check for network errors
-        if (errorMsg.includes('fetch') || errorMsg.includes('Failed to fetch')) {
-          errorMsg = 'Network error: Unable to connect to server. Please check:\n' +
-                     '1. Your internet connection\n' +
-                     '2. If you\'re using a VPN, try disabling it\n' +
-                     '3. Your firewall settings';
-        }
-
-        this.errorMessage.set(errorMsg);
-
-        // Show error toast
-        const toast = await this.toastController.create({
-          message: errorMsg,
-          duration: 8000,
-          position: 'bottom',
-          color: 'danger',
-          buttons: [{ text: 'Dismiss', role: 'cancel' }]
-        });
-        await toast.present();
-      } else {
-        console.log('Sign up successful!');
-
-        // Show persistent alert that user must dismiss
-        const alert = await this.alertController.create({
-          header: 'Verify Your Email',
-          message: `We've sent a verification link to <strong>${email}</strong>.<br><br>Please check your email and click the verification link before signing in.<br><br>Don't forget to check your spam folder!`,
-          backdropDismiss: false, // User must click OK
-          buttons: [
-            {
-              text: 'OK',
-              handler: () => {
-                // Navigate to login page when user clicks OK
-                this.router.navigate(['/auth/login']);
-              }
-            }
-          ]
-        });
-
-        await alert.present();
-      }
-    } catch (err) {
-      console.error('Unexpected error during sign up:', err);
-      this.loading.set(false);
-
-      const errorMsg = 'An unexpected error occurred. Please check your internet connection and try again.';
-      this.errorMessage.set(errorMsg);
-
-      const toast = await this.toastController.create({
-        message: errorMsg,
-        duration: 5000,
-        position: 'bottom',
-        color: 'danger',
-        buttons: [{ text: 'Dismiss', role: 'cancel' }]
-      });
-      await toast.present();
-    }
   }
 }
