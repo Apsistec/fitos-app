@@ -1,9 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router, UrlTree } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { filter, map, take } from 'rxjs';
-import { Observable } from 'rxjs';
 import type { UserRole } from '@fitos/shared';
 
 /**
@@ -15,29 +12,27 @@ import type { UserRole } from '@fitos/shared';
  * @returns Guard function
  */
 export function roleGuard(...allowedRoles: UserRole[]): CanActivateFn {
-  return (): Observable<boolean | UrlTree> => {
+  return async (): Promise<boolean | UrlTree> => {
     const authService = inject(AuthService);
     const router = inject(Router);
 
-    return toObservable(authService.state).pipe(
-      filter((state) => state.initialized),
-      take(1),
-      map((state) => {
-        const userRole = state.profile?.role;
+    // Wait for auth to initialize
+    await authService.waitForInitialization();
 
-        if (!userRole) {
-          // No role - redirect to dashboard
-          return router.createUrlTree(['/tabs/dashboard']);
-        }
+    const state = authService.state();
+    const userRole = state.profile?.role;
 
-        if (allowedRoles.includes(userRole)) {
-          return true;
-        }
+    if (!userRole) {
+      // No role - redirect to dashboard
+      return router.createUrlTree(['/tabs/dashboard']);
+    }
 
-        // Wrong role - redirect to appropriate dashboard
-        return router.createUrlTree(['/tabs/dashboard']);
-      })
-    );
+    if (allowedRoles.includes(userRole)) {
+      return true;
+    }
+
+    // Wrong role - redirect to appropriate dashboard
+    return router.createUrlTree(['/tabs/dashboard']);
   };
 }
 

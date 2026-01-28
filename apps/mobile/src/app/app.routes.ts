@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, noAuthGuard, trainerOrOwnerGuard, onboardingCompleteGuard } from './core/guards';
+import { authGuard, noAuthGuard, trainerOrOwnerGuard, onboardingCompleteGuard, mfaRequiredGuard } from './core/guards';
 
 export const routes: Routes = [
   {
@@ -123,7 +123,7 @@ export const routes: Routes = [
   },
   {
     path: 'tabs',
-    canActivate: [authGuard, onboardingCompleteGuard],
+    canActivate: [authGuard, mfaRequiredGuard, onboardingCompleteGuard],
     loadComponent: () => import('./features/tabs/tabs.page').then((m) => m.TabsPage),
     children: [
       {

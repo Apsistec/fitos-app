@@ -42,10 +42,13 @@ export class AppComponent implements OnInit {
   constructor() {
     // Register all Ionicons
     addIcons(allIcons);
+
+    // Initialize auth state listener immediately in constructor
+    // This ensures auth is initializing before route guards run
+    this.authService.initAuthListener();
   }
 
   ngOnInit(): void {
-    // Initialize auth state listener
-    this.authService.initAuthListener();
+    // Auth initialization moved to constructor for earlier execution
   }
 }

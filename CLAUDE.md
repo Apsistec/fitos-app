@@ -179,6 +179,23 @@ Examples of settings that require user approval before modification:
 - Environment variables
 - Build configurations
 
+### Feature and Guard Management
+**NEVER disable features, guards, or functionality without explicit user approval.**
+
+When encountering errors with features (e.g., MFA, auth guards, API failures):
+1. Explain the error clearly
+2. Investigate the root cause
+3. Present options to FIX the issue, not disable it
+4. Ask the user which approach they prefer
+5. Only disable functionality if user explicitly approves
+
+Examples that require user approval before disabling:
+- Route guards (auth, MFA, role guards)
+- Security features (MFA, passkeys, encryption)
+- API integrations
+- Validation rules
+- Feature flags
+
 ---
 
 ## Repository Structure

@@ -9,8 +9,6 @@ import {
   IonButton,
   IonInput,
   IonInputPasswordToggle,
-  IonItem,
-  IonList,
   IonSpinner,
   IonIcon,
   IonNote,
@@ -38,8 +36,6 @@ import { passwordComplexityValidator, capitalizeWords, checkPasswordRequirements
     IonButton,
     IonInput,
     IonInputPasswordToggle,
-    IonItem,
-    IonList,
     IonSpinner,
     IonIcon,
     IonNote,
@@ -76,54 +72,57 @@ import { passwordComplexityValidator, capitalizeWords, checkPasswordRequirements
 
         <!-- Registration Form -->
         <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-          <ion-list lines="none">
-            <ion-item lines="none">
-              <ion-input
-                formControlName="fullName"
-                type="text"
-                label="Full Name"
-                labelPlacement="floating"
-                fill="outline"
-                placeholder="John Doe"
-                autocomplete="name"
-                autocapitalize="words"
-                helperText="Your name as it will appear to your trainer"
-                [errorText]="fullNameError()"
-                (ionBlur)="capitalizeFullName()"
-              />
-            </ion-item>
+          <div class="form-fields">
+            <ion-input
+              formControlName="fullName"
+              type="text"
+              label="Full Name"
+              labelPlacement="floating"
+              fill="outline"
+              placeholder="John Doe"
+              autocomplete="name"
+              autocapitalize="words"
+              helperText="Your name as it will appear to your trainer"
+              [errorText]="fullNameError()"
+              [class.ion-valid]="registerForm.get('fullName')?.valid && registerForm.get('fullName')?.touched"
+              [class.ion-invalid]="registerForm.get('fullName')?.invalid && registerForm.get('fullName')?.touched"
+              [class.ion-touched]="registerForm.get('fullName')?.touched"
+              (ionBlur)="capitalizeFullName()"
+            />
 
-            <ion-item lines="none">
-              <ion-input
-                formControlName="email"
-                type="email"
-                label="Email"
-                labelPlacement="floating"
-                fill="outline"
-                placeholder="you@example.com"
-                autocomplete="email"
-                helperText="We'll use this for account verification"
-                [errorText]="emailError()"
-              />
-            </ion-item>
+            <ion-input
+              formControlName="email"
+              type="email"
+              label="Email"
+              labelPlacement="floating"
+              fill="outline"
+              placeholder="you@example.com"
+              autocomplete="email"
+              helperText="We'll use this for account verification"
+              [errorText]="emailError()"
+              [class.ion-valid]="registerForm.get('email')?.valid && registerForm.get('email')?.touched"
+              [class.ion-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+              [class.ion-touched]="registerForm.get('email')?.touched"
+            />
 
-            <ion-item lines="none">
-              <ion-input
-                formControlName="password"
-                type="password"
-                label="Password"
-                labelPlacement="floating"
-                fill="outline"
-                placeholder="Create a strong password"
-                autocomplete="new-password"
-                [errorText]="passwordError()"
-                [counter]="true"
-                [minlength]="8"
-                (ionInput)="onPasswordInput($event)"
-              >
-                <ion-input-password-toggle slot="end" />
-              </ion-input>
-            </ion-item>
+            <ion-input
+              formControlName="password"
+              type="password"
+              label="Password"
+              labelPlacement="floating"
+              fill="outline"
+              placeholder="Create a strong password"
+              autocomplete="new-password"
+              [errorText]="passwordError()"
+              [counter]="true"
+              [minlength]="8"
+              [class.ion-valid]="registerForm.get('password')?.valid && registerForm.get('password')?.touched"
+              [class.ion-invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+              [class.ion-touched]="registerForm.get('password')?.touched"
+              (ionInput)="onPasswordInput($event)"
+            >
+              <ion-input-password-toggle slot="end" />
+            </ion-input>
 
             <!-- Password Requirements -->
             @if (passwordValue()) {
@@ -151,21 +150,24 @@ import { passwordComplexityValidator, capitalizeWords, checkPasswordRequirements
               </div>
             }
 
-            <ion-item lines="none">
-              <ion-input
-                formControlName="confirmPassword"
-                type="password"
-                label="Confirm Password"
-                labelPlacement="floating"
-                fill="outline"
-                placeholder="Re-enter your password"
-                autocomplete="new-password"
-                [errorText]="confirmPasswordError()"
-              >
-                <ion-input-password-toggle slot="end" />
-              </ion-input>
-            </ion-item>
-          </ion-list>
+            <ion-input
+              formControlName="confirmPassword"
+              type="password"
+              label="Confirm Password"
+              labelPlacement="floating"
+              fill="outline"
+              placeholder="Re-enter your password"
+              autocomplete="new-password"
+              [errorText]="confirmPasswordError()"
+              [class.ion-valid]="confirmPasswordValue() && passwordValue() === confirmPasswordValue() && confirmPasswordTouched()"
+              [class.ion-invalid]="confirmPasswordValue() && passwordValue() !== confirmPasswordValue() && confirmPasswordTouched()"
+              [class.ion-touched]="confirmPasswordTouched()"
+              (ionInput)="onConfirmPasswordInput($event)"
+              (ionBlur)="onConfirmPasswordBlur()"
+            >
+              <ion-input-password-toggle slot="end" />
+            </ion-input>
+          </div>
 
           <ion-button
             expand="block"
@@ -241,14 +243,10 @@ import { passwordComplexityValidator, capitalizeWords, checkPasswordRequirements
       background: rgba(var(--ion-color-danger-rgb), 0.1);
     }
 
-    ion-list {
-      background: transparent;
+    .form-fields {
       margin-bottom: 24px;
 
-      ion-item {
-        --background: transparent;
-        --padding-start: 0;
-        --inner-padding-end: 0;
+      ion-input {
         margin-bottom: 16px;
       }
     }
@@ -338,6 +336,8 @@ export class ClientRegisterPage {
   isSubmitting = signal(false);
   errorMessage = signal<string | null>(null);
   passwordValue = signal('');
+  confirmPasswordValue = signal('');
+  confirmPasswordTouched = signal(false);
 
   registerForm: FormGroup = this.fb.group(
     {
@@ -357,6 +357,14 @@ export class ClientRegisterPage {
 
   onPasswordInput(event: CustomEvent): void {
     this.passwordValue.set(event.detail.value || '');
+  }
+
+  onConfirmPasswordInput(event: CustomEvent): void {
+    this.confirmPasswordValue.set(event.detail.value || '');
+  }
+
+  onConfirmPasswordBlur(): void {
+    this.confirmPasswordTouched.set(true);
   }
 
   fullNameError = computed(() => {
@@ -383,10 +391,9 @@ export class ClientRegisterPage {
   });
 
   confirmPasswordError = computed(() => {
-    const control = this.registerForm.get('confirmPassword');
-    if (!control?.touched) return '';
-    if (control.hasError('required')) return 'Please confirm your password';
-    if (this.registerForm.hasError('passwordMismatch') && control.touched) {
+    if (!this.confirmPasswordTouched()) return '';
+    if (!this.confirmPasswordValue()) return 'Please confirm your password';
+    if (this.passwordValue() !== this.confirmPasswordValue()) {
       return 'Passwords do not match';
     }
     return '';

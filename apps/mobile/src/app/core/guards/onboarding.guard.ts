@@ -1,9 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router, UrlTree } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { filter, map, take } from 'rxjs';
-import { Observable } from 'rxjs';
 
 /**
  * Onboarding guard - ensures user has completed onboarding
@@ -11,28 +8,26 @@ import { Observable } from 'rxjs';
  * Redirects to onboarding if profile is incomplete.
  * Currently checks if fullName is set.
  */
-export const onboardingCompleteGuard: CanActivateFn = (): Observable<boolean | UrlTree> => {
+export const onboardingCompleteGuard: CanActivateFn = async (): Promise<boolean | UrlTree> => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  return toObservable(authService.state).pipe(
-    filter((state) => state.initialized),
-    take(1),
-    map((state) => {
-      const profile = state.profile;
+  // Wait for auth to initialize
+  await authService.waitForInitialization();
 
-      if (!profile) {
-        // No profile - redirect to login
-        return router.createUrlTree(['/auth/login']);
-      }
+  const state = authService.state();
+  const profile = state.profile;
 
-      // Check if onboarding is complete (fullName is required)
-      if (profile.fullName) {
-        return true;
-      }
+  if (!profile) {
+    // No profile - redirect to login
+    return router.createUrlTree(['/auth/login']);
+  }
 
-      // Onboarding incomplete
-      return router.createUrlTree(['/onboarding']);
-    })
-  );
+  // Check if onboarding is complete (fullName is required)
+  if (profile.fullName) {
+    return true;
+  }
+
+  // Onboarding incomplete
+  return router.createUrlTree(['/onboarding']);
 };
