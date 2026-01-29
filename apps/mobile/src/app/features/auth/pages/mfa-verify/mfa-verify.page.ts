@@ -1,42 +1,34 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   IonContent,
   IonHeader,
   IonTitle,
   IonToolbar,
   IonButton,
-  IonInput,
-  IonItem,
-  IonList,
   IonSpinner,
   IonIcon,
-  IonNote,
   ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { shieldCheckmarkOutline, keyOutline } from 'ionicons/icons';
+import { shieldCheckmarkOutline, keyOutline, refreshOutline } from 'ionicons/icons';
 import { AuthService } from '@app/core/services/auth.service';
 import { SupabaseService } from '@app/core/services/supabase.service';
+import { OtpInputComponent } from '@app/shared/components/otp-input/otp-input.component';
 
 @Component({
   selector: 'app-mfa-verify',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    ReactiveFormsModule,
     IonContent,
     IonHeader,
     IonTitle,
     IonToolbar,
     IonButton,
-    IonInput,
-    IonItem,
-    IonList,
     IonSpinner,
     IonIcon,
-    IonNote,
+    OtpInputComponent,
   ],
   template: `
     <ion-header>
@@ -49,54 +41,50 @@ import { SupabaseService } from '@app/core/services/supabase.service';
       <div class="mfa-verify-container">
         <!-- Header -->
         <div class="verify-header">
-          <div class="icon-container">
-            <ion-icon name="shield-checkmark-outline" color="primary"></ion-icon>
+          <div class="icon-container" [class.verifying]="isVerifying()" [class.error]="hasError()" [class.success]="isSuccess()">
+            @if (isVerifying()) {
+              <ion-spinner name="crescent" color="primary"></ion-spinner>
+            } @else {
+              <ion-icon name="shield-checkmark-outline"></ion-icon>
+            }
           </div>
           <h1>Verify Your Identity</h1>
-          <p>Enter the 6-digit code from your authenticator app to continue.</p>
+          <p>Enter the 6-digit code from your authenticator app</p>
         </div>
+
+        <!-- OTP Input -->
+        <app-otp-input
+          #otpInput
+          [length]="6"
+          [error]="hasError()"
+          [success]="isSuccess()"
+          [disabled]="isVerifying()"
+          (codeComplete)="onCodeComplete($event)"
+          (codeChange)="onCodeChange($event)"
+        />
 
         <!-- Error Message -->
         @if (errorMessage()) {
-          <ion-note color="danger" class="error-message">
-            {{ errorMessage() }}
-          </ion-note>
+          <div class="error-container">
+            <p class="error-message">{{ errorMessage() }}</p>
+            <ion-button fill="clear" size="small" (click)="retry()">
+              <ion-icon name="refresh-outline" slot="start"></ion-icon>
+              Try Again
+            </ion-button>
+          </div>
         }
-
-        <!-- Verification Form -->
-        <form [formGroup]="verifyForm" (ngSubmit)="verifyCode()">
-          <ion-list lines="none">
-            <ion-item lines="none">
-              <ion-input
-                formControlName="code"
-                type="text"
-                inputmode="numeric"
-                label="Verification Code"
-                labelPlacement="floating"
-                fill="outline"
-                placeholder="000000"
-                [maxlength]="6"
-                autofocus="true"
-              />
-            </ion-item>
-          </ion-list>
-
-          <ion-button
-            expand="block"
-            type="submit"
-            [disabled]="verifyForm.invalid || isVerifying()"
-          >
-            @if (isVerifying()) {
-              <ion-spinner name="crescent"></ion-spinner>
-            } @else {
-              Verify
-            }
-          </ion-button>
-        </form>
 
         <!-- Help Text -->
         <div class="help-section">
-          <p>Open your authenticator app (Google Authenticator, Authy, etc.) to get your verification code.</p>
+          <p>Open your authenticator app to view your verification code. The code refreshes every 30 seconds.</p>
+        </div>
+
+        <!-- Recovery Code Option -->
+        <div class="recovery-section">
+          <p>Lost access to your authenticator?</p>
+          <ion-button fill="clear" size="small" (click)="useRecoveryCode()">
+            Use Recovery Code
+          </ion-button>
         </div>
 
         <!-- Sign Out Option -->
@@ -112,21 +100,60 @@ import { SupabaseService } from '@app/core/services/supabase.service';
     .mfa-verify-container {
       max-width: 400px;
       margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .verify-header {
       text-align: center;
-      margin-bottom: 32px;
+      margin-bottom: 16px;
       padding-top: 32px;
 
       .icon-container {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(var(--ion-color-primary-rgb), 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        transition: all 0.3s ease;
+
         ion-icon {
-          font-size: 72px;
+          font-size: 40px;
+          color: var(--ion-color-primary);
+        }
+
+        ion-spinner {
+          width: 36px;
+          height: 36px;
+        }
+
+        &.verifying {
+          animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        &.error {
+          background: rgba(var(--ion-color-danger-rgb), 0.1);
+
+          ion-icon {
+            color: var(--ion-color-danger);
+          }
+        }
+
+        &.success {
+          background: rgba(var(--ion-color-success-rgb), 0.1);
+
+          ion-icon {
+            color: var(--ion-color-success);
+          }
         }
       }
 
       h1 {
-        margin: 24px 0 12px;
+        margin: 0 0 12px;
         font-size: 1.5rem;
         font-weight: 700;
       }
@@ -134,64 +161,96 @@ import { SupabaseService } from '@app/core/services/supabase.service';
       p {
         color: var(--ion-color-medium);
         margin: 0;
+        font-size: 0.95rem;
       }
     }
 
-    .error-message {
-      display: block;
-      padding: 12px;
-      margin-bottom: 16px;
-      border-radius: 8px;
-      background: rgba(var(--ion-color-danger-rgb), 0.1);
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.8; }
     }
 
-    ion-list {
-      background: transparent;
-      margin-bottom: 24px;
+    .error-container {
+      text-align: center;
+      margin: 16px 0;
+      padding: 16px;
+      background: rgba(var(--ion-color-danger-rgb), 0.08);
+      border-radius: 12px;
+      width: 100%;
 
-      ion-item {
-        --background: transparent;
-        --padding-start: 0;
-        --inner-padding-end: 0;
+      .error-message {
+        margin: 0 0 8px;
+        color: var(--ion-color-danger);
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+
+      ion-button {
+        --color: var(--ion-color-danger);
       }
     }
 
     .help-section {
       text-align: center;
       margin-top: 24px;
+      max-width: 280px;
 
       p {
         font-size: 0.85rem;
         color: var(--ion-color-medium);
         margin: 0;
+        line-height: 1.4;
+      }
+    }
+
+    .recovery-section {
+      text-align: center;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--ion-color-light-shade);
+      width: 100%;
+
+      p {
+        margin: 0 0 8px;
+        font-size: 0.85rem;
+        color: var(--ion-color-medium);
       }
     }
 
     .signout-section {
       text-align: center;
-      margin-top: 32px;
-      padding-top: 24px;
-      border-top: 1px solid var(--ion-color-light-shade);
+      margin-top: 24px;
+    }
+
+    /* Dark mode */
+    :host-context(.dark) {
+      .verify-header .icon-container {
+        background: rgba(var(--ion-color-primary-rgb), 0.15);
+      }
+
+      .error-container {
+        background: rgba(var(--ion-color-danger-rgb), 0.12);
+      }
     }
   `],
 })
 export class MfaVerifyPage implements OnInit {
-  private fb = inject(FormBuilder);
+  @ViewChild('otpInput') otpInput!: OtpInputComponent;
+
   private router = inject(Router);
   private authService = inject(AuthService);
   private supabase = inject(SupabaseService);
   private toastController = inject(ToastController);
 
   isVerifying = signal(false);
+  hasError = signal(false);
+  isSuccess = signal(false);
   errorMessage = signal<string | null>(null);
   factorId = signal<string | null>(null);
-
-  verifyForm: FormGroup = this.fb.group({
-    code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6), Validators.pattern(/^\d{6}$/)]],
-  });
+  currentCode = signal('');
 
   constructor() {
-    addIcons({ shieldCheckmarkOutline, keyOutline });
+    addIcons({ shieldCheckmarkOutline, keyOutline, refreshOutline });
   }
 
   ngOnInit(): void {
@@ -222,15 +281,23 @@ export class MfaVerifyPage implements OnInit {
     }
   }
 
-  async verifyCode(): Promise<void> {
-    if (this.verifyForm.invalid || !this.factorId()) return;
+  onCodeChange(code: string): void {
+    this.currentCode.set(code);
+    // Clear error when user starts typing
+    if (this.hasError()) {
+      this.hasError.set(false);
+      this.errorMessage.set(null);
+    }
+  }
+
+  async onCodeComplete(code: string): Promise<void> {
+    if (!this.factorId() || this.isVerifying()) return;
 
     this.isVerifying.set(true);
+    this.hasError.set(false);
     this.errorMessage.set(null);
 
     try {
-      const code = this.verifyForm.get('code')?.value;
-
       // Challenge to get challenge ID
       const { data: challengeData, error: challengeError } = await this.supabase.auth.mfa.challenge({
         factorId: this.factorId()!,
@@ -247,7 +314,9 @@ export class MfaVerifyPage implements OnInit {
 
       if (verifyError) throw verifyError;
 
-      // Success! Navigate to dashboard
+      // Success!
+      this.isSuccess.set(true);
+
       const toast = await this.toastController.create({
         message: 'Verification successful!',
         duration: 2000,
@@ -256,14 +325,31 @@ export class MfaVerifyPage implements OnInit {
       });
       await toast.present();
 
-      this.router.navigate(['/tabs/dashboard']);
+      // Short delay to show success state before navigating
+      setTimeout(() => {
+        this.router.navigate(['/tabs/dashboard']);
+      }, 500);
+
     } catch (error: any) {
       console.error('Error verifying MFA:', error);
-      this.errorMessage.set('Invalid verification code. Please try again.');
-      this.verifyForm.reset();
+      this.hasError.set(true);
+      this.isSuccess.set(false);
+      this.errorMessage.set('Invalid code. Please check your authenticator app and try again.');
     } finally {
       this.isVerifying.set(false);
     }
+  }
+
+  retry(): void {
+    this.hasError.set(false);
+    this.isSuccess.set(false);
+    this.errorMessage.set(null);
+    this.otpInput?.clear();
+  }
+
+  useRecoveryCode(): void {
+    // Navigate to recovery code entry page
+    this.router.navigate(['/auth/mfa-recovery']);
   }
 
   async signOut(): Promise<void> {

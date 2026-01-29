@@ -33,6 +33,7 @@ jwt_expiry = 3600
 enable_refresh_token_rotation = true
 refresh_token_reuse_interval = 10
 enable_signup = true
+enable_manual_linking = true
 
 [auth.email]
 enable_signup = true
@@ -48,6 +49,13 @@ enabled = true
 client_id = "env(GOOGLE_CLIENT_ID)"
 secret = "env(GOOGLE_CLIENT_SECRET)"
 
+[auth.mfa]
+max_enrolled_factors = 10
+
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
+
 [auth.external.apple]
 enabled = true
 client_id = "env(APPLE_CLIENT_ID)"
@@ -57,3 +65,17 @@ secret = "env(APPLE_CLIENT_SECRET)"
 enabled = false
 port = 54327
 backend = "postgres"
+
+# Edge Functions configuration
+# Disable automatic JWT verification at gateway level since we do manual verification
+[functions.passkey-register-options]
+verify_jwt = false
+
+[functions.passkey-register-verify]
+verify_jwt = false
+
+[functions.passkey-auth-options]
+verify_jwt = false
+
+[functions.passkey-auth-verify]
+verify_jwt = false

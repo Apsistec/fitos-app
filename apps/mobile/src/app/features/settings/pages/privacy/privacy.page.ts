@@ -23,6 +23,7 @@ import {
   trashOutline,
   shieldCheckmarkOutline,
   eyeOffOutline,
+  fingerPrintOutline,
 } from 'ionicons/icons';
 import { AuthService } from '@app/core/services/auth.service';
 import { SupabaseService } from '@app/core/services/supabase.service';
@@ -68,6 +69,22 @@ import { SupabaseService } from '@app/core/services/supabase.service';
             <ion-label>
               <h3>Active Sessions</h3>
               <p>Manage devices where you're logged in</p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item button detail (click)="manageMfa()">
+            <ion-icon name="finger-print-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>Two-Factor Authentication</h3>
+              <p>Add an extra layer of security</p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item button detail (click)="changePassword()">
+            <ion-icon name="key-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>Change Password</h3>
+              <p>Update your account password</p>
             </ion-label>
           </ion-item>
         </ion-list>
@@ -263,6 +280,7 @@ export class PrivacyPage {
       trashOutline,
       shieldCheckmarkOutline,
       eyeOffOutline,
+      fingerPrintOutline,
     });
   }
 
@@ -273,6 +291,14 @@ export class PrivacyPage {
       position: 'bottom',
     });
     await toast.present();
+  }
+
+  manageMfa() {
+    this.router.navigate(['/auth/mfa-setup']);
+  }
+
+  changePassword() {
+    this.router.navigate(['/tabs/settings/change-password']);
   }
 
   async requestDataExport() {

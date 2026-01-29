@@ -124,13 +124,35 @@ export class PasskeyService {
     try {
       this._loading.set(true);
 
+      // Get the current session to ensure we have a valid token
+      const { data: sessionData } = await this.supabase.auth.getSession();
+      if (!sessionData.session) {
+        throw new Error('No active session. Please sign in again.');
+      }
+
+      console.log('[Passkey] Session found, access token present:', !!sessionData.session.access_token);
+
       // Step 1: Get registration options from server
+      console.log('[Passkey] Calling passkey-register-options edge function...');
       const { data: optionsData, error: optionsError } = await this.supabase.functions.invoke(
         'passkey-register-options',
-        { method: 'POST' }
+        {
+          headers: {
+            Authorization: `Bearer ${sessionData.session.access_token}`,
+          },
+        }
       );
 
+      console.log('[Passkey] Response:', { optionsData, optionsError });
+
       if (optionsError || !optionsData) {
+        console.error('[Passkey] Edge function error:', {
+          message: optionsError?.message,
+          name: optionsError?.name,
+          context: optionsError?.context,
+          status: (optionsError as any)?.status,
+          details: optionsError,
+        });
         throw new Error(optionsError?.message || 'Failed to get registration options');
       }
 
@@ -155,10 +177,12 @@ export class PasskeyService {
       const { data: verifyData, error: verifyError } = await this.supabase.functions.invoke(
         'passkey-register-verify',
         {
-          method: 'POST',
           body: {
             response: registrationResponse,
             name: name || this.getDefaultPasskeyName(),
+          },
+          headers: {
+            Authorization: `Bearer ${sessionData.session.access_token}`,
           },
         }
       );
@@ -202,7 +226,6 @@ export class PasskeyService {
       const { data: optionsData, error: optionsError } = await this.supabase.functions.invoke(
         'passkey-auth-options',
         {
-          method: 'POST',
           body: email ? { email } : {},
         }
       );
@@ -229,7 +252,6 @@ export class PasskeyService {
       const { data: verifyData, error: verifyError } = await this.supabase.functions.invoke(
         'passkey-auth-verify',
         {
-          method: 'POST',
           body: { response: authenticationResponse },
         }
       );

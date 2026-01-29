@@ -503,6 +503,14 @@ export const routes: Routes = [
               ),
           },
           {
+            // Change Password
+            path: 'change-password',
+            loadComponent: () =>
+              import('./features/settings/pages/change-password/change-password.page').then(
+                (m) => m.ChangePasswordPage
+              ),
+          },
+          {
             // Help & Support
             path: 'help',
             children: [

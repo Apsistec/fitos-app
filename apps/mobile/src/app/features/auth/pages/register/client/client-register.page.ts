@@ -18,7 +18,7 @@ import {
   ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { peopleOutline, checkmarkCircle, closeCircle } from 'ionicons/icons';
+import { peopleOutline, checkmarkCircle, closeCircle, logoGoogle, logoApple } from 'ionicons/icons';
 import { AuthService } from '@app/core/services/auth.service';
 import { passwordComplexityValidator, capitalizeWords, checkPasswordRequirements } from '../../../validators/password.validator';
 
@@ -182,6 +182,38 @@ import { passwordComplexityValidator, capitalizeWords, checkPasswordRequirements
           </ion-button>
         </form>
 
+        <!-- Divider -->
+        <div class="divider">
+          <span>or sign up with</span>
+        </div>
+
+        <!-- Social Sign Up -->
+        <div class="social-buttons">
+          <ion-button
+            expand="block"
+            fill="outline"
+            (click)="signUpWithGoogle()"
+            [disabled]="isSubmitting() || isSigningUpWithGoogle()"
+          >
+            @if (isSigningUpWithGoogle()) {
+              <ion-spinner name="crescent"></ion-spinner>
+            } @else {
+              <ion-icon name="logo-google" slot="start"></ion-icon>
+              Continue with Google
+            }
+          </ion-button>
+
+          <ion-button
+            expand="block"
+            fill="outline"
+            color="dark"
+            disabled
+          >
+            <ion-icon name="logo-apple" slot="start"></ion-icon>
+            Continue with Apple (Coming Soon)
+          </ion-button>
+        </div>
+
         <!-- Invite Note -->
         <div class="invite-note">
           <p>Have an invite code from your trainer? You can enter it after signing up.</p>
@@ -279,6 +311,33 @@ import { passwordComplexityValidator, capitalizeWords, checkPasswordRequirements
       }
     }
 
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 24px 0;
+
+      &::before,
+      &::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--ion-color-light-shade);
+      }
+
+      span {
+        padding: 0 16px;
+        color: var(--ion-color-medium);
+        font-size: 0.875rem;
+      }
+    }
+
+    .social-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
     .invite-note {
       text-align: center;
       margin-top: 16px;
@@ -334,6 +393,7 @@ export class ClientRegisterPage {
   private toastController = inject(ToastController);
 
   isSubmitting = signal(false);
+  isSigningUpWithGoogle = signal(false);
   errorMessage = signal<string | null>(null);
   passwordValue = signal('');
   confirmPasswordValue = signal('');
@@ -400,7 +460,20 @@ export class ClientRegisterPage {
   });
 
   constructor() {
-    addIcons({ peopleOutline, checkmarkCircle, closeCircle });
+    addIcons({ peopleOutline, checkmarkCircle, closeCircle, logoGoogle, logoApple });
+  }
+
+  async signUpWithGoogle(): Promise<void> {
+    this.isSigningUpWithGoogle.set(true);
+    this.errorMessage.set(null);
+
+    const { error } = await this.authService.signUpWithProvider('google', 'client');
+
+    if (error) {
+      this.isSigningUpWithGoogle.set(false);
+      this.errorMessage.set(error.message);
+    }
+    // If no error, user will be redirected to Google OAuth
   }
 
   passwordMatchValidator(form: FormGroup) {

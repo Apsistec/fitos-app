@@ -1,6 +1,6 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { Router } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
+import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, ViewChild } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import {
   IonContent,
@@ -8,21 +8,35 @@ import {
   IonTitle,
   IonToolbar,
   IonButton,
-  IonInput,
-  IonItem,
-  IonList,
   IonSpinner,
   IonIcon,
   IonNote,
   IonCard,
   IonCardContent,
+  IonModal,
   ToastController,
+  AlertController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { shieldCheckmarkOutline, qrCodeOutline, phonePortraitOutline, checkmarkCircle, logoGoogle, logoApple, copyOutline, downloadOutline, warningOutline, fingerPrintOutline, trashOutline } from 'ionicons/icons';
+import {
+  shieldCheckmarkOutline,
+  qrCodeOutline,
+  checkmarkCircle,
+  logoGoogle,
+  logoApple,
+  copyOutline,
+  downloadOutline,
+  warningOutline,
+  fingerPrintOutline,
+  trashOutline,
+  mailOutline,
+  personOutline,
+  closeOutline,
+} from 'ionicons/icons';
 import { AuthService } from '@app/core/services/auth.service';
 import { SupabaseService } from '@app/core/services/supabase.service';
 import { PasskeyService, Passkey } from '@app/core/services/passkey.service';
+import { OtpVerifyModalComponent } from '@app/shared/components/otp-verify-modal/otp-verify-modal.component';
 
 interface MfaFactor {
   id: string;
@@ -39,7 +53,6 @@ interface MfaFactor {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    ReactiveFormsModule,
     FormsModule,
     DatePipe,
     IonContent,
@@ -47,14 +60,13 @@ interface MfaFactor {
     IonTitle,
     IonToolbar,
     IonButton,
-    IonInput,
-    IonItem,
-    IonList,
     IonSpinner,
     IonIcon,
     IonNote,
     IonCard,
     IonCardContent,
+    IonModal,
+    OtpVerifyModalComponent,
   ],
   template: `
     <ion-header>
@@ -65,7 +77,126 @@ interface MfaFactor {
 
     <ion-content class="ion-padding">
       <div class="mfa-setup-container">
-        @if (!enrollmentStarted()) {
+        @if (pageLoading()) {
+          <div class="page-loading">
+            <ion-spinner name="crescent"></ion-spinner>
+          </div>
+        } @else if (isManagementMode() && !enrollmentStarted() && !showRecoveryCodes() && !showPasskeyManagement() && !showGoogleManagement()) {
+          <!-- MFA Management Mode - User already has MFA -->
+          <div class="setup-intro">
+            <div class="icon-container success">
+              <ion-icon name="shield-checkmark-outline" color="success"></ion-icon>
+            </div>
+            <h1>Two-Factor Authentication</h1>
+            <p>Your account is protected with two-factor authentication.</p>
+
+            @if (errorMessage()) {
+              <ion-note color="warning" class="setup-error-message">
+                <ion-icon name="warning-outline"></ion-icon>
+                {{ errorMessage() }}
+              </ion-note>
+            }
+
+            <!-- Current MFA Status -->
+            <ion-card class="status-card">
+              <ion-card-content>
+                <div class="status-row">
+                  <ion-icon name="checkmark-circle" color="success"></ion-icon>
+                  <div class="status-content">
+                    <h3>Authenticator App</h3>
+                    <p>Enabled and active</p>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <!-- Google - setup or manage -->
+            <ion-card class="method-card google-card" (click)="handleGoogleClick()">
+              <ion-card-content>
+                <div class="method-icon google-icon">
+                  <ion-icon name="logo-google"></ion-icon>
+                </div>
+                <div class="method-content">
+                  @if (isGoogleLinked()) {
+                    <h3>Google Account</h3>
+                    <p>{{ googleIdentity()?.identity_data?.email || 'Connected' }}</p>
+                  } @else {
+                    <h3>Link Google Account</h3>
+                    <p>Add your Google account for backup sign-in</p>
+                  }
+                </div>
+                @if (isSigningInWithGoogle()) {
+                  <ion-spinner name="crescent"></ion-spinner>
+                } @else if (isGoogleLinked()) {
+                  <ion-icon name="checkmark-circle" color="success"></ion-icon>
+                }
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card class="method-card apple-card disabled-card">
+              <ion-card-content>
+                <div class="method-icon apple-icon">
+                  <ion-icon name="logo-apple"></ion-icon>
+                </div>
+                <div class="method-content">
+                  <h3>Link Apple Account</h3>
+                  <p>Coming soon</p>
+                </div>
+                <span class="coming-soon-badge">Coming Soon</span>
+              </ion-card-content>
+            </ion-card>
+
+            <!-- Passkeys - setup or manage -->
+            @if (passkeysSupported()) {
+              <ion-card
+                class="method-card passkey-card"
+                [class.disabled-card]="!platformAuthAvailable()"
+                (click)="handlePasskeyClick()"
+              >
+                <ion-card-content>
+                  <div class="method-icon passkey-icon">
+                    <ion-icon name="finger-print-outline"></ion-icon>
+                  </div>
+                  <div class="method-content">
+                    <h3>Passkeys</h3>
+                    @if (passkeys().length > 0) {
+                      <p>{{ passkeys().length }} passkey(s) registered</p>
+                    } @else if (platformAuthAvailable()) {
+                      <p>Add Face ID, Touch ID, or Windows Hello</p>
+                    } @else {
+                      <p>Device doesn't support passkeys</p>
+                    }
+                  </div>
+                  @if (isRegisteringPasskey()) {
+                    <ion-spinner name="crescent"></ion-spinner>
+                  } @else if (passkeys().length > 0) {
+                    <ion-icon name="checkmark-circle" color="success"></ion-icon>
+                  }
+                </ion-card-content>
+              </ion-card>
+            }
+
+            <!-- Recovery Codes -->
+            <ion-button expand="block" fill="outline" (click)="regenerateRecoveryCodes()">
+              <ion-icon name="download-outline" slot="start"></ion-icon>
+              Regenerate Recovery Codes
+            </ion-button>
+
+            <!-- Remove MFA -->
+            <ion-button expand="block" fill="clear" color="danger" (click)="confirmRemoveMfa()">
+              @if (isRemovingMfa()) {
+                <ion-spinner name="crescent"></ion-spinner>
+              } @else {
+                Remove Two-Factor Authentication
+              }
+            </ion-button>
+
+            <!-- Back to Settings -->
+            <ion-button fill="clear" (click)="goBack()">
+              Back to Settings
+            </ion-button>
+          </div>
+        } @else if (!enrollmentStarted() && !showRecoveryCodes() && !showPasskeyManagement() && !showGoogleManagement() && !setupComplete() && !isManagementMode()) {
           <!-- Initial Setup Screen -->
           <div class="setup-intro">
             <div class="icon-container">
@@ -96,17 +227,25 @@ interface MfaFactor {
               </ion-card-content>
             </ion-card>
 
-            <ion-card class="method-card google-card" (click)="signInWithGoogle()">
+            <!-- Google - setup or manage -->
+            <ion-card class="method-card google-card" (click)="handleGoogleClick()">
               <ion-card-content>
                 <div class="method-icon google-icon">
                   <ion-icon name="logo-google"></ion-icon>
                 </div>
                 <div class="method-content">
-                  <h3>Sign in with Google</h3>
-                  <p>Use your Google account for secure authentication</p>
+                  @if (isGoogleLinked()) {
+                    <h3>Google Account</h3>
+                    <p>{{ googleIdentity()?.identity_data?.email || 'Connected' }}</p>
+                  } @else {
+                    <h3>Sign in with Google</h3>
+                    <p>Use your Google account for secure authentication</p>
+                  }
                 </div>
                 @if (isSigningInWithGoogle()) {
                   <ion-spinner name="crescent"></ion-spinner>
+                } @else if (isGoogleLinked()) {
+                  <ion-icon name="checkmark-circle" color="success"></ion-icon>
                 }
               </ion-card-content>
             </ion-card>
@@ -124,19 +263,22 @@ interface MfaFactor {
               </ion-card-content>
             </ion-card>
 
+            <!-- Passkeys - setup or manage -->
             @if (passkeysSupported()) {
               <ion-card
                 class="method-card passkey-card"
                 [class.disabled-card]="!platformAuthAvailable()"
-                (click)="platformAuthAvailable() ? registerPasskey() : null"
+                (click)="handlePasskeyClick()"
               >
                 <ion-card-content>
                   <div class="method-icon passkey-icon">
                     <ion-icon name="finger-print-outline"></ion-icon>
                   </div>
                   <div class="method-content">
-                    <h3>Passkey</h3>
-                    @if (platformAuthAvailable()) {
+                    <h3>Passkeys</h3>
+                    @if (passkeys().length > 0) {
+                      <p>{{ passkeys().length }} passkey(s) registered</p>
+                    } @else if (platformAuthAvailable()) {
                       <p>Use Face ID, Touch ID, or Windows Hello</p>
                     } @else {
                       <p>Device doesn't support passkeys</p>
@@ -145,16 +287,10 @@ interface MfaFactor {
                   @if (isRegisteringPasskey()) {
                     <ion-spinner name="crescent"></ion-spinner>
                   } @else if (passkeys().length > 0) {
-                    <span class="passkey-count">{{ passkeys().length }}</span>
+                    <ion-icon name="checkmark-circle" color="success"></ion-icon>
                   }
                 </ion-card-content>
               </ion-card>
-
-              @if (passkeys().length > 0) {
-                <ion-button fill="clear" size="small" (click)="showPasskeyManagement.set(true)">
-                  Manage Passkeys ({{ passkeys().length }})
-                </ion-button>
-              }
             }
 
             @if (canSkip()) {
@@ -163,7 +299,9 @@ interface MfaFactor {
               </ion-button>
             }
           </div>
-        } @else {
+        }
+
+        @if (enrollmentStarted()) {
           <!-- TOTP Setup Screen -->
           <div class="totp-setup">
             <h2>Setup Authenticator App</h2>
@@ -190,6 +328,7 @@ interface MfaFactor {
                 <p class="label">Or enter this code manually:</p>
                 <code>{{ secret() }}</code>
                 <ion-button fill="clear" size="small" (click)="copySecret()">
+                  <ion-icon name="copy-outline" slot="start"></ion-icon>
                   Copy
                 </ion-button>
               </div>
@@ -202,46 +341,12 @@ interface MfaFactor {
 
             <div class="step">
               <div class="step-number">3</div>
-              <p>Enter the 6-digit code from your authenticator app</p>
+              <p>Enter the 6-digit code from your app to verify</p>
             </div>
 
-            <!-- Verification Form -->
-            <form [formGroup]="verifyForm" (ngSubmit)="verifyTotp()">
-              <ion-list lines="none">
-                <ion-item lines="none">
-                  <ion-input
-                    formControlName="code"
-                    type="text"
-                    inputmode="numeric"
-                    label="Verification Code"
-                    labelPlacement="floating"
-                    fill="outline"
-                    placeholder="000000"
-                    [maxlength]="6"
-                    [errorText]="codeError()"
-                  />
-                </ion-item>
-              </ion-list>
-
-              <!-- Error Message -->
-              @if (errorMessage()) {
-                <ion-note color="danger" class="error-message">
-                  {{ errorMessage() }}
-                </ion-note>
-              }
-
-              <ion-button
-                expand="block"
-                type="submit"
-                [disabled]="verifyForm.invalid || isVerifying()"
-              >
-                @if (isVerifying()) {
-                  <ion-spinner name="crescent"></ion-spinner>
-                } @else {
-                  Verify & Enable
-                }
-              </ion-button>
-            </form>
+            <ion-button expand="block" (click)="openVerifyModal()">
+              Enter Verification Code
+            </ion-button>
 
             <ion-button fill="clear" (click)="cancelSetup()">
               Cancel
@@ -347,8 +452,43 @@ interface MfaFactor {
           </div>
         }
 
-        @if (setupComplete() && !showRecoveryCodes() && !showPasskeyManagement()) {
-          <!-- Success Screen -->
+        @if (showGoogleManagement()) {
+          <!-- Google Account Management Screen -->
+          <div class="google-management">
+            <h2>Google Account</h2>
+            <p class="subtitle">Manage your linked Google account</p>
+
+            @if (googleIdentity(); as identity) {
+              <ion-card class="status-card">
+                <ion-card-content>
+                  <div class="status-row">
+                    <ion-icon name="logo-google" style="color: #4285F4; font-size: 28px;"></ion-icon>
+                    <div class="status-content">
+                      <h3>{{ identity.identity_data?.full_name || 'Google Account' }}</h3>
+                      <p style="color: var(--ion-color-medium);">{{ identity.identity_data?.email || 'Connected' }}</p>
+                    </div>
+                    <ion-icon name="checkmark-circle" color="success"></ion-icon>
+                  </div>
+                </ion-card-content>
+              </ion-card>
+
+              <ion-button expand="block" fill="clear" color="danger" (click)="confirmUnlinkGoogle()">
+                @if (isUnlinkingGoogle()) {
+                  <ion-spinner name="crescent"></ion-spinner>
+                } @else {
+                  Unlink Google Account
+                }
+              </ion-button>
+            }
+
+            <ion-button fill="clear" expand="block" (click)="showGoogleManagement.set(false)">
+              Back
+            </ion-button>
+          </div>
+        }
+
+        @if (setupComplete() && !showRecoveryCodes() && !showPasskeyManagement() && !showGoogleManagement() && !isManagementMode()) {
+          <!-- Success Screen - Only for initial MFA setup, not management mode -->
           <div class="success-screen">
             <div class="success-icon">
               <ion-icon name="checkmark-circle" color="success"></ion-icon>
@@ -361,12 +501,41 @@ interface MfaFactor {
           </div>
         }
       </div>
+
+      <!-- TOTP Verification Modal -->
+      <ion-modal
+        #verifyModal
+        [isOpen]="showVerifyModal()"
+        (didDismiss)="onModalDismiss()"
+        [breakpoints]="[0, 0.6, 0.85]"
+        [initialBreakpoint]="0.6"
+        [handle]="true"
+      >
+        <ng-template>
+          <app-otp-verify-modal
+            #otpVerifyModal
+            title="Verify Authenticator"
+            subtitle="Enter the 6-digit code from your authenticator app"
+            helpText="The code refreshes every 30 seconds. Enter the current code shown in your app."
+            [showRecoveryOption]="false"
+            (verify)="verifyTotp($event)"
+            (cancelled)="closeVerifyModal()"
+          />
+        </ng-template>
+      </ion-modal>
     </ion-content>
   `,
   styles: [`
     .mfa-setup-container {
       max-width: 500px;
       margin: 0 auto;
+    }
+
+    .page-loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 80px 0;
     }
 
     .setup-intro {
@@ -376,6 +545,10 @@ interface MfaFactor {
       .icon-container {
         ion-icon {
           font-size: 80px;
+        }
+
+        &.success ion-icon {
+          color: var(--ion-color-success);
         }
       }
 
@@ -388,6 +561,52 @@ interface MfaFactor {
       p {
         color: var(--ion-color-medium);
         margin-bottom: 32px;
+      }
+    }
+
+    .section-header {
+      margin: 24px 0 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--ion-color-medium);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-align: left;
+    }
+
+    .status-card {
+      margin: 0 0 24px;
+      text-align: left;
+      --background: rgba(var(--ion-color-success-rgb), 0.1);
+      border: 1px solid rgba(var(--ion-color-success-rgb), 0.25);
+
+      ion-card-content {
+        padding: 16px;
+      }
+
+      .status-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        ion-icon {
+          font-size: 28px;
+        }
+
+        .status-content {
+          h3 {
+            margin: 0 0 4px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--ion-text-color);
+          }
+
+          p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--ion-color-success);
+          }
+        }
       }
     }
 
@@ -406,6 +625,75 @@ interface MfaFactor {
       ion-icon {
         font-size: 20px;
         flex-shrink: 0;
+      }
+    }
+
+    .linked-providers-section {
+      text-align: left;
+      margin-bottom: 24px;
+
+      h3 {
+        margin: 0 0 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--ion-color-medium);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .linked-providers-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .linked-provider-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        background: rgba(var(--ion-color-primary-rgb), 0.08);
+        border: 1px solid rgba(var(--ion-color-primary-rgb), 0.15);
+        border-radius: 12px;
+
+        .provider-icon {
+          font-size: 24px;
+
+          &.google {
+            color: #4285F4;
+          }
+
+          &.apple {
+            color: #000000;
+          }
+
+          &.email {
+            color: var(--ion-color-medium);
+          }
+        }
+
+        .provider-details {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+
+          .provider-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--ion-text-color);
+          }
+
+          .provider-email {
+            font-size: 0.8rem;
+            color: var(--ion-color-medium);
+          }
+        }
+
+        .linked-check {
+          font-size: 18px;
+          opacity: 0.9;
+        }
       }
     }
 
@@ -568,26 +856,8 @@ interface MfaFactor {
         font-size: 1rem;
         letter-spacing: 2px;
         word-break: break-all;
+        margin-bottom: 8px;
       }
-    }
-
-    ion-list {
-      background: transparent;
-      margin-bottom: 16px;
-
-      ion-item {
-        --background: transparent;
-        --padding-start: 0;
-        --inner-padding-end: 0;
-      }
-    }
-
-    .error-message {
-      display: block;
-      padding: 12px;
-      margin-bottom: 16px;
-      border-radius: 8px;
-      background: rgba(var(--ion-color-danger-rgb), 0.1);
     }
 
     .success-screen {
@@ -792,31 +1062,56 @@ interface MfaFactor {
         padding: 32px;
       }
     }
+
+    .google-management {
+      h2 {
+        text-align: center;
+        margin: 0 0 8px;
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: var(--ion-color-medium);
+        margin-bottom: 24px;
+      }
+    }
   `],
 })
 export class MfaSetupPage implements OnInit {
-  private fb = inject(FormBuilder);
+  @ViewChild('otpVerifyModal') otpVerifyModal!: OtpVerifyModalComponent;
+
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
   private supabase = inject(SupabaseService);
   private toastController = inject(ToastController);
+  private alertController = inject(AlertController);
   private passkeyService = inject(PasskeyService);
 
+  pageLoading = signal(true);
   isEnrolling = signal(false);
-  isVerifying = signal(false);
   isSigningInWithGoogle = signal(false);
   isRegisteringPasskey = signal(false);
   enrollmentStarted = signal(false);
   setupComplete = signal(false);
   showRecoveryCodes = signal(false);
   showPasskeyManagement = signal(false);
+  showVerifyModal = signal(false);
   recoveryCodes = signal<string[]>([]);
   savedCodesConfirmed = false;
   errorMessage = signal<string | null>(null);
   qrCode = signal<string | null>(null);
   secret = signal<string | null>(null);
   factorId = signal<string | null>(null);
-  canSkip = signal(true); // Allow skipping MFA setup - can be made mandatory later via profile settings
+  canSkip = signal(true);
+  linkedIdentities = signal<any[]>([]);
+
+  // Management mode - when user already has MFA set up
+  isManagementMode = signal(false);
+  existingFactorId = signal<string | null>(null);
+  isRemovingMfa = signal(false);
 
   // Passkey signals
   passkeysSupported = this.passkeyService.isSupported;
@@ -824,66 +1119,151 @@ export class MfaSetupPage implements OnInit {
   passkeys = this.passkeyService.passkeys;
   passkeyLoading = this.passkeyService.loading;
 
-  verifyForm: FormGroup = this.fb.group({
-    code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6), Validators.pattern(/^\d{6}$/)]],
-  });
+  // Google management
+  showGoogleManagement = signal(false);
+  isUnlinkingGoogle = signal(false);
+  isGoogleLinked = computed(() =>
+    this.linkedIdentities().some((i: any) => i.provider === 'google')
+  );
+  googleIdentity = computed(() =>
+    this.linkedIdentities().find((i: any) => i.provider === 'google')
+  );
 
-  codeError = signal('');
+  // Track initial identity count to detect OAuth returns
+  private initialIdentityCount = 0;
+  private hasCheckedOAuthReturn = false;
 
   constructor() {
-    addIcons({ shieldCheckmarkOutline, qrCodeOutline, phonePortraitOutline, checkmarkCircle, logoGoogle, logoApple, copyOutline, downloadOutline, warningOutline, fingerPrintOutline, trashOutline });
+    addIcons({
+      shieldCheckmarkOutline,
+      qrCodeOutline,
+      checkmarkCircle,
+      logoGoogle,
+      logoApple,
+      copyOutline,
+      downloadOutline,
+      warningOutline,
+      fingerPrintOutline,
+      trashOutline,
+      mailOutline,
+      personOutline,
+      closeOutline,
+    });
   }
 
   ngOnInit(): void {
-    // Check if MFA is already enrolled
-    this.checkExistingMfa();
-    // Load existing passkeys (don't block if it fails)
-    this.loadPasskeysQuietly();
+    this.initializePage();
   }
 
-  /**
-   * Load passkeys without throwing errors that block the page
-   */
+  private async initializePage(): Promise<void> {
+    // Check for OAuth return before loading data
+    const fragment = window.location.hash;
+    const isOAuthReturn = fragment.includes('access_token') || fragment.includes('provider_token');
+
+    // Load all data in parallel, then update UI once
+    await Promise.all([
+      this.checkExistingMfa(),
+      this.loadPasskeysQuietly(),
+      this.loadLinkedIdentities(),
+    ]);
+
+    this.pageLoading.set(false);
+
+    // Show toast after page is rendered if returning from OAuth
+    if (isOAuthReturn && !this.hasCheckedOAuthReturn) {
+      this.hasCheckedOAuthReturn = true;
+      await this.showSuccessToast('Account linked successfully!');
+    }
+  }
+
+  private async loadLinkedIdentities(): Promise<void> {
+    try {
+      const { identities, error } = await this.authService.getLinkedIdentities();
+      if (!error && identities) {
+        this.linkedIdentities.set(identities);
+      }
+    } catch (err) {
+      console.warn('Could not load linked identities:', err);
+    }
+  }
+
+  getProviderDisplayName(provider: string): string {
+    const names: Record<string, string> = {
+      'google': 'Google',
+      'apple': 'Apple',
+      'facebook': 'Facebook',
+      'github': 'GitHub',
+      'twitter': 'Twitter',
+      'email': 'Email',
+    };
+    return names[provider] || provider.charAt(0).toUpperCase() + provider.slice(1);
+  }
+
+  getProviderIcon(provider: string): string {
+    const icons: Record<string, string> = {
+      'google': 'logo-google',
+      'apple': 'logo-apple',
+      'facebook': 'logo-facebook',
+      'github': 'logo-github',
+      'twitter': 'logo-twitter',
+      'email': 'mail-outline',
+    };
+    return icons[provider] || 'person-outline';
+  }
+
   private async loadPasskeysQuietly(): Promise<void> {
     try {
       await this.passkeyService.loadPasskeys();
     } catch (err) {
-      // Passkeys may not be available yet - that's OK
       console.warn('Could not load passkeys:', err);
     }
   }
 
   private async checkExistingMfa(): Promise<void> {
     try {
+      console.log('[MFA Setup] Checking existing MFA factors...');
       const { data, error } = await this.supabase.auth.mfa.listFactors();
 
       if (error) {
-        // MFA might not be enabled in Supabase project - that's OK
-        console.warn('MFA not available:', error.message);
+        console.error('[MFA Setup] Error from listFactors:', {
+          message: error.message,
+          name: error.name,
+          status: (error as any).status,
+          code: (error as any).code,
+        });
+
         const errorMsg = (error.message || '').toLowerCase();
-        // Check if it's an edge function or server error
-        if (errorMsg.includes('edge function') || errorMsg.includes('non-2xx') || errorMsg.includes('function') || errorMsg.includes('500') || errorMsg.includes('502') || errorMsg.includes('503')) {
-          this.errorMessage.set('MFA service is temporarily unavailable. You can skip for now and set up MFA later from Settings.');
+
+        if (errorMsg.includes('edge function') || errorMsg.includes('non-2xx')) {
+          this.errorMessage.set('The authentication system is experiencing issues. You can skip MFA setup for now and configure it later from Settings.');
+        } else if (errorMsg.includes('mfa') && errorMsg.includes('not enabled')) {
+          this.errorMessage.set('MFA is not currently available. You can skip this step.');
+        } else if (errorMsg.includes('network') || errorMsg.includes('fetch')) {
+          this.errorMessage.set('Network error. Please check your connection and try again.');
+        } else {
+          this.errorMessage.set('Unable to verify MFA status. You can skip for now and set up MFA later from Settings.');
         }
-        // Allow user to skip MFA setup if it's not configured
+
         this.canSkip.set(true);
         return;
       }
 
-      // Check if user already has verified TOTP factor
+      console.log('[MFA Setup] MFA factors retrieved:', {
+        totpCount: data.totp?.length || 0,
+        phoneCount: data.phone?.length || 0,
+      });
+
       const verifiedTotp = data.totp.find(f => f.status === 'verified');
       if (verifiedTotp) {
-        // Already enrolled, redirect to dashboard
-        this.router.navigate(['/tabs/dashboard']);
+        // User already has MFA - switch to management mode
+        console.log('[MFA Setup] User already has verified TOTP, switching to management mode');
+        this.isManagementMode.set(true);
+        this.existingFactorId.set(verifiedTotp.id);
+        this.canSkip.set(false); // No skip button in management mode
       }
     } catch (err: any) {
-      console.error('Error checking MFA:', err);
-      const errorMsg = (err?.message || '').toLowerCase();
-      // Check if it's an edge function or server error
-      if (errorMsg.includes('edge function') || errorMsg.includes('non-2xx') || errorMsg.includes('function') || errorMsg.includes('500') || errorMsg.includes('502') || errorMsg.includes('503')) {
-        this.errorMessage.set('MFA service is temporarily unavailable. You can skip for now and set up MFA later from Settings.');
-      }
-      // Allow user to skip if MFA check fails
+      console.error('[MFA Setup] Unexpected error:', err);
+      this.errorMessage.set('An unexpected error occurred. You can skip MFA setup for now.');
       this.canSkip.set(true);
     }
   }
@@ -893,67 +1273,89 @@ export class MfaSetupPage implements OnInit {
     this.errorMessage.set(null);
 
     try {
+      console.log('[MFA Setup] Starting TOTP enrollment...');
+
       const { data, error } = await this.supabase.auth.mfa.enroll({
         factorType: 'totp',
         friendlyName: 'FitOS Authenticator',
+        issuer: 'FitOS',
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('[MFA Setup] TOTP enrollment error:', error);
+        throw error;
+      }
 
+      console.log('[MFA Setup] TOTP enrollment successful, factor ID:', data.id);
       this.factorId.set(data.id);
       this.qrCode.set(data.totp.qr_code);
       this.secret.set(data.totp.secret);
       this.enrollmentStarted.set(true);
     } catch (error: any) {
-      console.error('Error enrolling TOTP:', error);
-      // Provide user-friendly error message
+      console.error('[MFA Setup] Error in startTotpEnrollment:', error);
+
       let message = 'Failed to start MFA enrollment';
-      const errorMsg = (error.message || '').toLowerCase();
-      if (errorMsg.includes('mfa')) {
-        message = 'MFA is not currently available. Please try again later or skip for now.';
-        this.canSkip.set(true);
-      } else if (errorMsg.includes('edge function') || errorMsg.includes('non-2xx') || errorMsg.includes('function') || errorMsg.includes('500') || errorMsg.includes('502') || errorMsg.includes('503')) {
-        message = 'MFA service is temporarily unavailable. You can skip for now and set up MFA later from Settings.';
-        this.canSkip.set(true);
+      const errorMsg = (error?.message || '').toLowerCase();
+
+      if (errorMsg.includes('edge function') || errorMsg.includes('non-2xx')) {
+        message = 'The authentication system is experiencing issues. You can skip MFA setup for now.';
+      } else if (errorMsg.includes('mfa') && errorMsg.includes('not enabled')) {
+        message = 'MFA is not enabled for this project. Please contact support.';
+      } else if (errorMsg.includes('already enrolled') || errorMsg.includes('already exists')) {
+        message = 'You already have an authenticator enrolled. Please use MFA verify instead.';
+      } else if (errorMsg.includes('network') || errorMsg.includes('fetch')) {
+        message = 'Network error. Please check your connection and try again.';
       } else {
-        // Don't show raw technical errors to users
-        message = 'Unable to set up MFA at this time. Please try again later or skip for now.';
-        this.canSkip.set(true);
+        message = 'Unable to set up MFA at this time. You can skip for now and try again later from Settings.';
       }
+
       this.errorMessage.set(message);
+      this.canSkip.set(true);
     } finally {
       this.isEnrolling.set(false);
     }
   }
 
   async signInWithGoogle(): Promise<void> {
+    console.log('[MFA Setup] Linking Google account');
     this.isSigningInWithGoogle.set(true);
     this.errorMessage.set(null);
 
     try {
-      const { error } = await this.authService.signInWithProvider('google');
+      // Use linkIdentity to add Google as an additional identity, not signInWithProvider
+      // Redirect back to MFA setup after linking
+      const { error } = await this.authService.linkIdentity('google', '/auth/mfa-setup');
 
-      if (error) throw error;
+      if (error) {
+        console.error('[MFA Setup] Google link error:', error);
+        throw error;
+      }
 
-      // OAuth will redirect, so we don't need to do anything here
-      // The auth state change listener will handle the redirect after OAuth
+      console.log('[MFA Setup] Google link initiated, waiting for OAuth redirect...');
     } catch (error: any) {
-      console.error('Error signing in with Google:', error);
-      this.errorMessage.set(error.message || 'Failed to sign in with Google');
+      console.error('[MFA Setup] Error linking Google account:', error);
+      this.errorMessage.set(error.message || 'Failed to link Google account');
       this.isSigningInWithGoogle.set(false);
     }
   }
 
-  async verifyTotp(): Promise<void> {
-    if (this.verifyForm.invalid || !this.factorId()) return;
+  openVerifyModal(): void {
+    this.showVerifyModal.set(true);
+  }
 
-    this.isVerifying.set(true);
-    this.errorMessage.set(null);
+  closeVerifyModal(): void {
+    this.showVerifyModal.set(false);
+  }
+
+  onModalDismiss(): void {
+    this.showVerifyModal.set(false);
+  }
+
+  async verifyTotp(code: string): Promise<void> {
+    if (!this.factorId()) return;
 
     try {
-      const code = this.verifyForm.get('code')?.value;
-
-      // First challenge to get challenge ID
+      // Challenge to get challenge ID
       const { data: challengeData, error: challengeError } = await this.supabase.auth.mfa.challenge({
         factorId: this.factorId()!,
       });
@@ -969,30 +1371,36 @@ export class MfaSetupPage implements OnInit {
 
       if (verifyError) throw verifyError;
 
-      // Generate recovery codes
-      const codes = this.generateRecoveryCodes();
-      this.recoveryCodes.set(codes);
+      // Success!
+      this.otpVerifyModal?.setSuccess();
 
-      // Store recovery codes in the database
-      await this.storeRecoveryCodes(codes);
+      // Short delay to show success state
+      setTimeout(async () => {
+        this.showVerifyModal.set(false);
 
-      // Show recovery codes screen
-      this.showRecoveryCodes.set(true);
-      this.enrollmentStarted.set(false);
+        // Generate recovery codes
+        const codes = this.generateRecoveryCodes();
+        this.recoveryCodes.set(codes);
 
-      const toast = await this.toastController.create({
-        message: 'Two-factor authentication enabled! Save your recovery codes.',
-        duration: 3000,
-        position: 'top',
-        color: 'success',
-      });
-      await toast.present();
+        // Store recovery codes in the database
+        await this.storeRecoveryCodes(codes);
+
+        // Show recovery codes screen
+        this.showRecoveryCodes.set(true);
+        this.enrollmentStarted.set(false);
+
+        const toast = await this.toastController.create({
+          message: 'Two-factor authentication enabled! Save your recovery codes.',
+          duration: 3000,
+          position: 'top',
+          color: 'success',
+        });
+        await toast.present();
+      }, 500);
+
     } catch (error: any) {
       console.error('Error verifying TOTP:', error);
-      this.errorMessage.set(error.message || 'Invalid verification code. Please try again.');
-      this.verifyForm.reset();
-    } finally {
-      this.isVerifying.set(false);
+      this.otpVerifyModal?.setError('Invalid code. Please check your authenticator app and try again.');
     }
   }
 
@@ -1018,30 +1426,28 @@ export class MfaSetupPage implements OnInit {
     this.qrCode.set(null);
     this.secret.set(null);
     this.factorId.set(null);
-    this.verifyForm.reset();
   }
 
   skipForNow(): void {
+    console.log('[MFA Setup] Skip for now clicked');
+    this.authService.skipMfaSetup();
     this.router.navigate(['/tabs/dashboard']);
   }
 
   continueToDashboard(): void {
+    this.authService.clearMfaSkipped();
     this.router.navigate(['/tabs/dashboard']);
   }
 
-  /**
-   * Generate 10 random recovery codes
-   * Format: XXXX-XXXX (8 alphanumeric characters)
-   */
   private generateRecoveryCodes(): string[] {
     const codes: string[] = [];
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Excluded I, O, 0, 1 to avoid confusion
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
     for (let i = 0; i < 10; i++) {
       let code = '';
       for (let j = 0; j < 8; j++) {
         code += chars.charAt(Math.floor(Math.random() * chars.length));
-        if (j === 3) code += '-'; // Add hyphen in middle
+        if (j === 3) code += '-';
       }
       codes.push(code);
     }
@@ -1049,18 +1455,13 @@ export class MfaSetupPage implements OnInit {
     return codes;
   }
 
-  /**
-   * Store hashed recovery codes in the database
-   */
   private async storeRecoveryCodes(codes: string[]): Promise<void> {
     try {
       const userId = this.authService.user()?.id;
       if (!userId) return;
 
-      // Hash the codes before storing (simple hash for now, should use bcrypt in production)
       const hashedCodes = codes.map(code => this.simpleHash(code.replace('-', '')));
 
-      // Store in profiles table or a dedicated recovery_codes table
       const { error } = await this.supabase
         .from('mfa_recovery_codes')
         .upsert({
@@ -1071,16 +1472,12 @@ export class MfaSetupPage implements OnInit {
 
       if (error) {
         console.error('Error storing recovery codes:', error);
-        // Don't throw - we still want to show the codes to the user
       }
     } catch (err) {
       console.error('Error storing recovery codes:', err);
     }
   }
 
-  /**
-   * Simple hash function (for demo - use bcrypt in production)
-   */
   private simpleHash(str: string): string {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
@@ -1091,9 +1488,6 @@ export class MfaSetupPage implements OnInit {
     return Math.abs(hash).toString(16).padStart(8, '0');
   }
 
-  /**
-   * Copy all recovery codes to clipboard
-   */
   async copyRecoveryCodes(): Promise<void> {
     const codes = this.recoveryCodes().join('\n');
     try {
@@ -1110,9 +1504,6 @@ export class MfaSetupPage implements OnInit {
     }
   }
 
-  /**
-   * Download recovery codes as a text file
-   */
   downloadRecoveryCodes(): void {
     const codes = this.recoveryCodes();
     const content = `FitOS Recovery Codes
@@ -1138,18 +1529,31 @@ you can use one of these codes to sign in.
     URL.revokeObjectURL(url);
   }
 
-  /**
-   * Finish setup and navigate to dashboard
-   */
   finishSetup(): void {
-    this.setupComplete.set(true);
     this.showRecoveryCodes.set(false);
+
+    // If user was in management mode, go back to management view with toast
+    if (this.isManagementMode()) {
+      this.showSuccessToast('Two-factor authentication updated!');
+      // Stay on management view - don't navigate away
+      return;
+    }
+
+    // For initial setup, navigate to dashboard
+    this.setupComplete.set(true);
     this.router.navigate(['/tabs/dashboard']);
   }
 
-  /**
-   * Register a new passkey
-   */
+  private async showSuccessToast(message: string): Promise<void> {
+    const toast = await this.toastController.create({
+      message,
+      duration: 3000,
+      position: 'top',
+      color: 'success',
+    });
+    await toast.present();
+  }
+
   async registerPasskey(): Promise<void> {
     if (this.isRegisteringPasskey()) return;
 
@@ -1160,51 +1564,25 @@ you can use one of these codes to sign in.
       const result = await this.passkeyService.registerPasskey();
 
       if (result.success) {
-        const toast = await this.toastController.create({
-          message: 'Passkey registered successfully!',
-          duration: 3000,
-          position: 'top',
-          color: 'success',
-        });
-        await toast.present();
+        await this.showSuccessToast('Passkey registered successfully!');
 
-        // If this is the first passkey, show success
-        if (this.passkeys().length === 1) {
+        // Only show success screen and navigate if this is initial setup (not management mode)
+        if (!this.isManagementMode() && this.passkeys().length === 1) {
           this.setupComplete.set(true);
         }
+        // If in management mode, stay on the page to show updated passkey list
       } else {
-        // Check if it's an edge function error and show user-friendly message
-        const errorMsg = (result.error || 'Failed to register passkey').toLowerCase();
-        if (errorMsg.includes('edge function') || errorMsg.includes('non-2xx') || errorMsg.includes('failed to get') || errorMsg.includes('function') || errorMsg.includes('500') || errorMsg.includes('502') || errorMsg.includes('503')) {
-          this.errorMessage.set('Passkey service is temporarily unavailable. You can skip for now and set up passkeys later from Settings.');
-          this.canSkip.set(true);
-        } else {
-          // Show user-friendly message instead of technical error
-          this.errorMessage.set('Unable to register passkey at this time. Please try again later or skip for now.');
-          this.canSkip.set(true);
-        }
+        this.errorMessage.set(result.error || 'Failed to register passkey');
       }
     } catch (error: any) {
       console.error('Error registering passkey:', error);
-      const errorMsg = (error?.message || '').toLowerCase();
-      if (errorMsg.includes('edge function') || errorMsg.includes('non-2xx') || errorMsg.includes('failed to get') || errorMsg.includes('function') || errorMsg.includes('500') || errorMsg.includes('502') || errorMsg.includes('503')) {
-        this.errorMessage.set('Passkey service is temporarily unavailable. You can skip for now and set up passkeys later from Settings.');
-        this.canSkip.set(true);
-      } else {
-        // Show user-friendly message instead of technical error
-        this.errorMessage.set('Unable to register passkey at this time. Please try again later or skip for now.');
-        this.canSkip.set(true);
-      }
+      this.errorMessage.set(error.message || 'Failed to register passkey');
     } finally {
       this.isRegisteringPasskey.set(false);
     }
   }
 
-  /**
-   * Delete a passkey
-   */
   async deletePasskey(passkey: Passkey): Promise<void> {
-    // Confirm deletion
     const result = await this.passkeyService.deletePasskey(passkey.id);
 
     if (result.success) {
@@ -1223,6 +1601,143 @@ you can use one of these codes to sign in.
         color: 'danger',
       });
       await toast.present();
+    }
+  }
+
+  handleGoogleClick(): void {
+    if (this.isGoogleLinked()) {
+      this.showGoogleManagement.set(true);
+    } else {
+      this.signInWithGoogle();
+    }
+  }
+
+  handlePasskeyClick(): void {
+    if (!this.platformAuthAvailable()) return;
+
+    if (this.passkeys().length > 0) {
+      this.showPasskeyManagement.set(true);
+    } else {
+      this.registerPasskey();
+    }
+  }
+
+  async confirmUnlinkGoogle(): Promise<void> {
+    const confirmAlert = await this.alertController.create({
+      header: 'Unlink Google Account?',
+      message: 'You will no longer be able to sign in with this Google account.',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+        },
+        {
+          text: 'Unlink',
+          role: 'destructive',
+          handler: () => {
+            this.unlinkGoogle();
+          },
+        },
+      ],
+    });
+
+    await confirmAlert.present();
+  }
+
+  private async unlinkGoogle(): Promise<void> {
+    const identity = this.googleIdentity();
+    if (!identity) return;
+
+    this.isUnlinkingGoogle.set(true);
+
+    try {
+      const { error } = await this.authService.unlinkIdentity(identity.id);
+      if (error) throw error;
+
+      await this.showSuccessToast('Google account unlinked');
+      await this.loadLinkedIdentities();
+      this.showGoogleManagement.set(false);
+    } catch (error: any) {
+      console.error('Error unlinking Google:', error);
+      this.errorMessage.set(error.message || 'Failed to unlink Google account');
+    } finally {
+      this.isUnlinkingGoogle.set(false);
+    }
+  }
+
+  // Management mode methods
+  goBack(): void {
+    this.router.navigate(['/tabs/settings/privacy']);
+  }
+
+  async regenerateRecoveryCodes(): Promise<void> {
+    const codes = this.generateRecoveryCodes();
+    this.recoveryCodes.set(codes);
+    await this.storeRecoveryCodes(codes);
+    this.showRecoveryCodes.set(true);
+
+    const toast = await this.toastController.create({
+      message: 'New recovery codes generated. Save them now!',
+      duration: 3000,
+      position: 'top',
+      color: 'warning',
+    });
+    await toast.present();
+  }
+
+  async confirmRemoveMfa(): Promise<void> {
+    const confirmAlert = await this.alertController.create({
+      header: 'Remove Two-Factor Authentication?',
+      message: 'This will make your account less secure. You will need to set up 2FA again if you want to re-enable it.',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+        },
+        {
+          text: 'Remove',
+          role: 'destructive',
+          handler: () => {
+            this.removeMfa();
+          },
+        },
+      ],
+    });
+
+    await confirmAlert.present();
+  }
+
+  private async removeMfa(): Promise<void> {
+    if (!this.existingFactorId()) return;
+
+    this.isRemovingMfa.set(true);
+    this.errorMessage.set(null);
+
+    try {
+      const { error } = await this.supabase.auth.mfa.unenroll({
+        factorId: this.existingFactorId()!,
+      });
+
+      if (error) throw error;
+
+      const toast = await this.toastController.create({
+        message: 'Two-factor authentication removed',
+        duration: 3000,
+        position: 'top',
+        color: 'success',
+      });
+      await toast.present();
+
+      // Switch back to setup mode
+      this.isManagementMode.set(false);
+      this.existingFactorId.set(null);
+      this.canSkip.set(true);
+
+    } catch (error: any) {
+      console.error('Error removing MFA:', error);
+      this.errorMessage.set(error.message || 'Failed to remove two-factor authentication');
+    } finally {
+      this.isRemovingMfa.set(false);
     }
   }
 }

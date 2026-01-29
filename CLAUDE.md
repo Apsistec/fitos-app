@@ -179,22 +179,43 @@ Examples of settings that require user approval before modification:
 - Environment variables
 - Build configurations
 
-### Feature and Guard Management
-**NEVER disable features, guards, or functionality without explicit user approval.**
+### Feature, Service, and Code Management (CRITICAL)
+**NEVER disable, remove, or turn off ANY features, services, functionality, or code without EXPLICIT user approval.**
 
-When encountering errors with features (e.g., MFA, auth guards, API failures):
-1. Explain the error clearly
-2. Investigate the root cause
-3. Present options to FIX the issue, not disable it
-4. Ask the user which approach they prefer
-5. Only disable functionality if user explicitly approves
+This is a CRITICAL rule that applies to ALL situations:
 
-Examples that require user approval before disabling:
-- Route guards (auth, MFA, role guards)
-- Security features (MFA, passkeys, encryption)
-- API integrations
-- Validation rules
-- Feature flags
+#### What Requires User Approval BEFORE Action:
+- **Removing code** - Never delete functions, methods, classes, components, or any code
+- **Removing UI elements** - Never remove buttons, cards, forms, or any UI components
+- **Disabling features** - Never disable or comment out functionality
+- **Removing services** - Never remove service methods, API calls, or integrations
+- **Removing guards** - Never remove or bypass route guards
+- **Removing imports** - Never remove imports that are used (even if you think they're not)
+- **Simplifying code** - Never "simplify" by removing options or functionality
+
+#### When Encountering Errors:
+1. **Explain the error clearly** - Show what's happening
+2. **Investigate the root cause** - Find out WHY it's failing
+3. **Present options to FIX the issue** - NOT disable it
+4. **Ask the user which approach they prefer**
+5. **Only remove/disable if user EXPLICITLY says to remove it**
+
+#### Specific Examples That Are FORBIDDEN Without Approval:
+- ❌ Removing Google/Apple sign-in options because "they don't belong on MFA page"
+- ❌ Removing a guard because "it's causing errors"
+- ❌ Removing a service method because "it's not being used"
+- ❌ Removing UI cards/buttons because "they're not needed"
+- ❌ Commenting out code because "it's causing issues"
+- ❌ Removing validation because "it's too strict"
+- ❌ Removing error handling because "it's verbose"
+
+#### The Only Acceptable Approach:
+1. If something seems wrong or unnecessary, ASK the user first
+2. Explain your reasoning
+3. Wait for explicit approval before making ANY removal
+4. If the user says no, find another solution that KEEPS the functionality
+
+**Remember: The user built this application with intent. Every feature, button, and line of code exists for a reason. Your job is to FIX issues, not remove functionality.**
 
 ---
 
@@ -323,6 +344,42 @@ TERRA_API_KEY=
 TERRA_DEV_ID=
 DEEPGRAM_API_KEY=
 ```
+
+---
+
+## Production URLs
+
+- **Mobile App (PWA)**: https://fitos-mobile.web.app
+- **Landing Page**: https://fitos-landing.web.app (if deployed)
+- **Supabase Project**: `dmcogmopboebqiimzoej`
+
+---
+
+## MCP Servers (Model Context Protocol)
+
+This project has MCP servers configured in `.mcp.json`. **USE THESE TOOLS** for direct API access:
+
+### Supabase MCP
+- **Remote**: Connected to production project `dmcogmopboebqiimzoej`
+- **Local**: Connected to local Supabase instance at `http://127.0.0.1:54321`
+- **Use for**: Database queries, Edge Function logs, auth management, storage operations
+
+### Stripe MCP
+- **Use for**: Customer management, subscription queries, payment intents, invoice management
+- **Available tools**: `list_customers`, `list_subscriptions`, `list_invoices`, `list_products`, `list_prices`, `fetch_stripe_resources`, `search_stripe_documentation`
+
+### Firebase MCP
+- **Project dir**: `/Users/dougwhite/Dev/fitos-app`
+- **Use for**: Firebase Hosting deployment status, Cloud Functions logs, Firestore queries (if used), project management
+
+### When to Use MCP Tools
+- Checking Edge Function logs → Use Supabase MCP
+- Querying database directly → Use Supabase MCP
+- Looking up Stripe customers/subscriptions → Use Stripe MCP
+- Debugging payment issues → Use Stripe MCP
+- Checking Firebase deployment status → Use Firebase MCP
+
+**IMPORTANT**: Always prefer MCP tools over manual CLI commands when available.
 
 ---
 

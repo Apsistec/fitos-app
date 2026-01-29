@@ -57,3 +57,4 @@ temp/
 
 .angular
 .firebase
+.firebase/hosting.*.cache

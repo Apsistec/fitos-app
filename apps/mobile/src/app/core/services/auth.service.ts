@@ -32,6 +32,7 @@ export class AuthService {
   private ngZone = inject(NgZone);
 
   private readonly RETURN_URL_KEY = 'fitos_return_url';
+  private readonly MFA_SKIPPED_KEY = 'fitos_mfa_skipped';
   private readonly TOKEN_REFRESH_MARGIN_SECONDS = 60; // Refresh 60s before expiry
   private readonly MAX_RETRY_ATTEMPTS = 3;
   private readonly RETRY_DELAY_MS = 1000;
@@ -66,6 +67,15 @@ export class AuthService {
   readonly accessToken = computed(() => this._state().session?.access_token ?? null);
   readonly mfaPending = computed(() => this._state().mfaPending);
   readonly passwordRecoveryPending = computed(() => this._state().passwordRecoveryPending);
+
+  /**
+   * Track if user has chosen to skip MFA setup for this session.
+   * This is stored in sessionStorage and cleared on logout or browser close.
+   */
+  private _mfaSkipped = signal<boolean>(
+    typeof sessionStorage !== 'undefined' && sessionStorage.getItem('fitos_mfa_skipped') === 'true'
+  );
+  readonly mfaSkipped = this._mfaSkipped.asReadonly();
 
   // Get role directly from JWT claims (faster than DB query)
   readonly roleFromToken = computed(() => {
@@ -776,6 +786,14 @@ export class AuthService {
   private handlePostLogin(): void {
     const profile = this._state().profile;
 
+    // Check if this is an OAuth identity linking return (full page redirect back).
+    // Use window.location since the Angular router may not have resolved yet.
+    const currentPath = window.location.pathname;
+    if (currentPath.includes('/auth/mfa-setup') || currentPath.includes('/tabs/settings')) {
+      console.log('handlePostLogin: identity linking return, staying on:', currentPath);
+      return;
+    }
+
     // Check if onboarding is needed
     if (profile && !profile.fullName) {
       this.router.navigate(['/onboarding']);
@@ -937,6 +955,143 @@ export class AuthService {
   }
 
   /**
+   * Sign up with OAuth provider (Google, Apple, etc.)
+   * Stores the intended role in sessionStorage before OAuth redirect
+   */
+  async signUpWithProvider(provider: Provider, role: UserRole): Promise<{ error: Error | null }> {
+    try {
+      // Store the intended role before OAuth redirect
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem('fitos_pending_oauth_role', role);
+      }
+
+      const { error } = await this.supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/verify-email`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      return { error: null };
+    } catch (error) {
+      return { error: error as Error };
+    }
+  }
+
+  /**
+   * Get pending OAuth role (used after OAuth redirect)
+   */
+  getPendingOAuthRole(): UserRole | null {
+    if (typeof sessionStorage !== 'undefined') {
+      return sessionStorage.getItem('fitos_pending_oauth_role') as UserRole | null;
+    }
+    return null;
+  }
+
+  /**
+   * Clear pending OAuth role
+   */
+  clearPendingOAuthRole(): void {
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.removeItem('fitos_pending_oauth_role');
+    }
+  }
+
+  /**
+   * Link an additional OAuth identity to the current account
+   * This allows email users to add Google as a second login method
+   * @param provider The OAuth provider to link (google, apple, etc.)
+   * @param redirectPath Optional path to redirect to after linking (defaults to /tabs/settings/privacy)
+   */
+  async linkIdentity(provider: Provider, redirectPath?: string): Promise<{ error: Error | null }> {
+    try {
+      const redirectTo = `${window.location.origin}${redirectPath || '/tabs/settings/privacy'}`;
+      const { error } = await this.supabase.auth.linkIdentity({
+        provider,
+        options: {
+          redirectTo,
+        },
+      });
+
+      if (error) throw error;
+
+      return { error: null };
+    } catch (error) {
+      return { error: error as Error };
+    }
+  }
+
+  /**
+   * Get linked identities for the current user
+   */
+  async getLinkedIdentities(): Promise<{ identities: any[]; error: Error | null }> {
+    try {
+      const { data, error } = await this.supabase.auth.getUserIdentities();
+
+      if (error) throw error;
+
+      return { identities: data?.identities || [], error: null };
+    } catch (error) {
+      return { identities: [], error: error as Error };
+    }
+  }
+
+  async unlinkIdentity(identityId: string): Promise<{ error: Error | null }> {
+    try {
+      const { data } = await this.supabase.auth.getUserIdentities();
+      const identity = data?.identities?.find((i: any) => i.id === identityId);
+      if (!identity) throw new Error('Identity not found');
+
+      const { error } = await this.supabase.auth.unlinkIdentity(identity);
+      if (error) throw error;
+
+      return { error: null };
+    } catch (error) {
+      return { error: error as Error };
+    }
+  }
+
+  /**
+   * Update the user's password (requires current session)
+   */
+  async changePassword(newPassword: string): Promise<{ error: Error | null }> {
+    try {
+      const { error } = await this.supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) throw error;
+
+      return { error: null };
+    } catch (error) {
+      return { error: error as Error };
+    }
+  }
+
+  /**
+   * Update the user's email (sends verification to new email)
+   */
+  async changeEmail(newEmail: string): Promise<{ error: Error | null }> {
+    try {
+      const { error } = await this.supabase.auth.updateUser({
+        email: newEmail,
+      });
+
+      if (error) throw error;
+
+      return { error: null };
+    } catch (error) {
+      return { error: error as Error };
+    }
+  }
+
+  /**
    * Sign out
    */
   async signOut(): Promise<void> {
@@ -952,7 +1107,12 @@ export class AuthService {
         session: null,
         loading: false,
         initialized: true,
+        mfaPending: false,
+        passwordRecoveryPending: false,
       });
+
+      // Clear MFA skipped state
+      this.clearMfaSkipped();
 
       // Show success toast
       const toast = await this.toastController.create({
@@ -1130,6 +1290,29 @@ export class AuthService {
       ...s,
       passwordRecoveryPending: false,
     }));
+  }
+
+  /**
+   * Skip MFA setup for this session.
+   * User can still set up MFA later from settings.
+   */
+  skipMfaSetup(): void {
+    console.log('[AuthService] skipMfaSetup called');
+    this._mfaSkipped.set(true);
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.setItem(this.MFA_SKIPPED_KEY, 'true');
+      console.log('[AuthService] MFA skipped flag set in sessionStorage');
+    }
+  }
+
+  /**
+   * Clear MFA skipped state (called on logout or when user sets up MFA)
+   */
+  clearMfaSkipped(): void {
+    this._mfaSkipped.set(false);
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.removeItem(this.MFA_SKIPPED_KEY);
+    }
   }
 
   /**

@@ -3,7 +3,8 @@ import { generateAuthenticationOptions } from 'https://esm.sh/@simplewebauthn/se
 import { corsHeaders } from '../_shared/cors.ts';
 import { createSupabaseClient } from '../_shared/supabase.ts';
 
-const RP_ID = Deno.env.get('PASSKEY_RP_ID') || 'fitos-mobile.web.app';
+// For local development, use 'localhost'. For production, use the actual domain.
+const RP_ID = Deno.env.get('PASSKEY_RP_ID') || 'localhost';
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -55,6 +56,8 @@ serve(async (req) => {
     });
 
     // Store challenge temporarily for verification
+    // For local development, use http://localhost:4200. For production, use the actual origin.
+    const expectedOrigin = Deno.env.get('PASSKEY_ORIGIN') || 'http://localhost:4200';
     const { error: challengeError } = await supabase
       .from('passkey_challenges')
       .insert({
@@ -63,7 +66,7 @@ serve(async (req) => {
         type: 'authentication',
         options: {
           rpId: RP_ID,
-          expectedOrigin: Deno.env.get('PASSKEY_ORIGIN') || 'https://fitos-mobile.web.app',
+          expectedOrigin,
         },
       });
 
