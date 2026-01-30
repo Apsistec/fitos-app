@@ -66,7 +66,7 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
     ExerciseCardComponent
   ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-title>Exercise Library</ion-title>
         <ion-buttons slot="end">
@@ -221,6 +221,24 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
     </ion-content>
   `,
   styles: [`
+    ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    ion-searchbar {
+      --background: var(--fitos-bg-tertiary, #262626);
+      --border-radius: 10px;
+      --color: var(--fitos-text-primary, #F5F5F5);
+      --placeholder-color: var(--fitos-text-tertiary, #737373);
+    }
+
     .filters-wrapper {
       display: flex;
       gap: 8px;
@@ -231,6 +249,7 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
 
     .filters-wrapper ion-select {
       min-width: 140px;
+      font-size: 13px;
     }
 
     .chips-wrapper {
@@ -239,6 +258,12 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
       padding: 8px 16px;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
+    }
+
+    ion-chip {
+      --background: var(--fitos-bg-tertiary, #262626);
+      --color: var(--fitos-text-primary, #F5F5F5);
+      font-size: 13px;
     }
 
     .loading-container,
@@ -255,18 +280,20 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
 
     .loading-container p {
       margin-top: 16px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
+      font-size: 14px;
     }
 
     .error-message {
-      color: var(--ion-color-danger);
+      color: #FCA5A5;
       margin-bottom: 16px;
+      font-size: 14px;
     }
 
     .empty-state p {
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
       margin-bottom: 16px;
-      font-size: 1.1rem;
+      font-size: 14px;
     }
 
     .exercises-container {
@@ -279,13 +306,14 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
     }
 
     .results-count p {
-      font-size: 0.9rem;
-      color: var(--ion-color-medium);
+      font-size: 13px;
+      color: var(--fitos-text-tertiary, #737373);
       margin: 0;
     }
 
     ion-fab-button {
-      --background: var(--ion-color-primary);
+      --background: var(--ion-color-primary, #10B981);
+      --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
     }
   `]
 })

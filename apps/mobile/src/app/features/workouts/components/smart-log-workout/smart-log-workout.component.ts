@@ -251,65 +251,74 @@ export interface SmartDefault {
     .smart-log-container {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-4);
+      gap: 16px;
     }
 
     .card-header-with-icon {
       display: flex;
       align-items: center;
-      gap: var(--fitos-space-2);
+      gap: 8px;
 
       ion-icon {
         font-size: 24px;
-        color: var(--fitos-accent-primary);
+        color: var(--ion-color-primary, #10B981);
       }
 
       ion-card-title {
         margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
     }
 
     .templates-card {
-      background: linear-gradient(135deg, var(--fitos-bg-secondary) 0%, var(--fitos-bg-tertiary) 100%);
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--fitos-bg-secondary, #1A1A1A) 0%, var(--fitos-bg-tertiary, #262626) 100%);
     }
 
     .template-chips {
       display: flex;
       flex-wrap: wrap;
-      gap: var(--fitos-space-2);
-      margin-bottom: var(--fitos-space-3);
+      gap: 8px;
+      margin-bottom: 12px;
     }
 
     .template-chip {
       cursor: pointer;
-      transition: all var(--fitos-duration-fast);
+      transition: all 150ms ease;
 
       &:active {
         transform: scale(0.95);
       }
 
       ion-badge {
-        margin-left: var(--fitos-space-2);
+        margin-left: 8px;
       }
     }
 
     .hint-text {
       margin: 0;
-      font-size: var(--fitos-text-xs);
+      font-size: 12px;
       font-style: italic;
+      color: var(--fitos-text-tertiary, #737373);
     }
 
     .suggestions-card,
     .defaults-card {
-      border: 1px solid var(--fitos-border-subtle);
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
     }
 
     .suggestion-item,
     .default-item {
-      padding: var(--fitos-space-4);
-      background: var(--fitos-bg-tertiary);
-      border-radius: var(--fitos-radius-lg);
-      margin-bottom: var(--fitos-space-3);
+      padding: 16px;
+      background: var(--fitos-bg-tertiary, #262626);
+      border-radius: 12px;
+      margin-bottom: 12px;
 
       &:last-child {
         margin-bottom: 0;
@@ -321,115 +330,119 @@ export interface SmartDefault {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: var(--fitos-space-3);
+      margin-bottom: 12px;
 
       h3 {
         margin: 0;
-        font-size: var(--fitos-text-lg);
-        font-weight: 600;
-        color: var(--fitos-text-primary);
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       ion-badge {
-        font-size: var(--fitos-text-xs);
+        font-size: 11px;
       }
     }
 
     .suggestion-details {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-2);
-      margin-bottom: var(--fitos-space-3);
+      gap: 8px;
+      margin-bottom: 12px;
 
       .detail-row {
         display: flex;
         align-items: center;
-        gap: var(--fitos-space-2);
+        gap: 8px;
 
         .detail-label {
-          font-size: var(--fitos-text-sm);
+          font-size: 13px;
           font-weight: 600;
-          color: var(--fitos-text-secondary);
+          color: var(--fitos-text-secondary, #A3A3A3);
           min-width: 80px;
         }
 
         .detail-value {
-          font-size: var(--fitos-text-base);
+          font-size: 14px;
           font-weight: 700;
-          color: var(--fitos-text-primary);
+          color: var(--fitos-text-primary, #F5F5F5);
+          font-family: 'Space Mono', monospace;
         }
       }
     }
 
     .suggestion-reason {
       display: flex;
-      gap: var(--fitos-space-2);
-      padding: var(--fitos-space-3);
-      background: rgba(var(--ion-color-primary-rgb), 0.1);
-      border-radius: var(--fitos-radius-md);
-      margin-bottom: var(--fitos-space-3);
+      gap: 8px;
+      padding: 12px;
+      background: rgba(16, 185, 129, 0.1);
+      border-radius: 8px;
+      margin-bottom: 12px;
 
       ion-icon {
         font-size: 16px;
-        color: var(--ion-color-primary);
+        color: var(--ion-color-primary, #10B981);
         flex-shrink: 0;
         margin-top: 2px;
       }
 
       p {
         margin: 0;
-        font-size: var(--fitos-text-sm);
+        font-size: 13px;
         line-height: 1.5;
-        color: var(--fitos-text-primary);
+        color: var(--fitos-text-primary, #F5F5F5);
       }
     }
 
     .default-metrics {
       display: flex;
-      gap: var(--fitos-space-2);
+      gap: 8px;
       flex-wrap: wrap;
-      margin-bottom: var(--fitos-space-3);
+      margin-bottom: 12px;
 
       .metric-chip {
         display: flex;
         align-items: center;
-        gap: var(--fitos-space-1);
-        padding: var(--fitos-space-2) var(--fitos-space-3);
-        background: var(--fitos-bg-secondary);
-        border-radius: var(--fitos-radius-md);
+        gap: 4px;
+        padding: 8px 12px;
+        background: var(--fitos-bg-secondary, #1A1A1A);
+        border-radius: 8px;
 
         .metric-label {
-          font-size: var(--fitos-text-xs);
+          font-size: 11px;
           font-weight: 600;
-          color: var(--fitos-text-secondary);
+          color: var(--fitos-text-secondary, #A3A3A3);
+          text-transform: uppercase;
         }
 
         .metric-value {
-          font-size: var(--fitos-text-base);
+          font-size: 14px;
           font-weight: 700;
-          color: var(--fitos-text-primary);
+          color: var(--fitos-text-primary, #F5F5F5);
+          font-family: 'Space Mono', monospace;
         }
       }
     }
 
     .progression-reason {
-      padding: var(--fitos-space-2) 0;
+      padding: 8px 0;
 
       p {
         margin: 0;
-        font-size: var(--fitos-text-sm);
+        font-size: 13px;
         line-height: 1.5;
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
     }
 
     ion-segment {
-      --background: var(--fitos-bg-tertiary);
-      margin: var(--fitos-space-4) 0;
+      --background: var(--fitos-bg-tertiary, #262626);
+      margin: 16px 0;
 
       ion-segment-button {
-        --indicator-color: var(--fitos-accent-primary);
-        --color: var(--fitos-text-secondary);
-        --color-checked: var(--fitos-accent-primary);
+        --indicator-color: var(--ion-color-primary, #10B981);
+        --color: var(--fitos-text-secondary, #A3A3A3);
+        --color-checked: var(--ion-color-primary, #10B981);
         min-height: 48px;
       }
     }
@@ -437,11 +450,18 @@ export interface SmartDefault {
     .quick-actions {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-2);
-      margin-top: var(--fitos-space-4);
+      gap: 8px;
+      margin-top: 16px;
 
       ion-button {
         margin: 0;
+        --border-radius: 8px;
+        height: 48px;
+        font-weight: 700;
+      }
+
+      ion-button:first-child {
+        --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
       }
     }
   `],

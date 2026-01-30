@@ -97,24 +97,39 @@ import { MessagingService } from '@app/core/services/messaging.service';
   `,
   styles: [`
     ion-tab-bar {
-      --background: var(--ion-card-background, #fff);
-      border-top: 1px solid var(--ion-color-light-shade);
+      --background: var(--fitos-bg-primary, #0D0D0D);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: env(safe-area-inset-bottom, 0);
     }
 
     ion-tab-button {
-      --color: var(--ion-color-medium);
-      --color-selected: var(--ion-color-primary);
+      --color: var(--fitos-text-tertiary, #737373);
+      --color-selected: var(--ion-color-primary, #10B981);
       position: relative;
+      font-size: 10px;
+      letter-spacing: 0.2px;
+
+      ion-icon {
+        font-size: 22px;
+        margin-bottom: 2px;
+      }
+
+      ion-label {
+        font-size: 10px;
+        font-weight: 500;
+      }
 
       ion-badge {
         position: absolute;
         top: 4px;
         right: calc(50% - 30px);
-        font-size: 0.625rem;
+        font-size: 10px;
         min-width: 18px;
         height: 18px;
-        padding: 2px 4px;
+        padding: 2px 5px;
         border-radius: 9px;
+        --background: #EF4444;
+        --color: white;
       }
     }
   `],

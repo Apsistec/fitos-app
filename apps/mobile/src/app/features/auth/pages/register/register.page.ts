@@ -5,10 +5,7 @@ import {
   IonHeader,
   IonTitle,
   IonToolbar,
-  IonButton,
   IonIcon,
-  IonCard,
-  IonCardContent,
   IonBackButton,
   IonButtons,
 } from '@ionic/angular/standalone';
@@ -17,7 +14,7 @@ import {
   fitnessOutline,
   peopleOutline,
   businessOutline,
-  arrowForward,
+  chevronForward,
 } from 'ionicons/icons';
 
 @Component({
@@ -29,16 +26,13 @@ import {
     IonHeader,
     IonTitle,
     IonToolbar,
-    IonButton,
     IonIcon,
-    IonCard,
-    IonCardContent,
     IonBackButton,
     IonButtons,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/auth/login"></ion-back-button>
@@ -47,182 +41,273 @@ import {
       </ion-toolbar>
     </ion-header>
 
-    <ion-content class="ion-padding">
-      <div class="register-selector-container">
+    <ion-content>
+      <div class="register-container">
+        <!-- Decorative background glows -->
+        <div class="bg-glow bg-glow--top"></div>
+        <div class="bg-glow bg-glow--bottom"></div>
+
         <!-- Header -->
-        <div class="header">
-          <h1>Join FitOS</h1>
-          <p class="subtitle">Select your account type to get started</p>
-        </div>
+        <header class="header">
+          <h1 class="logo">
+            Fit<span class="logo-accent">O</span>S
+          </h1>
+          <p class="tagline">Create your account to get started</p>
+        </header>
 
         <!-- Role Selection Cards -->
-        <div class="role-cards">
+        <main class="role-cards">
           <!-- Trainer Card -->
-          <ion-card routerLink="/auth/register/trainer" class="role-card trainer-card">
-            <ion-card-content>
-              <div class="card-icon">
-                <ion-icon name="fitness-outline"></ion-icon>
-              </div>
-              <div class="card-content">
-                <h2>I'm a Trainer</h2>
-                <p>Create programs, manage clients, and grow your coaching business</p>
-              </div>
-              <ion-icon name="arrow-forward" class="arrow-icon"></ion-icon>
-            </ion-card-content>
-          </ion-card>
+          <button class="role-card" routerLink="/auth/register/trainer">
+            <div class="role-card__icon">
+              <ion-icon name="fitness-outline"></ion-icon>
+            </div>
+            <div class="role-card__content">
+              <h2>I'm a Trainer</h2>
+              <p>Create programs, manage clients, grow your business</p>
+            </div>
+            <ion-icon name="chevron-forward" class="role-card__arrow"></ion-icon>
+          </button>
 
           <!-- Client Card -->
-          <ion-card routerLink="/auth/register/client" class="role-card client-card">
-            <ion-card-content>
-              <div class="card-icon">
-                <ion-icon name="people-outline"></ion-icon>
-              </div>
-              <div class="card-content">
-                <h2>I'm a Client</h2>
-                <p>Track workouts, log nutrition, and connect with your trainer</p>
-              </div>
-              <ion-icon name="arrow-forward" class="arrow-icon"></ion-icon>
-            </ion-card-content>
-          </ion-card>
+          <button class="role-card" routerLink="/auth/register/client">
+            <div class="role-card__icon role-card__icon--client">
+              <ion-icon name="people-outline"></ion-icon>
+            </div>
+            <div class="role-card__content">
+              <h2>I'm a Client</h2>
+              <p>Track workouts, log nutrition, connect with your trainer</p>
+            </div>
+            <ion-icon name="chevron-forward" class="role-card__arrow"></ion-icon>
+          </button>
 
           <!-- Gym Owner Card -->
-          <ion-card routerLink="/auth/register/gym-owner" class="role-card gym-card">
-            <ion-card-content>
-              <div class="card-icon">
-                <ion-icon name="business-outline"></ion-icon>
-              </div>
-              <div class="card-content">
-                <h2>I'm a Gym Owner</h2>
-                <p>Manage your facility, staff trainers, and member experience</p>
-              </div>
-              <ion-icon name="arrow-forward" class="arrow-icon"></ion-icon>
-            </ion-card-content>
-          </ion-card>
-        </div>
+          <button class="role-card" routerLink="/auth/register/gym-owner">
+            <div class="role-card__icon role-card__icon--gym">
+              <ion-icon name="business-outline"></ion-icon>
+            </div>
+            <div class="role-card__content">
+              <h2>I'm a Gym Owner</h2>
+              <p>Manage your facility, staff trainers, grow membership</p>
+            </div>
+            <ion-icon name="chevron-forward" class="role-card__arrow"></ion-icon>
+          </button>
+        </main>
 
-        <!-- Sign In Link -->
-        <div class="signin-section">
-          <p>Already have an account?</p>
-          <ion-button fill="outline" routerLink="/auth/login">
-            Sign In
-          </ion-button>
-        </div>
+        <!-- Footer -->
+        <footer class="footer">
+          <p>
+            Already have an account?
+            <a routerLink="/auth/login" class="footer__link">Sign in</a>
+          </p>
+        </footer>
       </div>
     </ion-content>
   `,
   styles: [`
-    .register-selector-container {
+    .register-container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
       max-width: 500px;
       margin: 0 auto;
-      padding-top: 16px;
+      padding: 0 20px;
+      overflow: hidden;
+    }
+
+    ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .bg-glow {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      background: rgba(16, 185, 129, 0.05);
+      filter: blur(80px);
+    }
+
+    .bg-glow--top {
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 256px;
+      height: 256px;
+    }
+
+    .bg-glow--bottom {
+      bottom: 0;
+      right: 0;
+      width: 192px;
+      height: 192px;
     }
 
     .header {
-      text-align: center;
-      margin-bottom: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 24px;
+      padding-bottom: 32px;
+      z-index: 1;
+    }
 
-      h1 {
-        margin: 0 0 8px;
-        font-size: 1.75rem;
-        font-weight: 700;
-      }
+    .logo {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--fitos-text-primary, #F5F5F5);
+      letter-spacing: -0.5px;
+      margin: 0;
+    }
 
-      .subtitle {
-        margin: 0;
-        color: var(--ion-color-medium);
-      }
+    .logo-accent {
+      color: var(--ion-color-primary, #10B981);
+      text-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+    }
+
+    .tagline {
+      color: var(--fitos-text-secondary, #A3A3A3);
+      font-size: 14px;
+      font-weight: 500;
+      margin: 8px 0 0;
     }
 
     .role-cards {
       display: flex;
       flex-direction: column;
       gap: 16px;
+      flex: 1;
+      justify-content: center;
+      z-index: 1;
     }
 
     .role-card {
-      margin: 0;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+      padding: 20px;
+      border-radius: 12px;
+      background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+      text-align: left;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
 
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      &:hover, &:focus-visible {
+        transform: scale(1.02);
+        border-color: rgba(16, 185, 129, 0.5);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
       }
 
-      &:active {
-        transform: translateY(0);
+      &:active { transform: scale(0.98); }
+    }
+
+    .role-card__icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--fitos-bg-tertiary, #252525);
+      flex-shrink: 0;
+      transition: background 0.3s;
+
+      ion-icon {
+        font-size: 24px;
+        color: var(--ion-color-primary, #10B981);
       }
 
-      ion-card-content {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        padding: 20px;
-      }
-
-      .card-icon {
-        width: 56px;
-        height: 56px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-
-        ion-icon {
-          font-size: 28px;
-          color: white;
-        }
-      }
-
-      .card-content {
-        flex: 1;
-
-        h2 {
-          margin: 0 0 4px;
-          font-size: 1.1rem;
-          font-weight: 600;
-        }
-
-        p {
-          margin: 0;
-          font-size: 0.85rem;
-          color: var(--ion-color-medium);
-        }
-      }
-
-      .arrow-icon {
-        font-size: 20px;
-        color: var(--ion-color-medium);
+      .role-card:hover &,
+      .role-card:focus-visible & {
+        background: rgba(16, 185, 129, 0.2);
       }
     }
 
-    .trainer-card .card-icon {
-      background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));
+    .role-card__icon--client ion-icon {
+      color: var(--ion-color-primary, #10B981);
     }
 
-    .client-card .card-icon {
-      background: linear-gradient(135deg, #10B981, #059669);
+    .role-card__icon--gym {
+      ion-icon { color: var(--fitos-accent-secondary, #8B5CF6); }
+
+      .role-card:hover &,
+      .role-card:focus-visible & {
+        background: rgba(139, 92, 246, 0.2);
+      }
     }
 
-    .gym-card .card-icon {
-      background: linear-gradient(135deg, #8B5CF6, #7C3AED);
-    }
+    .role-card__content {
+      flex: 1;
+      min-width: 0;
 
-    .signin-section {
-      text-align: center;
-      margin-top: 40px;
-      padding-top: 24px;
-      border-top: 1px solid var(--ion-color-light-shade);
+      h2 {
+        margin: 0 0 4px;
+        font-size: 17px;
+        font-weight: 600;
+        color: var(--fitos-text-primary, #F5F5F5);
+        transition: color 0.3s;
+      }
 
       p {
-        margin: 0 0 16px;
-        color: var(--ion-color-medium);
+        margin: 0;
+        font-size: 13px;
+        color: var(--fitos-text-secondary, #A3A3A3);
+        line-height: 1.4;
       }
 
-      ion-button {
-        min-width: 200px;
+      .role-card:hover & h2,
+      .role-card:focus-visible & h2 {
+        color: var(--ion-color-primary, #10B981);
       }
+    }
+
+    .role-card__arrow {
+      font-size: 20px;
+      color: var(--ion-color-primary, #10B981);
+      opacity: 0;
+      transform: translateX(-8px);
+      transition: opacity 0.3s, transform 0.3s;
+
+      .role-card:hover &,
+      .role-card:focus-visible & {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .footer {
+      padding: 32px 0;
+      text-align: center;
+      z-index: 1;
+
+      p {
+        font-size: 14px;
+        color: var(--fitos-text-secondary, #A3A3A3);
+        margin: 0;
+      }
+    }
+
+    .footer__link {
+      color: var(--ion-color-primary, #10B981);
+      font-weight: 500;
+      text-decoration: none;
+      margin-left: 4px;
+      transition: color 0.2s;
+
+      &:hover { color: var(--fitos-text-primary, #F5F5F5); }
     }
   `],
 })
@@ -232,7 +317,7 @@ export class RegisterPage {
       fitnessOutline,
       peopleOutline,
       businessOutline,
-      arrowForward,
+      chevronForward,
     });
   }
 }

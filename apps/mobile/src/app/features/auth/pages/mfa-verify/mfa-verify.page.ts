@@ -31,13 +31,13 @@ import { OtpInputComponent } from '@app/shared/components/otp-input/otp-input.co
     OtpInputComponent,
   ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-title>Two-Factor Verification</ion-title>
       </ion-toolbar>
     </ion-header>
 
-    <ion-content class="ion-padding">
+    <ion-content>
       <div class="mfa-verify-container">
         <!-- Header -->
         <div class="verify-header">
@@ -97,9 +97,21 @@ import { OtpInputComponent } from '@app/shared/components/otp-input/otp-input.co
     </ion-content>
   `,
   styles: [`
+    ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     .mfa-verify-container {
       max-width: 400px;
       margin: 0 auto;
+      padding: 16px 24px 32px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -114,7 +126,7 @@ import { OtpInputComponent } from '@app/shared/components/otp-input/otp-input.co
         width: 80px;
         height: 80px;
         border-radius: 50%;
-        background: rgba(var(--ion-color-primary-rgb), 0.1);
+        background: rgba(16, 185, 129, 0.1);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -123,7 +135,7 @@ import { OtpInputComponent } from '@app/shared/components/otp-input/otp-input.co
 
         ion-icon {
           font-size: 40px;
-          color: var(--ion-color-primary);
+          color: var(--ion-color-primary, #10B981);
         }
 
         ion-spinner {
@@ -136,32 +148,34 @@ import { OtpInputComponent } from '@app/shared/components/otp-input/otp-input.co
         }
 
         &.error {
-          background: rgba(var(--ion-color-danger-rgb), 0.1);
+          background: rgba(239, 68, 68, 0.1);
 
           ion-icon {
-            color: var(--ion-color-danger);
+            color: #EF4444;
           }
         }
 
         &.success {
-          background: rgba(var(--ion-color-success-rgb), 0.1);
+          background: rgba(16, 185, 129, 0.15);
 
           ion-icon {
-            color: var(--ion-color-success);
+            color: var(--ion-color-primary, #10B981);
           }
         }
       }
 
       h1 {
         margin: 0 0 12px;
-        font-size: 1.5rem;
+        font-size: 24px;
         font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       p {
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-secondary, #A3A3A3);
         margin: 0;
-        font-size: 0.95rem;
+        font-size: 14px;
+        line-height: 1.5;
       }
     }
 
@@ -174,19 +188,20 @@ import { OtpInputComponent } from '@app/shared/components/otp-input/otp-input.co
       text-align: center;
       margin: 16px 0;
       padding: 16px;
-      background: rgba(var(--ion-color-danger-rgb), 0.08);
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
       border-radius: 12px;
       width: 100%;
 
       .error-message {
         margin: 0 0 8px;
-        color: var(--ion-color-danger);
-        font-size: 0.9rem;
+        color: #FCA5A5;
+        font-size: 14px;
         font-weight: 500;
       }
 
       ion-button {
-        --color: var(--ion-color-danger);
+        --color: #FCA5A5;
       }
     }
 
@@ -196,10 +211,10 @@ import { OtpInputComponent } from '@app/shared/components/otp-input/otp-input.co
       max-width: 280px;
 
       p {
-        font-size: 0.85rem;
-        color: var(--ion-color-medium);
+        font-size: 13px;
+        color: var(--fitos-text-tertiary, #737373);
         margin: 0;
-        line-height: 1.4;
+        line-height: 1.5;
       }
     }
 
@@ -207,30 +222,19 @@ import { OtpInputComponent } from '@app/shared/components/otp-input/otp-input.co
       text-align: center;
       margin-top: 32px;
       padding-top: 24px;
-      border-top: 1px solid var(--ion-color-light-shade);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
       width: 100%;
 
       p {
         margin: 0 0 8px;
-        font-size: 0.85rem;
-        color: var(--ion-color-medium);
+        font-size: 14px;
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
     }
 
     .signout-section {
       text-align: center;
       margin-top: 24px;
-    }
-
-    /* Dark mode */
-    :host-context(.dark) {
-      .verify-header .icon-container {
-        background: rgba(var(--ion-color-primary-rgb), 0.15);
-      }
-
-      .error-container {
-        background: rgba(var(--ion-color-danger-rgb), 0.12);
-      }
     }
   `],
 })

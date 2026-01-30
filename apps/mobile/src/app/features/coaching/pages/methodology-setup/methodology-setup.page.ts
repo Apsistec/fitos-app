@@ -44,7 +44,7 @@ import { MethodologyQuestionnaireComponent } from '../../components/methodology-
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/tabs/coaching"></ion-back-button>

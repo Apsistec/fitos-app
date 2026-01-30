@@ -62,24 +62,26 @@ import type { WorkoutWithExercises } from '../../../../core/services/workout.ser
       margin: 0;
       max-width: 800px;
       width: 100%;
+      border-radius: 12px;
     }
 
     .hero-card {
-      --background: var(--fitos-bg-secondary);
-      border: 1px solid var(--fitos-accent-primary);
-      box-shadow: var(--fitos-glow-primary);
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      box-shadow: 0 0 24px rgba(16, 185, 129, 0.08);
 
       ion-card-title {
-        color: var(--fitos-text-primary);
-        font-size: 1.5rem;
+        color: var(--fitos-text-primary, #F5F5F5);
+        font-size: 20px;
         font-weight: 700;
       }
 
       ion-card-subtitle {
-        color: var(--fitos-accent-primary);
+        color: var(--ion-color-primary, #10B981);
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.5px;
         font-weight: 600;
+        font-size: 11px;
       }
     }
 
@@ -87,59 +89,85 @@ import type { WorkoutWithExercises } from '../../../../core/services/workout.ser
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: 1rem;
+      gap: 12px;
+
+      ion-badge {
+        --background: rgba(16, 185, 129, 0.15);
+        --color: var(--ion-color-primary, #10B981);
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 4px 10px;
+      }
     }
 
     .description {
-      color: var(--fitos-text-secondary);
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
+      color: var(--fitos-text-secondary, #A3A3A3);
+      margin-bottom: 12px;
+      font-size: 14px;
+      line-height: 1.5;
     }
 
     .exercise-count {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      color: var(--fitos-text-secondary);
-      margin-bottom: 1rem;
+      gap: 6px;
+      color: var(--fitos-text-secondary, #A3A3A3);
+      margin-bottom: 12px;
+      font-size: 14px;
 
       ion-icon {
-        font-size: 1.2rem;
-        color: var(--fitos-text-tertiary);
+        font-size: 18px;
+        color: var(--fitos-text-tertiary, #737373);
       }
     }
 
     .start-button {
-      margin-top: 1rem;
-      --background: var(--fitos-accent-primary);
-      --background-hover: var(--fitos-accent-primary-tint);
+      margin-top: 12px;
+      --border-radius: 8px;
+      height: 44px;
+      font-weight: 700;
+      font-size: 15px;
+      --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
     }
 
     .empty-card {
       margin: 0;
       max-width: 800px;
       width: 100%;
-      --background: var(--fitos-bg-secondary);
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
     }
 
     .empty-content {
       text-align: center;
-      padding: 2rem 1rem;
+      padding: 32px 16px;
 
       .empty-icon {
-        font-size: 4rem;
-        color: var(--fitos-text-tertiary);
-        margin-bottom: 1rem;
+        font-size: 48px;
+        color: var(--fitos-text-tertiary, #737373);
+        margin-bottom: 16px;
       }
 
       h3 {
-        margin: 0 0 0.5rem 0;
-        color: var(--fitos-text-primary);
+        margin: 0 0 8px 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       p {
-        color: var(--fitos-text-secondary);
-        margin-bottom: 1.5rem;
+        color: var(--fitos-text-secondary, #A3A3A3);
+        margin-bottom: 20px;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      ion-button {
+        --border-radius: 8px;
+        --border-color: rgba(255, 255, 255, 0.1);
+        font-weight: 600;
       }
     }
   `],

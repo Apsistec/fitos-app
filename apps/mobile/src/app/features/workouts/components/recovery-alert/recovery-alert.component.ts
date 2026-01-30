@@ -167,30 +167,33 @@ import {
   styles: [
     `
       .recovery-alert {
-        margin: var(--fitos-space-4);
+        margin: 16px;
+        --background: var(--fitos-bg-secondary, #1A1A1A);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
         border-left: 4px solid;
 
         &.recovered {
-          border-left-color: var(--ion-color-success);
+          border-left-color: #10B981;
         }
 
         &.moderate {
-          border-left-color: var(--ion-color-primary);
+          border-left-color: var(--ion-color-primary, #10B981);
         }
 
         &.under_recovered {
-          border-left-color: var(--ion-color-warning);
+          border-left-color: #F59E0B;
         }
 
         &.critical {
-          border-left-color: var(--ion-color-danger);
+          border-left-color: #EF4444;
         }
       }
 
       .alert-header {
         display: flex;
         align-items: center;
-        gap: var(--fitos-space-2);
+        gap: 8px;
 
         > ion-icon {
           font-size: 24px;
@@ -198,101 +201,113 @@ import {
 
         ion-card-title {
           flex: 1;
-          font-size: var(--fitos-font-size-lg);
-          font-weight: 600;
+          font-size: 18px;
+          font-weight: 700;
+          color: var(--fitos-text-primary, #F5F5F5);
         }
       }
 
       .status-display {
-        margin-bottom: var(--fitos-space-4);
+        margin-bottom: 16px;
 
         .status-info {
           display: flex;
           align-items: center;
-          gap: var(--fitos-space-2);
-          margin-bottom: var(--fitos-space-2);
+          gap: 8px;
+          margin-bottom: 8px;
 
           ion-badge {
-            font-size: var(--fitos-font-size-sm);
+            font-size: 13px;
             padding: 6px 12px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
           }
 
           .score-value {
-            font-size: var(--fitos-font-size-lg);
+            font-size: 18px;
             font-weight: 700;
-            color: var(--fitos-text-primary);
+            color: var(--fitos-text-primary, #F5F5F5);
+            font-family: 'Space Mono', monospace;
           }
         }
 
         .status-message {
-          font-size: var(--fitos-font-size-base);
-          color: var(--fitos-text-secondary);
+          font-size: 14px;
+          color: var(--fitos-text-secondary, #A3A3A3);
           margin: 0;
           line-height: 1.5;
         }
       }
 
       .recommendations {
-        padding: var(--fitos-space-3);
-        background: var(--fitos-bg-secondary);
-        border-radius: var(--fitos-border-radius);
-        margin-bottom: var(--fitos-space-4);
+        padding: 12px;
+        background: var(--fitos-bg-tertiary, #262626);
+        border-radius: 12px;
+        margin-bottom: 16px;
 
         h4 {
-          font-size: var(--fitos-font-size-sm);
+          font-size: 11px;
           font-weight: 600;
-          color: var(--fitos-text-primary);
-          margin: 0 0 var(--fitos-space-2) 0;
+          color: var(--fitos-text-primary, #F5F5F5);
+          margin: 0 0 8px 0;
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
 
         .adjustment-options {
           display: flex;
-          gap: var(--fitos-space-3);
-          margin-bottom: var(--fitos-space-2);
+          gap: 12px;
+          margin-bottom: 8px;
 
           .adjustment-item {
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: var(--fitos-space-1);
-            padding: var(--fitos-space-2);
-            background: var(--fitos-bg-primary);
-            border-radius: var(--fitos-border-radius);
+            gap: 4px;
+            padding: 8px;
+            background: var(--fitos-bg-primary, #0D0D0D);
+            border-radius: 10px;
 
             .adjustment-label {
-              font-size: var(--fitos-font-size-xs);
-              color: var(--fitos-text-tertiary);
+              font-size: 11px;
+              color: var(--fitos-text-tertiary, #737373);
               text-transform: uppercase;
               letter-spacing: 0.5px;
+              font-weight: 500;
             }
 
             ion-badge {
-              font-size: var(--fitos-font-size-lg);
+              font-size: 18px;
               font-weight: 700;
               padding: 6px 12px;
               align-self: flex-start;
+              font-family: 'Space Mono', monospace;
             }
           }
         }
 
         .adjustment-note {
-          font-size: var(--fitos-font-size-xs);
+          font-size: 12px;
           line-height: 1.4;
+          color: var(--fitos-text-secondary, #A3A3A3);
         }
       }
 
       .actions {
         display: flex;
         flex-direction: column;
-        gap: var(--fitos-space-2);
+        gap: 8px;
+
+        ion-button[expand="block"] {
+          --border-radius: 8px;
+          height: 48px;
+          font-weight: 700;
+          --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        }
 
         .secondary-actions {
           display: flex;
-          gap: var(--fitos-space-2);
+          gap: 8px;
 
           ion-button {
             flex: 1;
@@ -304,18 +319,19 @@ import {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: var(--fitos-space-2);
-        padding: var(--fitos-space-3);
+        gap: 8px;
+        padding: 12px;
         text-align: center;
 
         ion-note {
-          font-size: var(--fitos-font-size-base);
+          font-size: 14px;
           line-height: 1.5;
+          color: var(--fitos-text-secondary, #A3A3A3);
         }
       }
 
       .info-button {
-        margin-top: var(--fitos-space-2);
+        margin-top: 8px;
       }
     `,
   ],

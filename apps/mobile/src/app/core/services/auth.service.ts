@@ -33,6 +33,7 @@ export class AuthService {
 
   private readonly RETURN_URL_KEY = 'fitos_return_url';
   private readonly MFA_SKIPPED_KEY = 'fitos_mfa_skipped';
+  private readonly LINK_IDENTITY_RETURN_KEY = 'fitos_link_identity_return';
   private readonly TOKEN_REFRESH_MARGIN_SECONDS = 60; // Refresh 60s before expiry
   private readonly MAX_RETRY_ATTEMPTS = 3;
   private readonly RETRY_DELAY_MS = 1000;
@@ -786,9 +787,20 @@ export class AuthService {
   private handlePostLogin(): void {
     const profile = this._state().profile;
 
-    // Check if this is an OAuth identity linking return (full page redirect back).
-    // Use window.location since the Angular router may not have resolved yet.
+    // Check if this is an OAuth identity linking return.
+    // linkIdentity has a known issue where it redirects to Site URL instead
+    // of the specified redirectTo, so we check sessionStorage for the return path.
     const currentPath = window.location.pathname;
+    const linkReturnPath = sessionStorage.getItem(this.LINK_IDENTITY_RETURN_KEY);
+
+    if (linkReturnPath) {
+      sessionStorage.removeItem(this.LINK_IDENTITY_RETURN_KEY);
+      console.log('handlePostLogin: identity linking return, navigating to:', linkReturnPath);
+      this.router.navigateByUrl(linkReturnPath);
+      return;
+    }
+
+    // Also stay on page if already on MFA setup or settings (direct redirect worked)
     if (currentPath.includes('/auth/mfa-setup') || currentPath.includes('/tabs/settings')) {
       console.log('handlePostLogin: identity linking return, staying on:', currentPath);
       return;
@@ -1011,7 +1023,15 @@ export class AuthService {
    */
   async linkIdentity(provider: Provider, redirectPath?: string): Promise<{ error: Error | null }> {
     try {
-      const redirectTo = `${window.location.origin}${redirectPath || '/tabs/settings/privacy'}`;
+      const returnPath = redirectPath || '/tabs/settings/privacy';
+      const redirectTo = `${window.location.origin}${returnPath}`;
+
+      // Store the return path before OAuth redirect.
+      // linkIdentity has a known issue where it ignores redirectTo and
+      // always redirects to the Site URL, so we use this flag in
+      // handlePostLogin to redirect back to the correct page.
+      sessionStorage.setItem(this.LINK_IDENTITY_RETURN_KEY, returnPath);
+
       const { error } = await this.supabase.auth.linkIdentity({
         provider,
         options: {
@@ -1023,6 +1043,8 @@ export class AuthService {
 
       return { error: null };
     } catch (error) {
+      // Clear the flag if linking fails before redirect
+      sessionStorage.removeItem(this.LINK_IDENTITY_RETURN_KEY);
       return { error: error as Error };
     }
   }

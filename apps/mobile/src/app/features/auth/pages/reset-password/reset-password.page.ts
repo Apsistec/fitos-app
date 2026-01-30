@@ -9,15 +9,12 @@ import {
   IonButton,
   IonInput,
   IonInputPasswordToggle,
-  IonItem,
-  IonList,
   IonSpinner,
-  IonNote,
   IonIcon,
   ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { checkmarkCircle, closeCircle } from 'ionicons/icons';
+import { checkmarkCircle, closeCircle, lockClosedOutline } from 'ionicons/icons';
 import { AuthService } from '@app/core/services/auth.service';
 
 // Password complexity validator
@@ -59,107 +56,106 @@ function passwordComplexityValidator(control: AbstractControl): ValidationErrors
     IonButton,
     IonInput,
     IonInputPasswordToggle,
-    IonItem,
-    IonList,
     IonSpinner,
-    IonNote,
     IonIcon,
   ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-title>Set New Password</ion-title>
       </ion-toolbar>
     </ion-header>
 
-    <ion-content class="ion-padding">
+    <ion-content>
       <div class="reset-container">
         <div class="reset-header">
+          <div class="icon-wrap">
+            <ion-icon name="lock-closed-outline"></ion-icon>
+          </div>
           <h2>Create a new password</h2>
           <p>Enter a strong password for your account.</p>
         </div>
 
         <!-- Error Message -->
         @if (errorMessage()) {
-          <ion-note color="danger" class="error-message">
+          <div class="message message--error">
             {{ errorMessage() }}
-          </ion-note>
+          </div>
         }
 
         <!-- Success Message -->
         @if (successMessage()) {
-          <ion-note color="success" class="success-message">
+          <div class="message message--success">
             {{ successMessage() }}
-          </ion-note>
+          </div>
         }
 
         @if (!successMessage()) {
           <!-- Form -->
-          <form [formGroup]="resetForm" (ngSubmit)="onSubmit()">
-            <ion-list lines="none">
-              <ion-item lines="none">
-                <ion-input
-                  formControlName="password"
-                  type="password"
-                  label="New Password"
-                  labelPlacement="floating"
-                  fill="outline"
-                  placeholder="Create a strong password"
-                  autocomplete="new-password"
-                  [errorText]="passwordError()"
-                  [counter]="true"
-                  [minlength]="8"
-                >
-                  <ion-input-password-toggle slot="end" />
-                </ion-input>
-              </ion-item>
+          <form [formGroup]="resetForm" (ngSubmit)="onSubmit()" class="reset-form">
+            <div class="form-group">
+              <ion-input
+                formControlName="password"
+                type="password"
+                label="New Password"
+                labelPlacement="floating"
+                fill="outline"
+                placeholder="Create a strong password"
+                autocomplete="new-password"
+                [errorText]="passwordError()"
+                [counter]="true"
+                [minlength]="8"
+              >
+                <ion-input-password-toggle slot="end" />
+              </ion-input>
+            </div>
 
-              <!-- Password Requirements -->
-              @if (resetForm.get('password')?.value) {
-                <div class="password-requirements">
-                  <div class="requirement" [class.met]="passwordRequirements().minLength">
-                    <ion-icon [name]="passwordRequirements().minLength ? 'checkmark-circle' : 'close-circle'"></ion-icon>
-                    <span>At least 8 characters</span>
-                  </div>
-                  <div class="requirement" [class.met]="passwordRequirements().hasUppercase">
-                    <ion-icon [name]="passwordRequirements().hasUppercase ? 'checkmark-circle' : 'close-circle'"></ion-icon>
-                    <span>One uppercase letter</span>
-                  </div>
-                  <div class="requirement" [class.met]="passwordRequirements().hasLowercase">
-                    <ion-icon [name]="passwordRequirements().hasLowercase ? 'checkmark-circle' : 'close-circle'"></ion-icon>
-                    <span>One lowercase letter</span>
-                  </div>
-                  <div class="requirement" [class.met]="passwordRequirements().hasNumber">
-                    <ion-icon [name]="passwordRequirements().hasNumber ? 'checkmark-circle' : 'close-circle'"></ion-icon>
-                    <span>One number</span>
-                  </div>
-                  <div class="requirement" [class.met]="passwordRequirements().hasSpecial">
-                    <ion-icon [name]="passwordRequirements().hasSpecial ? 'checkmark-circle' : 'close-circle'"></ion-icon>
-                    <span>One special character (!&#64;#$%^&*)</span>
-                  </div>
+            <!-- Password Requirements -->
+            @if (resetForm.get('password')?.value) {
+              <div class="password-requirements">
+                <div class="requirement" [class.met]="passwordRequirements().minLength">
+                  <ion-icon [name]="passwordRequirements().minLength ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+                  <span>At least 8 characters</span>
                 </div>
-              }
+                <div class="requirement" [class.met]="passwordRequirements().hasUppercase">
+                  <ion-icon [name]="passwordRequirements().hasUppercase ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+                  <span>One uppercase letter</span>
+                </div>
+                <div class="requirement" [class.met]="passwordRequirements().hasLowercase">
+                  <ion-icon [name]="passwordRequirements().hasLowercase ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+                  <span>One lowercase letter</span>
+                </div>
+                <div class="requirement" [class.met]="passwordRequirements().hasNumber">
+                  <ion-icon [name]="passwordRequirements().hasNumber ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+                  <span>One number</span>
+                </div>
+                <div class="requirement" [class.met]="passwordRequirements().hasSpecial">
+                  <ion-icon [name]="passwordRequirements().hasSpecial ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+                  <span>One special character (!&#64;#$%^&*)</span>
+                </div>
+              </div>
+            }
 
-              <ion-item lines="none">
-                <ion-input
-                  formControlName="confirmPassword"
-                  type="password"
-                  label="Confirm Password"
-                  labelPlacement="floating"
-                  fill="outline"
-                  placeholder="Re-enter your password"
-                  autocomplete="new-password"
-                  [errorText]="confirmPasswordError()"
-                >
-                  <ion-input-password-toggle slot="end" />
-                </ion-input>
-              </ion-item>
-            </ion-list>
+            <div class="form-group">
+              <ion-input
+                formControlName="confirmPassword"
+                type="password"
+                label="Confirm Password"
+                labelPlacement="floating"
+                fill="outline"
+                placeholder="Re-enter your password"
+                autocomplete="new-password"
+                [errorText]="confirmPasswordError()"
+              >
+                <ion-input-password-toggle slot="end" />
+              </ion-input>
+            </div>
 
             <ion-button
               expand="block"
               type="submit"
               [disabled]="resetForm.invalid || isSubmitting()"
+              class="submit-btn"
             >
               @if (isSubmitting()) {
                 <ion-spinner name="crescent"></ion-spinner>
@@ -173,80 +169,125 @@ function passwordComplexityValidator(control: AbstractControl): ValidationErrors
     </ion-content>
   `,
   styles: [`
+    ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     .reset-container {
       max-width: 400px;
       margin: 0 auto;
+      padding: 16px 24px 32px;
     }
 
     .reset-header {
-      margin-bottom: 24px;
+      text-align: center;
+      margin-bottom: 32px;
 
       h2 {
         margin: 0 0 8px;
-        font-size: 1.5rem;
+        font-size: 24px;
         font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       p {
         margin: 0;
-        color: var(--ion-color-medium);
+        font-size: 14px;
+        color: var(--fitos-text-secondary, #A3A3A3);
+        line-height: 1.5;
       }
     }
 
-    .error-message,
-    .success-message {
-      display: block;
-      padding: 12px;
-      margin-bottom: 16px;
+    .icon-wrap {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(16, 185, 129, 0.1);
+      margin: 0 auto 16px;
+
+      ion-icon {
+        font-size: 28px;
+        color: var(--ion-color-primary, #10B981);
+      }
+    }
+
+    .message {
+      padding: 12px 16px;
+      margin-bottom: 20px;
       border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.5;
     }
 
-    .error-message {
-      background: rgba(var(--ion-color-danger-rgb), 0.1);
+    .message--error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: #FCA5A5;
     }
 
-    .success-message {
-      background: rgba(var(--ion-color-success-rgb), 0.1);
+    .message--success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: #6EE7B7;
     }
 
-    ion-list {
-      background: transparent;
-      margin-bottom: 24px;
+    .reset-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
 
-      ion-item {
-        --background: transparent;
-        --padding-start: 0;
-        --inner-padding-end: 0;
-        margin-bottom: 16px;
+    .form-group {
+      ion-input {
+        --background: var(--fitos-bg-tertiary, #262626);
+        --border-radius: 8px;
+        --highlight-color-focused: var(--ion-color-primary, #10B981);
+        --border-color: transparent;
+        font-size: 16px;
       }
     }
 
     .password-requirements {
       padding: 12px 16px;
-      margin-bottom: 16px;
-      background: var(--ion-color-light);
+      background: var(--fitos-bg-secondary, #1A1A1A);
       border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
 
       .requirement {
         display: flex;
         align-items: center;
         gap: 8px;
-        font-size: 0.8rem;
-        color: var(--ion-color-danger);
-        margin-bottom: 4px;
+        font-size: 13px;
+        color: var(--fitos-text-tertiary, #737373);
+        margin-bottom: 6px;
 
-        &:last-child {
-          margin-bottom: 0;
-        }
+        &:last-child { margin-bottom: 0; }
 
-        ion-icon {
-          font-size: 16px;
-        }
+        ion-icon { font-size: 16px; }
 
         &.met {
-          color: var(--ion-color-success);
+          color: var(--ion-color-primary, #10B981);
         }
       }
+    }
+
+    .submit-btn {
+      margin-top: 8px;
+      --border-radius: 8px;
+      height: 48px;
+      font-weight: 700;
+      font-size: 16px;
+      --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
     }
   `],
 })

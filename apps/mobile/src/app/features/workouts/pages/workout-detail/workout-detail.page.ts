@@ -55,7 +55,7 @@ addIcons({
     IonIcon
 ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/tabs/workouts/history"></ion-back-button>
@@ -199,6 +199,17 @@ addIcons({
     </ion-content>
   `,
   styles: [`
+    ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     .loading-container,
     .error-container {
       display: flex;
@@ -212,12 +223,14 @@ addIcons({
 
     .loading-container p {
       margin-top: 16px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
+      font-size: 14px;
     }
 
     .error-message {
-      color: var(--ion-color-danger);
+      color: #FCA5A5;
       margin-bottom: 16px;
+      font-size: 14px;
     }
 
     .detail-container {
@@ -238,7 +251,7 @@ addIcons({
 
     .summary-item ion-icon {
       font-size: 24px;
-      color: var(--ion-color-primary);
+      color: var(--ion-color-primary, #10B981);
       flex-shrink: 0;
     }
 
@@ -248,37 +261,38 @@ addIcons({
     }
 
     .summary-label {
-      font-size: 0.75rem;
-      color: var(--ion-color-medium);
+      font-size: 11px;
+      color: var(--fitos-text-tertiary, #737373);
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-bottom: 2px;
+      font-weight: 500;
     }
 
     .summary-value {
-      font-size: 1rem;
+      font-size: 15px;
       font-weight: 600;
-      color: var(--ion-color-dark);
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .workout-notes {
       margin-top: 20px;
       padding-top: 20px;
-      border-top: 1px solid var(--ion-color-light);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .workout-notes h3 {
-      font-size: 0.875rem;
+      font-size: 12px;
       font-weight: 600;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-tertiary, #737373);
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin: 0 0 8px 0;
     }
 
     .workout-notes p {
-      font-size: 0.875rem;
-      color: var(--ion-color-dark);
+      font-size: 14px;
+      color: var(--fitos-text-secondary, #A3A3A3);
       margin: 0;
       font-style: italic;
       line-height: 1.5;
@@ -289,21 +303,31 @@ addIcons({
     }
 
     .section-title {
-      font-size: 1.1rem;
-      font-weight: 600;
+      font-size: 16px;
+      font-weight: 700;
       margin: 0 0 12px 4px;
-      color: var(--ion-color-dark);
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     ion-card {
       margin: 0 0 12px 0;
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+    }
+
+    ion-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .no-data {
       text-align: center;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
       margin: 0;
       padding: 20px;
+      font-size: 14px;
     }
 
     .sets-table {
@@ -316,20 +340,20 @@ addIcons({
       grid-template-columns: 60px 1fr 1fr;
       gap: 12px;
       padding: 8px 0;
-      font-size: 0.875rem;
+      font-size: 14px;
     }
 
     .sets-header {
       font-weight: 600;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-tertiary, #737373);
       text-transform: uppercase;
-      font-size: 0.75rem;
+      font-size: 11px;
       letter-spacing: 0.5px;
-      border-bottom: 2px solid var(--ion-color-light);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.08);
     }
 
     .set-row {
-      border-bottom: 1px solid var(--ion-color-light-shade);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     }
 
     .set-row:last-child {
@@ -338,19 +362,20 @@ addIcons({
 
     .set-number {
       font-weight: 600;
-      color: var(--ion-color-primary);
+      color: var(--ion-color-primary, #10B981);
+      font-family: 'Space Mono', monospace;
     }
 
     .set-reps,
     .set-weight,
     .set-rpe {
-      color: var(--ion-color-dark);
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .exercise-stats {
       margin-top: 16px;
       padding-top: 16px;
-      border-top: 1px solid var(--ion-color-light);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .stat {
@@ -360,14 +385,15 @@ addIcons({
     }
 
     .stat-label {
-      font-size: 0.875rem;
-      color: var(--ion-color-medium);
+      font-size: 13px;
+      color: var(--fitos-text-secondary, #A3A3A3);
     }
 
     .stat-value {
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: var(--ion-color-dark);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ion-color-primary, #10B981);
+      font-family: 'Space Mono', monospace;
     }
   `]
 })

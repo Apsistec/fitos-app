@@ -87,7 +87,7 @@ interface WeeklyAverage {
     IonSegmentButton,
   ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-title>Nutrition</ion-title>
         <ion-button slot="end" fill="clear" (click)="navigateToAddFood()" aria-label="Add food">
@@ -371,6 +371,27 @@ interface WeeklyAverage {
     </ion-content>
   `,
   styles: [`
+    ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    ion-segment {
+      --background: var(--fitos-bg-tertiary, #262626);
+    }
+
+    ion-segment-button {
+      --indicator-color: var(--ion-color-primary, #10B981);
+      --color: var(--fitos-text-secondary, #A3A3A3);
+      --color-checked: var(--ion-color-primary, #10B981);
+    }
+
     .nutrition-container {
       padding: 16px;
       max-width: 800px;
@@ -390,12 +411,14 @@ interface WeeklyAverage {
 
     .loading-state p {
       margin-top: 16px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
+      font-size: 14px;
     }
 
     .error-message {
-      color: var(--ion-color-danger);
+      color: #FCA5A5;
       margin-bottom: 16px;
+      font-size: 14px;
     }
 
     .card-header-row {
@@ -405,11 +428,20 @@ interface WeeklyAverage {
       gap: 8px;
     }
 
+    ion-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      margin: 0 0 16px 0;
+    }
+
     ion-card-title {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 1.1rem;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
       flex: 1;
     }
 
@@ -421,8 +453,8 @@ interface WeeklyAverage {
 
     .macro-card {
       padding: 16px;
-      background: var(--ion-color-light);
-      border-radius: 12px;
+      background: var(--fitos-bg-tertiary, #262626);
+      border-radius: 10px;
     }
 
     .macro-header {
@@ -433,28 +465,29 @@ interface WeeklyAverage {
     }
 
     .macro-label {
-      font-size: 0.875rem;
+      font-size: 11px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-tertiary, #737373);
     }
 
     .macro-target {
-      font-size: 0.75rem;
-      color: var(--ion-color-medium);
+      font-size: 12px;
+      color: var(--fitos-text-tertiary, #737373);
     }
 
     .macro-value {
-      font-size: 2rem;
+      font-size: 28px;
       font-weight: 700;
       line-height: 1;
       margin-bottom: 12px;
+      font-family: 'Space Mono', monospace;
     }
 
     .progress-bar {
       height: 8px;
-      background: var(--ion-color-light-shade);
+      background: rgba(255, 255, 255, 0.06);
       border-radius: 4px;
       overflow: hidden;
       margin-bottom: 8px;
@@ -464,13 +497,14 @@ interface WeeklyAverage {
       height: 100%;
       transition: width 0.3s ease;
       max-width: 100%;
+      border-radius: 4px;
     }
 
     .encouragement {
       display: block;
-      font-size: 0.75rem;
+      font-size: 12px;
       font-style: italic;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-tertiary, #737373);
       margin-top: 4px;
     }
 
@@ -480,18 +514,20 @@ interface WeeklyAverage {
 
     .no-data {
       text-align: center;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
       padding: 32px 16px;
       margin: 0;
+      font-size: 14px;
     }
 
     ion-list {
       padding: 0;
+      background: transparent;
     }
 
     .food-entry {
       padding: 12px 0;
-      border-bottom: 1px solid var(--ion-color-light);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
       cursor: pointer;
     }
 
@@ -504,9 +540,9 @@ interface WeeklyAverage {
     }
 
     .entry-name {
-      font-size: 0.938rem;
-      font-weight: 500;
-      color: var(--ion-color-dark);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--fitos-text-primary, #F5F5F5);
       margin-bottom: 4px;
     }
 
@@ -517,30 +553,32 @@ interface WeeklyAverage {
     }
 
     .macro-chip {
-      font-size: 0.75rem;
+      font-size: 12px;
       padding: 4px 8px;
-      background: var(--ion-color-light-shade);
-      border-radius: 4px;
-      color: var(--ion-color-dark);
+      background: var(--fitos-bg-tertiary, #262626);
+      border-radius: 6px;
+      color: var(--fitos-text-primary, #F5F5F5);
+      font-family: 'Space Mono', monospace;
+      font-weight: 600;
     }
 
     .weekly-info {
       margin-bottom: 16px;
       padding: 12px;
-      background: var(--ion-color-primary-tint);
+      background: rgba(16, 185, 129, 0.1);
       border-radius: 8px;
     }
 
     .weekly-info ion-note {
-      color: var(--ion-color-primary-contrast);
-      font-size: 0.875rem;
+      color: var(--ion-color-primary, #10B981);
+      font-size: 13px;
     }
 
     .context-message {
       margin: 0;
       line-height: 1.6;
-      color: var(--ion-color-medium);
-      font-size: 0.875rem;
+      color: var(--fitos-text-secondary, #A3A3A3);
+      font-size: 13px;
     }
   `],
 })

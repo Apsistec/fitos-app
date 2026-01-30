@@ -59,7 +59,7 @@ import { WorkoutService } from '../../../../core/services/workout.service';
     IonCheckbox
   ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/tabs/workouts"></ion-back-button>
@@ -236,6 +236,17 @@ import { WorkoutService } from '../../../../core/services/workout.service';
     </ion-content>
   `,
   styles: [`
+    ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     .assign-container {
       padding: 16px;
       max-width: 600px;
@@ -253,50 +264,76 @@ import { WorkoutService } from '../../../../core/services/workout.service';
 
     .loading-container p {
       margin-top: 16px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
+      font-size: 14px;
     }
 
     .workout-meta {
       margin-top: 8px;
       padding-top: 8px;
-      border-top: 1px solid var(--ion-color-light);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 13px;
     }
 
     ion-list {
       margin: 16px 0;
+      background: transparent;
     }
 
     ion-item {
       --padding-start: 0;
       --inner-padding-end: 0;
+      --background: transparent;
+      --border-color: rgba(255, 255, 255, 0.06);
     }
 
     ion-datetime {
       margin-top: 8px;
+      --background: var(--fitos-bg-tertiary, #262626);
+      border-radius: 12px;
     }
 
     .summary-card {
       margin-top: 24px;
-      background: var(--ion-color-light);
+      --background: var(--fitos-bg-tertiary, #262626);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
     }
 
     .summary-item {
       display: flex;
       justify-content: space-between;
       padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .summary-item:last-child {
+      border-bottom: none;
     }
 
     .summary-item .label {
       font-weight: 600;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-tertiary, #737373);
+      font-size: 13px;
     }
 
     .summary-item .value {
-      font-weight: 500;
+      font-weight: 600;
+      color: var(--fitos-text-primary, #F5F5F5);
+      font-size: 14px;
     }
 
     ion-card {
       margin: 12px 0;
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+    }
+
+    ion-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
     }
   `]
 })

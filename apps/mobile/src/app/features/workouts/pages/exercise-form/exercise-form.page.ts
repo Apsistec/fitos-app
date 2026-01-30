@@ -96,7 +96,7 @@ const COMMON_EQUIPMENT = [
     IonIcon,
   ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/tabs/workouts/exercises"></ion-back-button>
@@ -269,6 +269,17 @@ const COMMON_EQUIPMENT = [
     </ion-content>
   `,
   styles: [`
+    ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     .form-container {
       max-width: 600px;
       margin: 0 auto;
@@ -283,7 +294,8 @@ const COMMON_EQUIPMENT = [
 
       p {
         margin-top: 16px;
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-secondary, #A3A3A3);
+        font-size: 14px;
       }
     }
 
@@ -298,16 +310,34 @@ const COMMON_EQUIPMENT = [
       }
     }
 
+    ion-input, ion-textarea, ion-select {
+      --background: var(--fitos-bg-tertiary, #262626);
+      --border-radius: 8px;
+      --highlight-color-focused: var(--ion-color-primary, #10B981);
+      font-size: 16px;
+    }
+
     .error-message {
       display: block;
       padding: 12px;
       margin-bottom: 16px;
       border-radius: 8px;
-      background: rgba(var(--ion-color-danger-rgb), 0.1);
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: #FCA5A5;
+      font-size: 14px;
     }
 
     .form-actions {
       margin-top: 24px;
+    }
+
+    .form-actions ion-button {
+      --border-radius: 8px;
+      height: 48px;
+      font-weight: 700;
+      font-size: 16px;
+      --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
     }
   `],
 })

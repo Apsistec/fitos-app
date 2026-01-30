@@ -106,8 +106,8 @@ import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
     .photo-capture {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-4);
-      padding: var(--fitos-space-4);
+      gap: 16px;
+      padding: 16px;
     }
 
     .camera-placeholder {
@@ -116,26 +116,26 @@ import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
       align-items: center;
       justify-content: center;
       min-height: 300px;
-      background: var(--fitos-bg-tertiary);
-      border-radius: var(--fitos-radius-lg);
-      border: 2px dashed var(--fitos-border-default);
+      background: var(--fitos-bg-tertiary, #262626);
+      border-radius: 12px;
+      border: 2px dashed rgba(255, 255, 255, 0.06);
 
       ion-icon {
         font-size: 80px;
-        color: var(--fitos-text-tertiary);
-        margin-bottom: var(--fitos-space-4);
+        color: var(--fitos-text-tertiary, #737373);
+        margin-bottom: 16px;
       }
 
       p {
         margin: 0;
-        font-size: var(--fitos-text-lg);
-        color: var(--fitos-text-secondary);
+        font-size: 16px;
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
     }
 
     .photo-preview {
       position: relative;
-      border-radius: var(--fitos-radius-lg);
+      border-radius: 12px;
       overflow: hidden;
 
       img {
@@ -158,7 +158,7 @@ import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: all var(--fitos-duration-fast);
+        transition: all 150ms ease;
 
         ion-icon {
           font-size: 24px;
@@ -179,37 +179,45 @@ import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
     .action-buttons {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-3);
+      gap: 12px;
+
+      ion-button {
+        --border-radius: 8px;
+        height: 48px;
+        font-weight: 700;
+        --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+      }
     }
 
     .processing-state {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: var(--fitos-space-3);
-      padding: var(--fitos-space-4);
-      background: var(--fitos-bg-tertiary);
-      border-radius: var(--fitos-radius-md);
+      gap: 12px;
+      padding: 16px;
+      background: var(--fitos-bg-tertiary, #262626);
+      border-radius: 8px;
 
       ion-spinner {
-        --color: var(--fitos-accent-primary);
+        --color: var(--ion-color-primary, #10B981);
       }
 
       span {
-        font-size: var(--fitos-text-base);
-        color: var(--fitos-text-secondary);
+        font-size: 14px;
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
     }
 
     .error-card {
       --background: rgba(239, 68, 68, 0.1);
-      border: 1px solid var(--fitos-status-error);
+      border: 1px solid #EF4444;
+      border-radius: 12px;
       margin: 0;
 
       .error-text {
-        margin: 0 0 var(--fitos-space-3);
-        color: var(--fitos-status-error);
-        font-size: var(--fitos-text-sm);
+        margin: 0 0 12px;
+        color: #FCA5A5;
+        font-size: 13px;
       }
     }
   `],

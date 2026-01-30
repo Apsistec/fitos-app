@@ -81,7 +81,7 @@ addIcons({
     FoodConfirmationComponent,
   ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/tabs/nutrition"></ion-back-button>
@@ -254,23 +254,33 @@ addIcons({
     </ion-content>
   `,
   styles: [`
+    ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     .tabs-container {
       padding: 12px 16px;
-      background: var(--ion-background-color);
-      border-bottom: 1px solid var(--fitos-border-subtle);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
       position: sticky;
       top: 0;
       z-index: 10;
     }
 
     ion-segment {
-      --background: var(--fitos-bg-secondary);
+      --background: var(--fitos-bg-tertiary, #262626);
     }
 
     ion-segment-button {
-      --indicator-color: var(--fitos-accent-primary);
-      --color: var(--fitos-text-secondary);
-      --color-checked: var(--fitos-accent-primary);
+      --indicator-color: var(--ion-color-primary, #10B981);
+      --color: var(--fitos-text-secondary, #A3A3A3);
+      --color-checked: var(--ion-color-primary, #10B981);
       min-height: 48px;
     }
 
@@ -286,12 +296,11 @@ addIcons({
 
     .search-container {
       padding: 12px 16px 0 16px;
-      background: var(--ion-background-color);
     }
 
     .voice-container,
     .photo-container {
-      padding: var(--fitos-space-6);
+      padding: 32px;
       max-width: 600px;
       margin: 0 auto;
     }
@@ -299,7 +308,7 @@ addIcons({
     .photo-capture {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-4);
+      gap: 16px;
       align-items: center;
     }
 
@@ -307,37 +316,42 @@ addIcons({
       width: 100%;
       max-width: 300px;
       height: 56px;
-      font-size: var(--fitos-text-lg);
+      font-size: 16px;
+      --border-radius: 8px;
+      font-weight: 700;
+      --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
     }
 
     .error-message {
-      color: var(--fitos-status-error);
+      color: #FCA5A5;
       text-align: center;
-      padding: var(--fitos-space-3);
-      background: var(--fitos-bg-tertiary);
-      border-radius: var(--fitos-radius-md);
+      padding: 12px;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: 8px;
+      font-size: 14px;
     }
 
     .photo-info {
       text-align: center;
-      color: var(--fitos-text-secondary);
+      color: var(--fitos-text-secondary, #A3A3A3);
       max-width: 400px;
     }
 
     .photo-info p {
-      margin: 0 0 var(--fitos-space-4) 0;
-      font-size: var(--fitos-text-base);
+      margin: 0 0 16px 0;
+      font-size: 14px;
     }
 
     .photo-info ul {
       text-align: left;
       margin: 0;
-      padding-left: var(--fitos-space-6);
+      padding-left: 24px;
     }
 
     .photo-info li {
-      margin: var(--fitos-space-2) 0;
-      font-size: var(--fitos-text-sm);
+      margin: 8px 0;
+      font-size: 13px;
     }
 
     .loading-container,
@@ -354,12 +368,8 @@ addIcons({
 
     .loading-container p {
       margin-top: 16px;
-      color: var(--ion-color-medium);
-    }
-
-    .error-message {
-      color: var(--ion-color-danger);
-      margin-bottom: 16px;
+      color: var(--fitos-text-secondary, #A3A3A3);
+      font-size: 14px;
     }
 
     .empty-state {
@@ -367,19 +377,18 @@ addIcons({
     }
 
     .empty-icon {
-      font-size: 80px;
-      color: var(--ion-color-medium);
-      opacity: 0.5;
+      font-size: 48px;
+      color: var(--fitos-text-tertiary, #737373);
     }
 
     .empty-state p {
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
       margin: 0;
-      font-size: 1.1rem;
+      font-size: 14px;
     }
 
     .empty-subtitle {
-      font-size: 0.9rem !important;
+      font-size: 13px !important;
     }
 
     .results-container {
@@ -389,17 +398,21 @@ addIcons({
     ion-list {
       padding: 0;
       margin: 0;
+      background: transparent;
     }
 
     ion-card {
       margin: 0 0 12px 0;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      transition: transform 150ms ease, box-shadow 150ms ease;
     }
 
     ion-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 24px rgba(16, 185, 129, 0.08);
     }
 
     .food-header {
@@ -415,8 +428,9 @@ addIcons({
     }
 
     ion-card-title {
-      font-size: 1rem;
-      font-weight: 600;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
       margin: 0 0 4px 0;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -426,8 +440,8 @@ addIcons({
     }
 
     .food-info ion-note {
-      font-size: 0.875rem;
-      color: var(--ion-color-medium);
+      font-size: 13px;
+      color: var(--fitos-text-tertiary, #737373);
     }
 
     ion-badge {
@@ -436,6 +450,7 @@ addIcons({
       gap: 4px;
       padding: 6px 10px;
       flex-shrink: 0;
+      font-family: 'Space Mono', monospace;
     }
 
     ion-badge ion-icon {
@@ -447,8 +462,8 @@ addIcons({
     }
 
     .serving-info ion-note {
-      font-size: 0.875rem;
-      color: var(--ion-color-medium);
+      font-size: 13px;
+      color: var(--fitos-text-tertiary, #737373);
     }
 
     .macros-grid {
@@ -459,20 +474,25 @@ addIcons({
 
     .macro-item {
       text-align: center;
+      padding: 8px;
+      background: var(--fitos-bg-tertiary, #262626);
+      border-radius: 8px;
     }
 
     .macro-label {
-      font-size: 0.75rem;
-      color: var(--ion-color-medium);
+      font-size: 11px;
+      color: var(--fitos-text-tertiary, #737373);
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-bottom: 4px;
+      font-weight: 500;
     }
 
     .macro-value {
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: var(--ion-color-dark);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
+      font-family: 'Space Mono', monospace;
     }
   `]
 })

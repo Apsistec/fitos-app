@@ -204,8 +204,8 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
     .voice-nutrition {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
-      padding: 1rem;
+      gap: 16px;
+      padding: 16px;
       width: 100%;
       max-width: 600px;
       margin: 0 auto;
@@ -215,8 +215,8 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 1.5rem;
-      padding: 2rem 1rem;
+      gap: 24px;
+      padding: 32px 16px;
     }
 
     .mic-container {
@@ -236,7 +236,7 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all var(--fitos-duration-normal) var(--fitos-ease-default);
+      transition: all 200ms ease;
 
       ion-icon {
         font-size: 48px;
@@ -244,13 +244,13 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
       }
 
       &.idle {
-        background: var(--fitos-bg-tertiary);
-        color: var(--fitos-text-primary);
+        background: var(--fitos-bg-tertiary, #262626);
+        color: var(--fitos-text-primary, #F5F5F5);
 
         &:hover {
-          background: var(--fitos-bg-elevated);
+          background: #333333;
           transform: scale(1.05);
-          box-shadow: var(--fitos-glow-primary);
+          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
         }
 
         &:active {
@@ -259,9 +259,9 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
       }
 
       &.listening {
-        background: var(--fitos-accent-primary);
+        background: var(--ion-color-primary, #10B981);
         color: white;
-        box-shadow: var(--fitos-glow-primary);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
 
         ion-icon.pulse {
           animation: pulse 1.5s ease-in-out infinite;
@@ -269,8 +269,8 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
       }
 
       &.processing {
-        background: var(--fitos-bg-tertiary);
-        color: var(--fitos-text-secondary);
+        background: var(--fitos-bg-tertiary, #262626);
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
     }
 
@@ -279,7 +279,7 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
       width: 96px;
       height: 96px;
       border-radius: 50%;
-      border: 2px solid var(--fitos-accent-primary);
+      border: 2px solid var(--ion-color-primary, #10B981);
       opacity: 0;
       animation: ripple 2s ease-out infinite;
 
@@ -319,23 +319,23 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
     }
 
     .transcript {
-      background: var(--fitos-bg-secondary);
-      border: 1px solid var(--fitos-border-subtle);
-      border-radius: var(--fitos-radius-lg);
-      padding: 1rem;
+      background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 16px;
 
       .label {
-        font-size: 0.75rem;
+        font-size: 12px;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.5px;
         display: block;
-        margin-bottom: 0.5rem;
+        margin-bottom: 8px;
       }
 
       .transcript-text {
-        font-size: 1rem;
+        font-size: 16px;
         line-height: 1.5;
-        color: var(--fitos-text-primary);
+        color: var(--fitos-text-primary, #F5F5F5);
         margin: 0;
         font-weight: 500;
       }
@@ -343,27 +343,28 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
     .instructions {
       h3 {
-        margin: 0 0 1rem 0;
-        color: var(--fitos-text-primary);
-        font-size: 1.25rem;
+        margin: 0 0 16px 0;
+        color: var(--fitos-text-primary, #F5F5F5);
+        font-size: 20px;
+        font-weight: 700;
       }
 
       p {
-        margin: 0.5rem 0;
-        color: var(--fitos-text-secondary);
-        font-size: 0.875rem;
+        margin: 8px 0;
+        color: var(--fitos-text-secondary, #A3A3A3);
+        font-size: 14px;
       }
     }
 
     .listening-prompt {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      font-size: 1rem;
+      gap: 8px;
+      font-size: 16px;
       animation: fade-in 0.3s ease-in;
 
       .prompt-icon {
-        font-size: 1.25rem;
+        font-size: 20px;
         animation: pulse 1.5s ease-in-out infinite;
       }
     }
@@ -371,21 +372,21 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
     .error-container {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1rem;
+      gap: 8px;
+      padding: 12px 16px;
       background: rgba(239, 68, 68, 0.1);
-      border: 1px solid var(--fitos-status-error);
-      border-radius: var(--fitos-radius-md);
+      border: 1px solid #EF4444;
+      border-radius: 8px;
 
       ion-icon {
-        font-size: 1.25rem;
+        font-size: 20px;
       }
     }
 
     .foods-section {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 16px;
     }
 
     .section-header {
@@ -395,8 +396,9 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
       h3 {
         margin: 0;
-        color: var(--fitos-text-primary);
-        font-size: 1.25rem;
+        color: var(--fitos-text-primary, #F5F5F5);
+        font-size: 20px;
+        font-weight: 700;
       }
     }
 
@@ -406,11 +408,13 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
     }
 
     .food-card {
-      margin: 0 0 1rem 0;
-      border: 1px solid var(--fitos-border-default);
+      margin: 0 0 16px 0;
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
 
       &.low-confidence {
-        border-color: var(--fitos-status-warning);
+        border-color: #F59E0B;
       }
     }
 
@@ -424,15 +428,17 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
       flex: 1;
 
       ion-card-title {
-        font-size: 1.125rem;
-        margin-bottom: 0.25rem;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
+        margin-bottom: 4px;
       }
 
       .serving-info {
-        font-size: 0.875rem;
+        font-size: 14px;
 
         .brand {
-          color: var(--fitos-text-tertiary);
+          color: var(--fitos-text-tertiary, #737373);
         }
       }
     }
@@ -440,69 +446,72 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
     .icon-button {
       background: transparent;
       border: none;
-      padding: 0.5rem;
+      padding: 8px;
       cursor: pointer;
-      border-radius: var(--fitos-radius-md);
+      border-radius: 8px;
 
       &:hover {
-        background: var(--fitos-bg-tertiary);
+        background: var(--fitos-bg-tertiary, #262626);
       }
 
       ion-icon {
-        font-size: 1.25rem;
+        font-size: 20px;
       }
     }
 
     .confidence-warning {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      margin-top: 0.5rem;
-      padding: 0.5rem;
+      gap: 8px;
+      margin-top: 8px;
+      padding: 8px;
       background: rgba(245, 158, 11, 0.1);
-      border-radius: var(--fitos-radius-sm);
-      font-size: 0.75rem;
-      color: var(--fitos-status-warning);
+      border-radius: 6px;
+      font-size: 12px;
+      color: #F59E0B;
 
       ion-icon {
-        font-size: 1rem;
+        font-size: 16px;
       }
     }
 
     .macros-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
+      gap: 16px;
       text-align: center;
     }
 
     .macro-item {
       display: flex;
       flex-direction: column;
-      gap: 0.25rem;
+      gap: 4px;
     }
 
     .macro-value {
-      font-family: var(--fitos-font-mono);
-      font-size: 1.25rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 20px;
       font-weight: 700;
 
-      &.calories { color: var(--fitos-nutrition-calories); }
-      &.protein { color: var(--fitos-nutrition-protein); }
-      &.carbs { color: var(--fitos-nutrition-carbs); }
-      &.fat { color: var(--fitos-nutrition-fat); }
+      &.calories { color: #6366F1; }
+      &.protein { color: #22C55E; }
+      &.carbs { color: #F59E0B; }
+      &.fat { color: #EC4899; }
     }
 
     .macro-label {
-      font-size: 0.75rem;
-      color: var(--fitos-text-tertiary);
+      font-size: 12px;
+      color: var(--fitos-text-tertiary, #737373);
       text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 500;
     }
 
     .totals-card {
       margin: 0;
-      background: var(--fitos-bg-tertiary);
-      border: 1px solid var(--fitos-border-default);
+      --background: var(--fitos-bg-tertiary, #262626);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
     }
 
     .totals-row {
@@ -513,22 +522,29 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
     .totals-label {
       font-weight: 600;
-      color: var(--fitos-text-primary);
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .totals-macros {
       display: flex;
-      gap: 1rem;
-      font-family: var(--fitos-font-mono);
+      gap: 16px;
+      font-family: 'Space Mono', monospace;
       font-weight: 600;
     }
 
     .total-item {
-      color: var(--fitos-text-primary);
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .confirm-button {
-      margin-top: 0.5rem;
+      margin-top: 8px;
+
+      &::part(native) {
+        --border-radius: 8px;
+        height: 48px;
+        font-weight: 700;
+        --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+      }
     }
 
     @keyframes fade-in {

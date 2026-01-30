@@ -76,7 +76,7 @@ interface ExerciseProgress {
     VoiceLoggerComponent
   ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/tabs/dashboard"></ion-back-button>
@@ -252,10 +252,22 @@ interface ExerciseProgress {
     </ion-content>
   `,
   styles: [`
+    ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     .workout-progress {
       display: flex;
       justify-content: space-between;
       padding: 8px 16px;
+      font-size: 13px;
     }
 
     .workout-container {
@@ -275,11 +287,15 @@ interface ExerciseProgress {
 
     .loading-container p {
       margin-top: 16px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
+      font-size: 14px;
     }
 
     .exercise-card {
       margin: 0 0 80px 0;
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
     }
 
     .exercise-header {
@@ -289,13 +305,19 @@ interface ExerciseProgress {
       gap: 12px;
     }
 
+    ion-card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
+    }
+
     .exercise-meta {
       display: flex;
       gap: 24px;
       margin: 16px 0;
       padding: 12px 0;
-      border-top: 1px solid var(--ion-color-light);
-      border-bottom: 1px solid var(--ion-color-light);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .meta-item {
@@ -305,14 +327,17 @@ interface ExerciseProgress {
     }
 
     .meta-item .label {
-      font-size: 0.8rem;
-      color: var(--ion-color-medium);
+      font-size: 12px;
+      color: var(--fitos-text-tertiary, #737373);
       font-weight: 600;
+      text-transform: uppercase;
     }
 
     .meta-item .value {
-      font-size: 1rem;
-      font-weight: 500;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--fitos-text-primary, #F5F5F5);
+      font-family: 'Space Mono', monospace;
     }
 
     .set-indicator {
@@ -322,50 +347,69 @@ interface ExerciseProgress {
 
     .set-indicator h3 {
       margin: 0;
-      font-size: 1.5rem;
+      font-size: 22px;
+      font-weight: 700;
     }
 
     .log-form {
       margin: 16px 0;
+      background: transparent;
     }
 
     .log-form ion-item {
       --padding-start: 0;
       --inner-padding-end: 0;
+      --background: transparent;
+    }
+
+    ion-input {
+      --background: var(--fitos-bg-tertiary, #262626);
+      --border-radius: 8px;
+      --highlight-color-focused: var(--ion-color-primary, #10B981);
+      font-size: 16px;
     }
 
     .log-button {
       margin: 24px 0 16px 0;
+      --border-radius: 8px;
+      height: 48px;
+      font-weight: 700;
+      font-size: 16px;
+      --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
     }
 
     .logged-sets {
       margin-top: 24px;
       padding-top: 16px;
-      border-top: 2px solid var(--ion-color-light);
+      border-top: 2px solid rgba(255, 255, 255, 0.08);
     }
 
     .logged-sets h4 {
       margin: 0 0 12px 0;
-      font-size: 0.9rem;
-      color: var(--ion-color-medium);
+      font-size: 12px;
+      color: var(--fitos-text-tertiary, #737373);
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      font-weight: 600;
     }
 
     .set-row {
       display: flex;
       justify-content: space-between;
       padding: 8px 0;
-      border-bottom: 1px solid var(--ion-color-light);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     }
 
     .set-number {
       font-weight: 600;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-tertiary, #737373);
+      font-size: 13px;
     }
 
     .set-data {
-      font-size: 0.9rem;
+      font-size: 14px;
+      color: var(--fitos-text-primary, #F5F5F5);
+      font-family: 'Space Mono', monospace;
     }
 
     .exercise-nav {
@@ -377,14 +421,16 @@ interface ExerciseProgress {
     .exercise-nav ion-button {
       flex: 1;
       margin: 0;
+      --border-radius: 8px;
+      font-weight: 600;
     }
 
     .voice-logger-container {
       margin: 24px 0;
       padding: 16px;
-      background: var(--fitos-bg-tertiary);
-      border-radius: var(--fitos-radius-lg);
-      border: 1px solid var(--fitos-border-subtle);
+      background: var(--fitos-bg-tertiary, #262626);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }
   `]
 })

@@ -1,3 +1,12 @@
+ion-card {
+  margin: 0;
+  max-width: 800px;
+  width: 100%;
+  --background: var(--fitos-bg-secondary, #1A1A1A);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+}
+
 .card-header-content {
   display: flex;
   align-items: center;
@@ -5,7 +14,13 @@
 
   ion-card-title {
     margin: 0;
-    color: var(--fitos-text-primary);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--fitos-text-primary, #F5F5F5);
+  }
+
+  ion-button {
+    --color: var(--ion-color-primary, #10B981);
   }
 }
 
@@ -17,26 +32,34 @@
   ion-icon {
     font-size: 48px;
     margin-bottom: 12px;
-    color: var(--fitos-text-tertiary);
+    color: var(--fitos-text-tertiary, #737373);
   }
 
   p {
     margin: 0 0 12px 0;
-    color: var(--fitos-text-secondary);
+    font-size: 14px;
+    color: var(--fitos-text-secondary, #A3A3A3);
   }
 
   small {
     display: block;
     margin-top: 4px;
-    color: var(--fitos-text-tertiary);
+    font-size: 12px;
+    color: var(--fitos-text-tertiary, #737373);
+  }
+
+  ion-button {
+    --border-radius: 8px;
+    --border-color: rgba(255, 255, 255, 0.1);
+    font-weight: 600;
   }
 }
 
 .data-container {
   .data-date {
     text-align: center;
-    font-size: 0.875rem;
-    color: var(--fitos-text-secondary);
+    font-size: 13px;
+    color: var(--fitos-text-secondary, #A3A3A3);
     margin-bottom: 20px;
     font-weight: 500;
   }
@@ -45,7 +68,7 @@
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  gap: 12px;
   margin-bottom: 16px;
 
   @media (min-width: 576px) {
@@ -58,14 +81,13 @@
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: var(--fitos-bg-tertiary);
-  border-radius: var(--fitos-radius-md);
-  border: 1px solid var(--fitos-border-subtle);
+  background: var(--fitos-bg-tertiary, #262626);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
 
   ion-icon {
-    font-size: 32px;
+    font-size: 28px;
     flex-shrink: 0;
-    color: var(--fitos-accent-primary);
   }
 
   .metric-content {
@@ -74,26 +96,27 @@
   }
 
   .metric-value {
-    font-family: var(--fitos-font-mono);
-    font-size: 1.25rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 18px;
     font-weight: 600;
-    color: var(--fitos-text-primary);
+    color: var(--fitos-text-primary, #F5F5F5);
     line-height: 1.2;
 
     .unit {
-      font-size: 0.75rem;
+      font-size: 12px;
       font-weight: 400;
-      color: var(--fitos-text-tertiary);
+      color: var(--fitos-text-tertiary, #737373);
       margin-left: 2px;
     }
   }
 
   .metric-label {
-    font-size: 0.75rem;
-    color: var(--fitos-text-tertiary);
+    font-size: 11px;
+    color: var(--fitos-text-tertiary, #737373);
     margin-top: 2px;
     text-transform: uppercase;
     letter-spacing: 0.03em;
+    font-weight: 500;
   }
 }
 
@@ -101,12 +124,13 @@
   text-align: center;
   padding: 12px;
   background: rgba(245, 158, 11, 0.1);
-  border-left: 3px solid var(--fitos-status-warning);
-  border-radius: var(--fitos-radius-sm);
+  border-left: 3px solid #F59E0B;
+  border-radius: 6px;
   margin-top: 16px;
 
   small {
     line-height: 1.5;
-    color: var(--fitos-text-secondary);
+    font-size: 12px;
+    color: var(--fitos-text-secondary, #A3A3A3);
   }
 }

@@ -11,7 +11,6 @@ import {
   IonInputPasswordToggle,
   IonSpinner,
   IonIcon,
-  IonNote,
   IonBackButton,
   IonButtons,
   AlertController,
@@ -38,12 +37,11 @@ import { passwordComplexityValidator, capitalizeWords, checkPasswordRequirements
     IonInputPasswordToggle,
     IonSpinner,
     IonIcon,
-    IonNote,
     IonBackButton,
     IonButtons,
   ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/auth/register"></ion-back-button>
@@ -52,27 +50,33 @@ import { passwordComplexityValidator, capitalizeWords, checkPasswordRequirements
       </ion-toolbar>
     </ion-header>
 
-    <ion-content class="ion-padding">
+    <ion-content>
       <div class="register-container">
         <!-- Header -->
         <div class="register-header">
-          <div class="logo">
-            <ion-icon name="fitness-outline" color="primary"></ion-icon>
+          <div class="icon-wrap">
+            <ion-icon name="fitness-outline"></ion-icon>
           </div>
           <h1>Become a FitOS Trainer</h1>
           <p class="subtitle">Create programs, track clients, and grow your business</p>
         </div>
 
+        <!-- Role Badge -->
+        <div class="role-badge">
+          <ion-icon name="fitness-outline"></ion-icon>
+          <span>Trainer</span>
+        </div>
+
         <!-- Error Message -->
         @if (errorMessage()) {
-          <ion-note color="danger" class="error-message">
+          <div class="message message--error">
             {{ errorMessage() }}
-          </ion-note>
+          </div>
         }
 
         <!-- Registration Form -->
-        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-          <div class="form-fields">
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+          <div class="form-group">
             <ion-input
               formControlName="fullName"
               type="text"
@@ -82,14 +86,15 @@ import { passwordComplexityValidator, capitalizeWords, checkPasswordRequirements
               placeholder="John Doe"
               autocomplete="name"
               autocapitalize="words"
-              helperText="Your name as it will appear to clients"
               [errorText]="fullNameError()"
               [class.ion-valid]="registerForm.get('fullName')?.valid && registerForm.get('fullName')?.touched"
               [class.ion-invalid]="registerForm.get('fullName')?.invalid && registerForm.get('fullName')?.touched"
               [class.ion-touched]="registerForm.get('fullName')?.touched"
               (ionBlur)="capitalizeFullName()"
             />
+          </div>
 
+          <div class="form-group">
             <ion-input
               formControlName="email"
               type="email"
@@ -98,13 +103,14 @@ import { passwordComplexityValidator, capitalizeWords, checkPasswordRequirements
               fill="outline"
               placeholder="you@example.com"
               autocomplete="email"
-              helperText="We'll use this for account verification"
               [errorText]="emailError()"
               [class.ion-valid]="registerForm.get('email')?.valid && registerForm.get('email')?.touched"
               [class.ion-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
               [class.ion-touched]="registerForm.get('email')?.touched"
             />
+          </div>
 
+          <div class="form-group">
             <ion-input
               formControlName="password"
               type="password"
@@ -123,33 +129,35 @@ import { passwordComplexityValidator, capitalizeWords, checkPasswordRequirements
             >
               <ion-input-password-toggle slot="end" />
             </ion-input>
+          </div>
 
-            <!-- Password Requirements -->
-            @if (passwordValue()) {
-              <div class="password-requirements">
-                <div class="requirement" [class.met]="passwordRequirements().minLength">
-                  <ion-icon [name]="passwordRequirements().minLength ? 'checkmark-circle' : 'close-circle'"></ion-icon>
-                  <span>At least 8 characters</span>
-                </div>
-                <div class="requirement" [class.met]="passwordRequirements().hasUppercase">
-                  <ion-icon [name]="passwordRequirements().hasUppercase ? 'checkmark-circle' : 'close-circle'"></ion-icon>
-                  <span>One uppercase letter</span>
-                </div>
-                <div class="requirement" [class.met]="passwordRequirements().hasLowercase">
-                  <ion-icon [name]="passwordRequirements().hasLowercase ? 'checkmark-circle' : 'close-circle'"></ion-icon>
-                  <span>One lowercase letter</span>
-                </div>
-                <div class="requirement" [class.met]="passwordRequirements().hasNumber">
-                  <ion-icon [name]="passwordRequirements().hasNumber ? 'checkmark-circle' : 'close-circle'"></ion-icon>
-                  <span>One number</span>
-                </div>
-                <div class="requirement" [class.met]="passwordRequirements().hasSpecial">
-                  <ion-icon [name]="passwordRequirements().hasSpecial ? 'checkmark-circle' : 'close-circle'"></ion-icon>
-                  <span>One special character (!&#64;#$%^&*)</span>
-                </div>
+          <!-- Password Requirements -->
+          @if (passwordValue()) {
+            <div class="password-requirements">
+              <div class="requirement" [class.met]="passwordRequirements().minLength">
+                <ion-icon [name]="passwordRequirements().minLength ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+                <span>At least 8 characters</span>
               </div>
-            }
+              <div class="requirement" [class.met]="passwordRequirements().hasUppercase">
+                <ion-icon [name]="passwordRequirements().hasUppercase ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+                <span>One uppercase letter</span>
+              </div>
+              <div class="requirement" [class.met]="passwordRequirements().hasLowercase">
+                <ion-icon [name]="passwordRequirements().hasLowercase ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+                <span>One lowercase letter</span>
+              </div>
+              <div class="requirement" [class.met]="passwordRequirements().hasNumber">
+                <ion-icon [name]="passwordRequirements().hasNumber ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+                <span>One number</span>
+              </div>
+              <div class="requirement" [class.met]="passwordRequirements().hasSpecial">
+                <ion-icon [name]="passwordRequirements().hasSpecial ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+                <span>One special character (!&#64;#$%^&*)</span>
+              </div>
+            </div>
+          }
 
+          <div class="form-group">
             <ion-input
               formControlName="confirmPassword"
               type="password"
@@ -173,6 +181,7 @@ import { passwordComplexityValidator, capitalizeWords, checkPasswordRequirements
             expand="block"
             type="submit"
             [disabled]="registerForm.invalid || isSubmitting()"
+            class="submit-btn"
           >
             @if (isSubmitting()) {
               <ion-spinner name="crescent"></ion-spinner>
@@ -184,7 +193,9 @@ import { passwordComplexityValidator, capitalizeWords, checkPasswordRequirements
 
         <!-- Divider -->
         <div class="divider">
-          <span>or sign up with</span>
+          <div class="divider__line"></div>
+          <span class="divider__text">or sign up with</span>
+          <div class="divider__line"></div>
         </div>
 
         <!-- Social Sign Up -->
@@ -192,8 +203,10 @@ import { passwordComplexityValidator, capitalizeWords, checkPasswordRequirements
           <ion-button
             expand="block"
             fill="outline"
+            color="medium"
             (click)="signUpWithGoogle()"
             [disabled]="isSubmitting() || isSigningUpWithGoogle()"
+            class="social-btn"
           >
             @if (isSigningUpWithGoogle()) {
               <ion-spinner name="crescent"></ion-spinner>
@@ -206,8 +219,9 @@ import { passwordComplexityValidator, capitalizeWords, checkPasswordRequirements
           <ion-button
             expand="block"
             fill="outline"
-            color="dark"
+            color="medium"
             disabled
+            class="social-btn"
           >
             <ion-icon name="logo-apple" slot="start"></ion-icon>
             Continue with Apple (Coming Soon)
@@ -234,103 +248,180 @@ import { passwordComplexityValidator, capitalizeWords, checkPasswordRequirements
     </ion-content>
   `,
   styles: [`
+    ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     .register-container {
       max-width: 400px;
       margin: 0 auto;
+      padding: 16px 24px 32px;
     }
 
     .register-header {
       text-align: center;
       margin-bottom: 24px;
 
-      .logo {
-        ion-icon {
-          font-size: 56px;
-        }
-      }
-
       h1 {
-        margin: 16px 0 8px;
-        font-size: 1.5rem;
+        margin: 0 0 8px;
+        font-size: 24px;
         font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       .subtitle {
         margin: 0;
-        color: var(--ion-color-medium);
-        font-size: 0.9rem;
+        font-size: 14px;
+        color: var(--fitos-text-secondary, #A3A3A3);
+        line-height: 1.5;
       }
     }
 
-    .error-message {
-      display: block;
-      padding: 12px;
-      margin-bottom: 16px;
-      border-radius: 8px;
-      background: rgba(var(--ion-color-danger-rgb), 0.1);
+    .icon-wrap {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(16, 185, 129, 0.1);
+      margin: 0 auto 16px;
+
+      ion-icon {
+        font-size: 28px;
+        color: var(--ion-color-primary, #10B981);
+      }
     }
 
-    .form-fields {
-      margin-bottom: 24px;
+    .role-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      width: fit-content;
+      margin: 0 auto 24px;
 
+      ion-icon {
+        color: var(--ion-color-primary, #10B981);
+        font-size: 16px;
+      }
+
+      span {
+        color: var(--ion-color-primary, #10B981);
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+
+    .message {
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .message--error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: #FCA5A5;
+    }
+
+    .register-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-group {
       ion-input {
-        margin-bottom: 16px;
+        --background: var(--fitos-bg-tertiary, #262626);
+        --border-radius: 8px;
+        --highlight-color-focused: var(--ion-color-primary, #10B981);
+        --border-color: transparent;
+        font-size: 16px;
       }
     }
 
     .password-requirements {
       padding: 12px 16px;
-      margin-bottom: 16px;
-      background: var(--ion-color-light);
+      background: var(--fitos-bg-secondary, #1A1A1A);
       border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
 
       .requirement {
         display: flex;
         align-items: center;
         gap: 8px;
-        font-size: 0.8rem;
-        color: var(--ion-color-danger);
-        margin-bottom: 4px;
+        font-size: 13px;
+        color: var(--fitos-text-tertiary, #737373);
+        margin-bottom: 6px;
 
-        &:last-child {
-          margin-bottom: 0;
-        }
+        &:last-child { margin-bottom: 0; }
 
-        ion-icon {
-          font-size: 16px;
-        }
+        ion-icon { font-size: 16px; }
 
         &.met {
-          color: var(--ion-color-success);
+          color: var(--ion-color-primary, #10B981);
         }
       }
+    }
+
+    .submit-btn {
+      margin-top: 8px;
+      --border-radius: 8px;
+      height: 48px;
+      font-weight: 700;
+      font-size: 16px;
+      --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
     }
 
     .divider {
       display: flex;
       align-items: center;
-      margin: 24px 0;
+      padding: 24px 0;
+    }
 
-      &::before,
-      &::after {
-        content: '';
-        flex: 1;
-        height: 1px;
-        background: var(--ion-color-light-shade);
-      }
+    .divider__line {
+      flex: 1;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+    }
 
-      span {
-        padding: 0 16px;
-        color: var(--ion-color-medium);
-        font-size: 0.875rem;
-      }
+    .divider__text {
+      padding: 0 16px;
+      color: var(--fitos-text-tertiary, #737373);
+      font-size: 14px;
+      font-weight: 500;
     }
 
     .social-buttons {
       display: flex;
       flex-direction: column;
       gap: 12px;
-      margin-bottom: 16px;
+    }
+
+    .social-btn {
+      --border-radius: 8px;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --background: transparent;
+      --color: var(--fitos-text-primary, #F5F5F5);
+      height: 48px;
+      font-weight: 500;
+      font-size: 14px;
     }
 
     .terms {
@@ -338,13 +429,14 @@ import { passwordComplexityValidator, capitalizeWords, checkPasswordRequirements
       text-align: center;
 
       p {
-        font-size: 0.75rem;
-        color: var(--ion-color-medium);
+        font-size: 12px;
+        color: var(--fitos-text-tertiary, #737373);
         margin: 0;
+        line-height: 1.5;
       }
 
       a {
-        color: var(--ion-color-primary);
+        color: var(--ion-color-primary, #10B981);
         text-decoration: none;
       }
     }
@@ -355,13 +447,15 @@ import { passwordComplexityValidator, capitalizeWords, checkPasswordRequirements
 
       p {
         margin: 0;
-        color: var(--ion-color-medium);
+        font-size: 14px;
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
 
       a {
-        color: var(--ion-color-primary);
+        color: var(--ion-color-primary, #10B981);
         text-decoration: none;
-        font-weight: 600;
+        font-weight: 500;
+        margin-left: 4px;
       }
     }
   `],

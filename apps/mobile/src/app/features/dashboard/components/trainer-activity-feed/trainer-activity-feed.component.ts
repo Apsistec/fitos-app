@@ -83,28 +83,46 @@ export interface ActivityItem {
       margin: 0;
       max-width: 800px;
       width: 100%;
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+
+      ion-card-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
+      }
     }
 
     .header-content {
       display: flex;
       justify-content: space-between;
       align-items: center;
+
+      ion-button {
+        --color: var(--ion-color-primary, #10B981);
+        font-size: 13px;
+        font-weight: 600;
+      }
     }
 
     .activity-list {
-      margin: 0 -1rem;
+      margin: 0 -16px;
+      background: transparent;
     }
 
     .activity-item {
-      --padding-start: 1rem;
-      --padding-end: 1rem;
+      --padding-start: 16px;
+      --padding-end: 16px;
+      --background: transparent;
+      --border-color: rgba(255, 255, 255, 0.06);
     }
 
     .activity-avatar {
       width: 40px;
       height: 40px;
       position: relative;
-      margin-right: 1rem;
+      margin-right: 12px;
 
       img,
       .avatar-placeholder {
@@ -113,14 +131,18 @@ export interface ActivityItem {
         border-radius: 50%;
       }
 
+      img {
+        object-fit: cover;
+      }
+
       .avatar-placeholder {
         display: flex;
         align-items: center;
         justify-content: center;
-        background: var(--ion-color-primary);
+        background: var(--ion-color-primary, #10B981);
         color: white;
         font-weight: 600;
-        font-size: 0.85rem;
+        font-size: 14px;
       }
     }
 
@@ -134,75 +156,82 @@ export interface ActivityItem {
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 2px solid var(--ion-card-background, white);
+      border: 2px solid var(--fitos-bg-secondary, #1A1A1A);
 
       ion-icon {
-        font-size: 12px;
+        font-size: 10px;
         color: white;
       }
 
       &.type-workout_completed {
-        background: var(--ion-color-success);
+        background: var(--ion-color-primary, #10B981);
       }
 
       &.type-progress_photo {
-        background: var(--ion-color-tertiary);
+        background: var(--ion-color-tertiary, #8B5CF6);
       }
 
       &.type-checkin {
-        background: var(--ion-color-primary);
+        background: #3B82F6;
       }
 
       &.type-milestone {
-        background: var(--ion-color-warning);
+        background: #F59E0B;
       }
 
       &.type-payment {
-        background: var(--ion-color-secondary);
+        background: #EC4899;
       }
     }
 
     ion-label {
       h3 {
         font-weight: 600;
-        margin-bottom: 0.25rem;
+        font-size: 14px;
+        color: var(--fitos-text-primary, #F5F5F5);
+        margin-bottom: 4px;
       }
 
       p {
-        color: var(--ion-color-medium);
-        font-size: 0.85rem;
+        color: var(--fitos-text-secondary, #A3A3A3);
+        font-size: 13px;
         white-space: normal;
-        margin-bottom: 0.25rem;
+        margin-bottom: 4px;
       }
 
       ion-note {
-        font-size: 0.75rem;
+        font-size: 12px;
+        color: var(--fitos-text-tertiary, #737373);
       }
     }
 
     .activity-value {
-      font-weight: 600;
-      color: var(--ion-color-primary);
-      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--ion-color-primary, #10B981);
+      font-size: 14px;
+      font-family: 'Space Mono', monospace;
     }
 
     .empty-state {
       text-align: center;
-      padding: 2rem 1rem;
+      padding: 32px 16px;
 
       .empty-icon {
-        font-size: 4rem;
-        color: var(--ion-color-medium);
-        margin-bottom: 1rem;
+        font-size: 48px;
+        color: var(--fitos-text-tertiary, #737373);
+        margin-bottom: 16px;
       }
 
       h3 {
-        margin: 0 0 0.5rem 0;
-        color: var(--ion-color-dark);
+        margin: 0 0 8px 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       p {
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-secondary, #A3A3A3);
+        font-size: 14px;
         margin: 0;
       }
     }

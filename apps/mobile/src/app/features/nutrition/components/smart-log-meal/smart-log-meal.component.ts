@@ -366,32 +366,37 @@ export interface MacroProgress {
     .smart-meal-container {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-4);
+      gap: 16px;
     }
 
     .card-header-with-icon {
       display: flex;
       align-items: center;
-      gap: var(--fitos-space-2);
+      gap: 8px;
 
       ion-icon {
         font-size: 24px;
-        color: var(--fitos-accent-primary);
+        color: var(--ion-color-primary, #10B981);
       }
 
       ion-card-title {
         margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
     }
 
     .macro-progress-card {
-      background: linear-gradient(135deg, var(--fitos-bg-secondary) 0%, var(--fitos-bg-tertiary) 100%);
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
     }
 
     .macro-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: var(--fitos-space-4);
+      gap: 16px;
     }
 
     .macro-item {
@@ -399,58 +404,67 @@ export interface MacroProgress {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: var(--fitos-space-2);
+        margin-bottom: 8px;
 
         .macro-label {
-          font-size: var(--fitos-text-sm);
+          font-size: 13px;
           font-weight: 600;
-          color: var(--fitos-text-secondary);
+          color: var(--fitos-text-secondary, #A3A3A3);
         }
 
         .macro-value {
-          font-size: var(--fitos-text-sm);
+          font-size: 13px;
           font-weight: 700;
-          color: var(--fitos-text-primary);
+          color: var(--fitos-text-primary, #F5F5F5);
+          font-family: 'Space Mono', monospace;
         }
       }
 
       ion-progress-bar {
         height: 6px;
-        border-radius: var(--fitos-radius-full);
-        margin-bottom: var(--fitos-space-1);
+        border-radius: 9999px;
+        margin-bottom: 4px;
       }
 
       .macro-remaining {
-        font-size: var(--fitos-text-xs);
-        color: var(--fitos-text-tertiary);
+        font-size: 11px;
+        color: var(--fitos-text-tertiary, #737373);
       }
     }
 
     ion-segment {
-      --background: var(--fitos-bg-tertiary);
-      margin: var(--fitos-space-4) 0;
+      --background: var(--fitos-bg-tertiary, #262626);
+      margin: 16px 0;
 
       ion-segment-button {
-        --indicator-color: var(--fitos-accent-primary);
-        --color: var(--fitos-text-secondary);
-        --color-checked: var(--fitos-accent-primary);
+        --indicator-color: var(--ion-color-primary, #10B981);
+        --color: var(--fitos-text-secondary, #A3A3A3);
+        --color-checked: var(--ion-color-primary, #10B981);
         min-height: 40px;
-        font-size: var(--fitos-text-sm);
+        font-size: 13px;
       }
     }
 
     .templates-card,
     .suggestions-card {
-      border: 1px solid var(--fitos-border-subtle);
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+
+      ion-card-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
+      }
     }
 
     .template-item {
-      padding: var(--fitos-space-4);
-      background: var(--fitos-bg-tertiary);
-      border-radius: var(--fitos-radius-lg);
-      margin-bottom: var(--fitos-space-3);
+      padding: 16px;
+      background: var(--fitos-bg-tertiary, #262626);
+      border-radius: 12px;
+      margin-bottom: 12px;
       cursor: pointer;
-      transition: all var(--fitos-duration-fast);
+      transition: all 150ms ease;
 
       &:last-child {
         margin-bottom: 0;
@@ -458,35 +472,36 @@ export interface MacroProgress {
 
       &:active {
         transform: scale(0.98);
-        background: var(--fitos-bg-secondary);
+        background: var(--fitos-bg-secondary, #1A1A1A);
       }
 
       .template-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: var(--fitos-space-2);
+        margin-bottom: 8px;
 
         h3 {
           margin: 0;
-          font-size: var(--fitos-text-lg);
+          font-size: 16px;
           font-weight: 600;
-          color: var(--fitos-text-primary);
+          color: var(--fitos-text-primary, #F5F5F5);
         }
       }
 
       .template-macros {
         display: flex;
-        gap: var(--fitos-space-2);
-        margin-bottom: var(--fitos-space-3);
+        gap: 8px;
+        margin-bottom: 12px;
 
         .macro-chip {
-          padding: var(--fitos-space-1) var(--fitos-space-2);
-          background: var(--fitos-bg-secondary);
-          border-radius: var(--fitos-radius-sm);
-          font-size: var(--fitos-text-xs);
+          padding: 4px 8px;
+          background: var(--fitos-bg-primary, #0D0D0D);
+          border-radius: 6px;
+          font-size: 12px;
           font-weight: 600;
-          color: var(--fitos-text-secondary);
+          color: var(--fitos-text-secondary, #A3A3A3);
+          font-family: 'Space Mono', monospace;
         }
       }
 
@@ -494,21 +509,21 @@ export interface MacroProgress {
       .template-tags {
         display: flex;
         flex-wrap: wrap;
-        gap: var(--fitos-space-1);
-        margin-top: var(--fitos-space-2);
+        gap: 4px;
+        margin-top: 8px;
 
         ion-chip {
           margin: 0;
-          font-size: var(--fitos-text-xs);
+          font-size: 12px;
         }
       }
     }
 
     .suggestion-item {
-      padding: var(--fitos-space-4);
-      background: var(--fitos-bg-tertiary);
-      border-radius: var(--fitos-radius-lg);
-      margin-bottom: var(--fitos-space-3);
+      padding: 16px;
+      background: var(--fitos-bg-tertiary, #262626);
+      border-radius: 12px;
+      margin-bottom: 12px;
 
       &:last-child {
         margin-bottom: 0;
@@ -518,82 +533,83 @@ export interface MacroProgress {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: var(--fitos-space-2);
+        margin-bottom: 8px;
 
         h3 {
           margin: 0;
-          font-size: var(--fitos-text-lg);
+          font-size: 16px;
           font-weight: 600;
-          color: var(--fitos-text-primary);
+          color: var(--fitos-text-primary, #F5F5F5);
           flex: 1;
         }
 
         .suggestion-badges {
           display: flex;
-          gap: var(--fitos-space-1);
+          gap: 4px;
           flex-wrap: wrap;
 
           ion-badge {
-            font-size: var(--fitos-text-xs);
+            font-size: 12px;
           }
         }
       }
 
       .suggestion-quantity {
-        margin-bottom: var(--fitos-space-3);
+        margin-bottom: 12px;
 
         span {
-          font-size: var(--fitos-text-base);
+          font-size: 14px;
           font-weight: 600;
-          color: var(--fitos-text-secondary);
+          color: var(--fitos-text-secondary, #A3A3A3);
         }
       }
 
       .suggestion-macros {
         display: flex;
-        gap: var(--fitos-space-3);
+        gap: 12px;
         flex-wrap: wrap;
-        margin-bottom: var(--fitos-space-3);
+        margin-bottom: 12px;
 
         .macro-display {
           display: flex;
           align-items: center;
-          gap: var(--fitos-space-1);
+          gap: 4px;
 
           .macro-label {
-            font-size: var(--fitos-text-sm);
+            font-size: 13px;
             font-weight: 600;
-            color: var(--fitos-text-secondary);
+            color: var(--fitos-text-secondary, #A3A3A3);
           }
 
           .macro-value {
-            font-size: var(--fitos-text-base);
+            font-size: 14px;
             font-weight: 700;
-            color: var(--fitos-text-primary);
+            color: var(--fitos-text-primary, #F5F5F5);
+            font-family: 'Space Mono', monospace;
           }
         }
       }
 
       .suggestion-reason {
         display: flex;
-        gap: var(--fitos-space-2);
-        padding: var(--fitos-space-3);
-        background: rgba(var(--ion-color-primary-rgb), 0.1);
-        border-radius: var(--fitos-radius-md);
-        margin-bottom: var(--fitos-space-3);
+        gap: 8px;
+        padding: 12px;
+        background: rgba(16, 185, 129, 0.1);
+        border-radius: 8px;
+        margin-bottom: 12px;
 
         ion-icon {
           font-size: 16px;
-          color: var(--ion-color-primary);
+          color: var(--ion-color-primary, #10B981);
           flex-shrink: 0;
           margin-top: 2px;
         }
 
         p {
           margin: 0;
-          font-size: var(--fitos-text-sm);
+          font-size: 13px;
           line-height: 1.5;
-          color: var(--fitos-text-primary);
+          color: var(--fitos-text-primary, #F5F5F5);
         }
       }
     }
@@ -601,11 +617,18 @@ export interface MacroProgress {
     .quick-actions {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-2);
-      margin-top: var(--fitos-space-4);
+      gap: 8px;
+      margin-top: 16px;
 
       ion-button {
         margin: 0;
+        --border-radius: 8px;
+        height: 48px;
+        font-weight: 700;
+      }
+
+      ion-button:first-child {
+        --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
       }
     }
   `],

@@ -56,7 +56,7 @@ addIcons({ barbellOutline, timeOutline, calendarOutline, trophyOutline });
     IonList
 ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/tabs/dashboard"></ion-back-button>
@@ -167,6 +167,17 @@ addIcons({ barbellOutline, timeOutline, calendarOutline, trophyOutline });
     </ion-content>
   `,
   styles: [`
+    ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     .loading-container,
     .error-container,
     .empty-state {
@@ -181,12 +192,14 @@ addIcons({ barbellOutline, timeOutline, calendarOutline, trophyOutline });
 
     .loading-container p {
       margin-top: 16px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
+      font-size: 14px;
     }
 
     .error-message {
-      color: var(--ion-color-danger);
+      color: #FCA5A5;
       margin-bottom: 16px;
+      font-size: 14px;
     }
 
     .empty-state {
@@ -194,19 +207,18 @@ addIcons({ barbellOutline, timeOutline, calendarOutline, trophyOutline });
     }
 
     .empty-icon {
-      font-size: 80px;
-      color: var(--ion-color-medium);
-      opacity: 0.5;
+      font-size: 48px;
+      color: var(--fitos-text-tertiary, #737373);
     }
 
     .empty-state p {
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
       margin: 0;
-      font-size: 1.1rem;
+      font-size: 14px;
     }
 
     .empty-subtitle {
-      font-size: 0.9rem !important;
+      font-size: 13px !important;
     }
 
     .history-container {
@@ -222,13 +234,14 @@ addIcons({ barbellOutline, timeOutline, calendarOutline, trophyOutline });
       align-items: center;
       gap: 16px;
       padding: 20px;
-      background: var(--ion-color-light);
+      background: var(--fitos-bg-secondary, #1A1A1A);
       border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .stat-card ion-icon {
-      font-size: 40px;
-      color: var(--ion-color-primary);
+      font-size: 36px;
+      color: var(--ion-color-primary, #10B981);
     }
 
     .stat-content {
@@ -236,32 +249,38 @@ addIcons({ barbellOutline, timeOutline, calendarOutline, trophyOutline });
     }
 
     .stat-value {
-      font-size: 2rem;
+      font-size: 28px;
       font-weight: 700;
-      color: var(--ion-color-dark);
+      color: var(--fitos-text-primary, #F5F5F5);
       line-height: 1;
+      font-family: 'Space Mono', monospace;
     }
 
     .stat-label {
-      font-size: 0.875rem;
-      color: var(--ion-color-medium);
+      font-size: 13px;
+      color: var(--fitos-text-tertiary, #737373);
       margin-top: 4px;
+      font-weight: 500;
     }
 
     ion-list {
       padding: 0;
       margin: 0;
+      background: transparent;
     }
 
     ion-card {
       margin: 0 0 12px 0;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      transition: transform 150ms ease, box-shadow 150ms ease;
     }
 
     ion-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 24px rgba(16, 185, 129, 0.08);
     }
 
     .card-header {
@@ -272,8 +291,9 @@ addIcons({ barbellOutline, timeOutline, calendarOutline, trophyOutline });
     }
 
     ion-card-title {
-      font-size: 1.1rem;
-      font-weight: 600;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
       margin: 0;
       flex: 1;
     }
@@ -289,23 +309,23 @@ addIcons({ barbellOutline, timeOutline, calendarOutline, trophyOutline });
       display: flex;
       align-items: center;
       gap: 6px;
-      font-size: 0.875rem;
-      color: var(--ion-color-medium);
+      font-size: 13px;
+      color: var(--fitos-text-secondary, #A3A3A3);
     }
 
     .detail-item ion-icon {
-      font-size: 18px;
+      font-size: 16px;
     }
 
     .workout-notes {
       margin-top: 12px;
       padding-top: 12px;
-      border-top: 1px solid var(--ion-color-light);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .workout-notes p {
-      font-size: 0.875rem;
-      color: var(--ion-color-dark);
+      font-size: 13px;
+      color: var(--fitos-text-secondary, #A3A3A3);
       margin: 0;
       font-style: italic;
     }
@@ -317,6 +337,10 @@ addIcons({ barbellOutline, timeOutline, calendarOutline, trophyOutline });
 
     .load-more ion-button {
       margin: 0;
+      --border-radius: 8px;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --color: var(--fitos-text-primary, #F5F5F5);
+      font-weight: 600;
     }
   `]
 })

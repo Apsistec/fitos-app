@@ -50,7 +50,7 @@ import { AICoachService } from '@app/core/services/ai-coach.service';
     IonRefresherContent,
   ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/tabs/messages"></ion-back-button>

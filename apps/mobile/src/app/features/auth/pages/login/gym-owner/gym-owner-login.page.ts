@@ -9,11 +9,8 @@ import {
   IonButton,
   IonInput,
   IonInputPasswordToggle,
-  IonItem,
-  IonList,
   IonSpinner,
   IonIcon,
-  IonNote,
   IonBackButton,
   IonButtons,
   ToastController,
@@ -35,17 +32,14 @@ import { AuthService } from '@app/core/services/auth.service';
     IonButton,
     IonInput,
     IonInputPasswordToggle,
-    IonItem,
-    IonList,
     IonSpinner,
     IonIcon,
-    IonNote,
     IonBackButton,
     IonButtons,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/auth/login"></ion-back-button>
@@ -54,20 +48,17 @@ import { AuthService } from '@app/core/services/auth.service';
       </ion-toolbar>
     </ion-header>
 
-    <ion-content class="ion-padding">
+    <ion-content>
       <div class="login-container">
-        <!-- Logo and Title -->
-        <div class="login-header">
-          <div class="logo">
-            <ion-icon name="business-outline" color="primary"></ion-icon>
-          </div>
-          <h1>Welcome, Gym Owner</h1>
-          <p class="subtitle">Sign in to manage your facility and staff</p>
+        <!-- Role Badge -->
+        <div class="role-badge">
+          <ion-icon name="business-outline"></ion-icon>
+          <span>Gym Owner</span>
         </div>
 
         <!-- Error Message -->
         @if (errorMessage()) {
-          <ion-note color="danger" class="error-message">
+          <div class="message message--error">
             {{ errorMessage() }}
             @if (showResendLink()) {
               <br><br>
@@ -79,49 +70,45 @@ import { AuthService } from '@app/core/services/auth.service';
                 }
               </a>
             }
-          </ion-note>
+          </div>
         }
 
         <!-- Success Message -->
         @if (successMessage()) {
-          <ion-note color="success" class="success-message">
+          <div class="message message--success">
             {{ successMessage() }}
-          </ion-note>
+          </div>
         }
 
         <!-- Login Form -->
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-          <ion-list lines="none">
-            <ion-item lines="none">
-              <ion-input
-                formControlName="email"
-                type="email"
-                label="Email"
-                labelPlacement="floating"
-                fill="outline"
-                placeholder="you@example.com"
-                autocomplete="email"
-                helperText="Enter your business email"
-                [errorText]="emailError()"
-              />
-            </ion-item>
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+          <div class="form-group">
+            <ion-input
+              formControlName="email"
+              type="email"
+              label="Email Address"
+              labelPlacement="floating"
+              fill="outline"
+              placeholder="you@example.com"
+              autocomplete="email"
+              [errorText]="emailError()"
+            />
+          </div>
 
-            <ion-item lines="none">
-              <ion-input
-                formControlName="password"
-                type="password"
-                label="Password"
-                labelPlacement="floating"
-                fill="outline"
-                placeholder="Enter your password"
-                autocomplete="current-password"
-                helperText="Your account password"
-                [errorText]="passwordError()"
-              >
-                <ion-input-password-toggle slot="end" />
-              </ion-input>
-            </ion-item>
-          </ion-list>
+          <div class="form-group">
+            <ion-input
+              formControlName="password"
+              type="password"
+              label="Password"
+              labelPlacement="floating"
+              fill="outline"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              [errorText]="passwordError()"
+            >
+              <ion-input-password-toggle slot="end" />
+            </ion-input>
+          </div>
 
           <div class="forgot-password">
             <a routerLink="/auth/forgot-password">Forgot password?</a>
@@ -131,18 +118,21 @@ import { AuthService } from '@app/core/services/auth.service';
             expand="block"
             type="submit"
             [disabled]="loginForm.invalid || loading()"
+            class="submit-btn"
           >
             @if (loading()) {
               <ion-spinner name="crescent"></ion-spinner>
             } @else {
-              Sign In
+              Log In
             }
           </ion-button>
         </form>
 
         <!-- Divider -->
         <div class="divider">
-          <span>or continue with</span>
+          <div class="divider__line"></div>
+          <span class="divider__text">or</span>
+          <div class="divider__line"></div>
         </div>
 
         <!-- Social Login -->
@@ -150,29 +140,32 @@ import { AuthService } from '@app/core/services/auth.service';
           <ion-button
             expand="block"
             fill="outline"
+            color="medium"
             (click)="signInWithGoogle()"
             [disabled]="loading()"
+            class="social-btn"
           >
             <ion-icon name="logo-google" slot="start"></ion-icon>
-            Google
+            Continue with Google
           </ion-button>
 
           <ion-button
             expand="block"
             fill="outline"
-            color="dark"
+            color="medium"
             (click)="signInWithApple()"
             [disabled]="loading()"
+            class="social-btn"
           >
             <ion-icon name="logo-apple" slot="start"></ion-icon>
-            Apple
+            Continue with Apple
           </ion-button>
         </div>
 
         <!-- Sign Up Link -->
         <div class="signup-link">
           <p>
-            New gym owner?
+            Don't have an account?
             <a routerLink="/auth/register/gym-owner">Register your gym</a>
           </p>
         </div>
@@ -180,98 +173,134 @@ import { AuthService } from '@app/core/services/auth.service';
     </ion-content>
   `,
   styles: [`
+    ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     .login-container {
       max-width: 400px;
       margin: 0 auto;
-      padding-top: 24px;
+      padding: 16px 24px 32px;
+      display: flex;
+      flex-direction: column;
     }
 
-    .login-header {
-      text-align: center;
-      margin-bottom: 32px;
+    .role-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      width: fit-content;
+      margin: 0 auto 40px;
 
-      .logo {
-        ion-icon {
-          font-size: 64px;
-        }
+      ion-icon {
+        color: var(--fitos-accent-secondary, #8B5CF6);
+        font-size: 18px;
       }
 
-      h1 {
-        margin: 16px 0 8px;
-        font-size: 1.5rem;
-        font-weight: 700;
-      }
-
-      .subtitle {
-        margin: 0;
-        color: var(--ion-color-medium);
-        font-size: 0.9rem;
+      span {
+        color: var(--fitos-accent-secondary, #8B5CF6);
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
     }
 
-    .error-message {
-      display: block;
-      padding: 12px;
-      margin-bottom: 16px;
+    .message {
+      padding: 12px 16px;
+      margin-bottom: 20px;
       border-radius: 8px;
-      background: rgba(var(--ion-color-danger-rgb), 0.1);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .message--error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: #FCA5A5;
 
       .resend-link {
-        color: var(--ion-color-primary);
+        color: var(--ion-color-primary, #10B981);
         text-decoration: underline;
         cursor: pointer;
       }
     }
 
-    .success-message {
-      display: block;
-      padding: 12px;
-      margin-bottom: 16px;
-      border-radius: 8px;
-      background: rgba(var(--ion-color-success-rgb), 0.1);
+    .message--success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: #6EE7B7;
     }
 
-    ion-list {
-      background: transparent;
-      margin-bottom: 16px;
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
 
-      ion-item {
-        --background: transparent;
-        --padding-start: 0;
-        --inner-padding-end: 0;
-        margin-bottom: 16px;
+    .form-group {
+      ion-input {
+        --background: var(--fitos-bg-tertiary, #262626);
+        --border-radius: 8px;
+        --highlight-color-focused: var(--ion-color-primary, #10B981);
+        --border-color: transparent;
+        font-size: 16px;
       }
     }
 
     .forgot-password {
       text-align: right;
-      margin-bottom: 24px;
+      margin-top: -4px;
 
       a {
-        color: var(--ion-color-primary);
+        color: var(--ion-color-primary, #10B981);
         text-decoration: none;
-        font-size: 0.875rem;
+        font-size: 14px;
+        font-weight: 500;
+        transition: opacity 0.2s;
+
+        &:hover { opacity: 0.8; }
       }
+    }
+
+    .submit-btn {
+      margin-top: 8px;
+      --border-radius: 8px;
+      height: 48px;
+      font-weight: 700;
+      font-size: 16px;
+      --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
     }
 
     .divider {
       display: flex;
       align-items: center;
-      margin: 24px 0;
+      padding: 28px 0;
+    }
 
-      &::before,
-      &::after {
-        content: '';
-        flex: 1;
-        height: 1px;
-        background: var(--ion-color-light-shade);
-      }
+    .divider__line {
+      flex: 1;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+    }
 
-      span {
-        padding: 0 16px;
-        color: var(--ion-color-medium);
-        font-size: 0.875rem;
-      }
+    .divider__text {
+      padding: 0 16px;
+      color: var(--fitos-text-tertiary, #737373);
+      font-size: 14px;
+      font-weight: 500;
     }
 
     .social-buttons {
@@ -280,19 +309,33 @@ import { AuthService } from '@app/core/services/auth.service';
       gap: 12px;
     }
 
+    .social-btn {
+      --border-radius: 8px;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --background: transparent;
+      --color: var(--fitos-text-primary, #F5F5F5);
+      height: 48px;
+      font-weight: 500;
+      font-size: 14px;
+
+      &:hover { --background: rgba(255, 255, 255, 0.05); }
+    }
+
     .signup-link {
       text-align: center;
       margin-top: 32px;
 
       p {
         margin: 0;
-        color: var(--ion-color-medium);
+        font-size: 14px;
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
 
       a {
-        color: var(--ion-color-primary);
+        color: var(--ion-color-primary, #10B981);
         text-decoration: none;
-        font-weight: 600;
+        font-weight: 700;
+        margin-left: 4px;
       }
     }
   `],

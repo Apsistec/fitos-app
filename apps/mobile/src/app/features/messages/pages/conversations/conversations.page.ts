@@ -44,7 +44,7 @@ import { MessagingService, type Conversation } from '@app/core/services/messagin
     IonNote,
   ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-title>Messages</ion-title>
       </ion-toolbar>

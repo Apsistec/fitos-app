@@ -8,11 +8,8 @@ import {
   IonToolbar,
   IonButton,
   IonInput,
-  IonItem,
-  IonList,
   IonSpinner,
   IonIcon,
-  IonNote,
   IonSelect,
   IonSelectOption,
   IonTextarea,
@@ -38,81 +35,78 @@ import { SupabaseService } from '@app/core/services/supabase.service';
     IonToolbar,
     IonButton,
     IonInput,
-    IonItem,
-    IonList,
     IonSpinner,
     IonIcon,
-    IonNote,
     IonSelect,
     IonSelectOption,
     IonTextarea,
     IonProgressBar,
   ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-title>Complete Your Profile</ion-title>
       </ion-toolbar>
       <ion-progress-bar [value]="progressValue()"></ion-progress-bar>
     </ion-header>
 
-    <ion-content class="ion-padding">
+    <ion-content>
       <div class="onboarding-container">
         <!-- Step 1: Basic Info -->
         @if (currentStep() === 1) {
           <div class="step-header">
-            <h2>Welcome to FitOS! 👋</h2>
+            <div class="icon-wrap">
+              <ion-icon name="checkmark-circle"></ion-icon>
+            </div>
+            <h2>Welcome to FitOS</h2>
             <p>Let's set up your profile.</p>
           </div>
 
-          <form [formGroup]="profileForm">
-            <ion-list lines="none">
-              <ion-item lines="none">
-                <ion-input
-                  formControlName="fullName"
-                  type="text"
-                  label="Full Name"
-                  labelPlacement="floating"
-                  fill="outline"
-                  placeholder="John Doe"
-                  helperText="Enter your full name"
-                  [errorText]="fullNameError()"
-                />
-              </ion-item>
+          <form [formGroup]="profileForm" class="onboarding-form">
+            <div class="form-group">
+              <ion-input
+                formControlName="fullName"
+                type="text"
+                label="Full Name"
+                labelPlacement="floating"
+                fill="outline"
+                placeholder="John Doe"
+                [errorText]="fullNameError()"
+              />
+            </div>
 
-              <ion-item lines="none">
-                <ion-select
-                  formControlName="timezone"
-                  label="Timezone"
-                  labelPlacement="floating"
-                  fill="outline"
-                  placeholder="Select your timezone"
-                  interface="action-sheet"
-                >
-                  <ion-select-option value="America/New_York">Eastern Time</ion-select-option>
-                  <ion-select-option value="America/Chicago">Central Time</ion-select-option>
-                  <ion-select-option value="America/Denver">Mountain Time</ion-select-option>
-                  <ion-select-option value="America/Los_Angeles">Pacific Time</ion-select-option>
-                  <ion-select-option value="America/Phoenix">Arizona Time</ion-select-option>
-                  <ion-select-option value="Pacific/Honolulu">Hawaii Time</ion-select-option>
-                  <ion-select-option value="Europe/London">London</ion-select-option>
-                  <ion-select-option value="Europe/Paris">Paris</ion-select-option>
-                </ion-select>
-              </ion-item>
+            <div class="form-group">
+              <ion-select
+                formControlName="timezone"
+                label="Timezone"
+                labelPlacement="floating"
+                fill="outline"
+                placeholder="Select your timezone"
+                interface="action-sheet"
+              >
+                <ion-select-option value="America/New_York">Eastern Time</ion-select-option>
+                <ion-select-option value="America/Chicago">Central Time</ion-select-option>
+                <ion-select-option value="America/Denver">Mountain Time</ion-select-option>
+                <ion-select-option value="America/Los_Angeles">Pacific Time</ion-select-option>
+                <ion-select-option value="America/Phoenix">Arizona Time</ion-select-option>
+                <ion-select-option value="Pacific/Honolulu">Hawaii Time</ion-select-option>
+                <ion-select-option value="Europe/London">London</ion-select-option>
+                <ion-select-option value="Europe/Paris">Paris</ion-select-option>
+              </ion-select>
+            </div>
 
-              <ion-item lines="none">
-                <ion-select
-                  formControlName="unitsSystem"
-                  label="Units"
-                  labelPlacement="floating"
-                  fill="outline"
-                  interface="popover"
-                >
-                  <ion-select-option value="imperial">Imperial (lbs, ft)</ion-select-option>
-                  <ion-select-option value="metric">Metric (kg, cm)</ion-select-option>
-                </ion-select>
-              </ion-item>
-            </ion-list>
+            <div class="form-group">
+              <ion-select
+                formControlName="unitsSystem"
+                label="Units"
+                labelPlacement="floating"
+                fill="outline"
+                interface="popover"
+              >
+                <ion-select-option value="imperial">Imperial (lbs, ft)</ion-select-option>
+                <ion-select-option value="metric">Metric (kg, cm)</ion-select-option>
+              </ion-select>
+            </div>
           </form>
         }
 
@@ -123,57 +117,53 @@ import { SupabaseService } from '@app/core/services/supabase.service';
             <p>Help clients learn about you.</p>
           </div>
 
-          <form [formGroup]="trainerForm">
-            <ion-list lines="none">
-              <ion-item lines="none">
-                <ion-input
-                  formControlName="businessName"
-                  type="text"
-                  label="Business Name"
-                  labelPlacement="floating"
-                  fill="outline"
-                  placeholder="Your Fitness Business"
-                  helperText="Optional - Your business or brand name"
-                />
-              </ion-item>
+          <form [formGroup]="trainerForm" class="onboarding-form">
+            <div class="form-group">
+              <ion-input
+                formControlName="businessName"
+                type="text"
+                label="Business Name"
+                labelPlacement="floating"
+                fill="outline"
+                placeholder="Your Fitness Business"
+              />
+            </div>
 
-              <ion-item lines="none">
-                <ion-textarea
-                  formControlName="bio"
-                  label="About You"
-                  labelPlacement="floating"
-                  fill="outline"
-                  placeholder="Tell clients about yourself..."
-                  helperText="Share your experience and training philosophy"
-                  [autoGrow]="true"
-                  rows="4"
-                  [counter]="true"
-                  [maxlength]="500"
-                />
-              </ion-item>
+            <div class="form-group">
+              <ion-textarea
+                formControlName="bio"
+                label="About You"
+                labelPlacement="floating"
+                fill="outline"
+                placeholder="Tell clients about yourself..."
+                [autoGrow]="true"
+                rows="4"
+                [counter]="true"
+                [maxlength]="500"
+              />
+            </div>
 
-              <ion-item lines="none">
-                <ion-select
-                  formControlName="specializations"
-                  label="Specializations"
-                  labelPlacement="floating"
-                  fill="outline"
-                  placeholder="Select your specialties"
-                  [multiple]="true"
-                  interface="alert"
-                >
-                  <ion-select-option value="strength">Strength Training</ion-select-option>
-                  <ion-select-option value="weight_loss">Weight Loss</ion-select-option>
-                  <ion-select-option value="bodybuilding">Bodybuilding</ion-select-option>
-                  <ion-select-option value="athletic">Athletic Performance</ion-select-option>
-                  <ion-select-option value="rehabilitation">Rehabilitation</ion-select-option>
-                  <ion-select-option value="nutrition">Nutrition Coaching</ion-select-option>
-                  <ion-select-option value="mobility">Mobility & Flexibility</ion-select-option>
-                  <ion-select-option value="seniors">Senior Fitness</ion-select-option>
-                  <ion-select-option value="youth">Youth Training</ion-select-option>
-                </ion-select>
-              </ion-item>
-            </ion-list>
+            <div class="form-group">
+              <ion-select
+                formControlName="specializations"
+                label="Specializations"
+                labelPlacement="floating"
+                fill="outline"
+                placeholder="Select your specialties"
+                [multiple]="true"
+                interface="alert"
+              >
+                <ion-select-option value="strength">Strength Training</ion-select-option>
+                <ion-select-option value="weight_loss">Weight Loss</ion-select-option>
+                <ion-select-option value="bodybuilding">Bodybuilding</ion-select-option>
+                <ion-select-option value="athletic">Athletic Performance</ion-select-option>
+                <ion-select-option value="rehabilitation">Rehabilitation</ion-select-option>
+                <ion-select-option value="nutrition">Nutrition Coaching</ion-select-option>
+                <ion-select-option value="mobility">Mobility & Flexibility</ion-select-option>
+                <ion-select-option value="seniors">Senior Fitness</ion-select-option>
+                <ion-select-option value="youth">Youth Training</ion-select-option>
+              </ion-select>
+            </div>
           </form>
         }
 
@@ -184,77 +174,73 @@ import { SupabaseService } from '@app/core/services/supabase.service';
             <p>Set up your gym or fitness center.</p>
           </div>
 
-          <form [formGroup]="facilityForm">
-            <ion-list lines="none">
-              <ion-item lines="none">
-                <ion-input
-                  formControlName="facilityName"
-                  type="text"
-                  label="Facility Name"
-                  labelPlacement="floating"
-                  fill="outline"
-                  placeholder="My Gym"
-                  helperText="The name of your gym or fitness center"
-                />
-              </ion-item>
+          <form [formGroup]="facilityForm" class="onboarding-form">
+            <div class="form-group">
+              <ion-input
+                formControlName="facilityName"
+                type="text"
+                label="Facility Name"
+                labelPlacement="floating"
+                fill="outline"
+                placeholder="My Gym"
+              />
+            </div>
 
-              <ion-item lines="none">
-                <ion-textarea
-                  formControlName="description"
-                  label="Description"
-                  labelPlacement="floating"
-                  fill="outline"
-                  placeholder="Tell members about your facility..."
-                  helperText="Optional - Describe your gym's offerings"
-                  [autoGrow]="true"
-                  rows="3"
-                />
-              </ion-item>
+            <div class="form-group">
+              <ion-textarea
+                formControlName="description"
+                label="Description"
+                labelPlacement="floating"
+                fill="outline"
+                placeholder="Tell members about your facility..."
+                [autoGrow]="true"
+                rows="3"
+              />
+            </div>
 
-              <ion-item lines="none">
-                <ion-input
-                  formControlName="address"
-                  type="text"
-                  label="Street Address"
-                  labelPlacement="floating"
-                  fill="outline"
-                  placeholder="123 Main St"
-                />
-              </ion-item>
+            <div class="form-group">
+              <ion-input
+                formControlName="address"
+                type="text"
+                label="Street Address"
+                labelPlacement="floating"
+                fill="outline"
+                placeholder="123 Main St"
+              />
+            </div>
 
-              <ion-item lines="none">
-                <ion-input
-                  formControlName="city"
-                  type="text"
-                  label="City"
-                  labelPlacement="floating"
-                  fill="outline"
-                  placeholder="Chicago"
-                />
-              </ion-item>
+            <div class="form-group">
+              <ion-input
+                formControlName="city"
+                type="text"
+                label="City"
+                labelPlacement="floating"
+                fill="outline"
+                placeholder="Chicago"
+              />
+            </div>
 
-              <ion-item lines="none">
-                <ion-input
-                  formControlName="state"
-                  type="text"
-                  label="State"
-                  labelPlacement="floating"
-                  fill="outline"
-                  placeholder="IL"
-                />
-              </ion-item>
+            <div class="form-group">
+              <ion-input
+                formControlName="state"
+                type="text"
+                label="State"
+                labelPlacement="floating"
+                fill="outline"
+                placeholder="IL"
+              />
+            </div>
 
-              <ion-item lines="none">
-                <ion-input
-                  formControlName="zipCode"
-                  type="text"
-                  label="ZIP Code"
-                  labelPlacement="floating"
-                  fill="outline"
-                  placeholder="60601"
-                />
-              </ion-item>
-            </ion-list>
+            <div class="form-group">
+              <ion-input
+                formControlName="zipCode"
+                type="text"
+                label="ZIP Code"
+                labelPlacement="floating"
+                fill="outline"
+                placeholder="60601"
+              />
+            </div>
           </form>
         }
 
@@ -265,50 +251,50 @@ import { SupabaseService } from '@app/core/services/supabase.service';
             <p>What are you working towards?</p>
           </div>
 
-          <form [formGroup]="clientForm">
-            <ion-list lines="none">
-              <ion-item lines="none">
-                <ion-select
-                  formControlName="goals"
-                  label="Goals"
-                  labelPlacement="floating"
-                  fill="outline"
-                  placeholder="Select your goals"
-                  [multiple]="true"
-                  interface="alert"
-                >
-                  <ion-select-option value="lose_weight">Lose Weight</ion-select-option>
-                  <ion-select-option value="build_muscle">Build Muscle</ion-select-option>
-                  <ion-select-option value="get_stronger">Get Stronger</ion-select-option>
-                  <ion-select-option value="improve_endurance">Improve Endurance</ion-select-option>
-                  <ion-select-option value="flexibility">Increase Flexibility</ion-select-option>
-                  <ion-select-option value="general_fitness">General Fitness</ion-select-option>
-                  <ion-select-option value="sports_performance">Sports Performance</ion-select-option>
-                  <ion-select-option value="rehabilitation">Injury Recovery</ion-select-option>
-                </ion-select>
-              </ion-item>
+          <form [formGroup]="clientForm" class="onboarding-form">
+            <div class="form-group">
+              <ion-select
+                formControlName="goals"
+                label="Goals"
+                labelPlacement="floating"
+                fill="outline"
+                placeholder="Select your goals"
+                [multiple]="true"
+                interface="alert"
+              >
+                <ion-select-option value="lose_weight">Lose Weight</ion-select-option>
+                <ion-select-option value="build_muscle">Build Muscle</ion-select-option>
+                <ion-select-option value="get_stronger">Get Stronger</ion-select-option>
+                <ion-select-option value="improve_endurance">Improve Endurance</ion-select-option>
+                <ion-select-option value="flexibility">Increase Flexibility</ion-select-option>
+                <ion-select-option value="general_fitness">General Fitness</ion-select-option>
+                <ion-select-option value="sports_performance">Sports Performance</ion-select-option>
+                <ion-select-option value="rehabilitation">Injury Recovery</ion-select-option>
+              </ion-select>
+            </div>
 
-              <ion-item lines="none">
-                <ion-select
-                  formControlName="fitnessLevel"
-                  label="Fitness Level"
-                  labelPlacement="floating"
-                  fill="outline"
-                  interface="popover"
-                >
-                  <ion-select-option value="beginner">Beginner</ion-select-option>
-                  <ion-select-option value="intermediate">Intermediate</ion-select-option>
-                  <ion-select-option value="advanced">Advanced</ion-select-option>
-                </ion-select>
-              </ion-item>
-            </ion-list>
+            <div class="form-group">
+              <ion-select
+                formControlName="fitnessLevel"
+                label="Fitness Level"
+                labelPlacement="floating"
+                fill="outline"
+                interface="popover"
+              >
+                <ion-select-option value="beginner">Beginner</ion-select-option>
+                <ion-select-option value="intermediate">Intermediate</ion-select-option>
+                <ion-select-option value="advanced">Advanced</ion-select-option>
+              </ion-select>
+            </div>
           </form>
         }
 
         <!-- Step 3: Complete -->
         @if (currentStep() === 3) {
           <div class="complete-step">
-            <ion-icon name="checkmark-circle" color="success"></ion-icon>
+            <div class="success-icon-wrap">
+              <ion-icon name="checkmark-circle"></ion-icon>
+            </div>
             <h2>You're all set!</h2>
             <p>
               @if (isOwner()) {
@@ -324,15 +310,16 @@ import { SupabaseService } from '@app/core/services/supabase.service';
 
         <!-- Error Message -->
         @if (errorMessage()) {
-          <ion-note color="danger" class="error-message">
+          <div class="message message--error">
             {{ errorMessage() }}
-          </ion-note>
+          </div>
         }
 
         <!-- Navigation Buttons -->
         <div class="navigation-buttons">
           @if (currentStep() < 3) {
             <ion-button
+              class="submit-btn"
               expand="block"
               (click)="nextStep()"
               [disabled]="loading() || !canProceed()"
@@ -347,14 +334,14 @@ import { SupabaseService } from '@app/core/services/supabase.service';
           }
 
           @if (currentStep() === 3) {
-            <ion-button expand="block" (click)="finish()">
+            <ion-button class="submit-btn" expand="block" (click)="finish()">
               Get Started
               <ion-icon name="arrow-forward" slot="end"></ion-icon>
             </ion-button>
           }
 
           @if (currentStep() === 1) {
-            <ion-button fill="clear" expand="block" (click)="skip()">
+            <ion-button fill="clear" expand="block" class="skip-btn" (click)="skip()">
               Skip for now
             </ion-button>
           }
@@ -363,74 +350,154 @@ import { SupabaseService } from '@app/core/services/supabase.service';
     </ion-content>
   `,
   styles: [`
+    ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    ion-progress-bar {
+      --background: var(--fitos-bg-tertiary, #262626);
+      --progress-background: var(--ion-color-primary, #10B981);
+      height: 3px;
+    }
+
     .onboarding-container {
       max-width: 500px;
       margin: 0 auto;
-      padding-top: 24px;
+      padding: 16px 24px 32px;
     }
 
     .step-header {
-      margin-bottom: 32px;
+      text-align: center;
+      margin-bottom: 28px;
+      padding-top: 24px;
+
+      .icon-wrap {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: rgba(16, 185, 129, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+
+        ion-icon {
+          font-size: 32px;
+          color: var(--ion-color-primary, #10B981);
+        }
+      }
 
       h2 {
         margin: 0 0 8px;
-        font-size: 1.75rem;
+        font-size: 24px;
         font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       p {
         margin: 0;
-        color: var(--ion-color-medium);
-        font-size: 1rem;
+        color: var(--fitos-text-secondary, #A3A3A3);
+        font-size: 15px;
+        line-height: 1.5;
       }
     }
 
-    ion-list {
-      background: transparent;
-      margin-bottom: 24px;
-
-      ion-item {
-        --background: transparent;
-        --padding-start: 0;
-        --inner-padding-end: 0;
+    .onboarding-form {
+      .form-group {
         margin-bottom: 16px;
+
+        ion-input,
+        ion-select,
+        ion-textarea {
+          --background: var(--fitos-bg-tertiary, #262626);
+          --border-radius: 8px;
+          --highlight-color-focused: var(--ion-color-primary, #10B981);
+          --border-color: transparent;
+          --color: var(--fitos-text-primary, #F5F5F5);
+          --placeholder-color: var(--fitos-text-tertiary, #737373);
+          font-size: 15px;
+        }
+
+        ion-textarea {
+          --padding-start: 16px;
+          --padding-end: 16px;
+        }
       }
     }
 
-    .error-message {
-      display: block;
-      padding: 12px;
-      margin-bottom: 16px;
+    .message {
+      padding: 12px 16px;
       border-radius: 8px;
-      background: rgba(var(--ion-color-danger-rgb), 0.1);
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 16px;
+
+      &--error {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        color: #FCA5A5;
+      }
     }
 
     .complete-step {
       text-align: center;
       padding: 48px 0;
 
-      ion-icon {
-        font-size: 80px;
-        margin-bottom: 24px;
+      .success-icon-wrap {
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        background: rgba(16, 185, 129, 0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 24px;
+
+        ion-icon {
+          font-size: 48px;
+          color: var(--ion-color-primary, #10B981);
+        }
       }
 
       h2 {
         margin: 0 0 12px;
-        font-size: 1.75rem;
+        font-size: 24px;
         font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       p {
         margin: 0;
-        color: var(--ion-color-medium);
-        font-size: 1rem;
+        color: var(--fitos-text-secondary, #A3A3A3);
+        font-size: 15px;
+        line-height: 1.5;
+        max-width: 280px;
+        margin: 0 auto;
       }
     }
 
     .navigation-buttons {
       margin-top: 32px;
 
-      ion-button {
+      .submit-btn {
+        --border-radius: 8px;
+        height: 48px;
+        font-weight: 700;
+        font-size: 16px;
+        --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        margin-bottom: 12px;
+      }
+
+      .skip-btn {
+        --color: var(--fitos-text-tertiary, #737373);
+        font-size: 14px;
         margin-bottom: 12px;
       }
     }

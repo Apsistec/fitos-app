@@ -43,7 +43,7 @@ import { IdentifiedFood } from '@app/core/services/photo-nutrition.service';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/nutrition" icon="arrow-back-outline"></ion-back-button>
@@ -81,6 +81,17 @@ import { IdentifiedFood } from '@app/core/services/photo-nutrition.service';
     </ion-content>
   `,
   styles: [`
+    ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     .photo-nutrition-page {
       min-height: 100%;
     }

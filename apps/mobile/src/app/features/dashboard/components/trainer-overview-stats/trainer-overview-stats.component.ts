@@ -94,50 +94,53 @@ export interface TrainerStats {
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-      margin-bottom: 1rem;
+      gap: 12px;
+      margin-bottom: 14px;
     }
 
     .stat-card {
       margin: 0;
       max-width: 400px;
       width: 100%;
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
 
       ion-card-content {
         display: flex;
-        gap: 1rem;
-        padding: 1rem;
+        gap: 12px;
+        padding: 14px;
       }
     }
 
     .stat-icon-container {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
 
       ion-icon {
-        font-size: 24px;
+        font-size: 22px;
         color: white;
       }
 
       &.primary {
-        background: var(--ion-color-primary);
+        background: var(--ion-color-primary, #10B981);
       }
 
       &.success {
-        background: var(--ion-color-success);
+        background: var(--ion-color-success, #22C55E);
       }
 
       &.warning {
-        background: var(--ion-color-warning);
+        background: var(--ion-color-warning, #F59E0B);
       }
 
       &.tertiary {
-        background: var(--ion-color-tertiary);
+        background: var(--ion-color-tertiary, #8B5CF6);
       }
     }
 
@@ -145,45 +148,47 @@ export interface TrainerStats {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 0.25rem;
+      gap: 3px;
     }
 
     .stat-label {
-      font-size: 0.75rem;
-      color: var(--ion-color-medium);
+      font-size: 11px;
+      color: var(--fitos-text-tertiary, #737373);
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      font-weight: 500;
     }
 
     .stat-value {
-      font-size: 1.5rem;
+      font-size: 22px;
       font-weight: 700;
-      color: var(--ion-color-dark);
+      color: var(--fitos-text-primary, #F5F5F5);
       line-height: 1;
+      font-family: 'Space Mono', monospace;
     }
 
     .stat-sublabel {
-      font-size: 0.75rem;
-      color: var(--ion-color-medium);
+      font-size: 12px;
+      color: var(--fitos-text-tertiary, #737373);
     }
 
     .stat-change {
       display: flex;
       align-items: center;
-      gap: 0.25rem;
-      font-size: 0.75rem;
-      font-weight: 500;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 600;
 
       &.positive {
-        color: var(--ion-color-success);
+        color: var(--ion-color-primary, #10B981);
       }
 
       &.negative {
-        color: var(--ion-color-medium); // Neutral color, not red
+        color: var(--fitos-text-tertiary, #737373);
       }
 
       ion-icon {
-        font-size: 1rem;
+        font-size: 14px;
       }
     }
 
@@ -193,7 +198,8 @@ export interface TrainerStats {
       --padding-start: 0;
       --padding-end: 0;
       height: auto;
-      font-size: 0.75rem;
+      font-size: 12px;
+      --color: var(--ion-color-primary, #10B981);
     }
 
     @media (max-width: 576px) {

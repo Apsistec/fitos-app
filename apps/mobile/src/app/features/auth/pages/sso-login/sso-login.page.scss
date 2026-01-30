@@ -1,7 +1,18 @@
 /**
  * SSO Login Page Styles
- * Sprint 41: Enterprise SSO
+ * Sprint 41: Enterprise SSO (Redesigned Sprint 46)
  */
+
+ion-toolbar {
+  --background: transparent;
+  --border-width: 0;
+}
+
+ion-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
 
 // Loading & Error
 .loading-container,
@@ -11,166 +22,210 @@
   align-items: center;
   justify-content: center;
   min-height: 400px;
-  padding: 2rem;
+  padding: 32px 24px;
   text-align: center;
 
-  ion-icon {
-    font-size: 64px;
-    margin-bottom: 1rem;
-  }
-
   h2 {
-    font-size: 1.25rem;
-    margin: 1rem 0;
-    color: var(--ion-text-color);
+    font-size: 18px;
+    font-weight: 600;
+    margin: 16px 0;
+    color: var(--fitos-text-primary, #F5F5F5);
   }
 
   p {
-    margin-top: 0.5rem;
-    color: var(--ion-color-medium);
+    margin-top: 8px;
+    color: var(--fitos-text-secondary, #A3A3A3);
+    font-size: 14px;
   }
+}
+
+.error-icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(239, 68, 68, 0.1);
+  margin-bottom: 8px;
+
+  ion-icon {
+    font-size: 32px;
+    color: #EF4444;
+  }
+}
+
+.action-btn {
+  --border-radius: 8px;
+  height: 48px;
+  font-weight: 700;
+  margin-top: 16px;
+  max-width: 300px;
 }
 
 // SSO Container
 .sso-container {
-  max-width: 500px;
-  margin: 2rem auto;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 16px 24px 32px;
+}
+
+// Role Badge
+.role-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  width: fit-content;
+  margin: 0 auto 32px;
+
+  ion-icon {
+    color: var(--fitos-accent-secondary, #8B5CF6);
+    font-size: 18px;
+  }
+
+  span {
+    color: var(--fitos-accent-secondary, #8B5CF6);
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
 }
 
 // Branding
 .branding {
   text-align: center;
-  margin-bottom: 2rem;
-
-  .org-icon {
-    font-size: 64px;
-    color: var(--ion-color-primary);
-    margin-bottom: 1rem;
-  }
+  margin-bottom: 32px;
 
   h1 {
-    font-size: 1.75rem;
+    font-size: 24px;
     font-weight: 700;
-    margin: 0 0 0.5rem 0;
-    color: var(--ion-text-color);
+    margin: 0 0 8px 0;
+    color: var(--fitos-text-primary, #F5F5F5);
   }
 
   p {
-    font-size: 0.9375rem;
-    color: var(--ion-color-medium);
+    font-size: 14px;
+    color: var(--fitos-text-secondary, #A3A3A3);
     margin: 0;
+    line-height: 1.5;
   }
 }
 
 // Provider Card
 .provider-card {
-  margin: 0 0 2rem 0;
-
-  ion-card-content {
-    padding: 1.5rem;
-  }
+  padding: 20px;
+  background: var(--fitos-bg-secondary, #1A1A1A);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 24px;
 }
 
 .provider-info {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 16px;
+}
 
-  .provider-icon {
-    font-size: 48px;
-    color: var(--ion-color-primary);
-    flex-shrink: 0;
+.provider-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--fitos-bg-tertiary, #262626);
+  flex-shrink: 0;
+
+  ion-icon {
+    font-size: 24px;
+    color: var(--ion-color-primary, #10B981);
   }
+}
 
+.provider-details {
   h3 {
-    font-size: 1.125rem;
+    font-size: 17px;
     font-weight: 600;
-    margin: 0 0 0.25rem 0;
-    color: var(--ion-text-color);
+    margin: 0 0 4px 0;
+    color: var(--fitos-text-primary, #F5F5F5);
   }
 
   p {
-    font-size: 0.875rem;
-    color: var(--ion-color-medium);
+    font-size: 13px;
+    color: var(--fitos-text-secondary, #A3A3A3);
     margin: 0;
   }
 }
 
 // SSO Button
 .sso-button {
-  margin-bottom: 1.5rem;
-  --background: var(--ion-color-primary);
-  --background-hover: var(--ion-color-primary-shade);
+  --border-radius: 8px;
+  height: 48px;
+  font-weight: 700;
+  font-size: 16px;
+  --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+  margin-bottom: 0;
 }
 
 // Divider
 .divider {
-  position: relative;
-  text-align: center;
-  margin: 1.5rem 0;
+  display: flex;
+  align-items: center;
+  padding: 24px 0;
+}
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: var(--ion-color-light);
-  }
+.divider__line {
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
 
-  span {
-    position: relative;
-    background: var(--ion-background-color);
-    padding: 0 1rem;
-    color: var(--ion-color-medium);
-    font-size: 0.875rem;
-  }
+.divider__text {
+  padding: 0 16px;
+  color: var(--fitos-text-tertiary, #737373);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+// Alternative button
+.alt-btn {
+  --border-radius: 8px;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --background: transparent;
+  --color: var(--fitos-text-primary, #F5F5F5);
+  height: 48px;
+  font-weight: 500;
+  font-size: 14px;
 }
 
 // Info Section
 .info-section {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-  margin-top: 2rem;
-  padding: 1rem;
-  background: var(--ion-color-light);
-  border-radius: 8px;
+  gap: 12px;
+  margin-top: 32px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 
   ion-icon {
-    font-size: 24px;
-    color: var(--ion-color-primary);
+    font-size: 20px;
+    color: var(--fitos-text-tertiary, #737373);
     flex-shrink: 0;
-    margin-top: 0.125rem;
+    margin-top: 2px;
   }
 
   p {
-    font-size: 0.875rem;
-    color: var(--ion-color-medium);
+    font-size: 13px;
+    color: var(--fitos-text-tertiary, #737373);
     margin: 0;
     line-height: 1.5;
-  }
-}
-
-// Dark mode
-@media (prefers-color-scheme: dark) {
-  .branding h1,
-  .provider-info h3 {
-    color: var(--ion-color-light);
-  }
-
-  .divider {
-    &::before {
-      background: var(--ion-color-dark);
-    }
-
-    span {
-      background: var(--ion-background-color);
-    }
-  }
-
-  .info-section {
-    background: rgba(255, 255, 255, 0.05);
   }
 }

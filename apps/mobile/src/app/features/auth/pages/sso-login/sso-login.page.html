@@ -1,4 +1,4 @@
-<ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/auth/login"></ion-back-button>
@@ -7,7 +7,7 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
+<ion-content [fullscreen]="true">
   <!-- Loading State -->
   @if (loading()) {
     <div class="loading-container">
@@ -19,9 +19,11 @@
   <!-- Error State -->
   @if (error() && !loading()) {
     <div class="error-container">
-      <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+      <div class="error-icon-wrap">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+      </div>
       <h2>{{ error() }}</h2>
-      <ion-button expand="block" (click)="useStandardLogin()">
+      <ion-button expand="block" (click)="useStandardLogin()" class="action-btn">
         Use Standard Login
       </ion-button>
     </div>
@@ -30,25 +32,30 @@
   <!-- SSO Login -->
   @if (!loading() && !error() && ssoConfig()) {
     <div class="sso-container">
+      <!-- Role Badge -->
+      <div class="role-badge">
+        <ion-icon name="shield-checkmark-outline"></ion-icon>
+        <span>Enterprise SSO</span>
+      </div>
+
       <!-- Branding -->
       <div class="branding">
-        <ion-icon name="business-outline" class="org-icon"></ion-icon>
         <h1>Sign in with SSO</h1>
         <p>You'll be redirected to your organization's identity provider</p>
       </div>
 
       <!-- Provider Card -->
-      <ion-card class="provider-card">
-        <ion-card-content>
-          <div class="provider-info">
-            <ion-icon [name]="getProviderIcon()" class="provider-icon"></ion-icon>
-            <div>
-              <h3>{{ getProviderName() }}</h3>
-              <p>{{ ssoConfig()!.organizationId }}</p>
-            </div>
+      <div class="provider-card">
+        <div class="provider-info">
+          <div class="provider-icon-wrap">
+            <ion-icon [name]="getProviderIcon()"></ion-icon>
           </div>
-        </ion-card-content>
-      </ion-card>
+          <div class="provider-details">
+            <h3>{{ getProviderName() }}</h3>
+            <p>{{ ssoConfig()!.organizationId }}</p>
+          </div>
+        </div>
+      </div>
 
       <!-- Sign In Button -->
       <ion-button
@@ -65,13 +72,17 @@
       <!-- Alternative Login -->
       @if (!ssoConfig()!.enforceSso) {
         <div class="divider">
-          <span>or</span>
+          <div class="divider__line"></div>
+          <span class="divider__text">or</span>
+          <div class="divider__line"></div>
         </div>
 
         <ion-button
           expand="block"
           fill="outline"
+          color="medium"
           (click)="useStandardLogin()"
+          class="alt-btn"
         >
           Sign in with Email/Password
         </ion-button>

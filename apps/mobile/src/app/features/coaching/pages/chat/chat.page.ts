@@ -80,7 +80,7 @@ import { QuickActionsComponent } from '../../components/quick-actions/quick-acti
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/tabs/dashboard"></ion-back-button>

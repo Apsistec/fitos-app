@@ -78,7 +78,7 @@ import { AuthService } from '../../../../core/services/auth.service';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-title>Submit Form Check Video</ion-title>
         <ion-button slot="end" fill="clear" (click)="close()">
@@ -258,57 +258,88 @@ import { AuthService } from '../../../../core/services/auth.service';
   `,
   styles: [
     `
+      ion-toolbar {
+        --background: transparent;
+        --border-width: 0;
+      }
+
+      ion-title {
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.3px;
+      }
+
       .upload-container {
-        padding: var(--fitos-space-4);
+        padding: 16px;
         max-width: 600px;
         margin: 0 auto;
+      }
+
+      ion-card {
+        --background: var(--fitos-bg-secondary, #1A1A1A);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        margin: 0 0 16px 0;
       }
 
       ion-card-title {
         display: flex;
         align-items: center;
-        gap: var(--fitos-space-2);
+        gap: 8px;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
 
         ion-icon {
           font-size: 20px;
-          color: var(--fitos-accent-primary);
+          color: var(--ion-color-primary, #10B981);
         }
       }
 
       .help-text {
-        font-size: var(--fitos-font-size-sm);
-        color: var(--fitos-text-secondary);
-        margin: 0 0 var(--fitos-space-3) 0;
+        font-size: 13px;
+        color: var(--fitos-text-secondary, #A3A3A3);
+        margin: 0 0 12px 0;
         line-height: 1.5;
       }
 
       .video-actions {
         display: flex;
         flex-direction: column;
-        gap: var(--fitos-space-2);
-        margin-bottom: var(--fitos-space-4);
+        gap: 8px;
+        margin-bottom: 16px;
+
+        ion-button {
+          --border-radius: 8px;
+          height: 48px;
+          font-weight: 700;
+        }
+
+        ion-button:first-child {
+          --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        }
       }
 
       .video-preview {
-        margin-top: var(--fitos-space-4);
-        padding: var(--fitos-space-3);
-        background: var(--fitos-bg-secondary);
-        border-radius: var(--fitos-border-radius);
+        margin-top: 16px;
+        padding: 12px;
+        background: var(--fitos-bg-tertiary, #262626);
+        border-radius: 12px;
 
         video {
           width: 100%;
           max-height: 300px;
-          border-radius: var(--fitos-border-radius);
-          margin-bottom: var(--fitos-space-2);
+          border-radius: 8px;
+          margin-bottom: 8px;
         }
 
         .video-info {
-          margin: var(--fitos-space-2) 0;
+          margin: 8px 0;
 
           p {
-            font-size: var(--fitos-font-size-sm);
-            color: var(--fitos-text-secondary);
-            margin: var(--fitos-space-1) 0;
+            font-size: 13px;
+            color: var(--fitos-text-secondary, #A3A3A3);
+            margin: 4px 0;
           }
         }
       }
@@ -316,13 +347,14 @@ import { AuthService } from '../../../../core/services/auth.service';
       ion-item {
         --padding-start: 0;
         --inner-padding-end: 0;
-        margin-bottom: var(--fitos-space-3);
+        --background: transparent;
+        margin-bottom: 12px;
       }
 
       .review-item {
-        margin-bottom: var(--fitos-space-3);
-        padding-bottom: var(--fitos-space-3);
-        border-bottom: 1px solid var(--fitos-border-color);
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 
         &:last-child {
           border-bottom: none;
@@ -331,44 +363,46 @@ import { AuthService } from '../../../../core/services/auth.service';
 
         strong {
           display: block;
-          font-size: var(--fitos-font-size-sm);
-          color: var(--fitos-text-tertiary);
-          margin-bottom: var(--fitos-space-1);
+          font-size: 11px;
+          color: var(--fitos-text-tertiary, #737373);
+          margin-bottom: 4px;
           text-transform: uppercase;
           letter-spacing: 0.5px;
+          font-weight: 600;
         }
 
         p {
-          font-size: var(--fitos-font-size-base);
-          color: var(--fitos-text-primary);
+          font-size: 14px;
+          color: var(--fitos-text-primary, #F5F5F5);
           margin: 0;
         }
       }
 
       .upload-progress {
         text-align: center;
-        padding: var(--fitos-space-6) var(--fitos-space-4);
+        padding: 32px 16px;
 
         ion-spinner {
-          margin-bottom: var(--fitos-space-3);
+          margin-bottom: 12px;
         }
 
         p {
-          font-size: var(--fitos-font-size-base);
-          color: var(--fitos-text-secondary);
-          margin: var(--fitos-space-2) 0;
+          font-size: 14px;
+          color: var(--fitos-text-secondary, #A3A3A3);
+          margin: 8px 0;
         }
 
         .progress-text {
-          font-size: var(--fitos-font-size-lg);
-          font-weight: 600;
-          color: var(--fitos-accent-primary);
+          font-size: 18px;
+          font-weight: 700;
+          color: var(--ion-color-primary, #10B981);
+          font-family: 'Space Mono', monospace;
         }
 
         ion-progress-bar {
           height: 12px;
           border-radius: 6px;
-          margin: var(--fitos-space-3) 0;
+          margin: 12px 0;
         }
       }
 
@@ -378,29 +412,36 @@ import { AuthService } from '../../../../core/services/auth.service';
         align-items: center;
         justify-content: center;
         text-align: center;
-        padding: var(--fitos-space-8) var(--fitos-space-4);
+        padding: 48px 16px;
 
         ion-icon {
           font-size: 120px;
-          margin-bottom: var(--fitos-space-4);
+          margin-bottom: 16px;
         }
 
         h2 {
-          font-size: var(--fitos-font-size-2xl);
+          font-size: 24px;
           font-weight: 700;
-          color: var(--fitos-text-primary);
-          margin: 0 0 var(--fitos-space-2) 0;
+          color: var(--fitos-text-primary, #F5F5F5);
+          margin: 0 0 8px 0;
         }
 
         p {
-          font-size: var(--fitos-font-size-base);
-          color: var(--fitos-text-secondary);
-          margin: 0 0 var(--fitos-space-6) 0;
+          font-size: 14px;
+          color: var(--fitos-text-secondary, #A3A3A3);
+          margin: 0 0 32px 0;
           max-width: 400px;
         }
 
         ion-button {
-          margin-bottom: var(--fitos-space-2);
+          --border-radius: 8px;
+          height: 48px;
+          font-weight: 700;
+          margin-bottom: 8px;
+
+          &:first-child {
+            --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+          }
 
           &:last-child {
             margin-bottom: 0;
@@ -410,11 +451,14 @@ import { AuthService } from '../../../../core/services/auth.service';
 
       .actions {
         display: flex;
-        gap: var(--fitos-space-2);
-        margin-top: var(--fitos-space-4);
+        gap: 8px;
+        margin-top: 16px;
 
         ion-button {
           flex: 1;
+          --border-radius: 8px;
+          height: 48px;
+          font-weight: 700;
         }
 
         ion-button[fill="outline"] {

@@ -69,14 +69,14 @@ import type { WorkoutWithExercises } from '@app/core/services/workout.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeInUp, listStagger],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-title>
           {{ greeting() }}, {{ firstName() }}
         </ion-title>
         <ion-buttons slot="end">
-          <ion-button routerLink="/tabs/settings/profile">
-            <ion-avatar style="width: 32px; height: 32px;">
+          <ion-button routerLink="/tabs/settings/profile" class="avatar-btn">
+            <ion-avatar>
               @if (avatarUrl()) {
                 <img [src]="avatarUrl()" alt="Profile" />
               } @else {
@@ -177,10 +177,35 @@ import type { WorkoutWithExercises } from '@app/core/services/workout.service';
     </ion-content>
   `,
   styles: [`
+    ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--fitos-text-primary, #F5F5F5);
+    }
+
+    .avatar-btn {
+      ion-avatar {
+        width: 34px;
+        height: 34px;
+        border: 2px solid rgba(16, 185, 129, 0.3);
+
+        ion-icon {
+          font-size: 18px;
+          color: var(--fitos-text-secondary, #A3A3A3);
+        }
+      }
+    }
+
     ion-content {
       --padding-start: 16px;
       --padding-end: 16px;
-      --padding-top: 16px;
+      --padding-top: 12px;
       --padding-bottom: 16px;
     }
 
@@ -191,14 +216,14 @@ import type { WorkoutWithExercises } from '@app/core/services/workout.service';
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 14px;
       width: 100%;
     }
 
     .stats-row {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
+      gap: 12px;
       width: 100%;
     }
 
@@ -211,38 +236,48 @@ import type { WorkoutWithExercises } from '@app/core/services/workout.service';
     app-trainer-needs-attention,
     app-trainer-activity-feed,
     app-owner-facility-stats,
-    app-owner-trainer-performance {
+    app-owner-trainer-performance,
+    app-crm-dashboard-widget {
       width: 100%;
       max-width: 100%;
     }
 
     .quick-actions-card {
-      background: var(--fitos-bg-secondary);
+      background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 12px;
       padding: 20px;
-      margin-bottom: 1rem;
 
       h2 {
         margin: 0 0 16px 0;
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: var(--fitos-text-primary);
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       .actions-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
+        gap: 10px;
 
         ion-button {
           margin: 0;
-          font-size: 0.875rem;
-          --padding-start: 12px;
-          --padding-end: 12px;
+          font-size: 13px;
+          font-weight: 600;
+          --border-radius: 8px;
+          height: 42px;
+          --padding-start: 10px;
+          --padding-end: 10px;
+        }
+
+        ion-button[fill="outline"] {
+          --border-color: rgba(255, 255, 255, 0.1);
+          --color: var(--fitos-text-primary, #F5F5F5);
+          --background: transparent;
         }
 
         ion-icon {
-          font-size: 18px;
+          font-size: 16px;
         }
       }
     }

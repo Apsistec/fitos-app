@@ -7,15 +7,20 @@
   text-align: center;
 
   ion-icon {
-    font-size: 64px;
+    font-size: 48px;
     margin-bottom: 16px;
+    color: var(--fitos-text-tertiary, #737373);
   }
 
   p {
     margin: 0;
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-secondary, #A3A3A3);
     font-size: 14px;
   }
+}
+
+ion-list {
+  background: transparent;
 }
 
 .workout-date-badge {
@@ -33,18 +38,24 @@
     font-size: 11px;
     text-transform: uppercase;
     font-weight: 600;
+    color: var(--fitos-text-tertiary, #737373);
   }
 }
 
 ion-item {
+  --background: transparent;
+  --border-color: rgba(255, 255, 255, 0.06);
+
   h3 {
     font-weight: 600;
+    font-size: 14px;
+    color: var(--fitos-text-primary, #F5F5F5);
     margin-bottom: 4px;
   }
 
   p {
     font-size: 13px;
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-secondary, #A3A3A3);
   }
 
   ion-note {
@@ -52,6 +63,7 @@ ion-item {
     align-items: center;
     gap: 4px;
     font-size: 13px;
+    color: var(--fitos-text-tertiary, #737373);
 
     ion-icon {
       font-size: 16px;

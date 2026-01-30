@@ -81,29 +81,41 @@ export interface ClientAlert {
       margin: 0;
       max-width: 800px;
       width: 100%;
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+
+      ion-card-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
+      }
     }
 
     .alerts-list {
-      margin: 0 -1rem;
+      margin: 0 -16px;
+      background: transparent;
     }
 
     .alert-item {
-      --padding-start: 1rem;
-      --padding-end: 1rem;
-      --inner-padding-end: 0.5rem;
+      --padding-start: 16px;
+      --padding-end: 16px;
+      --inner-padding-end: 8px;
+      --background: transparent;
+      --border-color: rgba(255, 255, 255, 0.06);
 
       &.severity-high {
-        --background: rgba(var(--ion-color-danger-rgb), 0.05);
-        border-left: 3px solid var(--ion-color-danger);
+        --background: rgba(239, 68, 68, 0.06);
+        border-left: 3px solid #EF4444;
       }
 
       &.severity-medium {
-        --background: rgba(var(--ion-color-warning-rgb), 0.05);
-        border-left: 3px solid var(--ion-color-warning);
+        --background: rgba(245, 158, 11, 0.06);
+        border-left: 3px solid #F59E0B;
       }
 
       &.severity-low {
-        border-left: 3px solid var(--ion-color-medium);
+        border-left: 3px solid var(--fitos-text-tertiary, #737373);
       }
     }
 
@@ -113,57 +125,67 @@ export interface ClientAlert {
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--ion-color-primary);
+      background: var(--ion-color-primary, #10B981);
       color: white;
       font-weight: 600;
-      font-size: 0.9rem;
+      font-size: 14px;
+      border-radius: 50%;
     }
 
     ion-label {
       h3 {
         font-weight: 600;
-        margin-bottom: 0.25rem;
+        font-size: 14px;
+        color: var(--fitos-text-primary, #F5F5F5);
+        margin-bottom: 4px;
       }
 
       p {
-        color: var(--ion-color-medium);
-        font-size: 0.85rem;
+        color: var(--fitos-text-secondary, #A3A3A3);
+        font-size: 13px;
         white-space: normal;
-        margin-bottom: 0.25rem;
+        margin-bottom: 4px;
       }
 
       ion-note {
-        font-size: 0.75rem;
+        font-size: 12px;
+        color: var(--fitos-text-tertiary, #737373);
       }
     }
 
     ion-badge {
       ion-icon {
-        font-size: 1rem;
+        font-size: 14px;
       }
     }
 
     .view-all-button {
-      margin-top: 0.5rem;
+      margin-top: 8px;
+      --color: var(--ion-color-primary, #10B981);
+      font-size: 14px;
+      font-weight: 600;
     }
 
     .empty-state {
       text-align: center;
-      padding: 2rem 1rem;
+      padding: 32px 16px;
 
       .empty-icon {
-        font-size: 4rem;
-        color: var(--ion-color-success);
-        margin-bottom: 1rem;
+        font-size: 48px;
+        color: var(--ion-color-primary, #10B981);
+        margin-bottom: 16px;
       }
 
       h3 {
-        margin: 0 0 0.5rem 0;
-        color: var(--ion-color-dark);
+        margin: 0 0 8px 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       p {
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-secondary, #A3A3A3);
+        font-size: 14px;
         margin: 0;
       }
     }

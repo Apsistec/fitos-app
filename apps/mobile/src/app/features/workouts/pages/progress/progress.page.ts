@@ -57,7 +57,7 @@ interface ChartDataPoint {
     IonRefresherContent,
   ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-title>Progress</ion-title>
       </ion-toolbar>
@@ -164,6 +164,17 @@ interface ChartDataPoint {
     </ion-content>
   `,
   styles: [`
+    ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     .progress-container {
       max-width: 800px;
       margin: 0 auto;
@@ -171,6 +182,7 @@ interface ChartDataPoint {
 
     ion-segment {
       margin-bottom: 16px;
+      --background: var(--fitos-bg-tertiary, #262626);
     }
 
     .exercise-selector {
@@ -184,6 +196,18 @@ interface ChartDataPoint {
       width: 100%;
     }
 
+    ion-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+    }
+
+    ion-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
+    }
+
     .loading-card,
     .empty-state {
       text-align: center;
@@ -194,8 +218,9 @@ interface ChartDataPoint {
       }
 
       p {
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-secondary, #A3A3A3);
         margin: 0;
+        font-size: 14px;
       }
     }
 
@@ -204,12 +229,13 @@ interface ChartDataPoint {
       padding: 20px;
 
       p {
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-secondary, #A3A3A3);
         margin: 4px 0;
+        font-size: 14px;
       }
 
       .hint {
-        font-size: 0.875rem;
+        font-size: 13px;
       }
     }
 
@@ -221,17 +247,23 @@ interface ChartDataPoint {
 
     .stat {
       text-align: center;
+      padding: 12px;
+      background: var(--fitos-bg-tertiary, #262626);
+      border-radius: 10px;
 
       .stat-label {
-        font-size: 0.875rem;
-        color: var(--ion-color-medium);
+        font-size: 11px;
+        color: var(--fitos-text-tertiary, #737373);
         margin-bottom: 4px;
+        text-transform: uppercase;
+        font-weight: 500;
       }
 
       .stat-value {
-        font-size: 1.5rem;
+        font-size: 22px;
         font-weight: 700;
-        color: var(--ion-color-primary);
+        color: var(--ion-color-primary, #10B981);
+        font-family: 'Space Mono', monospace;
       }
     }
 

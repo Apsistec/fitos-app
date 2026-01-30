@@ -119,21 +119,34 @@ export interface NutritionSummary {
       margin: 0;
       max-width: 800px;
       width: 100%;
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+
+      ion-card-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
+      }
     }
 
     .header-content {
       display: flex;
       justify-content: space-between;
       align-items: center;
+
+      ion-button {
+        --color: var(--ion-color-primary, #10B981);
+      }
     }
 
     .macro-item {
-      margin-bottom: 1rem;
+      margin-bottom: 14px;
 
       &.primary {
-        padding-bottom: 1rem;
-        border-bottom: 1px solid var(--fitos-border-subtle);
-        margin-bottom: 1.5rem;
+        padding-bottom: 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        margin-bottom: 16px;
       }
     }
 
@@ -141,93 +154,112 @@ export interface NutritionSummary {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.5rem;
+      margin-bottom: 6px;
     }
 
     .macro-label {
-      font-weight: 500;
-      color: var(--fitos-text-primary);
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .macro-values {
-      font-family: var(--fitos-font-mono);
-      font-size: 0.9rem;
-      color: var(--fitos-text-secondary);
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      color: var(--fitos-text-secondary, #A3A3A3);
 
       &.over-target {
-        color: var(--fitos-nutrition-over);
+        color: var(--fitos-nutrition-over, #8B5CF6);
         font-weight: 600;
       }
     }
 
     .macros-grid {
       display: grid;
-      gap: 1rem;
+      gap: 12px;
     }
 
     /* Custom progress bars with adherence-neutral colors */
     .progress-bar-wrapper {
       width: 100%;
-      height: 8px;
-      background: var(--fitos-bg-tertiary);
-      border-radius: var(--fitos-radius-full);
+      height: 6px;
+      background: var(--fitos-bg-tertiary, #262626);
+      border-radius: 9999px;
       overflow: hidden;
     }
 
     .progress-bar {
       height: 100%;
-      border-radius: var(--fitos-radius-full);
-      transition: width 0.3s var(--fitos-ease-default);
+      border-radius: 9999px;
+      transition: width 0.3s ease;
 
       &.over-target {
-        background: var(--fitos-nutrition-over) !important;
+        background: var(--fitos-nutrition-over, #8B5CF6) !important;
       }
     }
 
     .progress-calories {
-      background: var(--fitos-nutrition-calories);
+      background: var(--fitos-nutrition-calories, #10B981);
     }
 
     .progress-protein {
-      background: var(--fitos-nutrition-protein);
+      background: var(--fitos-nutrition-protein, #6366F1);
     }
 
     .progress-carbs {
-      background: var(--fitos-nutrition-carbs);
+      background: var(--fitos-nutrition-carbs, #F59E0B);
     }
 
     .progress-fat {
-      background: var(--fitos-nutrition-fat);
+      background: var(--fitos-nutrition-fat, #EC4899);
     }
 
     .view-button {
-      margin-top: 1rem;
+      margin-top: 14px;
+      --border-radius: 8px;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --color: var(--fitos-text-primary, #F5F5F5);
+      font-weight: 600;
+      font-size: 14px;
+      height: 40px;
     }
 
     .empty-card {
       margin: 0;
       max-width: 800px;
       width: 100%;
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
     }
 
     .empty-content {
       text-align: center;
-      padding: 2rem 1rem;
+      padding: 32px 16px;
 
       .empty-icon {
-        font-size: 4rem;
-        color: var(--ion-color-medium);
-        margin-bottom: 1rem;
+        font-size: 48px;
+        color: var(--fitos-text-tertiary, #737373);
+        margin-bottom: 16px;
       }
 
       h3 {
-        margin: 0 0 0.5rem 0;
-        color: var(--fitos-text-primary);
+        margin: 0 0 8px 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       p {
-        color: var(--fitos-text-secondary);
-        margin-bottom: 1.5rem;
+        color: var(--fitos-text-secondary, #A3A3A3);
+        margin-bottom: 20px;
+        font-size: 14px;
+      }
+
+      ion-button {
+        --border-radius: 8px;
+        --border-color: rgba(255, 255, 255, 0.1);
+        font-weight: 600;
       }
     }
   `],

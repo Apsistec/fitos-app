@@ -190,56 +190,58 @@ import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
     .food-results {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-4);
-      padding: var(--fitos-space-4);
+      gap: 16px;
+      padding: 16px;
     }
 
     .results-header {
       text-align: center;
 
       h2 {
-        margin: 0 0 var(--fitos-space-2);
-        font-size: var(--fitos-text-2xl);
+        margin: 0 0 8px;
+        font-size: 24px;
         font-weight: 700;
-        color: var(--fitos-text-primary);
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       .food-count {
         margin: 0;
-        font-size: var(--fitos-text-sm);
-        color: var(--fitos-text-tertiary);
+        font-size: 13px;
+        color: var(--fitos-text-tertiary, #737373);
       }
     }
 
     .totals-card {
       margin: 0;
-      --background: var(--fitos-bg-secondary);
-      border: 1px solid var(--fitos-border-default);
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
 
       .totals-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: var(--fitos-space-4);
+        gap: 16px;
         text-align: center;
       }
 
       .total-item {
         display: flex;
         flex-direction: column;
-        gap: var(--fitos-space-1);
+        gap: 4px;
       }
 
       .total-value {
-        font-family: var(--fitos-font-mono);
-        font-size: var(--fitos-text-xl);
+        font-family: 'Space Mono', monospace;
+        font-size: 20px;
         font-weight: 700;
       }
 
       .total-label {
-        font-size: var(--fitos-text-xs);
-        color: var(--fitos-text-tertiary);
+        font-size: 11px;
+        color: var(--fitos-text-tertiary, #737373);
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.5px;
+        font-weight: 500;
       }
     }
 
@@ -250,9 +252,10 @@ import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
     }
 
     .food-card {
-      margin: 0 0 var(--fitos-space-3);
-      --background: var(--fitos-bg-secondary);
-      border: 1px solid var(--fitos-border-subtle);
+      margin: 0 0 12px;
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
 
       &:last-child {
         margin-bottom: 0;
@@ -263,33 +266,33 @@ import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: var(--fitos-space-3);
+      gap: 12px;
     }
 
     .food-title-section {
       flex: 1;
 
       ion-card-title {
-        font-size: var(--fitos-text-lg);
+        font-size: 16px;
         font-weight: 600;
-        color: var(--fitos-text-primary);
-        margin-bottom: var(--fitos-space-1);
+        color: var(--fitos-text-primary, #F5F5F5);
+        margin-bottom: 4px;
       }
 
       ion-note {
-        font-size: var(--fitos-text-xs);
-        color: var(--fitos-text-tertiary);
+        font-size: 12px;
+        color: var(--fitos-text-tertiary, #737373);
       }
     }
 
     .food-actions {
       display: flex;
       align-items: center;
-      gap: var(--fitos-space-2);
+      gap: 8px;
     }
 
     .confidence-badge {
-      font-size: var(--fitos-text-xs);
+      font-size: 12px;
       font-weight: 600;
       padding: 4px 8px;
     }
@@ -299,53 +302,53 @@ import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
       border: none;
       padding: 4px;
       cursor: pointer;
-      color: var(--fitos-text-tertiary);
-      transition: color var(--fitos-duration-fast);
+      color: var(--fitos-text-tertiary, #737373);
+      transition: color 150ms ease;
 
       ion-icon {
         font-size: 24px;
       }
 
       &:hover {
-        color: var(--fitos-text-primary);
+        color: var(--fitos-text-primary, #F5F5F5);
       }
     }
 
     .confidence-warning {
       display: flex;
       align-items: center;
-      gap: var(--fitos-space-2);
-      padding: var(--fitos-space-3);
+      gap: 8px;
+      padding: 12px;
       background: rgba(245, 158, 11, 0.1);
-      border: 1px solid var(--fitos-status-warning);
-      border-radius: var(--fitos-radius-md);
-      margin-bottom: var(--fitos-space-3);
+      border: 1px solid #F59E0B;
+      border-radius: 8px;
+      margin-bottom: 12px;
 
       ion-icon {
         font-size: 20px;
-        color: var(--fitos-status-warning);
+        color: #F59E0B;
         flex-shrink: 0;
       }
 
       span {
         flex: 1;
-        font-size: var(--fitos-text-sm);
-        color: var(--fitos-status-warning);
+        font-size: 13px;
+        color: #F59E0B;
       }
 
       .edit-button {
         display: flex;
         align-items: center;
-        gap: var(--fitos-space-1);
-        background: var(--fitos-status-warning);
+        gap: 4px;
+        background: #F59E0B;
         color: white;
         border: none;
         padding: 6px 12px;
-        border-radius: var(--fitos-radius-sm);
-        font-size: var(--fitos-text-xs);
+        border-radius: 6px;
+        font-size: 12px;
         font-weight: 600;
         cursor: pointer;
-        transition: opacity var(--fitos-duration-fast);
+        transition: opacity 150ms ease;
 
         &:active {
           opacity: 0.8;
@@ -359,26 +362,26 @@ import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
     }
 
     .serving-section {
-      margin-bottom: var(--fitos-space-4);
+      margin-bottom: 16px;
     }
 
     .serving-label {
       display: block;
-      margin-bottom: var(--fitos-space-2);
-      font-size: var(--fitos-text-sm);
+      margin-bottom: 8px;
+      font-size: 13px;
       font-weight: 600;
-      color: var(--fitos-text-secondary);
+      color: var(--fitos-text-secondary, #A3A3A3);
     }
 
     .portion-adjuster {
-      padding: var(--fitos-space-2) 0;
+      padding: 8px 0;
 
       ion-range {
-        --bar-background: var(--fitos-bg-tertiary);
-        --bar-background-active: var(--fitos-accent-primary);
-        --knob-background: var(--fitos-accent-primary);
+        --bar-background: var(--fitos-bg-tertiary, #262626);
+        --bar-background-active: var(--ion-color-primary, #10B981);
+        --knob-background: var(--ion-color-primary, #10B981);
         --knob-size: 24px;
-        --pin-background: var(--fitos-accent-primary);
+        --pin-background: var(--ion-color-primary, #10B981);
         --pin-color: white;
       }
     }
@@ -386,41 +389,41 @@ import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
     .macros-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: var(--fitos-space-3);
-      padding: var(--fitos-space-3);
-      background: var(--fitos-bg-tertiary);
-      border-radius: var(--fitos-radius-md);
+      gap: 12px;
+      padding: 12px;
+      background: var(--fitos-bg-tertiary, #262626);
+      border-radius: 8px;
       text-align: center;
     }
 
     .macro-item {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-1);
+      gap: 4px;
     }
 
     .macro-value {
-      font-family: var(--fitos-font-mono);
-      font-size: var(--fitos-text-base);
+      font-family: 'Space Mono', monospace;
+      font-size: 14px;
       font-weight: 700;
     }
 
     .macro-label {
-      font-size: var(--fitos-text-xs);
-      color: var(--fitos-text-tertiary);
+      font-size: 11px;
+      color: var(--fitos-text-tertiary, #737373);
     }
 
     .edited-badge {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: var(--fitos-space-1);
-      margin-top: var(--fitos-space-3);
-      padding: var(--fitos-space-2);
+      gap: 4px;
+      margin-top: 12px;
+      padding: 8px;
       background: rgba(16, 185, 129, 0.1);
-      border-radius: var(--fitos-radius-sm);
-      font-size: var(--fitos-text-xs);
-      color: var(--fitos-status-success);
+      border-radius: 6px;
+      font-size: 12px;
+      color: #10B981;
 
       ion-icon {
         font-size: 14px;
@@ -428,15 +431,22 @@ import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
     }
 
     .confirm-section {
-      padding-top: var(--fitos-space-4);
-      border-top: 1px solid var(--fitos-border-subtle);
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+
+      ion-button {
+        --border-radius: 8px;
+        height: 48px;
+        font-weight: 700;
+        --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+      }
     }
 
-    // Adherence-neutral colors
-    .calories-color { color: var(--fitos-nutrition-calories); }
-    .protein-color { color: var(--fitos-nutrition-protein); }
-    .carbs-color { color: var(--fitos-nutrition-carbs); }
-    .fat-color { color: var(--fitos-nutrition-fat); }
+    /* Adherence-neutral colors */
+    .calories-color { color: #6366F1; }
+    .protein-color { color: #22C55E; }
+    .carbs-color { color: #F59E0B; }
+    .fat-color { color: #EC4899; }
   `],
 })
 export class FoodIdentificationResultsComponent {

@@ -6,10 +6,6 @@ import {
   IonHeader,
   IonTitle,
   IonToolbar,
-  IonCard,
-  IonCardHeader,
-  IonCardTitle,
-  IonCardContent,
   IonButton,
   IonIcon,
   IonSpinner,
@@ -27,118 +23,152 @@ import { AuthService } from '@app/core/services/auth.service';
     IonHeader,
     IonTitle,
     IonToolbar,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardContent,
     IonButton,
     IonIcon,
     IonSpinner,
   ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-title>Email Verification</ion-title>
       </ion-toolbar>
     </ion-header>
 
-    <ion-content class="ion-padding">
+    <ion-content>
       <div class="verification-container">
         @if (verifying()) {
-          <ion-card>
-            <ion-card-header>
-              <ion-card-title class="ion-text-center">
-                <ion-spinner name="crescent"></ion-spinner>
-              </ion-card-title>
-            </ion-card-header>
-            <ion-card-content class="ion-text-center">
-              <p>Verifying your email address...</p>
-            </ion-card-content>
-          </ion-card>
+          <div class="state-card">
+            <ion-spinner name="crescent" class="large-spinner"></ion-spinner>
+            <p class="state-text">Verifying your email address...</p>
+          </div>
         } @else if (verified()) {
-          <ion-card color="success">
-            <ion-card-header>
-              <ion-card-title class="ion-text-center">
-                <ion-icon name="checkmark-circle-outline" size="large"></ion-icon>
-                <h2>Email Verified!</h2>
-              </ion-card-title>
-            </ion-card-header>
-            <ion-card-content class="ion-text-center">
-              <p>Your email has been successfully verified.</p>
-              <p>You can now sign in to your account.</p>
-              <ion-button expand="block" (click)="goToLogin()">
-                Go to Login
-              </ion-button>
-            </ion-card-content>
-          </ion-card>
+          <div class="state-card">
+            <div class="icon-wrap icon-wrap--success">
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+            </div>
+            <h2>Email Verified!</h2>
+            <p class="state-text">Your email has been successfully verified.</p>
+            <p class="state-text">You can now sign in to your account.</p>
+            <ion-button expand="block" (click)="goToLogin()" class="action-btn">
+              Go to Login
+            </ion-button>
+          </div>
         } @else if (error()) {
-          <ion-card color="danger">
-            <ion-card-header>
-              <ion-card-title class="ion-text-center">
-                <ion-icon name="close-circle-outline" size="large"></ion-icon>
-                <h2>Verification Failed</h2>
-              </ion-card-title>
-            </ion-card-header>
-            <ion-card-content class="ion-text-center">
-              <p>{{ errorMessage() }}</p>
-              @if (isExpiredLink()) {
-                <p>You can request a new verification email from the login page.</p>
-              }
-              <ion-button expand="block" (click)="goToLogin()">
-                Go to Login
-              </ion-button>
-            </ion-card-content>
-          </ion-card>
+          <div class="state-card">
+            <div class="icon-wrap icon-wrap--error">
+              <ion-icon name="close-circle-outline"></ion-icon>
+            </div>
+            <h2>Verification Failed</h2>
+            <p class="state-text">{{ errorMessage() }}</p>
+            @if (isExpiredLink()) {
+              <p class="state-text">You can request a new verification email from the login page.</p>
+            }
+            <ion-button expand="block" (click)="goToLogin()" class="action-btn">
+              Go to Login
+            </ion-button>
+          </div>
         } @else {
-          <ion-card>
-            <ion-card-header>
-              <ion-card-title class="ion-text-center">
-                <ion-icon name="mail-outline" size="large"></ion-icon>
-                <h2>Check Your Email</h2>
-              </ion-card-title>
-            </ion-card-header>
-            <ion-card-content class="ion-text-center">
-              <p>We've sent a verification link to your email address.</p>
-              <p>Please click the link in the email to verify your account.</p>
-              <ion-button expand="block" (click)="goToLogin()">
-                Back to Login
-              </ion-button>
-            </ion-card-content>
-          </ion-card>
+          <div class="state-card">
+            <div class="icon-wrap icon-wrap--info">
+              <ion-icon name="mail-outline"></ion-icon>
+            </div>
+            <h2>Check Your Email</h2>
+            <p class="state-text">We've sent a verification link to your email address.</p>
+            <p class="state-text">Please click the link in the email to verify your account.</p>
+            <ion-button expand="block" (click)="goToLogin()" class="action-btn">
+              Back to Login
+            </ion-button>
+          </div>
         }
       </div>
     </ion-content>
   `,
   styles: [`
+    ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     .verification-container {
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100%;
-      padding: 20px;
+      padding: 24px;
     }
 
-    ion-card {
-      max-width: 500px;
+    .state-card {
+      max-width: 400px;
       width: 100%;
+      text-align: center;
+      padding: 40px 24px;
+      background: var(--fitos-bg-secondary, #1A1A1A);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    ion-icon[size="large"] {
-      font-size: 64px;
-      margin-bottom: 16px;
+    .large-spinner {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 24px;
+    }
+
+    .icon-wrap {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+
+      ion-icon {
+        font-size: 36px;
+      }
+    }
+
+    .icon-wrap--success {
+      background: rgba(16, 185, 129, 0.1);
+      ion-icon { color: #10B981; }
+    }
+
+    .icon-wrap--error {
+      background: rgba(239, 68, 68, 0.1);
+      ion-icon { color: #EF4444; }
+    }
+
+    .icon-wrap--info {
+      background: rgba(16, 185, 129, 0.1);
+      ion-icon { color: var(--ion-color-primary, #10B981); }
     }
 
     h2 {
-      margin: 8px 0;
+      margin: 0 0 12px;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
-    p {
-      margin: 12px 0;
+    .state-text {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: var(--fitos-text-secondary, #A3A3A3);
       line-height: 1.6;
     }
 
-    ion-button {
-      margin-top: 20px;
+    .action-btn {
+      margin-top: 24px;
+      --border-radius: 8px;
+      height: 48px;
+      font-weight: 700;
+      font-size: 16px;
+      --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
     }
   `],
 })
