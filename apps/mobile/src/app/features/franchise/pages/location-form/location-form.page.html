@@ -8,8 +8,11 @@
       <ion-button
         (click)="saveLocation()"
         [disabled]="saving() || locationForm.invalid">
-        <span *ngIf="!saving()">Save</span>
-        <ion-spinner *ngIf="saving()" name="circular"></ion-spinner>
+        @if (saving()) {
+          <ion-spinner name="circular"></ion-spinner>
+        } @else {
+          <span>Save</span>
+        }
       </ion-button>
     </ion-buttons>
   </ion-toolbar>

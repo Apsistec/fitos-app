@@ -32,7 +32,7 @@ import { LeadPipelineComponent } from '../../components/lead-pipeline/lead-pipel
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-title>CRM & Marketing</ion-title>
       </ion-toolbar>
@@ -43,8 +43,19 @@ import { LeadPipelineComponent } from '../../components/lead-pipeline/lead-pipel
     </ion-content>
   `,
   styles: [`
+    ion-header ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-header ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     ion-content {
-      --background: var(--fitos-bg-primary);
+      --background: var(--fitos-bg-primary, #0D0D0D);
     }
   `],
 })

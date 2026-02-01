@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -69,6 +69,7 @@ import { OutcomePricingService, PricingTier } from '../../services/outcome-prici
     IonSpinner,
     IonBadge,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './tier-detail.page.html',
   styleUrls: ['./tier-detail.page.scss'],
 })

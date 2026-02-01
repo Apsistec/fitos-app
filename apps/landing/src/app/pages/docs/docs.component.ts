@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 interface DocCategory {
@@ -21,6 +21,7 @@ interface DocItem {
   selector: 'app-docs',
   standalone: true,
   imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="docs-page">
       <div class="docs-container">
@@ -312,7 +313,7 @@ interface DocItem {
     }
   `],
 })
-export class DocsComponent implements OnInit {
+export class DocsComponent {
   selectedCategory = signal<string | null>(null);
 
   categories: DocCategory[] = [
@@ -378,10 +379,6 @@ export class DocsComponent implements OnInit {
       ],
     },
   ];
-
-  ngOnInit() {
-    // Initialize with all categories visible
-  }
 
   filteredCategories = signal<DocCategory[]>(this.categories);
 

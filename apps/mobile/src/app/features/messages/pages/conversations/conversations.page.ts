@@ -19,7 +19,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { chatbubbleOutline, personCircleOutline } from 'ionicons/icons';
-import { MessagingService, type Conversation } from '@app/core/services/messaging.service';
+import { MessagingService, type Conversation } from '../../../../core/services/messaging.service';
 
 @Component({
   selector: 'app-conversations',
@@ -114,6 +114,21 @@ import { MessagingService, type Conversation } from '@app/core/services/messagin
     </ion-content>
   `,
   styles: [`
+    ion-header ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-header ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    ion-content {
+      --background: var(--fitos-bg-primary, #0D0D0D);
+    }
+
     .conversations-container {
       max-width: 800px;
       margin: 0 auto;
@@ -130,7 +145,7 @@ import { MessagingService, type Conversation } from '@app/core/services/messagin
 
       ion-icon {
         font-size: 64px;
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-tertiary, #737373);
         margin-bottom: 16px;
       }
 
@@ -141,16 +156,24 @@ import { MessagingService, type Conversation } from '@app/core/services/messagin
       h3 {
         margin: 0 0 8px;
         font-weight: 600;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       p {
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-secondary, #A3A3A3);
         margin: 0;
+        font-size: 14px;
       }
     }
 
+    ion-list {
+      background: transparent;
+    }
+
     ion-item {
+      --background: transparent;
       --padding-start: 16px;
+      --border-color: rgba(255, 255, 255, 0.06);
 
       ion-avatar {
         width: 48px;
@@ -158,18 +181,20 @@ import { MessagingService, type Conversation } from '@app/core/services/messagin
 
         ion-icon {
           font-size: 48px;
-          color: var(--ion-color-medium);
+          color: var(--fitos-text-tertiary, #737373);
         }
       }
 
       h2 {
         font-weight: 600;
+        font-size: 15px;
         margin: 0 0 4px;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       .last-message {
-        color: var(--ion-color-medium);
-        font-size: 0.875rem;
+        color: var(--fitos-text-secondary, #A3A3A3);
+        font-size: 14px;
         margin: 0 0 4px;
         white-space: nowrap;
         overflow: hidden;
@@ -177,7 +202,8 @@ import { MessagingService, type Conversation } from '@app/core/services/messagin
       }
 
       .message-time {
-        font-size: 0.75rem;
+        font-size: 12px;
+        color: var(--fitos-text-tertiary, #737373);
       }
     }
 
@@ -186,6 +212,7 @@ import { MessagingService, type Conversation } from '@app/core/services/messagin
       padding: 16px;
       margin: 16px;
       text-align: center;
+      color: #FCA5A5;
     }
   `],
 })

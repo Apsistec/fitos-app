@@ -313,7 +313,7 @@ export class OtpVerifyModalComponent {
   }
 
   /** Call this from parent to show verification error */
-  setError(message: string = 'Invalid code. Please try again.'): void {
+  setError(message = 'Invalid code. Please try again.'): void {
     this.isVerifying.set(false);
     this.isSuccess.set(false);
     this.hasError.set(true);

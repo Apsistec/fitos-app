@@ -104,7 +104,7 @@ export class HapticService {
    * Vibrate device for a specific duration (fallback for older APIs)
    * @param duration - Duration in milliseconds
    */
-  async vibrate(duration: number = 200): Promise<void> {
+  async vibrate(duration = 200): Promise<void> {
     if (!this.isNative) return;
 
     try {

@@ -209,6 +209,14 @@ export const routes: Routes = [
               ),
           },
           {
+            // Workout completion celebration screen
+            path: 'complete/:id',
+            loadComponent: () =>
+              import('./features/workouts/pages/workout-complete/workout-complete.page').then(
+                (m) => m.WorkoutCompletePage
+              ),
+          },
+          {
             // Workout history list - everyone
             path: 'history',
             loadComponent: () =>

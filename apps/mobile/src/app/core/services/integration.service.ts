@@ -419,7 +419,7 @@ export class IntegrationService {
    */
   async getSyncHistory(
     userIntegrationId: string,
-    limit: number = 20
+    limit = 20
   ): Promise<IntegrationSyncLog[]> {
     try {
       const { data, error } = await this.supabase.client

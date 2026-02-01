@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
@@ -14,6 +14,7 @@ import { OutcomePricingService, CreatePricingTierRequest } from '../../services/
   selector: 'fit-create-tier',
   standalone: true,
   imports: [CommonModule, FormsModule, IonicModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ion-header>
       <ion-toolbar>
@@ -217,8 +218,20 @@ import { OutcomePricingService, CreatePricingTierRequest } from '../../services/
       --background: var(--fitos-bg-primary, #0D0D0D);
     }
 
+    ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
     ion-list {
       margin-bottom: 16px;
+    }
+
+    ion-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
     }
 
     .pricing-preview {
@@ -244,6 +257,7 @@ import { OutcomePricingService, CreatePricingTierRequest } from '../../services/
     .bonus-price strong {
       display: block;
       font-size: 18px;
+      font-family: 'Space Mono', monospace;
       margin-bottom: 2px;
     }
 
@@ -251,19 +265,19 @@ import { OutcomePricingService, CreatePricingTierRequest } from '../../services/
     .bonus-price p {
       margin: 0;
       font-size: 12px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
     }
 
     .plus-icon {
       font-size: 20px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-tertiary, #737373);
     }
 
     .description {
       margin-top: 16px;
       padding-top: 16px;
-      border-top: 1px solid var(--ion-border-color);
-      color: var(--ion-color-medium);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      color: var(--fitos-text-secondary, #A3A3A3);
       line-height: 1.5;
     }
 

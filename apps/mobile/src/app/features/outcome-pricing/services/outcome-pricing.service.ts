@@ -98,9 +98,9 @@ export class OutcomePricingService {
    * List goals (filtered by client_id or all for trainer)
    */
   listGoals(clientId?: string, status?: GoalStatus): Observable<ClientGoal[]> {
-    let params: any = {};
-    if (clientId) params.client_id = clientId;
-    if (status) params.status = status;
+    const params: Record<string, string> = {};
+    if (clientId) params['client_id'] = clientId;
+    if (status) params['status'] = status;
 
     return this.http.get<ClientGoal[]>(`${this.baseUrl}/goals`, { params }).pipe(
       tap(goals => this.clientGoals.set(goals))

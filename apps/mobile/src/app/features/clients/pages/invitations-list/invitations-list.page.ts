@@ -74,7 +74,7 @@ addIcons({
     IonFabButton,
   ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/tabs/clients"></ion-back-button>
@@ -213,6 +213,18 @@ addIcons({
     </ion-content>
   `,
   styles: [`
+    /* FitOS Header */
+    ion-header ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-header ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     .loading-container,
     .error-container,
     .empty-state {
@@ -227,22 +239,22 @@ addIcons({
 
     .loading-container p {
       margin-top: 16px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
     }
 
     .error-message {
-      color: var(--ion-color-danger);
+      color: var(--fitos-status-error, #EF4444);
       margin-bottom: 16px;
     }
 
     .empty-state p {
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
       margin-bottom: 8px;
-      font-size: 1.1rem;
+      font-size: 16px;
     }
 
     .empty-subtitle {
-      font-size: 0.9rem !important;
+      font-size: 14px !important;
       margin-bottom: 16px !important;
     }
 
@@ -255,10 +267,12 @@ addIcons({
     }
 
     .section-title {
-      font-size: 1.1rem;
-      font-weight: 600;
+      font-size: 13px;
+      font-weight: 500;
       margin: 0 0 12px 4px;
-      color: var(--ion-color-dark);
+      color: var(--fitos-text-tertiary, #737373);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .card-header {
@@ -276,8 +290,9 @@ addIcons({
     }
 
     ion-card-title {
-      font-size: 1rem;
-      font-weight: 600;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
       margin: 0;
       flex: 1;
       min-width: 0;
@@ -313,32 +328,40 @@ addIcons({
     }
 
     .detail-label {
-      font-size: 0.875rem;
-      color: var(--ion-color-medium);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 500;
+      color: var(--fitos-text-tertiary, #737373);
     }
 
     .detail-value {
-      font-size: 0.875rem;
+      font-size: 14px;
       font-weight: 500;
-      color: var(--ion-color-dark);
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .detail-value.code {
-      font-family: 'Courier New', monospace;
+      font-family: 'Space Mono', monospace;
       font-weight: 600;
-      color: var(--ion-color-primary);
+      color: var(--ion-color-primary, #10B981);
     }
 
     .detail-value.expired {
-      color: var(--ion-color-danger);
+      color: var(--fitos-status-error, #EF4444);
     }
 
     ion-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
       margin: 0 0 12px 0;
     }
 
     ion-fab-button {
-      --background: var(--ion-color-primary);
+      --background: var(--ion-color-primary, #10B981);
+      --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
     }
   `]
 })

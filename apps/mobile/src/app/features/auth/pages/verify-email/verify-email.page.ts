@@ -12,7 +12,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { mailOutline, checkmarkCircleOutline, closeCircleOutline } from 'ionicons/icons';
-import { AuthService } from '@app/core/services/auth.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-verify-email',

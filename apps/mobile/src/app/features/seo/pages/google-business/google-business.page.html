@@ -1,5 +1,5 @@
-<ion-header>
-  <ion-toolbar>
+<ion-header class="ion-no-border">
+  <ion-toolbar class="transparent-toolbar">
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/seo"></ion-back-button>
     </ion-buttons>
@@ -12,7 +12,7 @@
   </ion-toolbar>
 
   @if (connected()) {
-    <ion-toolbar>
+    <ion-toolbar class="transparent-toolbar">
       <ion-segment [value]="selectedTab()" (ionChange)="selectedTab.set($event.detail.value)">
         <ion-segment-button value="info">
           <ion-label>Profile</ion-label>

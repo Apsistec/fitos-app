@@ -12,9 +12,9 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { shieldCheckmarkOutline, keyOutline, refreshOutline } from 'ionicons/icons';
-import { AuthService } from '@app/core/services/auth.service';
-import { SupabaseService } from '@app/core/services/supabase.service';
-import { OtpInputComponent } from '@app/shared/components/otp-input/otp-input.component';
+import { AuthService } from '../../../../core/services/auth.service';
+import { SupabaseService } from '../../../../core/services/supabase.service';
+import { OtpInputComponent } from '../../../../shared/components/otp-input/otp-input.component';
 
 @Component({
   selector: 'app-mfa-verify',

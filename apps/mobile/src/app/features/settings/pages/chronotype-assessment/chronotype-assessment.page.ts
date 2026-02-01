@@ -39,9 +39,9 @@ import {
   ChronotypeService,
   ChronotypeQuestion,
   ChronotypeResult,
-} from '@app/core/services/chronotype.service';
-import { AuthService } from '@app/core/services/auth.service';
-import { LoadingService } from '@app/core/services/loading.service';
+} from '../../../../core/services/chronotype.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { LoadingService } from '../../../../core/services/loading.service';
 
 /**
  * Chronotype Assessment Page
@@ -82,6 +82,23 @@ import { LoadingService } from '@app/core/services/loading.service';
   ],
   styles: [
     `
+      ion-header {
+        ion-toolbar {
+          --background: transparent;
+          --border-width: 0;
+
+          ion-title {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+          }
+        }
+      }
+
+      ion-content {
+        --background: var(--fitos-bg-primary, #0D0D0D);
+      }
+
       .assessment-container {
         max-width: 600px;
         margin: 0 auto;
@@ -91,11 +108,33 @@ import { LoadingService } from '@app/core/services/loading.service';
       .intro-section {
         text-align: center;
         margin-bottom: 24px;
+
+        h1 {
+          color: var(--fitos-text-primary, #F5F5F5);
+          font-weight: 700;
+        }
+
+        p {
+          color: var(--fitos-text-secondary, #A3A3A3);
+        }
       }
 
       .intro-icon {
         font-size: 64px;
         margin-bottom: 16px;
+      }
+
+      ion-card {
+        --background: var(--fitos-bg-secondary, #1A1A1A);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        box-shadow: none;
+      }
+
+      ion-card-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       .question-card {
@@ -104,59 +143,88 @@ import { LoadingService } from '@app/core/services/loading.service';
 
       .question-number {
         font-weight: 600;
-        color: var(--ion-color-primary);
+        color: var(--ion-color-primary, #10B981);
       }
 
       .option-item {
+        --background: transparent;
         margin-bottom: 8px;
         --padding-start: 16px;
+      }
+
+      ion-list {
+        background: transparent;
       }
 
       .progress-text {
         text-align: center;
         margin-bottom: 16px;
         font-size: 14px;
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-tertiary, #737373);
       }
 
       .results-section {
         text-align: center;
+
+        h1 {
+          color: var(--fitos-text-primary, #F5F5F5);
+          font-weight: 700;
+        }
+
+        p {
+          color: var(--fitos-text-secondary, #A3A3A3);
+        }
       }
 
       .chronotype-category {
         font-size: 28px;
         font-weight: 700;
         margin: 16px 0;
-        color: var(--ion-color-primary);
+        color: var(--ion-color-primary, #10B981);
       }
 
       .score-badge {
         display: inline-block;
         padding: 8px 16px;
-        background: var(--ion-color-light);
+        background: var(--fitos-bg-tertiary, #262626);
         border-radius: 16px;
         margin: 16px 0;
+        font-family: 'Space Mono', monospace;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       .insights-list {
         text-align: left;
         margin-top: 24px;
+
+        h3 {
+          color: var(--fitos-text-primary, #F5F5F5);
+        }
       }
 
       .insight-item {
         margin-bottom: 12px;
         padding: 12px;
-        background: var(--ion-color-light);
+        background: var(--fitos-bg-tertiary, #262626);
         border-radius: 8px;
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
 
       .insight-title {
         font-weight: 600;
         margin-bottom: 4px;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       .recommendation-chip {
         margin: 4px;
+      }
+
+      ion-button[size="large"] {
+        --border-radius: 8px;
+        height: 48px;
+        font-weight: 700;
+        --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
       }
     `,
   ],

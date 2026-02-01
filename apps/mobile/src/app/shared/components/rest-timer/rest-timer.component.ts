@@ -163,8 +163,8 @@ addIcons({ playOutline, pauseOutline, stopOutline, closeOutline });
 export class RestTimerComponent implements OnInit, OnDestroy {
   private haptic = inject(HapticService);
 
-  @Input() restSeconds: number = 90;
-  @Input() autoStart: boolean = true;
+  @Input() restSeconds = 90;
+  @Input() autoStart = true;
   @Output() complete = new EventEmitter<void>();
   @Output() skip = new EventEmitter<void>();
 
@@ -174,7 +174,7 @@ export class RestTimerComponent implements OnInit, OnDestroy {
 
   private interval?: number;
   private startTime?: number;
-  private pausedTime: number = 0;
+  private pausedTime = 0;
   private warningHapticTriggered = false;
 
   ngOnInit() {

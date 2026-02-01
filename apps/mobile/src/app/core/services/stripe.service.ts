@@ -1,7 +1,7 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
-import { environment } from '@env/environment';
+import { environment } from '../../../environments/environment';
 
 export interface StripeConnectStatus {
   isConnected: boolean;
@@ -255,7 +255,7 @@ export class StripeService {
   /**
    * Get payout history for the connected account
    */
-  async getPayouts(limit: number = 50): Promise<StripePayout[]> {
+  async getPayouts(limit = 50): Promise<StripePayout[]> {
     const accountId = this._connectStatus()?.accountId;
     if (!accountId) {
       return [];
@@ -291,7 +291,7 @@ export class StripeService {
   /**
    * Get transfer history (for trainers who receive transfers from facilities)
    */
-  async getTransfers(limit: number = 50): Promise<StripeTransfer[]> {
+  async getTransfers(limit = 50): Promise<StripeTransfer[]> {
     const accountId = this._connectStatus()?.accountId;
     if (!accountId) {
       return [];

@@ -15,7 +15,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { copyOutline, checkmarkOutline } from 'ionicons/icons';
-import { HapticService } from '@app/core/services/haptic.service';
+import { HapticService } from '../../../../core/services/haptic.service';
 
 type EmbedType = 'iframe' | 'script' | 'direct';
 
@@ -150,29 +150,37 @@ type EmbedType = 'iframe' | 'script' | 'direct';
     </ion-card>
   `,
   styles: [`
+    ion-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
+    }
+
     .subtitle {
       margin: 4px 0 0 0;
-      font-size: var(--fitos-text-sm);
+      font-size: 13px;
+      color: var(--fitos-text-secondary, #A3A3A3);
     }
 
     ion-segment {
-      --background: var(--fitos-bg-tertiary);
-      margin-bottom: var(--fitos-space-4);
+      --background: var(--fitos-bg-tertiary, #262626);
+      margin-bottom: 16px;
     }
 
     .code-container {
       position: relative;
-      margin: var(--fitos-space-4) 0;
+      margin: 16px 0;
     }
 
     .code-block {
-      background: var(--fitos-bg-tertiary);
-      border: 1px solid var(--fitos-border-subtle);
-      border-radius: var(--fitos-radius-md);
-      padding: var(--fitos-space-4);
-      font-family: var(--fitos-font-mono);
-      font-size: var(--fitos-text-sm);
-      color: var(--fitos-text-primary);
+      background: var(--fitos-bg-tertiary, #262626);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      color: var(--fitos-text-primary, #F5F5F5);
       overflow-x: auto;
       white-space: pre-wrap;
       word-wrap: break-word;
@@ -181,78 +189,79 @@ type EmbedType = 'iframe' | 'script' | 'direct';
 
     .copy-button {
       position: absolute;
-      top: var(--fitos-space-2);
-      right: var(--fitos-space-2);
+      top: 8px;
+      right: 8px;
+      --border-radius: 8px;
     }
 
     .instructions {
-      margin-top: var(--fitos-space-6);
+      margin-top: 24px;
 
       h3 {
-        margin: 0 0 var(--fitos-space-3) 0;
-        font-size: var(--fitos-text-lg);
+        margin: 0 0 12px 0;
+        font-size: 16px;
         font-weight: 600;
-        color: var(--fitos-text-primary);
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       ol {
         margin: 0;
-        padding-left: var(--fitos-space-6);
+        padding-left: 24px;
 
         li {
-          margin: var(--fitos-space-2) 0;
-          font-size: var(--fitos-text-sm);
-          color: var(--fitos-text-secondary);
+          margin: 8px 0;
+          font-size: 13px;
+          color: var(--fitos-text-secondary, #A3A3A3);
         }
       }
     }
 
     .note {
-      margin-top: var(--fitos-space-3);
-      padding: var(--fitos-space-3);
-      background: var(--fitos-bg-tertiary);
-      border-radius: var(--fitos-radius-md);
-      border-left: 3px solid var(--ion-color-warning);
+      margin-top: 12px;
+      padding: 12px;
+      background: var(--fitos-bg-tertiary, #262626);
+      border-radius: 8px;
+      border-left: 3px solid #F59E0B;
 
       p {
         margin: 0;
-        font-size: var(--fitos-text-sm);
+        font-size: 13px;
       }
     }
 
     .customization {
-      margin-top: var(--fitos-space-6);
-      padding-top: var(--fitos-space-4);
-      border-top: 1px solid var(--fitos-border-subtle);
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
 
       h3 {
-        margin: 0 0 var(--fitos-space-3) 0;
-        font-size: var(--fitos-text-lg);
+        margin: 0 0 12px 0;
+        font-size: 16px;
         font-weight: 600;
-        color: var(--fitos-text-primary);
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       p {
-        margin: 0 0 var(--fitos-space-2) 0;
-        font-size: var(--fitos-text-sm);
-        color: var(--fitos-text-secondary);
+        margin: 0 0 8px 0;
+        font-size: 13px;
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
 
       ul {
         margin: 0;
-        padding-left: var(--fitos-space-6);
+        padding-left: 24px;
 
         li {
-          margin: var(--fitos-space-1) 0;
-          font-size: var(--fitos-text-sm);
-          color: var(--fitos-text-secondary);
+          margin: 4px 0;
+          font-size: 13px;
+          color: var(--fitos-text-secondary, #A3A3A3);
 
           code {
-            font-family: var(--fitos-font-mono);
-            background: var(--fitos-bg-tertiary);
+            font-family: 'Space Mono', monospace;
+            background: var(--fitos-bg-tertiary, #262626);
             padding: 2px 6px;
-            border-radius: var(--fitos-radius-sm);
-            font-size: var(--fitos-text-xs);
+            border-radius: 6px;
+            font-size: 11px;
           }
         }
       }

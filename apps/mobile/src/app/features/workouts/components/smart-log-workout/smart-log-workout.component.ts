@@ -26,7 +26,7 @@ import {
   addOutline,
   removeOutline,
 } from 'ionicons/icons';
-import { HapticService } from '@app/core/services/haptic.service';
+import { HapticService } from '../../../../core/services/haptic.service';
 
 export interface ExerciseSuggestion {
   exerciseId: string;

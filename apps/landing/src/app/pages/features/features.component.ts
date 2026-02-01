@@ -1,9 +1,10 @@
-import { Component, OnInit, ElementRef, AfterViewInit, PLATFORM_ID, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ElementRef, AfterViewInit, PLATFORM_ID, inject } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-features',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   template: `
     <div class="features-page">
@@ -313,8 +314,8 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
     }
 
     .problem-card:hover {
-      border-color: rgba(239, 68, 68, 0.3);
-      box-shadow: 0 12px 32px rgba(239, 68, 68, 0.15);
+      border-color: rgba(var(--fitos-accent-danger-rgb, 239, 68, 68), 0.3);
+      box-shadow: 0 12px 32px rgba(var(--fitos-accent-danger-rgb, 239, 68, 68), 0.15);
       transform: translateY(-4px);
     }
 
@@ -374,7 +375,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
     }
 
     .category-badge.client {
-      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      background: linear-gradient(135deg, #f59e0b, var(--fitos-accent-danger, #ef4444));
     }
 
     .category-header h3 {
@@ -420,7 +421,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
     }
 
     .feature-card.client::before {
-      background: linear-gradient(90deg, #f59e0b, #ef4444);
+      background: linear-gradient(90deg, #f59e0b, var(--fitos-accent-danger, #ef4444));
     }
 
     .feature-card:hover {
@@ -598,8 +599,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 })
 export class FeaturesComponent implements AfterViewInit {
   private platformId = inject(PLATFORM_ID);
-
-  constructor(private elementRef: ElementRef) {}
+  private elementRef = inject(ElementRef);
 
   ngAfterViewInit() {
     // Only run animations in browser, not during SSR

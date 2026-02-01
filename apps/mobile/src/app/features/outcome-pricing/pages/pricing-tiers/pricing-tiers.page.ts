@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
@@ -14,6 +14,7 @@ import { OutcomePricingService, PricingTier } from '../../services/outcome-prici
   selector: 'fit-pricing-tiers',
   standalone: true,
   imports: [CommonModule, IonicModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ion-header>
       <ion-toolbar>
@@ -89,6 +90,17 @@ import { OutcomePricingService, PricingTier } from '../../services/outcome-prici
     </ion-content>
   `,
   styles: [`
+    :host {
+      ion-content {
+        --background: var(--fitos-bg-primary, #0D0D0D);
+      }
+    }
+
+    ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
     .empty-state {
       display: flex;
       flex-direction: column;
@@ -101,19 +113,19 @@ import { OutcomePricingService, PricingTier } from '../../services/outcome-prici
 
     .empty-icon {
       font-size: 96px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-tertiary, #737373);
       margin-bottom: 24px;
     }
 
     .empty-state h2 {
-      color: var(--ion-color-step-850, #000);
+      color: var(--fitos-text-primary, #F5F5F5);
       font-size: 24px;
       font-weight: 600;
       margin-bottom: 8px;
     }
 
     .empty-state p {
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
       margin-bottom: 24px;
       max-width: 300px;
     }
@@ -140,7 +152,7 @@ import { OutcomePricingService, PricingTier } from '../../services/outcome-prici
 
     .loading-container p {
       margin-top: 16px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
     }
   `]
 })

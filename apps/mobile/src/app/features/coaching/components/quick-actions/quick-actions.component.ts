@@ -64,53 +64,53 @@ export interface QuickAction {
   `,
   styles: [`
     .quick-actions {
-      padding: var(--fitos-space-4);
-      background: var(--fitos-bg-secondary);
-      border-top: 1px solid var(--fitos-border-subtle);
+      padding: 16px;
+      background: var(--fitos-bg-secondary, #1A1A1A);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .actions-header {
-      margin-bottom: var(--fitos-space-4);
+      margin-bottom: 16px;
       text-align: center;
     }
 
     .actions-header h3 {
-      margin: 0 0 var(--fitos-space-1) 0;
-      font-size: var(--fitos-text-lg);
+      margin: 0 0 4px 0;
+      font-size: 16px;
       font-weight: 600;
-      color: var(--fitos-text-primary);
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .subtitle {
       margin: 0;
-      font-size: var(--fitos-text-sm);
-      color: var(--fitos-text-tertiary);
+      font-size: 13px;
+      color: var(--fitos-text-tertiary, #737373);
     }
 
     .actions-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: var(--fitos-space-3);
+      gap: 12px;
     }
 
     .action-button {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: var(--fitos-space-2);
-      padding: var(--fitos-space-4);
-      background: var(--fitos-bg-primary);
-      border: 1px solid var(--fitos-border-subtle);
-      border-radius: var(--fitos-radius-lg);
+      gap: 8px;
+      padding: 16px;
+      background: var(--fitos-bg-primary, #0D0D0D);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
       cursor: pointer;
-      transition: all var(--fitos-duration-fast) var(--fitos-ease-default);
+      transition: all 150ms ease;
       min-height: 100px;
       text-align: center;
 
       &:hover {
         transform: translateY(-2px);
-        box-shadow: var(--fitos-glow-primary);
-        border-color: var(--fitos-accent-primary);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        border-color: var(--ion-color-primary, #10B981);
       }
 
       &:active {
@@ -125,7 +125,7 @@ export interface QuickAction {
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all var(--fitos-duration-fast);
+      transition: all 150ms ease;
 
       ion-icon {
         font-size: 24px;
@@ -134,7 +134,7 @@ export interface QuickAction {
 
     .action-button[data-color="nutrition"] .action-icon {
       background: rgba(16, 185, 129, 0.15);
-      color: var(--fitos-nutrition-protein);
+      color: #22C55E;
     }
 
     .action-button[data-color="progress"] .action-icon {
@@ -144,16 +144,16 @@ export interface QuickAction {
 
     .action-button[data-color="workout"] .action-icon {
       background: rgba(139, 92, 246, 0.15);
-      color: var(--fitos-accent-secondary);
+      color: #8B5CF6;
     }
 
     .action-button[data-color="trainer"] .action-icon {
       background: rgba(245, 158, 11, 0.15);
-      color: var(--fitos-status-warning);
+      color: #F59E0B;
     }
 
     .action-button:hover[data-color="nutrition"] {
-      border-color: var(--fitos-nutrition-protein);
+      border-color: #22C55E;
     }
 
     .action-button:hover[data-color="progress"] {
@@ -161,17 +161,17 @@ export interface QuickAction {
     }
 
     .action-button:hover[data-color="workout"] {
-      border-color: var(--fitos-accent-secondary);
+      border-color: #8B5CF6;
     }
 
     .action-button:hover[data-color="trainer"] {
-      border-color: var(--fitos-status-warning);
+      border-color: #F59E0B;
     }
 
     .action-label {
-      font-size: var(--fitos-text-sm);
+      font-size: 13px;
       font-weight: 500;
-      color: var(--fitos-text-primary);
+      color: var(--fitos-text-primary, #F5F5F5);
       line-height: 1.3;
     }
 

@@ -9,7 +9,7 @@
     .section-title {
       font-size: 24px;
       font-weight: 700;
-      color: var(--fitos-text-primary, var(--ion-text-color));
+      color: var(--fitos-text-primary, #F5F5F5);
       margin: 0 0 16px 0;
       text-align: center;
     }
@@ -27,7 +27,7 @@
       ion-label {
         font-size: 18px;
         font-weight: 700;
-        color: var(--fitos-text-primary, var(--ion-text-color));
+        color: var(--fitos-text-primary, #F5F5F5);
         margin: 0;
       }
     }

@@ -1,13 +1,14 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FAQ_ITEMS, FAQ_CATEGORIES, AccordionComponent } from '@fitos/libs';
-import type { FAQItem, HelpCategory, SupportCategory, AccordionItem } from '@fitos/libs';
+import type { FAQItem, HelpCategory, AccordionItem } from '@fitos/libs';
 
 @Component({
   selector: 'app-help',
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule, AccordionComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="help-container">
       <div class="help-header">
@@ -418,7 +419,7 @@ import type { FAQItem, HelpCategory, SupportCategory, AccordionItem } from '@fit
     .error-text {
       display: block;
       font-size: 0.75rem;
-      color: #ef4444;
+      color: var(--fitos-accent-danger, #ef4444);
       margin-top: 4px;
     }
 
@@ -453,10 +454,10 @@ import type { FAQItem, HelpCategory, SupportCategory, AccordionItem } from '@fit
     .error-message {
       margin-top: 16px;
       padding: 12px 16px;
-      background-color: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
+      background-color: color-mix(in srgb, var(--fitos-accent-danger, #ef4444) 10%, transparent);
+      border: 1px solid color-mix(in srgb, var(--fitos-accent-danger, #ef4444) 30%, transparent);
       border-radius: 8px;
-      color: #ef4444;
+      color: var(--fitos-accent-danger, #ef4444);
       font-size: 0.875rem;
       text-align: center;
     }
@@ -607,7 +608,8 @@ export class HelpComponent {
       // In a real implementation, this would call a Supabase Edge Function or backend API
       // that creates a ticket and sends an email notification
 
-      const ticketData = {
+      // For landing page submissions, we log the data and simulate ticket creation
+      console.log('Support ticket submitted:', {
         name: formValue.name,
         email: formValue.email,
         category: formValue.category,
@@ -616,7 +618,7 @@ export class HelpComponent {
         source: 'landing_page',
         platform: 'web',
         timestamp: new Date().toISOString(),
-      };
+      });
 
       // TODO: Replace with actual API call
       // await fetch('/api/support/ticket', {

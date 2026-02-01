@@ -318,7 +318,7 @@ export class SubscriptionService {
   /**
    * Format price for display
    */
-  formatPrice(amountCents: number, currency: string = 'usd'): string {
+  formatPrice(amountCents: number, currency = 'usd'): string {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency.toUpperCase(),

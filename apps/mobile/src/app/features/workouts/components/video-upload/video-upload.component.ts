@@ -469,7 +469,7 @@ import { AuthService } from '../../../../core/services/auth.service';
   ],
 })
 export class VideoUploadComponent implements OnInit {
-  @Input() trainerId: string = '';
+  @Input() trainerId = '';
   @Input() exercises: any[] = []; // Exercise list passed in
 
   private videoFeedbackService = inject(VideoFeedbackService);

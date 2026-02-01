@@ -37,7 +37,7 @@ import {
   trashOutline,
   peopleOutline,
 } from 'ionicons/icons';
-import { HapticService } from '@app/core/services/haptic.service';
+import { HapticService } from '../../../../core/services/haptic.service';
 
 export type CampaignStatus = 'draft' | 'scheduled' | 'sending' | 'sent' | 'failed';
 
@@ -93,7 +93,7 @@ export interface EmailCampaign {
     IonSpinner,
   ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/crm"></ion-back-button>
@@ -263,51 +263,76 @@ export interface EmailCampaign {
     </ion-content>
   `,
   styles: [`
+    ion-header ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-header ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    ion-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
+    }
+
+    ion-card-header ion-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
+    }
+
     .campaigns-container {
-      padding: var(--fitos-space-4);
+      padding: 16px;
     }
 
     .stats-header {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: var(--fitos-space-3);
-      margin-bottom: var(--fitos-space-4);
+      gap: 12px;
+      margin-bottom: 16px;
     }
 
     .stat-card {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: var(--fitos-space-4);
-      background: var(--fitos-bg-secondary);
-      border-radius: var(--fitos-radius-lg);
-      border: 1px solid var(--fitos-border-subtle);
+      padding: 16px;
+      background: var(--fitos-bg-secondary, #1A1A1A);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .stat-value {
-      font-family: var(--fitos-font-mono);
-      font-size: var(--fitos-text-2xl);
+      font-family: 'Space Mono', monospace;
+      font-size: 24px;
       font-weight: 700;
-      color: var(--fitos-text-primary);
-      margin-bottom: var(--fitos-space-1);
+      color: var(--fitos-text-primary, #F5F5F5);
+      margin-bottom: 4px;
     }
 
     .stat-label {
-      font-size: var(--fitos-text-xs);
-      color: var(--fitos-text-tertiary);
+      font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.5px;
+      font-weight: 500;
+      color: var(--fitos-text-tertiary, #737373);
       text-align: center;
     }
 
     ion-segment {
-      --background: var(--fitos-bg-secondary);
-      margin-bottom: var(--fitos-space-4);
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      margin-bottom: 16px;
     }
 
     ion-searchbar {
-      --background: var(--fitos-bg-secondary);
-      margin-bottom: var(--fitos-space-4);
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      margin-bottom: 16px;
     }
 
     .loading-container {
@@ -315,28 +340,29 @@ export interface EmailCampaign {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: var(--fitos-space-8);
-      gap: var(--fitos-space-3);
+      padding: 48px;
+      gap: 12px;
 
       ion-spinner {
-        --color: var(--fitos-accent-primary);
+        --color: var(--ion-color-primary, #10B981);
       }
 
       p {
         margin: 0;
-        color: var(--fitos-text-secondary);
+        font-size: 14px;
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
     }
 
     .campaigns-list {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-3);
+      gap: 12px;
     }
 
     .campaign-card {
       margin: 0;
-      transition: transform var(--fitos-duration-fast);
+      transition: transform 150ms ease;
 
       &:active {
         transform: scale(0.98);
@@ -347,7 +373,7 @@ export interface EmailCampaign {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: var(--fitos-space-3);
+      gap: 12px;
     }
 
     .campaign-info {
@@ -356,15 +382,15 @@ export interface EmailCampaign {
     }
 
     ion-card-title {
-      font-size: var(--fitos-text-lg);
+      font-size: 16px;
       font-weight: 600;
-      margin-bottom: var(--fitos-space-1);
+      margin-bottom: 4px;
     }
 
     .campaign-subject {
       margin: 0;
-      font-size: var(--fitos-text-sm);
-      color: var(--fitos-text-secondary);
+      font-size: 13px;
+      color: var(--fitos-text-secondary, #A3A3A3);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -373,26 +399,26 @@ export interface EmailCampaign {
     .campaign-meta {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-2);
-      margin-bottom: var(--fitos-space-4);
+      gap: 8px;
+      margin-bottom: 16px;
     }
 
     .meta-item {
       display: flex;
       align-items: center;
-      gap: var(--fitos-space-2);
-      font-size: var(--fitos-text-sm);
-      color: var(--fitos-text-secondary);
+      gap: 8px;
+      font-size: 13px;
+      color: var(--fitos-text-secondary, #A3A3A3);
 
       ion-icon {
         font-size: 16px;
-        color: var(--fitos-text-tertiary);
+        color: var(--fitos-text-tertiary, #737373);
       }
     }
 
     .campaign-actions {
       display: flex;
-      gap: var(--fitos-space-2);
+      gap: 8px;
       flex-wrap: wrap;
 
       ion-button {
@@ -405,25 +431,34 @@ export interface EmailCampaign {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: var(--fitos-space-8);
+      padding: 48px;
       text-align: center;
 
       .empty-icon {
-        font-size: 80px;
-        color: var(--fitos-text-tertiary);
+        font-size: 48px;
+        color: var(--fitos-text-tertiary, #737373);
         opacity: 0.5;
-        margin-bottom: var(--fitos-space-4);
+        margin-bottom: 16px;
       }
 
       h2 {
-        margin: 0 0 var(--fitos-space-2) 0;
-        font-size: var(--fitos-text-xl);
-        color: var(--fitos-text-primary);
+        margin: 0 0 8px 0;
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       p {
-        margin: 0 0 var(--fitos-space-4) 0;
-        color: var(--fitos-text-secondary);
+        margin: 0 0 16px 0;
+        font-size: 14px;
+        color: var(--fitos-text-secondary, #A3A3A3);
+      }
+
+      ion-button {
+        --border-radius: 8px;
+        height: 48px;
+        font-weight: 700;
+        --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
       }
     }
   `],

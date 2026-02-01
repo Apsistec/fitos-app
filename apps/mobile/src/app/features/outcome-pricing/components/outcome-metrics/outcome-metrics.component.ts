@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { OutcomePricingService, TrainerAnalytics } from '../../services/outcome-pricing.service';
@@ -13,6 +13,7 @@ import { OutcomePricingService, TrainerAnalytics } from '../../services/outcome-
   selector: 'fit-outcome-metrics',
   standalone: true,
   imports: [CommonModule, IonicModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (isLoading()) {
       <div class="loading-container">
@@ -115,7 +116,7 @@ import { OutcomePricingService, TrainerAnalytics } from '../../services/outcome-
     }
 
     .error-container p {
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
       text-align: center;
     }
 
@@ -128,6 +129,10 @@ import { OutcomePricingService, TrainerAnalytics } from '../../services/outcome-
 
     .metric-card {
       margin: 0;
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
     }
 
     .metric-card.primary {
@@ -171,15 +176,17 @@ import { OutcomePricingService, TrainerAnalytics } from '../../services/outcome-
     .metric-value {
       font-size: 32px;
       font-weight: 700;
+      font-family: 'Space Mono', monospace;
       line-height: 1;
       margin-bottom: 8px;
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .metric-label {
       font-size: 12px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
       font-weight: 600;
     }
 
@@ -190,7 +197,7 @@ import { OutcomePricingService, TrainerAnalytics } from '../../services/outcome-
     .metric-note {
       margin: 8px 0 0;
       font-size: 11px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-tertiary, #737373);
     }
 
     .metric-card.primary .metric-note {

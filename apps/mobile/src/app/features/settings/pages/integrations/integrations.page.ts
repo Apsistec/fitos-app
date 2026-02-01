@@ -257,8 +257,21 @@ import { AuthService } from '../../../../core/services/auth.service';
   `,
   styles: [
     `
+      :host {
+        ion-header {
+          ion-toolbar {
+            --background: transparent;
+            --border-width: 0;
+          }
+        }
+
+        ion-content {
+          --background: var(--fitos-bg-primary, #0D0D0D);
+        }
+      }
+
       .integrations-container {
-        padding: var(--fitos-space-4);
+        padding: 16px;
         max-width: 800px;
         margin: 0 auto;
       }
@@ -272,31 +285,41 @@ import { AuthService } from '../../../../core/services/auth.service';
         text-align: center;
 
         ion-spinner {
-          margin-bottom: var(--fitos-space-2);
+          margin-bottom: 8px;
         }
 
         p {
-          font-size: var(--fitos-font-size-base);
-          color: var(--fitos-text-secondary);
+          font-size: 14px;
+          color: var(--fitos-text-secondary, #A3A3A3);
           margin: 0;
         }
       }
 
       .summary-card {
-        margin-bottom: var(--fitos-space-4);
+        --background: var(--fitos-bg-secondary, #1A1A1A);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        box-shadow: none;
+        margin-bottom: 16px;
+
+        ion-card-title {
+          font-size: 16px;
+          font-weight: 700;
+          color: var(--fitos-text-primary, #F5F5F5);
+        }
 
         .summary-stats {
           display: flex;
-          gap: var(--fitos-space-4);
+          gap: 16px;
 
           .stat {
             flex: 1;
             display: flex;
             align-items: center;
-            gap: var(--fitos-space-2);
-            padding: var(--fitos-space-3);
-            background: var(--fitos-bg-secondary);
-            border-radius: var(--fitos-border-radius);
+            gap: 8px;
+            padding: 12px;
+            background: var(--fitos-bg-tertiary, #262626);
+            border-radius: 8px;
 
             ion-icon {
               font-size: 32px;
@@ -307,15 +330,19 @@ import { AuthService } from '../../../../core/services/auth.service';
               flex-direction: column;
 
               .stat-value {
-                font-size: var(--fitos-font-size-2xl);
+                font-size: 24px;
                 font-weight: 700;
-                color: var(--fitos-text-primary);
+                font-family: 'Space Mono', monospace;
+                color: var(--fitos-text-primary, #F5F5F5);
                 line-height: 1;
               }
 
               .stat-label {
-                font-size: var(--fitos-font-size-sm);
-                color: var(--fitos-text-tertiary);
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                font-weight: 500;
+                color: var(--fitos-text-tertiary, #737373);
                 margin-top: 4px;
               }
             }
@@ -324,19 +351,23 @@ import { AuthService } from '../../../../core/services/auth.service';
       }
 
       .integration-card {
-        margin-bottom: var(--fitos-space-4);
+        --background: var(--fitos-bg-secondary, #1A1A1A);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        box-shadow: none;
+        margin-bottom: 16px;
 
         .integration-header {
           display: flex;
           align-items: flex-start;
           justify-content: space-between;
-          gap: var(--fitos-space-2);
-          margin-bottom: var(--fitos-space-2);
+          gap: 8px;
+          margin-bottom: 8px;
 
           .integration-info {
             display: flex;
             align-items: center;
-            gap: var(--fitos-space-3);
+            gap: 12px;
             flex: 1;
 
             .integration-icon,
@@ -355,11 +386,11 @@ import { AuthService } from '../../../../core/services/auth.service';
               display: flex;
               align-items: center;
               justify-content: center;
-              background: var(--fitos-bg-secondary);
+              background: var(--fitos-bg-tertiary, #262626);
 
               ion-icon {
                 font-size: 24px;
-                color: var(--fitos-text-secondary);
+                color: var(--fitos-text-secondary, #A3A3A3);
               }
             }
 
@@ -367,16 +398,17 @@ import { AuthService } from '../../../../core/services/auth.service';
               flex: 1;
               display: flex;
               flex-direction: column;
-              gap: var(--fitos-space-1);
+              gap: 4px;
 
               ion-card-title {
-                font-size: var(--fitos-font-size-lg);
-                font-weight: 600;
+                font-size: 16px;
+                font-weight: 700;
+                color: var(--fitos-text-primary, #F5F5F5);
                 margin: 0;
               }
 
               ion-badge {
-                font-size: var(--fitos-font-size-xs);
+                font-size: 11px;
                 padding: 4px 8px;
                 align-self: flex-start;
               }
@@ -385,23 +417,23 @@ import { AuthService } from '../../../../core/services/auth.service';
         }
 
         .integration-description {
-          font-size: var(--fitos-font-size-base);
-          color: var(--fitos-text-secondary);
+          font-size: 14px;
+          color: var(--fitos-text-secondary, #A3A3A3);
           line-height: 1.5;
-          margin: 0 0 var(--fitos-space-3) 0;
+          margin: 0 0 12px 0;
         }
 
         .connected-info {
-          margin-top: var(--fitos-space-3);
+          margin-top: 12px;
 
           .sync-info,
           .error-info {
             display: flex;
             align-items: center;
-            gap: var(--fitos-space-1);
-            font-size: var(--fitos-font-size-sm);
-            color: var(--fitos-text-secondary);
-            margin-bottom: var(--fitos-space-2);
+            gap: 4px;
+            font-size: 13px;
+            color: var(--fitos-text-secondary, #A3A3A3);
+            margin-bottom: 8px;
 
             ion-icon {
               font-size: 16px;
@@ -409,21 +441,28 @@ import { AuthService } from '../../../../core/services/auth.service';
           }
 
           .error-info {
-            color: var(--ion-color-danger);
+            color: #EF4444;
           }
         }
 
         .integration-actions {
           display: flex;
-          gap: var(--fitos-space-2);
-          margin-top: var(--fitos-space-3);
+          gap: 8px;
+          margin-top: 12px;
+
+          ion-button[expand="block"] {
+            --border-radius: 8px;
+            height: 48px;
+            font-weight: 700;
+            --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+          }
         }
 
         .setup-note {
           display: block;
-          font-size: var(--fitos-font-size-xs);
+          font-size: 11px;
           line-height: 1.4;
-          margin-top: var(--fitos-space-2);
+          margin-top: 8px;
         }
       }
 
@@ -436,14 +475,14 @@ import { AuthService } from '../../../../core/services/auth.service';
         text-align: center;
 
         ion-icon {
-          font-size: 64px;
-          color: var(--fitos-text-tertiary);
-          margin-bottom: var(--fitos-space-2);
+          font-size: 48px;
+          color: var(--fitos-text-tertiary, #737373);
+          margin-bottom: 8px;
         }
 
         p {
-          font-size: var(--fitos-font-size-base);
-          color: var(--fitos-text-secondary);
+          font-size: 14px;
+          color: var(--fitos-text-secondary, #A3A3A3);
           margin: 0;
         }
       }

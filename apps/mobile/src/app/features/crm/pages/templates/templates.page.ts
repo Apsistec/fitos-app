@@ -82,7 +82,7 @@ import { EmailTemplate } from '@fitos/shared';
 ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-button routerLink="/crm/pipeline">
@@ -214,10 +214,21 @@ import { EmailTemplate } from '@fitos/shared';
   `,
   styles: [
     `
+      ion-header ion-toolbar {
+        --background: transparent;
+        --border-width: 0;
+      }
+
+      ion-header ion-title {
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.3px;
+      }
+
       .category-chips {
         display: flex;
-        gap: var(--fitos-space-2);
-        padding: var(--fitos-space-2) var(--fitos-space-4);
+        gap: 8px;
+        padding: 8px 16px;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
 
@@ -226,19 +237,19 @@ import { EmailTemplate } from '@fitos/shared';
         }
 
         ion-chip {
-          --background: var(--fitos-bg-secondary);
-          --color: var(--fitos-text-secondary);
+          --background: var(--fitos-bg-secondary, #1A1A1A);
+          --color: var(--fitos-text-secondary, #A3A3A3);
           cursor: pointer;
-          transition: all 0.2s ease;
+          transition: all 200ms ease;
 
           &.active {
-            --background: var(--fitos-accent-primary);
+            --background: var(--ion-color-primary, #10B981);
             --color: white;
             font-weight: 600;
           }
 
           &:hover:not(.active) {
-            --background: var(--fitos-bg-tertiary);
+            --background: var(--fitos-bg-tertiary, #262626);
           }
         }
       }
@@ -249,11 +260,11 @@ import { EmailTemplate } from '@fitos/shared';
         align-items: center;
         justify-content: center;
         height: 300px;
-        gap: var(--fitos-space-4);
+        gap: 16px;
 
         p {
-          color: var(--fitos-text-secondary);
-          font-size: var(--fitos-font-size-sm);
+          color: var(--fitos-text-secondary, #A3A3A3);
+          font-size: 13px;
         }
       }
 
@@ -263,31 +274,35 @@ import { EmailTemplate } from '@fitos/shared';
         align-items: center;
         justify-content: center;
         text-align: center;
-        padding: var(--fitos-space-8) var(--fitos-space-4);
+        padding: 48px 16px;
         min-height: 400px;
 
         ion-icon {
-          font-size: 80px;
-          color: var(--fitos-text-tertiary);
-          margin-bottom: var(--fitos-space-4);
+          font-size: 48px;
+          color: var(--fitos-text-tertiary, #737373);
+          margin-bottom: 16px;
         }
 
         h2 {
-          font-size: var(--fitos-font-size-xl);
+          font-size: 20px;
           font-weight: 600;
-          color: var(--fitos-text-primary);
-          margin: 0 0 var(--fitos-space-2) 0;
+          color: var(--fitos-text-primary, #F5F5F5);
+          margin: 0 0 8px 0;
         }
 
         p {
-          font-size: var(--fitos-font-size-base);
-          color: var(--fitos-text-secondary);
-          margin: 0 0 var(--fitos-space-6) 0;
+          font-size: 14px;
+          color: var(--fitos-text-secondary, #A3A3A3);
+          margin: 0 0 24px 0;
           max-width: 400px;
         }
 
         ion-button {
-          margin-top: var(--fitos-space-4);
+          margin-top: 16px;
+          --border-radius: 8px;
+          height: 48px;
+          font-weight: 700;
+          --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
         }
       }
 
@@ -295,9 +310,22 @@ import { EmailTemplate } from '@fitos/shared';
         padding: 0;
       }
 
+      ion-card {
+        --background: var(--fitos-bg-secondary, #1A1A1A);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        box-shadow: none;
+      }
+
+      ion-card-header ion-card-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
+      }
+
       .template-card {
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: all 200ms ease;
         height: 100%;
         display: flex;
         flex-direction: column;
@@ -308,34 +336,35 @@ import { EmailTemplate } from '@fitos/shared';
         }
 
         ion-card-header {
-          padding-bottom: var(--fitos-space-3);
+          padding-bottom: 12px;
         }
 
         .card-header-top {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: var(--fitos-space-2);
+          margin-bottom: 8px;
 
           ion-card-subtitle {
             text-transform: uppercase;
-            font-size: var(--fitos-font-size-xs);
+            font-size: 11px;
             font-weight: 600;
-            color: var(--fitos-accent-primary);
+            letter-spacing: 0.5px;
+            color: var(--ion-color-primary, #10B981);
             margin: 0;
           }
 
           ion-button {
-            --padding-start: var(--fitos-space-2);
-            --padding-end: var(--fitos-space-2);
+            --padding-start: 8px;
+            --padding-end: 8px;
             margin: 0;
           }
         }
 
         ion-card-title {
-          font-size: var(--fitos-font-size-lg);
-          font-weight: 600;
-          color: var(--fitos-text-primary);
+          font-size: 16px;
+          font-weight: 700;
+          color: var(--fitos-text-primary, #F5F5F5);
         }
 
         ion-card-content {
@@ -347,27 +376,27 @@ import { EmailTemplate } from '@fitos/shared';
       }
 
       .template-preview {
-        margin-bottom: var(--fitos-space-4);
+        margin-bottom: 16px;
 
         .subject-preview {
-          margin-bottom: var(--fitos-space-3);
-          font-size: var(--fitos-font-size-sm);
+          margin-bottom: 12px;
+          font-size: 13px;
 
           strong {
             display: block;
-            color: var(--fitos-text-secondary);
-            margin-bottom: var(--fitos-space-1);
+            color: var(--fitos-text-secondary, #A3A3A3);
+            margin-bottom: 4px;
           }
 
           span {
-            color: var(--fitos-text-primary);
+            color: var(--fitos-text-primary, #F5F5F5);
             font-weight: 500;
           }
         }
 
         .body-preview {
-          font-size: var(--fitos-font-size-sm);
-          color: var(--fitos-text-secondary);
+          font-size: 13px;
+          color: var(--fitos-text-secondary, #A3A3A3);
           line-height: 1.6;
           display: -webkit-box;
           -webkit-line-clamp: 3;
@@ -378,16 +407,19 @@ import { EmailTemplate } from '@fitos/shared';
 
       .template-meta {
         display: flex;
-        gap: var(--fitos-space-4);
-        padding-top: var(--fitos-space-3);
-        border-top: 1px solid var(--fitos-border-color);
+        gap: 16px;
+        padding-top: 12px;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
 
         .meta-item {
           display: flex;
           align-items: center;
-          gap: var(--fitos-space-1);
-          font-size: var(--fitos-font-size-xs);
-          color: var(--fitos-text-tertiary);
+          gap: 4px;
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-weight: 500;
+          color: var(--fitos-text-tertiary, #737373);
 
           ion-icon {
             font-size: 14px;
@@ -396,11 +428,12 @@ import { EmailTemplate } from '@fitos/shared';
       }
 
       ion-fab {
-        margin: 0 var(--fitos-space-4) var(--fitos-space-4) 0;
+        margin: 0 16px 16px 0;
 
         ion-fab-button {
-          --background: var(--fitos-accent-primary);
+          --background: var(--ion-color-primary, #10B981);
           --color: white;
+          --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
         }
       }
     `,

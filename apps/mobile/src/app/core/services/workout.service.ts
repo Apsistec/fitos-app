@@ -68,7 +68,7 @@ export class WorkoutService {
             exercise:exercises(*)
           )
         `)
-        .eq('created_by', userId)
+        .eq('trainer_id', userId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -140,8 +140,8 @@ export class WorkoutService {
         .insert({
           name,
           description,
-          created_by: userId,
-          estimated_duration: estimatedDuration,
+          trainer_id: userId,
+          estimated_duration_minutes: estimatedDuration,
           is_public: false
         })
         .select()
@@ -210,11 +210,11 @@ export class WorkoutService {
         .update({
           name,
           description,
-          estimated_duration: estimatedDuration,
+          estimated_duration_minutes: estimatedDuration,
           updated_at: new Date().toISOString()
         })
         .eq('id', id)
-        .eq('created_by', userId);
+        .eq('trainer_id', userId);
 
       if (templateError) throw templateError;
 
@@ -320,7 +320,7 @@ export class WorkoutService {
         .from('workout_templates')
         .delete()
         .eq('id', id)
-        .eq('created_by', userId);
+        .eq('trainer_id', userId);
 
       if (error) throw error;
 

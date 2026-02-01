@@ -327,7 +327,7 @@ export class WorkoutSessionService {
    * Get count of completed workouts in the last N days
    * Used by client dashboard for weekly stats
    */
-  async getWorkoutCount(clientId: string, days: number = 7): Promise<number> {
+  async getWorkoutCount(clientId: string, days = 7): Promise<number> {
     try {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - days);
@@ -400,7 +400,7 @@ export class WorkoutSessionService {
    * Get upcoming workouts for a client (next 7 days)
    * Used by client dashboard
    */
-  async getUpcomingWorkouts(clientId: string, limit: number = 5): Promise<WorkoutSession[]> {
+  async getUpcomingWorkouts(clientId: string, limit = 5): Promise<WorkoutSession[]> {
     try {
       const today = new Date().toISOString().split('T')[0];
       const nextWeek = new Date();

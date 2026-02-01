@@ -108,7 +108,7 @@ interface TrainerNote {
     GraduationAlertComponent,
   ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/tabs/clients"></ion-back-button>
@@ -426,6 +426,18 @@ interface TrainerNote {
     </ion-content>
   `,
   styles: [`
+    /* FitOS Header */
+    ion-header ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-header ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     .loading-container,
     .error-container {
       display: flex;
@@ -439,11 +451,11 @@ interface TrainerNote {
 
     .loading-container p {
       margin-top: 16px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
     }
 
     .error-message {
-      color: var(--ion-color-danger);
+      color: var(--fitos-status-error, #EF4444);
       margin-bottom: 16px;
     }
 
@@ -452,6 +464,10 @@ interface TrainerNote {
     }
 
     ion-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
       margin: 0 0 16px 0;
     }
 
@@ -459,12 +475,14 @@ interface TrainerNote {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 1.1rem;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     ion-card-title ion-icon {
       font-size: 20px;
-      color: var(--ion-color-primary);
+      color: var(--ion-color-primary, #10B981);
     }
 
     .card-header-row {
@@ -486,16 +504,16 @@ interface TrainerNote {
     }
 
     .info-label {
-      font-size: 0.875rem;
+      font-size: 11px;
       font-weight: 500;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-tertiary, #737373);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     .info-item ion-note {
-      font-size: 1rem;
-      color: var(--ion-color-dark);
+      font-size: 16px;
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .goals-list {
@@ -508,7 +526,7 @@ interface TrainerNote {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 0.938rem;
+      font-size: 14px;
     }
 
     .goal-item ion-icon {
@@ -519,7 +537,7 @@ interface TrainerNote {
     .injuries-notes {
       margin: 0;
       line-height: 1.6;
-      color: var(--ion-color-dark);
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .stats-grid {
@@ -533,18 +551,20 @@ interface TrainerNote {
     }
 
     .stat-value {
-      font-size: 2rem;
+      font-size: 32px;
       font-weight: 700;
-      color: var(--ion-color-primary);
+      font-family: 'Space Mono', monospace;
+      color: var(--ion-color-primary, #10B981);
       line-height: 1;
     }
 
     .stat-label {
-      font-size: 0.75rem;
-      color: var(--ion-color-medium);
+      font-size: 11px;
+      color: var(--fitos-text-tertiary, #737373);
       margin-top: 4px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      font-weight: 500;
     }
 
     .loading-small {
@@ -555,7 +575,7 @@ interface TrainerNote {
 
     .no-data {
       text-align: center;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
       margin: 20px 0;
     }
 
@@ -568,7 +588,7 @@ interface TrainerNote {
       justify-content: space-between;
       align-items: center;
       padding: 12px 0;
-      border-bottom: 1px solid var(--ion-color-light);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .workout-item:last-child {
@@ -580,14 +600,18 @@ interface TrainerNote {
     }
 
     .workout-name {
-      font-size: 0.938rem;
+      font-size: 14px;
       font-weight: 500;
-      color: var(--ion-color-dark);
+      color: var(--fitos-text-primary, #F5F5F5);
       margin-bottom: 4px;
     }
 
     .add-note-button {
       margin-top: 16px;
+      --border-radius: 8px;
+      height: 48px;
+      font-weight: 700;
+      --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
     }
 
     .notes-list {
@@ -598,7 +622,7 @@ interface TrainerNote {
 
     .note-item {
       padding: 12px;
-      background: var(--ion-color-light);
+      background: var(--fitos-bg-tertiary, #262626);
       border-radius: 8px;
     }
 
@@ -610,14 +634,14 @@ interface TrainerNote {
     }
 
     .note-date {
-      font-size: 0.75rem;
-      color: var(--ion-color-medium);
+      font-size: 12px;
+      color: var(--fitos-text-tertiary, #737373);
     }
 
     .note-text {
       margin: 0;
       line-height: 1.6;
-      color: var(--ion-color-dark);
+      color: var(--fitos-text-primary, #F5F5F5);
     }
   `]
 })

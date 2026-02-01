@@ -102,7 +102,7 @@ interface RecentEmail {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-button routerLink="/tabs/crm/pipeline">
@@ -314,29 +314,64 @@ interface RecentEmail {
   `,
   styles: [
     `
+      ion-header ion-toolbar {
+        --background: transparent;
+        --border-width: 0;
+      }
+
+      ion-header ion-title {
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.3px;
+      }
+
+      ion-card {
+        --background: var(--fitos-bg-secondary, #1A1A1A);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        box-shadow: none;
+        margin: 0 0 16px 0;
+
+        ion-card-header {
+          ion-card-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--fitos-text-primary, #F5F5F5);
+
+            ion-icon {
+              font-size: 20px;
+              color: var(--ion-color-primary, #10B981);
+            }
+          }
+        }
+      }
+
       .loading-container {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         height: 300px;
-        gap: var(--fitos-space-4);
+        gap: 16px;
 
         p {
-          color: var(--fitos-text-secondary);
-          font-size: var(--fitos-font-size-sm);
+          color: var(--fitos-text-secondary, #A3A3A3);
+          font-size: 13px;
         }
       }
 
       ion-segment {
-        margin-bottom: var(--fitos-space-4);
+        margin-bottom: 16px;
       }
 
       .metrics-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: var(--fitos-space-3);
-        margin-bottom: var(--fitos-space-4);
+        gap: 12px;
+        margin-bottom: 16px;
       }
 
       .metric-card {
@@ -345,8 +380,8 @@ interface RecentEmail {
         ion-card-content {
           display: flex;
           align-items: center;
-          gap: var(--fitos-space-3);
-          padding: var(--fitos-space-4);
+          gap: 12px;
+          padding: 16px;
         }
       }
 
@@ -369,16 +404,20 @@ interface RecentEmail {
         flex: 1;
 
         h3 {
-          font-size: var(--fitos-font-size-2xl);
+          font-size: 24px;
           font-weight: 700;
-          color: var(--fitos-text-primary);
-          margin: 0 0 var(--fitos-space-1) 0;
+          font-family: 'Space Mono', monospace;
+          color: var(--fitos-text-primary, #F5F5F5);
+          margin: 0 0 4px 0;
         }
 
         p {
-          font-size: var(--fitos-font-size-xs);
-          color: var(--fitos-text-secondary);
-          margin: 0 0 var(--fitos-space-1) 0;
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-weight: 500;
+          color: var(--fitos-text-secondary, #A3A3A3);
+          margin: 0 0 4px 0;
         }
 
         ion-chip {
@@ -393,29 +432,11 @@ interface RecentEmail {
         }
       }
 
-      ion-card {
-        margin: 0 0 var(--fitos-space-4) 0;
-
-        ion-card-header {
-          ion-card-title {
-            display: flex;
-            align-items: center;
-            gap: var(--fitos-space-2);
-            font-size: var(--fitos-font-size-lg);
-
-            ion-icon {
-              font-size: 20px;
-              color: var(--fitos-accent-primary);
-            }
-          }
-        }
-      }
-
       .rate-item {
-        margin-bottom: var(--fitos-space-5);
+        margin-bottom: 20px;
 
         &:last-child {
-          margin-bottom: var(--fitos-space-4);
+          margin-bottom: 16px;
         }
       }
 
@@ -423,43 +444,44 @@ interface RecentEmail {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: var(--fitos-space-2);
+        margin-bottom: 8px;
 
         .rate-label {
-          font-size: var(--fitos-font-size-base);
+          font-size: 14px;
           font-weight: 600;
-          color: var(--fitos-text-primary);
+          color: var(--fitos-text-primary, #F5F5F5);
         }
 
         .rate-value {
-          font-size: var(--fitos-font-size-xl);
+          font-size: 20px;
           font-weight: 700;
-          color: var(--fitos-accent-primary);
+          font-family: 'Space Mono', monospace;
+          color: var(--ion-color-primary, #10B981);
         }
       }
 
       ion-progress-bar {
         height: 8px;
         border-radius: 4px;
-        margin-bottom: var(--fitos-space-2);
+        margin-bottom: 8px;
       }
 
       .rate-description {
-        font-size: var(--fitos-font-size-sm);
-        color: var(--fitos-text-secondary);
+        font-size: 13px;
+        color: var(--fitos-text-secondary, #A3A3A3);
         margin: 0;
       }
 
       .benchmarks {
-        margin-top: var(--fitos-space-5);
-        padding-top: var(--fitos-space-4);
-        border-top: 1px solid var(--fitos-border-color);
+        margin-top: 20px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
 
         h4 {
-          font-size: var(--fitos-font-size-sm);
-          font-weight: 600;
-          color: var(--fitos-text-secondary);
-          margin: 0 0 var(--fitos-space-3) 0;
+          font-size: 11px;
+          font-weight: 500;
+          color: var(--fitos-text-secondary, #A3A3A3);
+          margin: 0 0 12px 0;
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
@@ -469,13 +491,14 @@ interface RecentEmail {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: var(--fitos-space-2) 0;
-        font-size: var(--fitos-font-size-sm);
-        color: var(--fitos-text-secondary);
+        padding: 8px 0;
+        font-size: 13px;
+        color: var(--fitos-text-secondary, #A3A3A3);
 
         .benchmark-value {
           font-weight: 600;
-          color: var(--fitos-text-primary);
+          font-family: 'Space Mono', monospace;
+          color: var(--fitos-text-primary, #F5F5F5);
         }
       }
 
@@ -485,24 +508,32 @@ interface RecentEmail {
         align-items: center;
         justify-content: center;
         text-align: center;
-        padding: var(--fitos-space-8) var(--fitos-space-4);
+        padding: 48px 16px;
         min-height: 200px;
 
         ion-icon {
-          font-size: 64px;
-          color: var(--fitos-text-tertiary);
-          margin-bottom: var(--fitos-space-3);
+          font-size: 48px;
+          color: var(--fitos-text-tertiary, #737373);
+          margin-bottom: 12px;
         }
 
         p {
-          font-size: var(--fitos-font-size-base);
-          color: var(--fitos-text-secondary);
-          margin: 0 0 var(--fitos-space-1) 0;
+          font-size: 14px;
+          color: var(--fitos-text-secondary, #A3A3A3);
+          margin: 0 0 4px 0;
         }
 
         small {
-          font-size: var(--fitos-font-size-sm);
+          font-size: 13px;
         }
+      }
+
+      ion-list {
+        background: transparent;
+      }
+
+      ion-item {
+        --background: transparent;
       }
 
       .email-activity-item {
@@ -510,26 +541,26 @@ interface RecentEmail {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: var(--fitos-space-3);
-        padding: var(--fitos-space-2) 0;
+        gap: 12px;
+        padding: 8px 0;
 
         .email-info {
           flex: 1;
           min-width: 0;
 
           h3 {
-            font-size: var(--fitos-font-size-base);
+            font-size: 14px;
             font-weight: 500;
-            color: var(--fitos-text-primary);
-            margin: 0 0 var(--fitos-space-1) 0;
+            color: var(--fitos-text-primary, #F5F5F5);
+            margin: 0 0 4px 0;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
           }
 
           p {
-            font-size: var(--fitos-font-size-xs);
-            color: var(--fitos-text-secondary);
+            font-size: 11px;
+            color: var(--fitos-text-secondary, #A3A3A3);
             margin: 0;
           }
         }
@@ -541,7 +572,7 @@ interface RecentEmail {
             display: flex;
             align-items: center;
             gap: 4px;
-            font-size: var(--fitos-font-size-xs);
+            font-size: 11px;
             padding: 4px 8px;
 
             ion-icon {
@@ -554,7 +585,13 @@ interface RecentEmail {
       .action-buttons {
         display: flex;
         flex-direction: column;
-        gap: var(--fitos-space-2);
+        gap: 8px;
+
+        ion-button {
+          --border-radius: 8px;
+          height: 48px;
+          font-weight: 700;
+        }
       }
     `,
   ],

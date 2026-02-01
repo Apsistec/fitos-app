@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AccordionComponent } from '@fitos/libs';
 import type { AccordionItem } from '@fitos/libs';
@@ -6,6 +6,7 @@ import type { AccordionItem } from '@fitos/libs';
 @Component({
   selector: 'app-pricing',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, AccordionComponent],
   template: `
     <div class="pricing-page">
@@ -311,8 +312,8 @@ import type { AccordionItem } from '@fitos/libs';
       display: inline-block;
       margin-left: 8px;
       padding: 2px 8px;
-      background-color: rgba(239, 68, 68, 0.2);
-      color: #ef4444;
+      background-color: rgba(var(--fitos-accent-danger-rgb, 239, 68, 68), 0.2);
+      color: var(--fitos-accent-danger, #ef4444);
       font-size: 0.75rem;
       border-radius: 4px;
       font-weight: 700;

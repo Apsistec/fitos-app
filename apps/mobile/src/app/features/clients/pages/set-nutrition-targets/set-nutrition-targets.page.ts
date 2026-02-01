@@ -20,8 +20,8 @@ import {
   IonCardTitle,
   IonCardContent,
 } from '@ionic/angular/standalone';
-import { NutritionService } from '@app/core/services/nutrition.service';
-import { ClientService, ClientWithProfile } from '@app/core/services/client.service';
+import { NutritionService } from '../../../../core/services/nutrition.service';
+import { ClientService, ClientWithProfile } from '../../../../core/services/client.service';
 import type { Tables } from '@fitos/shared';
 import { NUTRITION_COLORS } from '@fitos/shared';
 
@@ -50,7 +50,7 @@ import { NUTRITION_COLORS } from '@fitos/shared';
     IonCardContent,
   ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button [defaultHref]="'/tabs/clients/' + clientId()"></ion-back-button>
@@ -266,6 +266,32 @@ import { NUTRITION_COLORS } from '@fitos/shared';
     </ion-content>
   `,
   styles: [`
+    /* FitOS Header */
+    ion-header ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-header ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    /* FitOS Card Styles */
+    ion-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
+    }
+
+    ion-card-header ion-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
+    }
+
     .targets-container {
       max-width: 600px;
       margin: 0 auto;
@@ -280,7 +306,7 @@ import { NUTRITION_COLORS } from '@fitos/shared';
       }
 
       p {
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
     }
 
@@ -295,13 +321,18 @@ import { NUTRITION_COLORS } from '@fitos/shared';
         align-items: center;
 
         .label {
-          color: var(--ion-color-medium);
-          font-size: 0.875rem;
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-weight: 500;
+          color: var(--fitos-text-secondary, #A3A3A3);
         }
 
         .value {
           font-weight: 600;
-          font-size: 1rem;
+          font-size: 16px;
+          font-family: 'Space Mono', monospace;
+          color: var(--fitos-text-primary, #F5F5F5);
         }
       }
     }
@@ -315,11 +346,11 @@ import { NUTRITION_COLORS } from '@fitos/shared';
     }
 
     .error-message {
-      background: rgba(var(--ion-color-danger-rgb), 0.1);
+      background: rgba(239, 68, 68, 0.1);
     }
 
     .success-message {
-      background: rgba(var(--ion-color-success-rgb), 0.1);
+      background: rgba(16, 185, 129, 0.1);
     }
 
     ion-list {
@@ -336,13 +367,15 @@ import { NUTRITION_COLORS } from '@fitos/shared';
     .macro-summary {
       margin: 24px 0;
       padding: 16px;
-      background: var(--ion-color-light);
-      border-radius: 8px;
+      background: var(--fitos-bg-tertiary, #262626);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
 
       h4 {
         margin: 0 0 16px;
-        font-size: 1rem;
-        font-weight: 600;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       .macro-bars {
@@ -354,39 +387,43 @@ import { NUTRITION_COLORS } from '@fitos/shared';
       .macro-bar {
         .macro-label {
           display: block;
-          font-size: 0.875rem;
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
           margin-bottom: 4px;
           font-weight: 500;
+          color: var(--fitos-text-secondary, #A3A3A3);
         }
 
         .bar-container {
           height: 24px;
-          background: white;
-          border-radius: 4px;
+          background: var(--fitos-bg-secondary, #1A1A1A);
+          border-radius: 6px;
           overflow: hidden;
           margin-bottom: 4px;
 
           .bar {
             height: 100%;
-            transition: width 0.3s ease;
+            transition: width 200ms ease;
 
             &.protein {
-              background: #22C55E; /* Neutral green from NUTRITION_COLORS */
+              background: #22C55E;
             }
 
             &.carbs {
-              background: #F59E0B; /* Neutral amber from NUTRITION_COLORS */
+              background: #F59E0B;
             }
 
             &.fat {
-              background: #EC4899; /* Neutral pink from NUTRITION_COLORS */
+              background: #EC4899;
             }
           }
         }
 
         .macro-cals {
-          font-size: 0.75rem;
-          color: var(--ion-color-medium);
+          font-size: 12px;
+          font-family: 'Space Mono', monospace;
+          color: var(--fitos-text-tertiary, #737373);
         }
       }
 
@@ -394,9 +431,18 @@ import { NUTRITION_COLORS } from '@fitos/shared';
         display: block;
         margin-top: 12px;
         padding: 8px;
-        background: rgba(var(--ion-color-warning-rgb), 0.1);
-        border-radius: 4px;
+        background: rgba(245, 158, 11, 0.1);
+        border-radius: 6px;
       }
+    }
+
+    /* FitOS Submit Button */
+    ion-content form ion-button[type="submit"],
+    ion-content form ion-button[expand="block"] {
+      --border-radius: 8px;
+      height: 48px;
+      font-weight: 700;
+      --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
     }
   `],
 })

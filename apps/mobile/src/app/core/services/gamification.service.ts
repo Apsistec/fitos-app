@@ -233,7 +233,7 @@ export class GamificationService {
     type: LeaderboardType,
     scope: LeaderboardScope = 'global',
     scopeId?: string,
-    limit: number = 50
+    limit = 50
   ): Promise<LeaderboardEntry[]> {
     this.loading.set(true);
     this.error.set(null);

@@ -20,8 +20,8 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { keyOutline, checkmarkCircle, closeCircle, shieldCheckmarkOutline } from 'ionicons/icons';
-import { AuthService } from '@app/core/services/auth.service';
-import { passwordComplexityValidator, checkPasswordRequirements } from '@app/features/auth/validators/password.validator';
+import { AuthService } from '../../../../core/services/auth.service';
+import { passwordComplexityValidator, checkPasswordRequirements } from '../../../auth/validators/password.validator';
 
 @Component({
   selector: 'app-change-password',
@@ -180,6 +180,23 @@ import { passwordComplexityValidator, checkPasswordRequirements } from '@app/fea
     </ion-content>
   `,
   styles: [`
+    ion-header {
+      ion-toolbar {
+        --background: transparent;
+        --border-width: 0;
+
+        ion-title {
+          font-size: 18px;
+          font-weight: 700;
+          letter-spacing: -0.3px;
+        }
+      }
+    }
+
+    ion-content {
+      --background: var(--fitos-bg-primary, #0D0D0D);
+    }
+
     .change-password-container {
       max-width: 500px;
       margin: 0 auto;
@@ -197,14 +214,15 @@ import { passwordComplexityValidator, checkPasswordRequirements } from '@app/fea
 
       h1 {
         margin: 16px 0 8px;
-        font-size: 1.5rem;
+        font-size: 24px;
         font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       p {
         margin: 0;
-        color: var(--ion-color-medium);
-        font-size: 0.9rem;
+        color: var(--fitos-text-secondary, #A3A3A3);
+        font-size: 14px;
       }
     }
 
@@ -213,10 +231,10 @@ import { passwordComplexityValidator, checkPasswordRequirements } from '@app/fea
       padding: 12px 16px;
       margin-bottom: 16px;
       border-radius: 8px;
-      background: rgba(var(--ion-color-danger-rgb), 0.1);
+      background: rgba(239, 68, 68, 0.1);
 
       &.success {
-        background: rgba(var(--ion-color-success-rgb), 0.1);
+        background: rgba(16, 185, 129, 0.1);
         display: flex;
         align-items: center;
         gap: 8px;
@@ -228,7 +246,11 @@ import { passwordComplexityValidator, checkPasswordRequirements } from '@app/fea
     }
 
     ion-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
       margin: 0 0 24px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
     }
 
     .form-fields {
@@ -239,18 +261,25 @@ import { passwordComplexityValidator, checkPasswordRequirements } from '@app/fea
       }
     }
 
+    ion-button[type="submit"] {
+      --border-radius: 8px;
+      height: 48px;
+      font-weight: 700;
+      --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    }
+
     .password-requirements {
       padding: 12px 16px;
       margin-bottom: 16px;
-      background: var(--ion-color-light);
+      background: var(--fitos-bg-tertiary, #262626);
       border-radius: 8px;
 
       .requirement {
         display: flex;
         align-items: center;
         gap: 8px;
-        font-size: 0.8rem;
-        color: var(--ion-color-danger);
+        font-size: 13px;
+        color: #EF4444;
         margin-bottom: 4px;
 
         &:last-child {
@@ -262,14 +291,14 @@ import { passwordComplexityValidator, checkPasswordRequirements } from '@app/fea
         }
 
         &.met {
-          color: var(--ion-color-success);
+          color: #10B981;
         }
       }
     }
 
     .security-tips {
       padding: 16px;
-      background: rgba(var(--ion-color-primary-rgb), 0.1);
+      background: rgba(16, 185, 129, 0.1);
       border-radius: 12px;
       margin-bottom: 24px;
 
@@ -278,12 +307,13 @@ import { passwordComplexityValidator, checkPasswordRequirements } from '@app/fea
         align-items: center;
         gap: 8px;
         margin: 0 0 12px;
-        font-size: 1rem;
+        font-size: 16px;
         font-weight: 600;
+        color: var(--fitos-text-primary, #F5F5F5);
 
         ion-icon {
           font-size: 20px;
-          color: var(--ion-color-primary);
+          color: var(--ion-color-primary, #10B981);
         }
       }
 
@@ -292,8 +322,8 @@ import { passwordComplexityValidator, checkPasswordRequirements } from '@app/fea
         padding-left: 20px;
 
         li {
-          font-size: 0.85rem;
-          color: var(--ion-color-dark);
+          font-size: 14px;
+          color: var(--fitos-text-secondary, #A3A3A3);
           margin-bottom: 6px;
           line-height: 1.4;
 

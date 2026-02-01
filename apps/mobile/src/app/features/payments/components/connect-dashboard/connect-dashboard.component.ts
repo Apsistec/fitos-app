@@ -127,6 +127,10 @@ import { SupabaseService } from '../../../../core/services/supabase.service';
       justify-content: center;
       min-height: 300px;
       gap: 1rem;
+
+      p {
+        color: var(--fitos-text-secondary, #A3A3A3);
+      }
     }
 
     .error-state {
@@ -141,10 +145,12 @@ import { SupabaseService } from '../../../../core/services/supabase.service';
 
       h3 {
         margin: 0 0 0.5rem 0;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       p {
         margin: 0 0 1rem 0;
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
     }
 
@@ -164,7 +170,7 @@ import { SupabaseService } from '../../../../core/services/supabase.service';
       display: block;
       width: 100%;
       min-height: 200px;
-      border-radius: 8px;
+      border-radius: 12px;
       overflow: hidden;
     }
 
@@ -174,16 +180,24 @@ import { SupabaseService } from '../../../../core/services/supabase.service';
       align-items: center;
       text-align: center;
       padding: 1rem;
-      border-top: 1px solid var(--ion-color-light-shade);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
 
       p {
         margin: 0.25rem 0;
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
 
       .small-text {
         font-size: 0.85rem;
+        color: var(--fitos-text-tertiary, #737373);
       }
+    }
+
+    ion-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
     }
   `],
 })

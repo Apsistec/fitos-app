@@ -389,55 +389,73 @@ import { AuthService } from '../../../../core/services/auth.service';
   styles: [
     `
       .assessment-form {
-        padding: var(--fitos-space-4);
+        padding: 16px;
         max-width: 800px;
         margin: 0 auto;
-        padding-bottom: var(--fitos-space-8);
+        padding-bottom: 48px;
       }
 
       .preview-card {
-        margin-bottom: var(--fitos-space-4);
-        background: var(--fitos-bg-secondary);
+        margin-bottom: 16px;
+        --background: var(--fitos-bg-secondary, #1A1A1A);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        box-shadow: none;
       }
 
       .score-preview {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: var(--fitos-space-4);
-        padding: var(--fitos-space-3) 0;
+        gap: 16px;
+        padding: 12px 0;
       }
 
       .score-number {
         font-size: 64px;
         font-weight: 700;
         line-height: 1;
+        font-family: 'Space Mono', monospace;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       .score-label {
         text-align: left;
 
         ion-badge {
-          margin-bottom: var(--fitos-space-2);
-          font-size: var(--fitos-font-size-sm);
+          margin-bottom: 8px;
+          font-size: 13px;
         }
 
         .recommended-action {
-          font-size: var(--fitos-font-size-sm);
-          color: var(--fitos-text-secondary);
+          font-size: 13px;
+          color: var(--fitos-text-secondary, #A3A3A3);
           margin: 0;
           font-weight: 500;
         }
+      }
+
+      ion-card {
+        --background: var(--fitos-bg-secondary, #1A1A1A);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        box-shadow: none;
       }
 
       ion-card-title {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: var(--fitos-space-2);
+        gap: 8px;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
 
         ion-badge {
-          font-size: var(--fitos-font-size-xs);
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-weight: 500;
         }
       }
 
@@ -449,7 +467,7 @@ import { AuthService } from '../../../../core/services/auth.service';
         --background: transparent;
         --padding-start: 0;
         --inner-padding-end: 0;
-        margin-bottom: var(--fitos-space-3);
+        margin-bottom: 12px;
 
         &:last-child {
           margin-bottom: 0;
@@ -457,24 +475,31 @@ import { AuthService } from '../../../../core/services/auth.service';
       }
 
       .help-text {
-        font-size: var(--fitos-font-size-xs);
-        color: var(--fitos-text-tertiary);
-        margin: var(--fitos-space-1) 0 0 0;
+        font-size: 11px;
+        color: var(--fitos-text-tertiary, #737373);
+        margin: 4px 0 0 0;
         font-style: italic;
       }
 
       ion-range {
-        padding: var(--fitos-space-2) 0;
+        padding: 8px 0;
       }
 
       .actions {
-        margin-top: var(--fitos-space-4);
+        margin-top: 16px;
+
+        ion-button {
+          --border-radius: 8px;
+          height: 48px;
+          font-weight: 700;
+          --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        }
       }
     `,
   ],
 })
 export class AssessmentFormComponent implements OnInit {
-  @Input() clientId: string = '';
+  @Input() clientId = '';
 
   private autonomyService = inject(AutonomyService);
   private authService = inject(AuthService);

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
@@ -15,9 +15,10 @@ import { OutcomePricingService, ClientGoal, GoalStatus } from '../../services/ou
   selector: 'app-fit-my-goals',
   standalone: true,
   imports: [CommonModule, FormsModule, IonicModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ion-header>
-      <ion-toolbar>
+    <ion-header class="ion-no-border">
+      <ion-toolbar style="--background: transparent; --border-width: 0;">
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/tabs/dashboard"></ion-back-button>
         </ion-buttons>
@@ -30,7 +31,7 @@ import { OutcomePricingService, ClientGoal, GoalStatus } from '../../services/ou
       </ion-toolbar>
 
       <!-- Segment Filter -->
-      <ion-toolbar>
+      <ion-toolbar style="--background: transparent; --border-width: 0;">
         <ion-segment [(ngModel)]="selectedStatus" (ionChange)="onStatusChange()">
           <ion-segment-button value="active">
             <ion-label>Active ({{ activeGoals().length }})</ion-label>
@@ -150,6 +151,21 @@ import { OutcomePricingService, ClientGoal, GoalStatus } from '../../services/ou
     </ion-content>
   `,
   styles: [`
+    :host {
+      --background: var(--fitos-bg-primary, #0D0D0D);
+    }
+
+    ion-content {
+      --background: var(--fitos-bg-primary, #0D0D0D);
+    }
+
+    ion-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
+    }
+
     .empty-state {
       display: flex;
       flex-direction: column;
@@ -162,7 +178,7 @@ import { OutcomePricingService, ClientGoal, GoalStatus } from '../../services/ou
 
     .empty-icon {
       font-size: 96px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-tertiary, #737373);
       margin-bottom: 24px;
     }
 
@@ -170,10 +186,11 @@ import { OutcomePricingService, ClientGoal, GoalStatus } from '../../services/ou
       font-size: 24px;
       font-weight: 600;
       margin-bottom: 8px;
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .empty-state p {
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
       max-width: 300px;
     }
 
@@ -219,7 +236,7 @@ import { OutcomePricingService, ClientGoal, GoalStatus } from '../../services/ou
 
     .value-item .label {
       font-size: 11px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-tertiary, #737373);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -235,7 +252,7 @@ import { OutcomePricingService, ClientGoal, GoalStatus } from '../../services/ou
     }
 
     .arrow-icon {
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-tertiary, #737373);
       font-size: 16px;
     }
 
@@ -249,7 +266,7 @@ import { OutcomePricingService, ClientGoal, GoalStatus } from '../../services/ou
     .progress-bar {
       flex: 1;
       height: 8px;
-      background: var(--ion-color-step-100);
+      background: var(--fitos-bg-tertiary, #262626);
       border-radius: 4px;
       overflow: hidden;
     }
@@ -291,7 +308,7 @@ import { OutcomePricingService, ClientGoal, GoalStatus } from '../../services/ou
 
     .milestone ion-icon {
       font-size: 24px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-tertiary, #737373);
     }
 
     .milestone.achieved ion-icon {
@@ -300,7 +317,7 @@ import { OutcomePricingService, ClientGoal, GoalStatus } from '../../services/ou
 
     .milestone span {
       font-size: 11px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-tertiary, #737373);
     }
 
     .meta-info {
@@ -313,8 +330,8 @@ import { OutcomePricingService, ClientGoal, GoalStatus } from '../../services/ou
     .notes {
       margin-top: 12px;
       padding-top: 12px;
-      border-top: 1px solid var(--ion-border-color);
-      color: var(--ion-color-medium);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      color: var(--fitos-text-secondary, #A3A3A3);
       font-size: 14px;
       line-height: 1.5;
     }
@@ -330,7 +347,7 @@ import { OutcomePricingService, ClientGoal, GoalStatus } from '../../services/ou
 
     .loading-container p {
       margin-top: 16px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
     }
   `]
 })

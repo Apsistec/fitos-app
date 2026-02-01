@@ -50,7 +50,7 @@ export class NutritionService {
         .select('*, entries:nutrition_entries(*)')
         .eq('client_id', clientId)
         .eq('log_date', date)
-        .single();
+        .maybeSingle();
 
       if (logError && logError.code !== 'PGRST116') {
         throw logError;
@@ -117,7 +117,7 @@ export class NutritionService {
       this.errorSignal.set(null);
 
       // Try to get existing log
-      let { data: log, error: logError } = await this.supabase
+      const { data: log, error: logError } = await this.supabase
         .from('nutrition_logs')
         .select('*')
         .eq('client_id', clientId)

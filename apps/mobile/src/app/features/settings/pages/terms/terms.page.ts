@@ -344,6 +344,20 @@ import { FormsModule } from '@angular/forms';
     </ion-content>
   `,
   styles: [`
+    :host {
+      --background: var(--fitos-bg-primary, #0D0D0D);
+    }
+
+    ion-header ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+      --color: var(--fitos-text-primary, #F5F5F5);
+    }
+
+    ion-content {
+      --background: var(--fitos-bg-primary, #0D0D0D);
+    }
+
     .legal-container {
       max-width: 768px;
       margin: 0 auto;
@@ -353,15 +367,15 @@ import { FormsModule } from '@angular/forms';
       padding: 24px 16px;
 
       h1 {
-        font-size: 1.75rem;
+        font-size: 28px;
         font-weight: 700;
         margin: 0 0 8px 0;
-        color: var(--ion-color-dark);
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       .last-updated {
-        color: var(--fitos-text-tertiary);
-        font-size: 0.875rem;
+        color: var(--fitos-text-tertiary, #737373);
+        font-size: 14px;
         margin: 0 0 32px 0;
       }
 
@@ -373,27 +387,27 @@ import { FormsModule } from '@angular/forms';
         }
 
         h2 {
-          font-size: 1.25rem;
-          font-weight: 600;
+          font-size: 20px;
+          font-weight: 700;
           margin: 0 0 12px 0;
-          color: var(--ion-color-dark);
+          color: var(--fitos-text-primary, #F5F5F5);
         }
 
         h3 {
-          font-size: 1rem;
-          font-weight: 600;
+          font-size: 16px;
+          font-weight: 700;
           margin: 16px 0 8px 0;
-          color: var(--ion-color-dark);
+          color: var(--fitos-text-primary, #F5F5F5);
         }
 
         p {
           line-height: 1.7;
           margin: 0 0 12px 0;
-          color: var(--fitos-text-primary);
-          font-size: 1rem;
+          color: var(--fitos-text-secondary, #A3A3A3);
+          font-size: 14px;
 
           strong {
-            color: var(--ion-color-dark);
+            color: var(--fitos-text-primary, #F5F5F5);
             font-weight: 600;
           }
         }
@@ -405,11 +419,11 @@ import { FormsModule } from '@angular/forms';
           li {
             margin-bottom: 8px;
             line-height: 1.6;
-            color: var(--fitos-text-primary);
-            font-size: 1rem;
+            color: var(--fitos-text-secondary, #A3A3A3);
+            font-size: 14px;
 
             strong {
-              color: var(--ion-color-dark);
+              color: var(--fitos-text-primary, #F5F5F5);
               font-weight: 600;
             }
 

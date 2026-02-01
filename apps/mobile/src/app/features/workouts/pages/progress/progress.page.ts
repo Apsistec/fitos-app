@@ -20,9 +20,9 @@ import {
   IonRefresherContent,
 } from '@ionic/angular/standalone';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
-import { WorkoutSessionService } from '@app/core/services/workout-session.service';
-import { ExerciseService } from '@app/core/services/exercise.service';
-import { AuthService } from '@app/core/services/auth.service';
+import { WorkoutSessionService } from '../../../../core/services/workout-session.service';
+import { ExerciseService } from '../../../../core/services/exercise.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import type { Exercise } from '@fitos/shared';
 
 Chart.register(...registerables);

@@ -24,7 +24,7 @@ import {
   addOutline,
   funnelOutline,
 } from 'ionicons/icons';
-import { LeadService, Lead, LeadStage } from '@app/core/services/lead.service';
+import { LeadService, Lead, LeadStage } from '../../../../core/services/lead.service';
 import { LeadCardComponent } from '../lead-card/lead-card.component';
 import { LeadFormComponent } from '../lead-form/lead-form.component';
 import { ModalController } from '@ionic/angular/standalone';
@@ -152,8 +152,8 @@ const STAGE_CONFIG = {
     .pipeline-container {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-4);
-      padding: var(--fitos-space-4);
+      gap: 16px;
+      padding: 16px;
       min-height: 100vh;
     }
 
@@ -161,35 +161,42 @@ const STAGE_CONFIG = {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: var(--fitos-space-4);
-      padding: var(--fitos-space-4);
-      background: var(--fitos-bg-secondary);
-      border-radius: var(--fitos-radius-lg);
+      gap: 16px;
+      padding: 16px;
+      background: var(--fitos-bg-secondary, #1A1A1A);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+
+      ion-button {
+        --border-radius: 8px;
+        font-weight: 700;
+      }
     }
 
     .header-stats {
       display: flex;
-      gap: var(--fitos-space-6);
+      gap: 24px;
     }
 
     .stat-item {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-1);
+      gap: 4px;
     }
 
     .stat-value {
-      font-family: var(--fitos-font-mono);
-      font-size: var(--fitos-text-2xl);
+      font-family: 'Space Mono', monospace;
+      font-size: 24px;
       font-weight: 700;
-      color: var(--fitos-text-primary);
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .stat-label {
-      font-size: var(--fitos-text-xs);
-      color: var(--fitos-text-tertiary);
+      font-size: 11px;
+      color: var(--fitos-text-tertiary, #737373);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.5px;
+      font-weight: 500;
     }
 
     .loading-container {
@@ -197,24 +204,25 @@ const STAGE_CONFIG = {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: var(--fitos-space-8);
-      gap: var(--fitos-space-3);
+      padding: 48px;
+      gap: 12px;
 
       ion-spinner {
-        --color: var(--fitos-accent-primary);
+        --color: var(--ion-color-primary, #10B981);
       }
 
       p {
         margin: 0;
-        color: var(--fitos-text-secondary);
+        font-size: 14px;
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
     }
 
     .pipeline-stages {
       display: flex;
-      gap: var(--fitos-space-4);
+      gap: 16px;
       overflow-x: auto;
-      padding-bottom: var(--fitos-space-4);
+      padding-bottom: 16px;
       -webkit-overflow-scrolling: touch;
     }
 
@@ -222,24 +230,25 @@ const STAGE_CONFIG = {
       flex: 0 0 300px;
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-3);
+      gap: 12px;
     }
 
     .stage-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: var(--fitos-space-3) var(--fitos-space-4);
-      background: var(--fitos-bg-secondary);
-      border-radius: var(--fitos-radius-md);
+      padding: 12px 16px;
+      background: var(--fitos-bg-secondary, #1A1A1A);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .stage-title {
       display: flex;
       align-items: center;
-      gap: var(--fitos-space-2);
+      gap: 8px;
       font-weight: 600;
-      color: var(--fitos-text-primary);
+      color: var(--fitos-text-primary, #F5F5F5);
 
       ion-icon {
         font-size: 20px;
@@ -249,12 +258,12 @@ const STAGE_CONFIG = {
     .lead-cards {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-3);
+      gap: 12px;
       min-height: 200px;
-      padding: var(--fitos-space-2);
+      padding: 8px;
       background: transparent;
-      border-radius: var(--fitos-radius-md);
-      transition: background-color var(--fitos-duration-fast);
+      border-radius: 8px;
+      transition: background-color 150ms ease;
 
       &.cdk-drop-list-dragging {
         background: rgba(16, 185, 129, 0.05);
@@ -266,18 +275,18 @@ const STAGE_CONFIG = {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: var(--fitos-space-6);
-      color: var(--fitos-text-tertiary);
+      padding: 24px;
+      color: var(--fitos-text-tertiary, #737373);
       text-align: center;
 
       ion-icon {
         font-size: 48px;
-        margin-bottom: var(--fitos-space-2);
+        margin-bottom: 8px;
       }
 
       p {
         margin: 0;
-        font-size: var(--fitos-text-sm);
+        font-size: 13px;
       }
     }
   `],

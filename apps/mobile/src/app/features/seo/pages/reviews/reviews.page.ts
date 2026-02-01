@@ -4,7 +4,7 @@
  * Sprint 42: Local SEO Automation
  */
 
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonicModule,
@@ -52,6 +52,7 @@ interface Client {
   imports: [CommonModule, IonicModule],
   templateUrl: './reviews.page.html',
   styleUrls: ['./reviews.page.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReviewsPage implements OnInit {
   loading = signal(true);

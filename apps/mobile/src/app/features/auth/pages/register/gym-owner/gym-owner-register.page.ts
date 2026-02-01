@@ -18,7 +18,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { businessOutline, checkmarkCircle, closeCircle, logoGoogle, logoApple } from 'ionicons/icons';
-import { AuthService } from '@app/core/services/auth.service';
+import { AuthService } from '../../../../../core/services/auth.service';
 import { passwordComplexityValidator, capitalizeWords, checkPasswordRequirements } from '../../../validators/password.validator';
 
 @Component({

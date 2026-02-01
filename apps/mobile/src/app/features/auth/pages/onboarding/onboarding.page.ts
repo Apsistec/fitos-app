@@ -20,8 +20,8 @@ import {
   arrowForward,
   checkmarkCircle,
 } from 'ionicons/icons';
-import { AuthService } from '@app/core/services/auth.service';
-import { SupabaseService } from '@app/core/services/supabase.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { SupabaseService } from '../../../../core/services/supabase.service';
 
 @Component({
   selector: 'app-onboarding',

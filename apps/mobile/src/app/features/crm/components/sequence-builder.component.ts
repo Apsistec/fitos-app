@@ -380,23 +380,41 @@ interface SequenceStepForm {
   `,
   styles: [
     `
+      ion-header ion-toolbar {
+        --background: transparent;
+        --border-width: 0;
+        --color: var(--fitos-text-primary, #F5F5F5);
+      }
+
       .loading-container {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         height: 300px;
-        gap: var(--fitos-space-4);
+        gap: 16px;
 
         p {
-          color: var(--fitos-text-secondary);
-          font-size: var(--fitos-font-size-sm);
+          color: var(--fitos-text-secondary, #A3A3A3);
+          font-size: 13px;
         }
       }
 
       .info-card,
       .steps-card {
-        margin: 0 0 var(--fitos-space-4) 0;
+        --background: var(--fitos-bg-secondary, #1A1A1A);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        box-shadow: none;
+        margin: 0 0 16px 0;
+      }
+
+      ion-list {
+        background: transparent;
+      }
+
+      ion-item {
+        --background: transparent;
       }
 
       .steps-header {
@@ -409,7 +427,8 @@ interface SequenceStepForm {
         }
 
         ion-badge {
-          font-size: var(--fitos-font-size-sm);
+          font-size: 13px;
+          font-family: 'Space Mono', monospace;
         }
       }
 
@@ -419,33 +438,36 @@ interface SequenceStepForm {
         align-items: center;
         justify-content: center;
         text-align: center;
-        padding: var(--fitos-space-8) var(--fitos-space-4);
+        padding: 48px 16px;
         min-height: 200px;
 
         ion-icon {
-          font-size: 64px;
-          color: var(--fitos-text-tertiary);
-          margin-bottom: var(--fitos-space-3);
+          font-size: 48px;
+          color: var(--fitos-text-tertiary, #737373);
+          margin-bottom: 12px;
         }
 
         p {
-          font-size: var(--fitos-font-size-base);
-          color: var(--fitos-text-secondary);
-          margin: 0 0 var(--fitos-space-1) 0;
+          font-size: 14px;
+          color: var(--fitos-text-secondary, #A3A3A3);
+          margin: 0 0 4px 0;
         }
 
         small {
-          font-size: var(--fitos-font-size-sm);
+          font-size: 13px;
         }
       }
 
       .step-card {
-        margin: 0 0 var(--fitos-space-3) 0;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        --background: var(--fitos-bg-secondary, #1A1A1A);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        box-shadow: none;
+        margin: 0 0 12px 0;
 
         ion-item {
-          --padding-start: var(--fitos-space-3);
-          --padding-end: var(--fitos-space-3);
+          --padding-start: 12px;
+          --padding-end: 12px;
         }
       }
 
@@ -455,16 +477,17 @@ interface SequenceStepForm {
         justify-content: center;
         width: 32px;
         height: 32px;
-        background: var(--fitos-accent-primary);
+        background: var(--ion-color-primary, #10B981);
         color: white;
         border-radius: 50%;
-        font-size: var(--fitos-font-size-sm);
+        font-size: 13px;
         font-weight: 600;
+        font-family: 'Space Mono', monospace;
         flex-shrink: 0;
       }
 
       .step-config {
-        padding: 0 var(--fitos-space-3) var(--fitos-space-3) var(--fitos-space-3);
+        padding: 0 12px 12px 12px;
 
         ion-item {
           --padding-start: 0;
@@ -475,24 +498,27 @@ interface SequenceStepForm {
       .delay-inputs {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: var(--fitos-space-2);
-        margin-top: var(--fitos-space-2);
+        gap: 8px;
+        margin-top: 8px;
       }
 
       .add-step-button {
-        margin-top: var(--fitos-space-4);
+        margin-top: 16px;
+        --border-radius: 8px;
+        height: 48px;
+        font-weight: 700;
       }
 
       .validation-card {
-        margin-top: var(--fitos-space-4);
+        margin-top: 16px;
 
         h3 {
           display: flex;
           align-items: center;
-          gap: var(--fitos-space-2);
-          font-size: var(--fitos-font-size-base);
+          gap: 8px;
+          font-size: 14px;
           font-weight: 600;
-          margin: 0 0 var(--fitos-space-2) 0;
+          margin: 0 0 8px 0;
 
           ion-icon {
             font-size: 20px;
@@ -501,11 +527,11 @@ interface SequenceStepForm {
 
         ul {
           margin: 0;
-          padding-left: var(--fitos-space-5);
+          padding-left: 20px;
 
           li {
-            font-size: var(--fitos-font-size-sm);
-            margin-bottom: var(--fitos-space-1);
+            font-size: 13px;
+            margin-bottom: 4px;
           }
         }
       }

@@ -306,30 +306,36 @@ import { HapticService } from '../../../core/services/haptic.service';
     </ion-content>
   `,
   styles: [`
+    ion-header ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+      --color: var(--fitos-text-primary, #F5F5F5);
+    }
+
     .loading-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 200px;
-      gap: var(--fitos-space-4);
+      gap: 16px;
 
       p {
-        color: var(--fitos-text-secondary);
-        font-size: var(--fitos-font-size-sm);
+        color: var(--fitos-text-secondary, #A3A3A3);
+        font-size: 13px;
       }
     }
 
     .section-header {
-      margin-top: var(--fitos-space-6);
-      margin-bottom: var(--fitos-space-3);
-      padding: 0 var(--fitos-space-4);
+      margin-top: 24px;
+      margin-bottom: 12px;
+      padding: 0 16px;
 
       h2 {
-        font-size: var(--fitos-font-size-base);
+        font-size: 14px;
         font-weight: 600;
-        color: var(--fitos-text-primary);
-        margin: 0 0 var(--fitos-space-1) 0;
+        color: var(--fitos-text-primary, #F5F5F5);
+        margin: 0 0 4px 0;
       }
 
       &:first-child {
@@ -338,28 +344,28 @@ import { HapticService } from '../../../core/services/haptic.service';
     }
 
     .section-description {
-      font-size: var(--fitos-font-size-sm);
-      color: var(--fitos-text-secondary);
+      font-size: 13px;
+      color: var(--fitos-text-secondary, #A3A3A3);
       margin: 0;
     }
 
     .error-text {
-      font-size: var(--fitos-font-size-xs);
-      color: var(--ion-color-danger);
-      margin-top: var(--fitos-space-1);
-      padding: 0 var(--fitos-space-4);
+      font-size: 11px;
+      color: #EF4444;
+      margin-top: 4px;
+      padding: 0 16px;
     }
 
     .variable-chips {
       display: flex;
       flex-wrap: wrap;
-      gap: var(--fitos-space-2);
-      padding: var(--fitos-space-4);
+      gap: 8px;
+      padding: 16px;
     }
 
     .variable-chip {
       cursor: pointer;
-      transition: transform var(--fitos-duration-fast) var(--fitos-ease-default);
+      transition: transform 150ms ease;
 
       &:hover {
         transform: translateY(-2px);
@@ -373,18 +379,25 @@ import { HapticService } from '../../../core/services/haptic.service';
     .detected-variables {
       display: flex;
       flex-wrap: wrap;
-      gap: var(--fitos-space-2);
-      padding: var(--fitos-space-4);
+      gap: 8px;
+      padding: 16px;
+    }
+
+    ion-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
     }
 
     .email-preview {
-      background: var(--fitos-bg-secondary);
-      border-radius: var(--fitos-radius-md);
-      padding: var(--fitos-space-4);
+      background: var(--fitos-bg-secondary, #1A1A1A);
+      border-radius: 8px;
+      padding: 16px;
     }
 
     .preview-section {
-      margin-bottom: var(--fitos-space-4);
+      margin-bottom: 16px;
 
       &:last-child {
         margin-bottom: 0;
@@ -392,21 +405,23 @@ import { HapticService } from '../../../core/services/haptic.service';
     }
 
     .preview-label {
-      font-size: var(--fitos-font-size-sm);
+      font-size: 13px;
       font-weight: 600;
-      color: var(--fitos-text-secondary);
-      margin-bottom: var(--fitos-space-2);
+      color: var(--fitos-text-secondary, #A3A3A3);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .preview-value {
-      font-size: var(--fitos-font-size-base);
+      font-size: 14px;
       font-weight: 600;
-      color: var(--fitos-text-primary);
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .preview-body {
-      font-size: var(--fitos-font-size-base);
-      color: var(--fitos-text-primary);
+      font-size: 14px;
+      color: var(--fitos-text-primary, #F5F5F5);
       line-height: 1.6;
       white-space: pre-wrap;
     }
@@ -414,22 +429,22 @@ import { HapticService } from '../../../core/services/haptic.service';
     .preview-info {
       display: flex;
       align-items: flex-start;
-      gap: var(--fitos-space-2);
-      margin-top: var(--fitos-space-4);
-      padding: var(--fitos-space-3);
-      background: var(--ion-color-primary-tint);
-      border-radius: var(--fitos-radius-sm);
+      gap: 8px;
+      margin-top: 16px;
+      padding: 12px;
+      background: rgba(16, 185, 129, 0.1);
+      border-radius: 6px;
 
       ion-icon {
         flex-shrink: 0;
         font-size: 20px;
-        color: var(--ion-color-primary);
+        color: var(--ion-color-primary, #10B981);
       }
 
       p {
         margin: 0;
-        font-size: var(--fitos-font-size-sm);
-        color: var(--fitos-text-secondary);
+        font-size: 13px;
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
     }
 
@@ -438,33 +453,34 @@ import { HapticService } from '../../../core/services/haptic.service';
     }
 
     ion-item {
-      --padding-start: var(--fitos-space-4);
-      --padding-end: var(--fitos-space-4);
+      --background: transparent;
+      --padding-start: 16px;
+      --padding-end: 16px;
       --inner-padding-end: 0;
     }
 
     ion-label[position="stacked"] {
-      font-size: var(--fitos-font-size-sm);
+      font-size: 13px;
       font-weight: 500;
-      color: var(--fitos-text-secondary);
-      margin-bottom: var(--fitos-space-2);
+      color: var(--fitos-text-secondary, #A3A3A3);
+      margin-bottom: 8px;
     }
 
     ion-input,
     ion-textarea,
     ion-select {
       --padding-start: 0;
-      font-size: var(--fitos-font-size-base);
+      font-size: 14px;
     }
 
     ion-textarea {
-      margin-top: var(--fitos-space-2);
-      font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+      margin-top: 8px;
+      font-family: 'Space Mono', monospace;
     }
 
     ion-segment {
       ion-icon {
-        margin-bottom: var(--fitos-space-1);
+        margin-bottom: 4px;
       }
     }
 

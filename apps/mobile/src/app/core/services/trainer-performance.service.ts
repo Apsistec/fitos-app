@@ -470,7 +470,7 @@ export class TrainerPerformanceService {
   /**
    * Get metric color (for health indicators)
    */
-  getMetricColor(value: number, benchmark: number, higherIsBetter: boolean = true): string {
+  getMetricColor(value: number, benchmark: number, higherIsBetter = true): string {
     const diff = higherIsBetter ? value - benchmark : benchmark - value;
 
     if (diff >= 0.05) return 'success'; // 5%+ above benchmark

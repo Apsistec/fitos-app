@@ -1,4 +1,4 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, ModalController } from '@ionic/angular';
 import { trigger, state, style, transition, animate } from '@angular/animations';
@@ -13,6 +13,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
   selector: 'fit-celebration-modal',
   standalone: true,
   imports: [CommonModule, IonicModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
     trigger('scaleIn', [
       state('void', style({ transform: 'scale(0)', opacity: 0 })),
@@ -205,14 +206,14 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
     .celebration-title {
       font-size: 32px;
       font-weight: 700;
-      color: var(--ion-color-step-850);
+      color: var(--fitos-text-primary, #F5F5F5);
       margin-bottom: 8px;
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
     .celebration-message {
       font-size: 16px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
       margin-bottom: 24px;
       line-height: 1.5;
     }
@@ -232,6 +233,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
     .milestone-badge .percent {
       font-size: 48px;
       font-weight: 700;
+      font-family: 'Space Mono', monospace;
       color: white;
       line-height: 1;
     }
@@ -247,6 +249,10 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
     /* Progress Card */
     .progress-card {
       margin: 24px 0;
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
     }
 
     .progress-stats {
@@ -265,7 +271,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
 
     .stat .label {
       font-size: 11px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-tertiary, #737373);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -273,6 +279,8 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
     .stat .value {
       font-size: 16px;
       font-weight: 600;
+      font-family: 'Space Mono', monospace;
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .stat.highlight .value {
@@ -281,12 +289,12 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
     }
 
     .stat .arrow {
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-tertiary, #737373);
     }
 
     .progress-bar {
       height: 8px;
-      background: var(--ion-color-step-100);
+      background: var(--fitos-bg-tertiary, #262626);
       border-radius: 4px;
       overflow: hidden;
     }
@@ -322,14 +330,14 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
     .bonus-info strong {
       display: block;
       font-size: 16px;
-      color: var(--ion-color-step-850);
+      color: var(--fitos-text-primary, #F5F5F5);
       margin-bottom: 2px;
     }
 
     .bonus-info p {
       margin: 0;
       font-size: 14px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
     }
 
     /* Next Milestone */
@@ -339,19 +347,19 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
       justify-content: center;
       gap: 8px;
       padding: 12px;
-      background: var(--ion-color-step-100);
+      background: var(--fitos-bg-tertiary, #262626);
       border-radius: 8px;
       margin-bottom: 24px;
     }
 
     .next-milestone ion-icon {
       font-size: 20px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-tertiary, #737373);
     }
 
     .next-milestone span {
       font-size: 14px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
     }
 
     /* Actions */

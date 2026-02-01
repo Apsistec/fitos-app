@@ -28,7 +28,7 @@ import {
   addOutline,
   trashOutline,
 } from 'ionicons/icons';
-import { ExerciseService } from '@app/core/services/exercise.service';
+import { ExerciseService } from '../../../../core/services/exercise.service';
 import { Database } from '@fitos/shared';
 
 type ExerciseCategory = Database['public']['Enums']['exercise_category'];

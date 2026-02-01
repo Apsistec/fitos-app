@@ -9,7 +9,7 @@
  * Sprint 40: Multi-Location Management
  */
 
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
@@ -23,6 +23,7 @@ import { Location } from '../../models/franchise.models';
   styleUrls: ['./location-form.page.scss'],
   standalone: true,
   imports: [CommonModule, IonicModule, ReactiveFormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LocationFormPage implements OnInit {
   private fb = inject(FormBuilder);

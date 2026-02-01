@@ -148,30 +148,38 @@ interface ClientRecoveryAlert {
   styles: [
     `
       .recovery-alerts-card {
-        margin: var(--fitos-space-4);
+        margin: 16px;
+        --background: var(--fitos-bg-secondary, #1A1A1A);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        box-shadow: none;
       }
 
       .card-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: var(--fitos-space-2);
+        gap: 8px;
 
         ion-card-title {
           display: flex;
           align-items: center;
-          gap: var(--fitos-space-2);
-          font-size: var(--fitos-font-size-lg);
-          font-weight: 600;
+          gap: 8px;
+          font-size: 16px;
+          font-weight: 700;
+          color: var(--fitos-text-primary, #F5F5F5);
 
           ion-icon {
             font-size: 20px;
-            color: var(--ion-color-warning);
+            color: #F59E0B;
           }
         }
 
         ion-badge {
-          font-size: var(--fitos-font-size-xs);
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-weight: 500;
           padding: 4px 10px;
         }
       }
@@ -182,78 +190,83 @@ interface ClientRecoveryAlert {
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: var(--fitos-space-6) var(--fitos-space-4);
+        padding: 24px 16px;
         text-align: center;
 
         ion-icon {
           font-size: 48px;
-          color: var(--fitos-text-tertiary);
-          margin-bottom: var(--fitos-space-2);
+          color: var(--fitos-text-tertiary, #737373);
+          margin-bottom: 8px;
         }
 
         ion-spinner {
-          margin-bottom: var(--fitos-space-2);
+          margin-bottom: 8px;
         }
 
         p {
-          font-size: var(--fitos-font-size-base);
-          color: var(--fitos-text-secondary);
-          margin: 0 0 var(--fitos-space-1) 0;
+          font-size: 14px;
+          color: var(--fitos-text-secondary, #A3A3A3);
+          margin: 0 0 4px 0;
         }
 
         ion-note {
-          font-size: var(--fitos-font-size-sm);
+          font-size: 13px;
         }
       }
 
       .alert-item {
         width: 100%;
-        padding: var(--fitos-space-2) 0;
+        padding: 8px 0;
 
         .alert-header {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: var(--fitos-space-2);
-          margin-bottom: var(--fitos-space-1);
+          gap: 8px;
+          margin-bottom: 4px;
 
           .client-info {
             display: flex;
             align-items: center;
-            gap: var(--fitos-space-1);
+            gap: 4px;
 
             ion-icon {
               font-size: 18px;
-              color: var(--fitos-text-tertiary);
+              color: var(--fitos-text-tertiary, #737373);
             }
 
             .client-name {
-              font-size: var(--fitos-font-size-base);
+              font-size: 14px;
               font-weight: 600;
-              color: var(--fitos-text-primary);
+              color: var(--fitos-text-primary, #F5F5F5);
             }
           }
 
           ion-badge {
-            font-size: var(--fitos-font-size-xs);
+            font-size: 11px;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
           }
         }
 
         .alert-details {
           display: flex;
           align-items: center;
-          gap: var(--fitos-space-2);
+          gap: 8px;
 
           .score-value {
-            font-size: var(--fitos-font-size-sm);
-            color: var(--fitos-text-secondary);
+            font-size: 13px;
+            font-family: 'Space Mono', monospace;
+            color: var(--fitos-text-secondary, #A3A3A3);
           }
 
           .unacknowledged {
-            font-size: var(--fitos-font-size-xs);
-            color: var(--ion-color-danger);
+            font-size: 11px;
+            color: #EF4444;
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
           }
         }
       }
@@ -261,13 +274,18 @@ interface ClientRecoveryAlert {
       ion-item {
         --padding-start: 0;
         --inner-padding-end: 0;
+        --background: transparent;
+      }
+
+      ion-list {
+        background: transparent;
       }
     `,
   ],
 })
 export class RecoveryAlertsComponent implements OnInit {
   @Input({ required: true }) trainerId!: string;
-  @Input() limit: number = 5;
+  @Input() limit = 5;
 
   private supabase = inject(SupabaseService);
   private recoveryService = inject(RecoveryService);

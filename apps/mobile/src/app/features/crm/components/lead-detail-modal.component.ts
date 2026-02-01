@@ -48,9 +48,9 @@ import {
   LeadTask,
   LeadStatus,
   ActivityType,
-} from '@app/core/services/lead.service';
-import { AuthService } from '@app/core/services/auth.service';
-import { HapticService } from '@app/core/services/haptic.service';
+} from '../../../../core/services/lead.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { HapticService } from '../../../../core/services/haptic.service';
 
 /**
  * LeadDetailModalComponent - Detailed lead view with activity timeline
@@ -409,31 +409,38 @@ import { HapticService } from '@app/core/services/haptic.service';
     </ion-content>
   `,
   styles: [`
+    ion-header ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+      --color: var(--fitos-text-primary, #F5F5F5);
+    }
+
     .loading-container {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: var(--fitos-space-8);
+      padding: 48px;
     }
 
     .lead-detail {
-      padding: var(--fitos-space-4);
-      padding-bottom: var(--fitos-space-8);
+      padding: 16px;
+      padding-bottom: 48px;
     }
 
     .lead-header {
       display: flex;
-      gap: var(--fitos-space-4);
-      margin-bottom: var(--fitos-space-4);
-      padding: var(--fitos-space-4);
-      background: var(--fitos-bg-secondary);
-      border-radius: var(--fitos-radius-lg);
+      gap: 16px;
+      margin-bottom: 16px;
+      padding: 16px;
+      background: var(--fitos-bg-secondary, #1A1A1A);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
 
       .lead-avatar {
         width: 64px;
         height: 64px;
         border-radius: 50%;
-        background: var(--fitos-bg-tertiary);
+        background: var(--fitos-bg-tertiary, #262626);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -441,7 +448,7 @@ import { HapticService } from '@app/core/services/haptic.service';
 
         ion-icon {
           font-size: 32px;
-          color: var(--fitos-text-secondary);
+          color: var(--fitos-text-secondary, #A3A3A3);
         }
       }
 
@@ -449,13 +456,13 @@ import { HapticService } from '@app/core/services/haptic.service';
         flex: 1;
         display: flex;
         flex-direction: column;
-        gap: var(--fitos-space-2);
+        gap: 8px;
 
         h2 {
           margin: 0;
-          font-size: var(--fitos-text-xl);
+          font-size: 20px;
           font-weight: 700;
-          color: var(--fitos-text-primary);
+          color: var(--fitos-text-primary, #F5F5F5);
         }
 
         ion-chip {
@@ -465,32 +472,51 @@ import { HapticService } from '@app/core/services/haptic.service';
     }
 
     ion-card {
-      margin: 0 0 var(--fitos-space-3) 0;
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
+      margin: 0 0 12px 0;
+    }
+
+    ion-list {
+      background: transparent;
+    }
+
+    ion-item {
+      --background: transparent;
     }
 
     .source-details {
       font-style: italic;
-      color: var(--fitos-text-tertiary);
+      color: var(--fitos-text-tertiary, #737373);
     }
 
     .lost-reason-input {
-      margin-top: var(--fitos-space-3);
+      margin-top: 12px;
     }
 
     .tags-container {
       display: flex;
       flex-wrap: wrap;
-      gap: var(--fitos-space-2);
+      gap: 8px;
     }
 
     .add-activity-section,
     .add-task-section {
-      margin-bottom: var(--fitos-space-4);
+      margin-bottom: 16px;
+
+      ion-button {
+        --border-radius: 8px;
+        height: 48px;
+        font-weight: 700;
+        --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+      }
     }
 
     .timeline {
       position: relative;
-      padding-left: var(--fitos-space-6);
+      padding-left: 24px;
 
       &::before {
         content: '';
@@ -499,13 +525,13 @@ import { HapticService } from '@app/core/services/haptic.service';
         top: 0;
         bottom: 0;
         width: 2px;
-        background: var(--fitos-border-subtle);
+        background: rgba(255, 255, 255, 0.06);
       }
     }
 
     .timeline-item {
       position: relative;
-      margin-bottom: var(--fitos-space-4);
+      margin-bottom: 16px;
 
       &:last-child {
         margin-bottom: 0;
@@ -519,43 +545,43 @@ import { HapticService } from '@app/core/services/haptic.service';
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      background: var(--fitos-bg-secondary);
-      border: 2px solid var(--fitos-border-subtle);
+      background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 2px solid rgba(255, 255, 255, 0.06);
       display: flex;
       align-items: center;
       justify-content: center;
 
       ion-icon {
         font-size: 16px;
-        color: var(--fitos-text-secondary);
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
 
       &.email {
-        border-color: var(--ion-color-primary);
-        background: rgba(var(--ion-color-primary-rgb), 0.1);
+        border-color: var(--ion-color-primary, #10B981);
+        background: rgba(16, 185, 129, 0.1);
 
-        ion-icon { color: var(--ion-color-primary); }
+        ion-icon { color: var(--ion-color-primary, #10B981); }
       }
 
       &.call {
-        border-color: var(--ion-color-success);
-        background: rgba(var(--ion-color-success-rgb), 0.1);
+        border-color: #10B981;
+        background: rgba(16, 185, 129, 0.1);
 
-        ion-icon { color: var(--ion-color-success); }
+        ion-icon { color: #10B981; }
       }
 
       &.meeting {
-        border-color: var(--ion-color-tertiary);
-        background: rgba(var(--ion-color-tertiary-rgb), 0.1);
+        border-color: #8B5CF6;
+        background: rgba(139, 92, 246, 0.1);
 
-        ion-icon { color: var(--ion-color-tertiary); }
+        ion-icon { color: #8B5CF6; }
       }
 
       &.note {
-        border-color: var(--ion-color-medium);
-        background: rgba(var(--ion-color-medium-rgb), 0.1);
+        border-color: var(--fitos-text-tertiary, #737373);
+        background: rgba(115, 115, 115, 0.1);
 
-        ion-icon { color: var(--ion-color-medium); }
+        ion-icon { color: var(--fitos-text-tertiary, #737373); }
       }
     }
 
@@ -568,15 +594,15 @@ import { HapticService } from '@app/core/services/haptic.service';
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        gap: var(--fitos-space-2);
+        gap: 8px;
 
         ion-card-title {
           flex: 1;
-          font-size: var(--fitos-text-base);
+          font-size: 14px;
         }
 
         ion-note {
-          font-size: var(--fitos-text-xs);
+          font-size: 11px;
           white-space: nowrap;
         }
       }
@@ -594,9 +620,9 @@ import { HapticService } from '@app/core/services/haptic.service';
       .task-due {
         display: flex;
         align-items: center;
-        gap: var(--fitos-space-1);
-        font-size: var(--fitos-text-xs);
-        color: var(--fitos-text-tertiary);
+        gap: 4px;
+        font-size: 11px;
+        color: var(--fitos-text-tertiary, #737373);
 
         ion-icon {
           font-size: 14px;
@@ -609,18 +635,19 @@ import { HapticService } from '@app/core/services/haptic.service';
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: var(--fitos-space-8);
+      padding: 48px;
       text-align: center;
 
       ion-icon {
         font-size: 48px;
-        color: var(--fitos-text-tertiary);
-        margin-bottom: var(--fitos-space-3);
+        color: var(--fitos-text-tertiary, #737373);
+        margin-bottom: 12px;
       }
 
       p {
         margin: 0;
-        color: var(--fitos-text-secondary);
+        font-size: 14px;
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
     }
   `],

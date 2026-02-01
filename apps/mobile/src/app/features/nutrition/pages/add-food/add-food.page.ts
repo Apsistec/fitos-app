@@ -35,11 +35,14 @@ import {
   cameraOutline,
 } from 'ionicons/icons';
 import { FoodService, Food } from '../../../../core/services/food.service';
+import { NutritionService } from '../../../../core/services/nutrition.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { VoiceNutritionComponent } from '../../components/voice-nutrition/voice-nutrition.component';
 import { FoodConfirmationComponent } from '../../../../shared/components/food-confirmation/food-confirmation.component';
 import { ParsedFood } from '../../../../core/services/nutrition-parser.service';
 import { PhotoNutritionService } from '../../../../core/services/photo-nutrition.service';
 import { HapticService } from '../../../../core/services/haptic.service';
+import { ToastController } from '@ionic/angular/standalone';
 
 addIcons({
   searchOutline,
@@ -499,9 +502,12 @@ addIcons({
 export class AddFoodPage implements OnInit {
   foodService = inject(FoodService);
   photoNutrition = inject(PhotoNutritionService);
+  private nutritionService = inject(NutritionService);
+  private authService = inject(AuthService);
   private router = inject(Router);
   private modalCtrl = inject(ModalController);
   private haptic = inject(HapticService);
+  private toastCtrl = inject(ToastController);
 
   // Input method
   inputMethod: 'search' | 'voice' | 'photo' = 'search';
@@ -511,6 +517,9 @@ export class AddFoodPage implements OnInit {
 
   // Parsed foods from voice or photo
   parsedFoods = signal<ParsedFood[]>([]);
+
+  // Loading state for food logging
+  isLogging = signal(false);
 
   ngOnInit() {
     addIcons({
@@ -595,16 +604,99 @@ export class AddFoodPage implements OnInit {
   }
 
   /**
-   * Confirm and log the parsed foods
+   * Confirm and log the parsed foods to the nutrition diary
    */
   async confirmFoods(foods: ParsedFood[]): Promise<void> {
-    this.haptic.success();
+    const userId = this.authService.user()?.id;
+    if (!userId) {
+      await this.showToast('Please log in to add foods', 'warning');
+      return;
+    }
 
-    // TODO: Log foods to nutrition diary
-    console.log('Logging foods:', foods);
+    this.isLogging.set(true);
+    this.haptic.light();
 
-    // For now, just navigate back
-    this.router.navigate(['/tabs/nutrition']);
+    try {
+      // Get today's date in YYYY-MM-DD format
+      const today = new Date().toISOString().split('T')[0];
+
+      // Load or create today's nutrition log
+      const log = await this.nutritionService.loadNutritionLog(userId, today);
+
+      if (!log) {
+        throw new Error('Failed to load nutrition log');
+      }
+
+      // Log each food item
+      let successCount = 0;
+      for (const food of foods) {
+        const entry = await this.nutritionService.addEntry(log.log.id, {
+          custom_name: food.foodName,
+          servings: food.servingQty,
+          calories: Math.round(food.calories),
+          protein_g: Math.round(food.protein * 10) / 10,
+          carbs_g: Math.round(food.carbs * 10) / 10,
+          fat_g: Math.round(food.fat * 10) / 10,
+          meal_type: this.inferMealType(),
+        });
+
+        if (entry) {
+          successCount++;
+        }
+      }
+
+      if (successCount === foods.length) {
+        await this.haptic.success();
+        await this.showToast(
+          successCount === 1
+            ? 'Food logged successfully!'
+            : `${successCount} foods logged successfully!`,
+          'success'
+        );
+      } else if (successCount > 0) {
+        await this.haptic.warning();
+        await this.showToast(
+          `${successCount} of ${foods.length} foods logged`,
+          'warning'
+        );
+      } else {
+        throw new Error('Failed to log foods');
+      }
+
+      // Navigate back to nutrition log
+      this.router.navigate(['/tabs/nutrition']);
+    } catch (error) {
+      console.error('Error logging foods:', error);
+      await this.haptic.error();
+      await this.showToast('Failed to log foods. Please try again.', 'danger');
+    } finally {
+      this.isLogging.set(false);
+    }
+  }
+
+  /**
+   * Infer meal type based on current time
+   */
+  private inferMealType(): string {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 11) return 'breakfast';
+    if (hour >= 11 && hour < 15) return 'lunch';
+    if (hour >= 15 && hour < 18) return 'snack';
+    if (hour >= 18 && hour < 22) return 'dinner';
+    return 'snack'; // Late night
+  }
+
+  /**
+   * Show toast message
+   */
+  private async showToast(message: string, color = 'primary'): Promise<void> {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 2000,
+      position: 'bottom',
+      color,
+    });
+    await toast.present();
   }
 
   /**

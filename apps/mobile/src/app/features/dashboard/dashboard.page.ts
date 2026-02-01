@@ -20,24 +20,24 @@ import {
   barbellOutline,
   peopleOutline,
 } from 'ionicons/icons';
-import { AuthService } from '@app/core/services/auth.service';
-import { fadeInUp, listStagger } from '@app/shared/animations';
-import { AssignmentService } from '@app/core/services/assignment.service';
-import { ClientService } from '@app/core/services/client.service';
-import { WorkoutSessionService } from '@app/core/services/workout-session.service';
-import { NutritionService } from '@app/core/services/nutrition.service';
+import { AuthService } from '../../core/services/auth.service';
+import { fadeInUp, listStagger } from '../../shared/animations';
+import { AssignmentService } from '../../core/services/assignment.service';
+import { ClientService } from '../../core/services/client.service';
+import { WorkoutSessionService } from '../../core/services/workout-session.service';
+import { NutritionService } from '../../core/services/nutrition.service';
 import { ClientTodayWorkoutCardComponent } from './components/client-today-workout-card/client-today-workout-card.component';
 import { ClientNutritionSummaryComponent, type NutritionSummary } from './components/client-nutrition-summary/client-nutrition-summary.component';
 import { TrainerOverviewStatsComponent, type TrainerStats } from './components/trainer-overview-stats/trainer-overview-stats.component';
 import { TrainerNeedsAttentionComponent, type ClientAlert } from './components/trainer-needs-attention/trainer-needs-attention.component';
 import { TrainerActivityFeedComponent, type ActivityItem } from './components/trainer-activity-feed/trainer-activity-feed.component';
-import { StatCardComponent } from '@app/shared/components/stat-card/stat-card.component';
-import { UpcomingWorkoutsListComponent } from '@app/shared/components/upcoming-workouts-list/upcoming-workouts-list.component';
-import { WearableDataCardComponent } from '@app/shared/components/wearable-data-card/wearable-data-card.component';
+import { StatCardComponent } from '../../shared/components/stat-card/stat-card.component';
+import { UpcomingWorkoutsListComponent } from '../../shared/components/upcoming-workouts-list/upcoming-workouts-list.component';
+import { WearableDataCardComponent } from '../../shared/components/wearable-data-card/wearable-data-card.component';
 import { OwnerFacilityStatsComponent, type FacilityStats } from './components/owner-facility-stats/owner-facility-stats.component';
 import { OwnerTrainerPerformanceComponent, type TrainerPerformance } from './components/owner-trainer-performance/owner-trainer-performance.component';
 import { CRMDashboardWidgetComponent } from '../crm/components/crm-dashboard-widget.component';
-import type { WorkoutWithExercises } from '@app/core/services/workout.service';
+import type { WorkoutWithExercises } from '../../core/services/workout.service';
 
 @Component({
   selector: 'app-dashboard',

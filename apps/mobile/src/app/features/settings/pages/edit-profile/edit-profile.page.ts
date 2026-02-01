@@ -31,8 +31,8 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { cameraOutline, checkmarkCircle, settingsOutline } from 'ionicons/icons';
-import { AuthService } from '@app/core/services/auth.service';
-import { SupabaseService } from '@app/core/services/supabase.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { SupabaseService } from '../../../../core/services/supabase.service';
 
 @Component({
   selector: 'app-edit-profile',
@@ -362,6 +362,23 @@ import { SupabaseService } from '@app/core/services/supabase.service';
     </ion-content>
   `,
   styles: [`
+    ion-header {
+      ion-toolbar {
+        --background: transparent;
+        --border-width: 0;
+
+        ion-title {
+          font-size: 18px;
+          font-weight: 700;
+          letter-spacing: -0.3px;
+        }
+      }
+    }
+
+    ion-content {
+      --background: var(--fitos-bg-primary, #0D0D0D);
+    }
+
     .profile-container {
       max-width: 600px;
       margin: 0 auto;
@@ -380,7 +397,7 @@ import { SupabaseService } from '@app/core/services/supabase.service';
     .profile-avatar {
       width: 120px;
       height: 120px;
-      border: 4px solid var(--ion-color-primary);
+      border: 4px solid var(--ion-color-primary, #10B981);
     }
 
     .avatar-placeholder {
@@ -389,26 +406,30 @@ import { SupabaseService } from '@app/core/services/supabase.service';
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--ion-color-primary);
+      background: var(--ion-color-primary, #10B981);
       color: white;
       font-size: 48px;
       font-weight: 600;
     }
 
     ion-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
       margin: 16px 0;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
     }
 
     ion-card-title {
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--ion-color-primary);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .form-item {
       --padding-start: 0;
       --inner-padding-end: 0;
+      --background: transparent;
       margin-bottom: 20px;
     }
 
@@ -420,26 +441,26 @@ import { SupabaseService } from '@app/core/services/supabase.service';
     }
 
     .field-label {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--ion-color-medium);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--fitos-text-secondary, #A3A3A3);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     .field-input {
       font-size: 16px;
-      color: var(--ion-text-color);
+      color: var(--fitos-text-primary, #F5F5F5);
       --padding-start: 12px;
       --padding-end: 12px;
-      border: 1px solid var(--ion-color-light);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 8px;
       min-height: 44px;
     }
 
     .field-value {
       font-size: 16px;
-      color: var(--ion-text-color);
+      color: var(--fitos-text-primary, #F5F5F5);
       display: flex;
       align-items: center;
       gap: 8px;
@@ -472,7 +493,7 @@ import { SupabaseService } from '@app/core/services/supabase.service';
       justify-content: space-between;
       align-items: center;
       padding: 8px 0;
-      border-bottom: 1px solid var(--ion-color-light);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .info-row:last-child {
@@ -483,12 +504,20 @@ import { SupabaseService } from '@app/core/services/supabase.service';
       padding: 24px 0;
       position: sticky;
       bottom: 0;
-      background: var(--ion-background-color);
+      background: var(--fitos-bg-primary, #0D0D0D);
       z-index: 10;
+
+      ion-button {
+        --border-radius: 8px;
+        height: 48px;
+        font-weight: 700;
+        --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+      }
     }
 
     ion-list {
       padding: 0;
+      background: transparent;
     }
 
     ion-textarea {
@@ -496,7 +525,7 @@ import { SupabaseService } from '@app/core/services/supabase.service';
       --padding-end: 12px;
       --padding-top: 12px;
       --padding-bottom: 12px;
-      border: 1px solid var(--ion-color-light);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 8px;
     }
   `],

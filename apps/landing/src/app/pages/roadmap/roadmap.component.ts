@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 interface RoadmapItem {
@@ -12,6 +12,7 @@ interface RoadmapItem {
   selector: 'app-roadmap',
   standalone: true,
   imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="roadmap-container">
       <div class="roadmap-header">

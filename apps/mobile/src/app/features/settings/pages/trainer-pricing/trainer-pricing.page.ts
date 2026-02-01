@@ -27,8 +27,8 @@ import {
 import { CurrencyPipe } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { addOutline, trashOutline, createOutline } from 'ionicons/icons';
-import { SubscriptionService, TrainerPricing } from '@app/core/services/subscription.service';
-import { StripeService } from '@app/core/services/stripe.service';
+import { SubscriptionService, TrainerPricing } from '../../../../core/services/subscription.service';
+import { StripeService } from '../../../../core/services/stripe.service';
 
 @Component({
   standalone: true,
@@ -232,6 +232,43 @@ import { StripeService } from '@app/core/services/stripe.service';
     </ion-content>
   `,
   styles: [`
+    :host {
+      --background: var(--fitos-bg-primary, #0D0D0D);
+    }
+
+    ion-header ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+      --color: var(--fitos-text-primary, #F5F5F5);
+    }
+
+    ion-content {
+      --background: var(--fitos-bg-primary, #0D0D0D);
+    }
+
+    ion-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
+    }
+
+    ion-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
+    }
+
+    ion-list {
+      --background: transparent;
+    }
+
+    ion-item {
+      --background: transparent;
+      --color: var(--fitos-text-primary, #F5F5F5);
+      --border-color: rgba(255, 255, 255, 0.06);
+    }
+
     .pricing-container {
       max-width: 600px;
       margin: 0 auto;
@@ -245,8 +282,9 @@ import { StripeService } from '@app/core/services/stripe.service';
 
       h2 {
         margin: 0;
-        font-size: 1.25rem;
-        font-weight: 600;
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
     }
 
@@ -255,7 +293,7 @@ import { StripeService } from '@app/core/services/stripe.service';
       flex-direction: column;
       align-items: center;
       padding: 48px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
 
       p {
         margin-top: 16px;
@@ -268,7 +306,8 @@ import { StripeService } from '@app/core/services/stripe.service';
 
       p {
         margin-bottom: 16px;
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-secondary, #A3A3A3);
+        font-size: 14px;
       }
     }
 
@@ -280,20 +319,23 @@ import { StripeService } from '@app/core/services/stripe.service';
     }
 
     .tier-price {
-      font-size: 1.5rem;
+      font-size: 24px;
       font-weight: 700;
-      color: var(--ion-color-primary);
+      font-family: 'Space Mono', monospace;
+      color: var(--ion-color-primary, #10B981);
 
       .interval {
-        font-size: 0.875rem;
+        font-size: 14px;
         font-weight: 400;
-        color: var(--ion-color-medium);
+        font-family: inherit;
+        color: var(--fitos-text-tertiary, #737373);
       }
     }
 
     .tier-description {
       margin: 8px 0;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
+      font-size: 14px;
     }
 
     .tier-status {
@@ -309,7 +351,8 @@ import { StripeService } from '@app/core/services/stripe.service';
       padding: 12px 16px;
       margin: 16px 0;
       border-radius: 8px;
-      background: rgba(var(--ion-color-danger-rgb), 0.1);
+      background: rgba(239, 68, 68, 0.1);
+      color: #EF4444;
     }
 
     .form-actions {
@@ -319,12 +362,21 @@ import { StripeService } from '@app/core/services/stripe.service';
       margin-top: 16px;
     }
 
+    ion-button[type="submit"],
+    ion-button[expand="block"] {
+      --border-radius: 8px;
+      height: 48px;
+      font-weight: 700;
+      --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    }
+
     .fee-note {
       display: block;
       text-align: center;
       padding: 16px;
       margin-top: 24px;
-      font-size: 0.875rem;
+      font-size: 13px;
+      color: var(--fitos-text-tertiary, #737373);
     }
   `],
 })

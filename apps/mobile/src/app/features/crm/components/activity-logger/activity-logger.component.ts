@@ -24,8 +24,8 @@ import {
   saveOutline,
   closeOutline,
 } from 'ionicons/icons';
-import { LeadService, LeadActivity } from '@app/core/services/lead.service';
-import { HapticService } from '@app/core/services/haptic.service';
+import { LeadService, LeadActivity } from '../../../../core/services/lead.service';
+import { HapticService } from '../../../../core/services/haptic.service';
 
 type ActivityType = 'note' | 'call' | 'email' | 'meeting';
 
@@ -214,18 +214,22 @@ type ActivityType = 'note' | 'call' | 'email' | 'meeting';
   `,
   styles: [`
     .activity-logger {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
       margin: 0;
     }
 
     ion-segment {
-      --background: var(--fitos-bg-tertiary);
-      margin-bottom: var(--fitos-space-4);
+      --background: var(--fitos-bg-tertiary, #262626);
+      margin-bottom: 16px;
     }
 
     ion-segment-button {
-      --indicator-color: var(--fitos-accent-primary);
-      --color: var(--fitos-text-secondary);
-      --color-checked: var(--fitos-accent-primary);
+      --indicator-color: var(--ion-color-primary, #10B981);
+      --color: var(--fitos-text-secondary, #A3A3A3);
+      --color-checked: var(--ion-color-primary, #10B981);
       min-height: 56px;
     }
 
@@ -235,15 +239,18 @@ type ActivityType = 'note' | 'call' | 'email' | 'meeting';
     }
 
     ion-segment-button ion-label {
-      font-size: 12px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 500;
       margin-top: 4px;
     }
 
     .form-section {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-3);
-      margin-top: var(--fitos-space-4);
+      gap: 12px;
+      margin-top: 16px;
     }
 
     ion-item {
@@ -252,14 +259,28 @@ type ActivityType = 'note' | 'call' | 'email' | 'meeting';
       --background: transparent;
     }
 
+    ion-label[position="stacked"] {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--fitos-text-secondary, #A3A3A3);
+      margin-bottom: 8px;
+    }
+
     .action-buttons {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-2);
-      margin-top: var(--fitos-space-6);
+      gap: 8px;
+      margin-top: 24px;
 
       ion-button {
         margin: 0;
+        --border-radius: 8px;
+        height: 48px;
+        font-weight: 700;
+      }
+
+      ion-button:first-child {
+        --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
       }
     }
   `],

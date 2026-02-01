@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LegalPageComponent, PRIVACY_POLICY } from '../../../../../../libs/src/index';
 
@@ -6,6 +6,7 @@ import { LegalPageComponent, PRIVACY_POLICY } from '../../../../../../libs/src/i
   selector: 'app-privacy',
   standalone: true,
   imports: [CommonModule, LegalPageComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <lib-legal-page [document]="privacyPolicy" />
   `,

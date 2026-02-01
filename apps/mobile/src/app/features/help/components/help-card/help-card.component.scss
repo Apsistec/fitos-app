@@ -4,8 +4,10 @@
   cursor: pointer;
   transition: transform 150ms ease-in-out;
   min-height: 80px;
-  background: var(--fitos-bg-secondary, var(--ion-color-step-50));
-  border: 1px solid var(--fitos-border-subtle, var(--ion-border-color));
+  background: var(--fitos-bg-secondary, #1A1A1A);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  box-shadow: none;
 
   &:active {
     transform: scale(0.98);
@@ -30,7 +32,7 @@
     align-items: center;
     justify-content: center;
     border-radius: 8px;
-    background: var(--fitos-bg-tertiary, var(--ion-color-step-100));
+    background: var(--fitos-bg-tertiary, #262626);
 
     ion-icon {
       font-size: 24px;
@@ -45,13 +47,13 @@
   ion-card-title {
     font-size: 16px;
     font-weight: 600;
-    color: var(--fitos-text-primary, var(--ion-text-color));
+    color: var(--fitos-text-primary, #F5F5F5);
     margin-bottom: 4px;
   }
 
   ion-card-subtitle {
     font-size: 13px;
-    color: var(--fitos-text-secondary, var(--ion-color-step-600));
+    color: var(--fitos-text-secondary, #A3A3A3);
     line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;

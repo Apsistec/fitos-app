@@ -88,12 +88,12 @@ interface ActivityData {
     }
 
     .nutrition-bar {
-      background: var(--ion-color-primary, #3880ff);
+      background: var(--ion-color-primary, #10B981);
     }
 
     .day-label {
       font-size: 12px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
       text-transform: uppercase;
     }
 
@@ -121,12 +121,12 @@ interface ActivityData {
     }
 
     .legend-dot.nutrition {
-      background: var(--ion-color-primary, #3880ff);
+      background: var(--ion-color-primary, #10B981);
     }
 
     .legend-label {
       font-size: 12px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
     }
   `]
 })

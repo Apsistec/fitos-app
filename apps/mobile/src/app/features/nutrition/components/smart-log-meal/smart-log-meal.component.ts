@@ -27,7 +27,7 @@ import {
   nutritionOutline,
   checkmarkCircleOutline,
 } from 'ionicons/icons';
-import { HapticService } from '@app/core/services/haptic.service';
+import { HapticService } from '../../../../core/services/haptic.service';
 
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 

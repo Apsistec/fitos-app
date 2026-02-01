@@ -25,8 +25,8 @@ import {
   eyeOffOutline,
   fingerPrintOutline,
 } from 'ionicons/icons';
-import { AuthService } from '@app/core/services/auth.service';
-import { SupabaseService } from '@app/core/services/supabase.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { SupabaseService } from '../../../../core/services/supabase.service';
 
 @Component({
   selector: 'app-privacy',
@@ -172,6 +172,19 @@ import { SupabaseService } from '@app/core/services/supabase.service';
     </ion-content>
   `,
   styles: [`
+    :host {
+      ion-header {
+        ion-toolbar {
+          --background: transparent;
+          --border-width: 0;
+        }
+      }
+
+      ion-content {
+        --background: var(--fitos-bg-primary, #0D0D0D);
+      }
+    }
+
     .privacy-container {
       max-width: 768px;
       margin: 0 auto;
@@ -186,46 +199,54 @@ import { SupabaseService } from '@app/core/services/supabase.service';
 
       ion-icon {
         font-size: 24px;
-        color: var(--ion-color-primary);
+        color: var(--ion-color-primary, #10B981);
       }
 
       h2 {
         margin: 0;
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: var(--ion-color-dark);
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.3px;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       &.danger {
         ion-icon {
-          color: var(--ion-color-danger);
+          color: #EF4444;
         }
 
         h2 {
-          color: var(--ion-color-danger);
+          color: #EF4444;
         }
       }
     }
 
     ion-list {
+      --background: transparent;
       margin-bottom: 24px;
 
       &.danger-zone {
         margin-top: 32px;
-        border-top: 2px solid var(--ion-color-danger);
+        border-top: 2px solid #EF4444;
       }
+    }
+
+    ion-item {
+      --background: transparent;
+      --border-color: rgba(255, 255, 255, 0.08);
     }
 
     .danger-note {
       padding: 16px;
       margin: 0 16px 16px;
-      background: rgba(var(--ion-color-danger-rgb), 0.1);
-      border-left: 3px solid var(--ion-color-danger);
+      background: rgba(239, 68, 68, 0.1);
+      border-left: 3px solid #EF4444;
       border-radius: 4px;
 
       ion-note {
         display: block;
         line-height: 1.5;
+        font-size: 14px;
 
         strong {
           display: block;
@@ -237,14 +258,15 @@ import { SupabaseService } from '@app/core/services/supabase.service';
     .security-info {
       padding: 24px 16px;
       margin: 0 16px;
-      background: var(--fitos-bg-secondary);
+      background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 12px;
 
       h3 {
         margin: 0 0 16px 0;
-        font-size: 1rem;
-        font-weight: 600;
-        color: var(--ion-color-dark);
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       ul {
@@ -254,8 +276,8 @@ import { SupabaseService } from '@app/core/services/supabase.service';
         li {
           margin-bottom: 8px;
           line-height: 1.5;
-          color: var(--fitos-text-primary);
-          font-size: 1rem;
+          color: var(--fitos-text-primary, #F5F5F5);
+          font-size: 14px;
 
           &:last-child {
             margin-bottom: 0;

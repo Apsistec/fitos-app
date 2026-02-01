@@ -84,7 +84,7 @@ interface AttentionItem {
       }
 
       p {
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-secondary, #A3A3A3);
         margin: 0;
       }
     }
@@ -99,7 +99,7 @@ interface AttentionItem {
       display: flex;
       gap: 12px;
       padding: 12px;
-      background: var(--ion-color-light);
+      background: var(--fitos-bg-tertiary, #262626);
       border-radius: 8px;
       border-left: 3px solid transparent;
       cursor: pointer;
@@ -114,11 +114,11 @@ interface AttentionItem {
       }
 
       &.priority-low {
-        border-left-color: var(--ion-color-medium);
+        border-left-color: var(--fitos-text-tertiary, #737373);
       }
 
       &:active {
-        background: var(--ion-color-light-shade);
+        background: var(--fitos-bg-secondary, #1A1A1A);
       }
     }
 
@@ -171,7 +171,7 @@ interface AttentionItem {
       align-items: center;
       gap: 6px;
       font-size: 13px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
 
       ion-icon {
         font-size: 16px;

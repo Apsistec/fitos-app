@@ -9,7 +9,7 @@ export interface AccordionItem {
 }
 
 @Component({
-  selector: 'fitos-accordion',
+  selector: 'lib-accordion',
   standalone: true,
   imports: [CommonModule],
   template: `

@@ -46,9 +46,9 @@ import {
   starOutline,
   bookOutline,
 } from 'ionicons/icons';
-import { AuthService } from '@app/core/services/auth.service';
-import { StripeService } from '@app/core/services/stripe.service';
-import { ThemeService, ThemeMode } from '@app/core/services/theme.service';
+import { AuthService } from '../../core/services/auth.service';
+import { StripeService } from '../../core/services/stripe.service';
+import { ThemeService, ThemeMode } from '../../core/services/theme.service';
 
 @Component({
   standalone: true,
@@ -339,6 +339,23 @@ import { ThemeService, ThemeMode } from '@app/core/services/theme.service';
     </ion-content>
   `,
   styles: [`
+    ion-header {
+      ion-toolbar {
+        --background: transparent;
+        --border-width: 0;
+
+        ion-title {
+          font-size: 18px;
+          font-weight: 700;
+          letter-spacing: -0.3px;
+        }
+      }
+    }
+
+    ion-content {
+      --background: var(--fitos-bg-primary, #0D0D0D);
+    }
+
     .settings-container {
       max-width: 768px;
       margin: 0 auto;
@@ -358,33 +375,34 @@ import { ThemeService, ThemeMode } from '@app/core/services/theme.service';
 
       ion-icon {
         font-size: 24px;
-        color: var(--fitos-accent-primary);
+        color: var(--ion-color-primary, #10B981);
       }
 
       h2 {
-        font-size: 1.125rem;
-        font-weight: 600;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.3px;
         margin: 0;
-        color: var(--fitos-text-primary);
+        color: var(--fitos-text-primary, #F5F5F5);
       }
     }
 
     ion-item {
-      --background: var(--fitos-bg-secondary);
-      --color: var(--fitos-text-primary);
-      --border-color: var(--fitos-border-subtle);
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      --color: var(--fitos-text-primary, #F5F5F5);
+      --border-color: rgba(255, 255, 255, 0.06);
 
       ion-icon[slot="start"] {
-        color: var(--fitos-text-secondary);
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
 
       h3 {
-        color: var(--fitos-text-primary);
+        color: var(--fitos-text-primary, #F5F5F5);
         font-weight: 500;
       }
 
       p {
-        color: var(--fitos-text-secondary);
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
     }
 
@@ -397,11 +415,11 @@ import { ThemeService, ThemeMode } from '@app/core/services/theme.service';
       padding: 0 16px 16px;
 
       ion-segment {
-        --background: var(--fitos-bg-tertiary);
+        --background: var(--fitos-bg-tertiary, #262626);
 
         ion-segment-button {
-          --background-checked: var(--fitos-accent-primary);
-          --color: var(--fitos-text-secondary);
+          --background-checked: var(--ion-color-primary, #10B981);
+          --color: var(--fitos-text-secondary, #A3A3A3);
           --color-checked: #ffffff;
           --indicator-color: transparent;
           min-height: 48px;
@@ -436,7 +454,7 @@ import { ThemeService, ThemeMode } from '@app/core/services/theme.service';
       padding: 12px 16px;
       margin: 0 16px 16px;
       border-radius: 8px;
-      background: rgba(var(--ion-color-danger-rgb), 0.1);
+      background: rgba(239, 68, 68, 0.1);
     }
 
     .signout-section {
@@ -449,8 +467,8 @@ import { ThemeService, ThemeMode } from '@app/core/services/theme.service';
 
       p {
         margin: 0;
-        color: var(--fitos-text-tertiary);
-        font-size: 0.875rem;
+        color: var(--fitos-text-tertiary, #737373);
+        font-size: 14px;
       }
     }
   `],

@@ -3,7 +3,7 @@
  * Sprint 42: Local SEO Automation
  */
 
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -52,6 +52,7 @@ interface BusinessInsights {
   imports: [CommonModule, IonicModule, ReactiveFormsModule],
   templateUrl: './google-business.page.html',
   styleUrls: ['./google-business.page.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GoogleBusinessPage implements OnInit {
   loading = signal(true);

@@ -642,10 +642,8 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
             );
 
             if (success) {
-              // Celebration animation on workout completion
-              await this.celebration.workoutComplete();
-              this.showToast('Workout completed!', 'success');
-              this.router.navigate(['/tabs/dashboard']);
+              // Navigate to workout complete page for celebration
+              this.router.navigate(['/tabs/workouts/complete', this.assignedWorkoutId]);
             } else {
               await this.haptic.error();
               this.showToast('Failed to complete workout', 'danger');
@@ -684,7 +682,7 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   }
 
-  async showToast(message: string, color: string = 'primary') {
+  async showToast(message: string, color = 'primary') {
     const toast = await this.toastController.create({
       message,
       duration: 2000,

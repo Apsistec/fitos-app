@@ -20,8 +20,8 @@ import {
   createOutline,
   trashOutline,
 } from 'ionicons/icons';
-import { VoiceService } from '@app/core/services/voice.service';
-import { NutritionParserService, ParsedFood } from '@app/core/services/nutrition-parser.service';
+import { VoiceService } from '../../../../core/services/voice.service';
+import { NutritionParserService, ParsedFood } from '../../../../core/services/nutrition-parser.service';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 /**

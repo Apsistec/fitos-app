@@ -39,7 +39,7 @@ import {
   reorderThreeOutline,
   settingsOutline,
 } from 'ionicons/icons';
-import { HapticService } from '@app/core/services/haptic.service';
+import { HapticService } from '../../../../core/services/haptic.service';
 import { EmbedCodeComponent } from '../../components/embed-code/embed-code.component';
 
 export type CustomFieldType = 'text' | 'email' | 'phone' | 'textarea' | 'select' | 'number';
@@ -110,7 +110,7 @@ export interface LeadFormConfig {
     IonTextarea,
   ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/crm"></ion-back-button>
@@ -294,52 +294,91 @@ export interface LeadFormConfig {
     </ion-content>
   `,
   styles: [`
+    ion-header ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-header ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     .form-builder-container {
-      padding: var(--fitos-space-4);
-      padding-bottom: var(--fitos-space-8);
+      padding: 16px;
+      padding-bottom: 48px;
     }
 
     ion-card {
-      margin-bottom: var(--fitos-space-4);
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
+      margin-bottom: 16px;
+    }
+
+    ion-card-header ion-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     ion-item {
+      --background: transparent;
       --padding-start: 0;
       --inner-padding-end: 0;
-      margin-bottom: var(--fitos-space-3);
+      margin-bottom: 12px;
+    }
+
+    ion-list {
+      background: transparent;
     }
 
     ion-label[position="stacked"] {
-      margin-bottom: var(--fitos-space-2);
-      font-size: var(--fitos-text-sm);
+      margin-bottom: 8px;
+      font-size: 13px;
       font-weight: 600;
-      color: var(--fitos-text-primary);
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .card-header-with-action {
       display: flex;
       justify-content: space-between;
       align-items: center;
+
+      ion-button {
+        --border-radius: 8px;
+        font-weight: 700;
+      }
     }
 
     .empty-state {
-      padding: var(--fitos-space-6);
+      padding: 24px;
       text-align: center;
 
       p {
         margin: 0;
-        font-size: var(--fitos-text-sm);
+        font-size: 14px;
+        color: var(--fitos-text-tertiary, #737373);
       }
     }
 
     .action-buttons {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-2);
-      margin-top: var(--fitos-space-4);
+      gap: 8px;
+      margin-top: 16px;
 
       ion-button {
         margin: 0;
+        --border-radius: 8px;
+        height: 48px;
+        font-weight: 700;
+      }
+
+      ion-button:first-child {
+        --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
       }
     }
   `],

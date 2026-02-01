@@ -38,7 +38,7 @@ import {
 import { WorkoutService } from '../../../../core/services/workout.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { Database } from '@fitos/shared';
-import { listStagger } from '@app/shared/animations';
+import { listStagger } from '../../../../shared/animations';
 
 type WorkoutTemplateWithExercises = Database['public']['Tables']['workout_templates']['Row'] & {
   exercises: any[];
@@ -538,7 +538,7 @@ export class WorkoutListPage implements OnInit {
     return `${hours}h ${remainingMinutes}m`;
   }
 
-  async showToast(message: string, color: string = 'primary') {
+  async showToast(message: string, color = 'primary') {
     const toast = await this.toastController.create({
       message,
       duration: 2000,

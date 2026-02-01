@@ -201,10 +201,22 @@ import { FormsModule } from '@angular/forms';
   `,
   styles: [
     `
+      :host {
+        ion-content {
+          --background: var(--fitos-bg-primary, #0D0D0D);
+        }
+      }
+
+      ion-toolbar {
+        --background: transparent;
+        --border-width: 0;
+      }
+
       .opt-in-banner {
         margin: 24px 16px;
         padding: 24px;
-        background: var(--ion-color-light);
+        background: var(--fitos-bg-secondary, #1A1A1A);
+        border: 1px solid rgba(255, 255, 255, 0.06);
         border-radius: 16px;
         text-align: center;
 
@@ -217,7 +229,7 @@ import { FormsModule } from '@angular/forms';
 
           .banner-icon {
             font-size: 48px;
-            color: var(--ion-color-medium);
+            color: var(--fitos-text-tertiary, #737373);
             flex-shrink: 0;
           }
 
@@ -228,13 +240,13 @@ import { FormsModule } from '@angular/forms';
               margin: 0 0 8px;
               font-size: 20px;
               font-weight: 600;
-              color: var(--ion-color-dark);
+              color: var(--fitos-text-primary, #F5F5F5);
             }
 
             p {
               margin: 0;
               font-size: 14px;
-              color: var(--ion-color-medium);
+              color: var(--fitos-text-secondary, #A3A3A3);
               line-height: 1.5;
             }
           }
@@ -256,7 +268,7 @@ import { FormsModule } from '@angular/forms';
 
         ion-icon {
           font-size: 64px;
-          color: var(--ion-color-medium);
+          color: var(--fitos-text-tertiary, #737373);
           margin-bottom: 16px;
         }
 
@@ -266,13 +278,17 @@ import { FormsModule } from '@angular/forms';
 
         p {
           margin: 0 0 24px;
-          color: var(--ion-color-medium);
+          color: var(--fitos-text-secondary, #A3A3A3);
         }
       }
 
       .my-rank-card {
         margin: 16px;
+        --background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-secondary));
         background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-secondary));
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        box-shadow: none;
         color: white;
 
         .rank-header {
@@ -288,6 +304,7 @@ import { FormsModule } from '@angular/forms';
             .rank-number {
               font-size: 48px;
               font-weight: 700;
+              font-family: 'Space Mono', monospace;
               line-height: 1;
             }
 
@@ -311,6 +328,7 @@ import { FormsModule } from '@angular/forms';
               .stat-value {
                 font-size: 24px;
                 font-weight: 700;
+                font-family: 'Space Mono', monospace;
                 line-height: 1;
               }
 
@@ -335,12 +353,12 @@ import { FormsModule } from '@angular/forms';
           --min-height: 72px;
 
           &.current-user {
-            --background: var(--ion-color-primary-tint);
+            --background: rgba(var(--ion-color-primary-rgb), 0.15);
             font-weight: 600;
           }
 
           &.top-three {
-            --background: var(--ion-color-light);
+            --background: var(--fitos-bg-secondary, #1A1A1A);
           }
 
           .rank-indicator {
@@ -356,7 +374,8 @@ import { FormsModule } from '@angular/forms';
             .rank-text {
               font-size: 20px;
               font-weight: 600;
-              color: var(--ion-color-medium);
+              font-family: 'Space Mono', monospace;
+              color: var(--fitos-text-secondary, #A3A3A3);
             }
           }
 
@@ -364,13 +383,13 @@ import { FormsModule } from '@angular/forms';
             h2 {
               font-size: 16px;
               font-weight: 600;
-              color: var(--ion-color-dark);
+              color: var(--fitos-text-primary, #F5F5F5);
               margin-bottom: 4px;
             }
 
             p {
               font-size: 14px;
-              color: var(--ion-color-medium);
+              color: var(--fitos-text-secondary, #A3A3A3);
             }
           }
         }
@@ -386,25 +405,26 @@ import { FormsModule } from '@angular/forms';
 
         ion-icon {
           font-size: 64px;
-          color: var(--ion-color-light);
+          color: var(--fitos-text-tertiary, #737373);
           margin-bottom: 16px;
         }
 
         p {
           margin: 8px 0 0;
           font-size: 16px;
-          color: var(--ion-color-medium);
+          color: var(--fitos-text-secondary, #A3A3A3);
 
           &.empty-subtitle {
             font-size: 14px;
-            color: var(--ion-color-light);
+            color: var(--fitos-text-tertiary, #737373);
           }
         }
       }
 
       .compare-toggle {
         margin: 24px 16px;
-        background: var(--ion-color-light);
+        background: var(--fitos-bg-secondary, #1A1A1A);
+        border: 1px solid rgba(255, 255, 255, 0.06);
         border-radius: 12px;
 
         ion-item {
@@ -414,13 +434,13 @@ import { FormsModule } from '@angular/forms';
             h3 {
               font-size: 16px;
               font-weight: 600;
-              color: var(--ion-color-dark);
+              color: var(--fitos-text-primary, #F5F5F5);
               margin-bottom: 4px;
             }
 
             p {
               font-size: 13px;
-              color: var(--ion-color-medium);
+              color: var(--fitos-text-secondary, #A3A3A3);
             }
           }
         }

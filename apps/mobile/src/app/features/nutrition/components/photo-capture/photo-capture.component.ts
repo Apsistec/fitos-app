@@ -11,7 +11,7 @@ import {
 import { addIcons } from 'ionicons';
 import { cameraOutline, imagesOutline, closeOutline } from 'ionicons/icons';
 import { CameraSource, Photo } from '@capacitor/camera';
-import { PhotoNutritionService, IdentifiedFood } from '@app/core/services/photo-nutrition.service';
+import { PhotoNutritionService, IdentifiedFood } from '../../../../core/services/photo-nutrition.service';
 import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 
 @Component({

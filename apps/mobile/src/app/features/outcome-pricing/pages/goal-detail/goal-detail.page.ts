@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -83,6 +83,7 @@ type ViewTab = 'overview' | 'history' | 'verify';
     IonSegment,
     IonSegmentButton,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './goal-detail.page.html',
   styleUrls: ['./goal-detail.page.scss'],
 })

@@ -163,25 +163,49 @@ interface PayoutSettings {
     </ion-card>
   `,
   styles: [`
+    ion-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
+    }
+
+    ion-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
+    }
+
+    ion-list {
+      --background: transparent;
+    }
+
+    ion-item {
+      --background: transparent;
+      --color: var(--fitos-text-primary, #F5F5F5);
+      --border-color: rgba(255, 255, 255, 0.06);
+    }
+
     .loading-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       min-height: 200px;
-      gap: 1rem;
+      gap: 16px;
+      color: var(--fitos-text-secondary, #A3A3A3);
     }
 
     .info-section {
       display: flex;
-      gap: 1rem;
-      padding: 1rem;
-      background: var(--ion-color-light);
-      border-radius: 8px;
+      gap: 16px;
+      padding: 16px;
+      background: var(--fitos-bg-tertiary, #262626);
+      border-radius: 12px;
 
       ion-icon {
-        font-size: 1.5rem;
-        margin-top: 0.25rem;
+        font-size: 24px;
+        margin-top: 4px;
         flex-shrink: 0;
       }
 
@@ -189,25 +213,43 @@ interface PayoutSettings {
         flex: 1;
 
         p {
-          margin: 0 0 0.5rem 0;
-          font-size: 0.9rem;
+          margin: 0 0 8px 0;
+          font-size: 14px;
+          color: var(--fitos-text-secondary, #A3A3A3);
+
+          strong {
+            color: var(--fitos-text-primary, #F5F5F5);
+          }
         }
 
         ul {
-          margin: 0.5rem 0;
-          padding-left: 1.25rem;
-          font-size: 0.875rem;
+          margin: 8px 0;
+          padding-left: 20px;
+          font-size: 14px;
+          color: var(--fitos-text-secondary, #A3A3A3);
 
           li {
-            margin-bottom: 0.25rem;
+            margin-bottom: 4px;
+
+            strong {
+              color: var(--fitos-text-primary, #F5F5F5);
+            }
           }
         }
       }
     }
 
+    ion-button[expand="block"] {
+      --border-radius: 8px;
+      height: 48px;
+      font-weight: 700;
+      --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    }
+
     ion-note {
-      font-size: 0.85rem;
-      margin-top: 0.25rem;
+      font-size: 13px;
+      margin-top: 4px;
+      color: var(--fitos-text-tertiary, #737373);
     }
   `],
 })

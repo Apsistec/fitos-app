@@ -24,8 +24,8 @@ import {
   sparklesOutline,
   sparkles,
 } from 'ionicons/icons';
-import { AuthService } from '@app/core/services/auth.service';
-import { MessagingService } from '@app/core/services/messaging.service';
+import { AuthService } from '../../core/services/auth.service';
+import { MessagingService } from '../../core/services/messaging.service';
 
 @Component({
   selector: 'app-tabs',

@@ -109,7 +109,7 @@ interface FailedPayment {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/tabs/settings" />
@@ -302,7 +302,7 @@ interface FailedPayment {
           </ion-card>
 
           <!-- Info Card -->
-          <ion-card color="light">
+          <ion-card class="info-card">
             <ion-card-content>
               <div class="info-section">
                 <ion-icon name="alert-circle-outline" color="primary" />
@@ -323,6 +323,33 @@ interface FailedPayment {
     </ion-content>
   `,
   styles: [`
+    :host {
+      --background: var(--fitos-bg-primary, #0D0D0D);
+    }
+
+    ion-header {
+      ion-toolbar {
+        --background: transparent;
+        --border-width: 0;
+        --color: var(--fitos-text-primary, #F5F5F5);
+      }
+    }
+
+    ion-content {
+      --background: var(--fitos-bg-primary, #0D0D0D);
+    }
+
+    ion-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
+    }
+
+    ion-card-title {
+      color: var(--fitos-text-primary, #F5F5F5);
+    }
+
     .loading-container {
       display: flex;
       flex-direction: column;
@@ -330,6 +357,10 @@ interface FailedPayment {
       justify-content: center;
       min-height: 50vh;
       gap: 1rem;
+
+      p {
+        color: var(--fitos-text-secondary, #A3A3A3);
+      }
     }
 
     .metrics-grid {
@@ -357,9 +388,11 @@ interface FailedPayment {
         }
 
         ion-label {
-          font-size: 0.875rem;
-          color: var(--ion-color-medium);
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
           font-weight: 500;
+          color: var(--fitos-text-tertiary, #737373);
         }
       }
 
@@ -367,7 +400,9 @@ interface FailedPayment {
         margin: 0;
         font-size: 1.75rem;
         font-weight: 600;
+        font-family: 'Space Mono', monospace;
         line-height: 1.2;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       .metric-change {
@@ -377,6 +412,7 @@ interface FailedPayment {
         margin-top: 0.5rem;
         font-size: 0.75rem;
         font-weight: 500;
+        font-family: 'Space Mono', monospace;
 
         &.positive {
           color: var(--ion-color-success);
@@ -395,6 +431,7 @@ interface FailedPayment {
         display: block;
         margin-top: 0.25rem;
         font-size: 0.75rem;
+        color: var(--fitos-text-tertiary, #737373);
       }
     }
 
@@ -402,6 +439,7 @@ interface FailedPayment {
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      color: var(--fitos-text-primary, #F5F5F5);
 
       ion-icon {
         font-size: 1.5rem;
@@ -416,14 +454,17 @@ interface FailedPayment {
 
       .recovery-stat {
         padding: 1rem;
-        background: var(--ion-color-light);
+        background: var(--fitos-bg-tertiary, #262626);
         border-radius: 8px;
         text-align: center;
 
         ion-label {
           display: block;
-          font-size: 0.875rem;
-          color: var(--ion-color-medium);
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-weight: 500;
+          color: var(--fitos-text-tertiary, #737373);
           margin-bottom: 0.5rem;
         }
 
@@ -431,6 +472,8 @@ interface FailedPayment {
           margin: 0;
           font-size: 1.5rem;
           font-weight: 600;
+          font-family: 'Space Mono', monospace;
+          color: var(--fitos-text-primary, #F5F5F5);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -445,6 +488,7 @@ interface FailedPayment {
           display: block;
           font-size: 0.75rem;
           margin-top: 0.25rem;
+          color: var(--fitos-text-tertiary, #737373);
         }
       }
     }
@@ -454,9 +498,10 @@ interface FailedPayment {
       align-items: flex-start;
       gap: 0.5rem;
       padding: 0.75rem;
-      background: var(--ion-color-light);
+      background: var(--fitos-bg-tertiary, #262626);
       border-radius: 6px;
       font-size: 0.875rem;
+      color: var(--fitos-text-secondary, #A3A3A3);
 
       ion-icon {
         font-size: 1.25rem;
@@ -480,18 +525,22 @@ interface FailedPayment {
           margin: 0 0 0.25rem 0;
           font-size: 1rem;
           font-weight: 600;
+          color: var(--fitos-text-primary, #F5F5F5);
         }
 
         p {
           margin: 0 0 0.25rem 0;
           font-size: 0.9rem;
           font-weight: 500;
+          font-family: 'Space Mono', monospace;
+          color: var(--fitos-text-primary, #F5F5F5);
         }
 
         ion-note {
           display: block;
           font-size: 0.75rem;
           margin-top: 0.25rem;
+          color: var(--fitos-text-tertiary, #737373);
 
           &.failure-message {
             margin-top: 0.5rem;
@@ -511,7 +560,7 @@ interface FailedPayment {
         align-items: center;
         justify-content: space-between;
         padding-bottom: 1rem;
-        border-bottom: 1px solid var(--ion-color-light-shade);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 
         &:last-child {
           border-bottom: none;
@@ -519,16 +568,25 @@ interface FailedPayment {
         }
 
         ion-label {
-          font-size: 0.9rem;
-          color: var(--ion-color-medium);
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-weight: 500;
+          color: var(--fitos-text-tertiary, #737373);
         }
 
         h2 {
           margin: 0;
           font-size: 1.5rem;
           font-weight: 600;
+          font-family: 'Space Mono', monospace;
+          color: var(--fitos-text-primary, #F5F5F5);
         }
       }
+    }
+
+    .info-card {
+      --background: var(--fitos-bg-tertiary, #262626);
     }
 
     .info-section {
@@ -547,12 +605,14 @@ interface FailedPayment {
         p {
           margin: 0 0 0.5rem 0;
           font-size: 0.9rem;
+          color: var(--fitos-text-secondary, #A3A3A3);
         }
 
         ul {
           margin: 0.5rem 0 0 0;
           padding-left: 1.25rem;
           font-size: 0.875rem;
+          color: var(--fitos-text-secondary, #A3A3A3);
 
           li {
             margin-bottom: 0.5rem;
@@ -563,6 +623,16 @@ interface FailedPayment {
           }
         }
       }
+    }
+
+    ion-item {
+      --background: transparent;
+      --color: var(--fitos-text-primary, #F5F5F5);
+      --border-color: rgba(255, 255, 255, 0.06);
+    }
+
+    ion-list {
+      background: transparent;
     }
   `],
 })

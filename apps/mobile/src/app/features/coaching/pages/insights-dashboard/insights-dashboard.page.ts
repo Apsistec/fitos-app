@@ -38,8 +38,8 @@ import {
   refreshOutline,
   chatbubbleOutline,
 } from 'ionicons/icons';
-import { HapticService } from '@app/core/services/haptic.service';
-import { JITAIService, JITAIContext } from '@app/core/services/jitai.service';
+import { HapticService } from '../../../../core/services/haptic.service';
+import { JITAIService, JITAIContext } from '../../../../core/services/jitai.service';
 
 export type InsightCategory = 'workout' | 'nutrition' | 'recovery' | 'adherence' | 'all';
 export type InsightSeverity = 'info' | 'success' | 'warning' | 'critical';
@@ -331,20 +331,31 @@ export interface ProgressMetric {
     </ion-content>
   `,
   styles: [`
+    ion-header ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-header ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     .insights-container {
-      padding: var(--fitos-space-4);
-      padding-bottom: var(--fitos-space-8);
+      padding: 16px;
+      padding-bottom: 48px;
     }
 
     ion-segment {
-      --background: var(--fitos-bg-tertiary);
+      --background: var(--fitos-bg-tertiary, #262626);
       margin: 0;
-      padding: var(--fitos-space-2);
+      padding: 8px;
 
       ion-segment-button {
-        --indicator-color: var(--fitos-accent-primary);
-        --color: var(--fitos-text-secondary);
-        --color-checked: var(--fitos-accent-primary);
+        --indicator-color: var(--ion-color-primary, #10B981);
+        --color: var(--fitos-text-secondary, #A3A3A3);
+        --color-checked: var(--ion-color-primary, #10B981);
         min-height: 40px;
 
         ion-icon {
@@ -359,15 +370,28 @@ export interface ProgressMetric {
       align-items: center;
     }
 
+    ion-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
+    }
+
+    ion-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
+    }
+
     .jitai-context-card {
-      background: linear-gradient(135deg, var(--fitos-bg-secondary) 0%, var(--fitos-bg-tertiary) 100%);
-      border: 1px solid var(--fitos-border-subtle);
+      background: linear-gradient(135deg, var(--fitos-bg-secondary, #1A1A1A) 0%, var(--fitos-bg-tertiary, #262626) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .context-metrics {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-4);
+      gap: 16px;
     }
 
     .context-metric {
@@ -375,38 +399,39 @@ export interface ProgressMetric {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: var(--fitos-space-2);
+        margin-bottom: 8px;
 
         .metric-label {
-          font-size: var(--fitos-text-sm);
+          font-size: 13px;
           font-weight: 600;
-          color: var(--fitos-text-primary);
+          color: var(--fitos-text-primary, #F5F5F5);
         }
 
         .metric-value {
-          font-size: var(--fitos-text-base);
+          font-size: 14px;
           font-weight: 700;
-          color: var(--fitos-text-primary);
+          font-family: 'Space Mono', monospace;
+          color: var(--fitos-text-primary, #F5F5F5);
         }
       }
 
       ion-progress-bar {
         height: 8px;
-        border-radius: var(--fitos-radius-full);
-        margin-bottom: var(--fitos-space-1);
+        border-radius: 9999px;
+        margin-bottom: 4px;
       }
 
       .metric-hint {
         margin: 0;
-        font-size: var(--fitos-text-xs);
-        color: var(--fitos-text-tertiary);
+        font-size: 12px;
+        color: var(--fitos-text-tertiary, #737373);
       }
     }
 
     .progress-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: var(--fitos-space-4);
+      gap: 16px;
     }
 
     .progress-metric {
@@ -414,12 +439,12 @@ export interface ProgressMetric {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: var(--fitos-space-1);
+        margin-bottom: 4px;
 
         .metric-label {
-          font-size: var(--fitos-text-sm);
+          font-size: 13px;
           font-weight: 600;
-          color: var(--fitos-text-secondary);
+          color: var(--fitos-text-secondary, #A3A3A3);
         }
 
         ion-icon {
@@ -442,44 +467,45 @@ export interface ProgressMetric {
       .metric-value-row {
         display: flex;
         align-items: baseline;
-        gap: var(--fitos-space-1);
-        margin-bottom: var(--fitos-space-2);
+        gap: 4px;
+        margin-bottom: 8px;
 
         .metric-value {
-          font-size: var(--fitos-text-2xl);
+          font-size: 24px;
           font-weight: 700;
-          color: var(--fitos-text-primary);
+          font-family: 'Space Mono', monospace;
+          color: var(--fitos-text-primary, #F5F5F5);
         }
 
         .metric-unit {
-          font-size: var(--fitos-text-sm);
-          color: var(--fitos-text-secondary);
+          font-size: 13px;
+          color: var(--fitos-text-secondary, #A3A3A3);
         }
 
         .metric-target {
-          font-size: var(--fitos-text-sm);
-          color: var(--fitos-text-tertiary);
+          font-size: 13px;
+          color: var(--fitos-text-tertiary, #737373);
         }
       }
 
       ion-progress-bar {
         height: 6px;
-        border-radius: var(--fitos-radius-full);
+        border-radius: 9999px;
       }
     }
 
     .section-title {
       display: flex;
       align-items: center;
-      gap: var(--fitos-space-2);
-      margin: var(--fitos-space-6) 0 var(--fitos-space-4) 0;
-      font-size: var(--fitos-text-lg);
+      gap: 8px;
+      margin: 24px 0 16px 0;
+      font-size: 16px;
       font-weight: 700;
-      color: var(--fitos-text-primary);
+      color: var(--fitos-text-primary, #F5F5F5);
 
       ion-icon {
         font-size: 24px;
-        color: var(--fitos-accent-primary);
+        color: var(--ion-color-primary, #10B981);
       }
     }
 
@@ -488,32 +514,32 @@ export interface ProgressMetric {
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: var(--fitos-space-8) var(--fitos-space-4);
+        padding: 48px 16px;
         text-align: center;
 
         ion-icon {
           font-size: 64px;
           color: var(--ion-color-success);
-          margin-bottom: var(--fitos-space-4);
+          margin-bottom: 16px;
         }
 
         h3 {
-          margin: 0 0 var(--fitos-space-2) 0;
-          font-size: var(--fitos-text-xl);
+          margin: 0 0 8px 0;
+          font-size: 20px;
           font-weight: 600;
-          color: var(--fitos-text-primary);
+          color: var(--fitos-text-primary, #F5F5F5);
         }
 
         p {
-          margin: 0 0 var(--fitos-space-6) 0;
-          color: var(--fitos-text-secondary);
+          margin: 0 0 24px 0;
+          color: var(--fitos-text-secondary, #A3A3A3);
         }
       }
     }
 
     .insight-card {
-      border-left: 4px solid var(--fitos-border-subtle);
-      margin-bottom: var(--fitos-space-3);
+      border-left: 4px solid rgba(255, 255, 255, 0.06);
+      margin-bottom: 12px;
 
       &.severity-critical {
         border-left-color: var(--ion-color-danger);
@@ -536,67 +562,69 @@ export interface ProgressMetric {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: var(--fitos-space-3);
+      margin-bottom: 12px;
 
       .insight-title-row {
         display: flex;
         align-items: center;
-        gap: var(--fitos-space-2);
+        gap: 8px;
         flex: 1;
 
         ion-icon {
           font-size: 24px;
-          color: var(--fitos-accent-primary);
+          color: var(--ion-color-primary, #10B981);
         }
 
         h3 {
           margin: 0;
-          font-size: var(--fitos-text-lg);
+          font-size: 16px;
           font-weight: 600;
-          color: var(--fitos-text-primary);
+          color: var(--fitos-text-primary, #F5F5F5);
         }
       }
 
       ion-badge {
         text-transform: uppercase;
-        font-size: var(--fitos-text-xs);
+        font-size: 11px;
+        letter-spacing: 0.5px;
       }
     }
 
     .insight-description {
-      margin: 0 0 var(--fitos-space-3) 0;
-      font-size: var(--fitos-text-base);
+      margin: 0 0 12px 0;
+      font-size: 14px;
       line-height: 1.6;
-      color: var(--fitos-text-secondary);
+      color: var(--fitos-text-secondary, #A3A3A3);
     }
 
     .insight-metric {
-      padding: var(--fitos-space-3);
-      background: var(--fitos-bg-tertiary);
-      border-radius: var(--fitos-radius-md);
-      margin-bottom: var(--fitos-space-3);
+      padding: 12px;
+      background: var(--fitos-bg-tertiary, #262626);
+      border-radius: 8px;
+      margin-bottom: 12px;
 
       .metric-display {
         display: flex;
         align-items: center;
-        gap: var(--fitos-space-2);
+        gap: 8px;
         flex-wrap: wrap;
 
         .metric-label {
-          font-size: var(--fitos-text-sm);
+          font-size: 13px;
           font-weight: 600;
-          color: var(--fitos-text-secondary);
+          color: var(--fitos-text-secondary, #A3A3A3);
         }
 
         .metric-value {
-          font-size: var(--fitos-text-xl);
+          font-size: 20px;
           font-weight: 700;
-          color: var(--fitos-text-primary);
+          font-family: 'Space Mono', monospace;
+          color: var(--fitos-text-primary, #F5F5F5);
         }
 
         .metric-target {
-          font-size: var(--fitos-text-sm);
-          color: var(--fitos-text-tertiary);
+          font-size: 13px;
+          color: var(--fitos-text-tertiary, #737373);
         }
 
         ion-icon {
@@ -618,24 +646,24 @@ export interface ProgressMetric {
     }
 
     .insight-recommendation {
-      padding: var(--fitos-space-3);
-      background: rgba(var(--ion-color-primary-rgb), 0.1);
-      border-radius: var(--fitos-radius-md);
-      margin-bottom: var(--fitos-space-3);
+      padding: 12px;
+      background: rgba(16, 185, 129, 0.1);
+      border-radius: 8px;
+      margin-bottom: 12px;
 
       strong {
-        font-size: var(--fitos-text-sm);
+        font-size: 13px;
         font-weight: 700;
-        color: var(--ion-color-primary);
+        color: var(--ion-color-primary, #10B981);
         display: block;
-        margin-bottom: var(--fitos-space-1);
+        margin-bottom: 4px;
       }
 
       p {
         margin: 0;
-        font-size: var(--fitos-text-sm);
+        font-size: 13px;
         line-height: 1.5;
-        color: var(--fitos-text-primary);
+        color: var(--fitos-text-primary, #F5F5F5);
       }
     }
 
@@ -643,18 +671,18 @@ export interface ProgressMetric {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: var(--fitos-space-3);
-      padding-top: var(--fitos-space-3);
-      border-top: 1px solid var(--fitos-border-subtle);
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
 
       ion-chip {
         margin: 0;
-        font-size: var(--fitos-text-xs);
+        font-size: 11px;
       }
 
       .insight-time {
-        font-size: var(--fitos-text-xs);
-        color: var(--fitos-text-tertiary);
+        font-size: 11px;
+        color: var(--fitos-text-tertiary, #737373);
       }
     }
   `],

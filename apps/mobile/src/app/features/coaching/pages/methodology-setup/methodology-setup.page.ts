@@ -13,7 +13,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { checkmarkCircleOutline, rocketOutline } from 'ionicons/icons';
-import { TrainerMethodologyService } from '@app/core/services/trainer-methodology.service';
+import { TrainerMethodologyService } from '../../../../core/services/trainer-methodology.service';
 import { MethodologyQuestionnaireComponent } from '../../components/methodology-questionnaire/methodology-questionnaire.component';
 
 /**
@@ -154,10 +154,21 @@ import { MethodologyQuestionnaireComponent } from '../../components/methodology-
     </ion-content>
   `,
   styles: [`
+    ion-header ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-header ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     .setup-container {
       max-width: 800px;
       margin: 0 auto;
-      padding: var(--fitos-space-6) var(--fitos-space-4);
+      padding: 24px 16px;
     }
 
     .intro-section,
@@ -167,43 +178,43 @@ import { MethodologyQuestionnaireComponent } from '../../components/methodology-
 
     .hero-icon {
       font-size: 80px;
-      margin-bottom: var(--fitos-space-4);
+      margin-bottom: 16px;
     }
 
     .success-icon {
       font-size: 100px;
-      margin-bottom: var(--fitos-space-4);
+      margin-bottom: 16px;
     }
 
     h1 {
-      margin: 0 0 var(--fitos-space-3) 0;
-      font-size: var(--fitos-text-3xl);
+      margin: 0 0 12px 0;
+      font-size: 28px;
       font-weight: 700;
-      color: var(--fitos-text-primary);
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .subtitle {
-      margin: 0 0 var(--fitos-space-6) 0;
-      font-size: var(--fitos-text-lg);
-      color: var(--fitos-text-secondary);
+      margin: 0 0 24px 0;
+      font-size: 16px;
+      color: var(--fitos-text-secondary, #A3A3A3);
       line-height: 1.6;
     }
 
     .benefits {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-4);
-      margin-bottom: var(--fitos-space-8);
+      gap: 16px;
+      margin-bottom: 48px;
       text-align: left;
     }
 
     .benefit {
       display: flex;
-      gap: var(--fitos-space-3);
-      padding: var(--fitos-space-4);
-      background: var(--fitos-bg-secondary);
-      border-radius: var(--fitos-radius-lg);
-      border: 1px solid var(--fitos-border-subtle);
+      gap: 12px;
+      padding: 16px;
+      background: var(--fitos-bg-secondary, #1A1A1A);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
 
       ion-icon {
         font-size: 32px;
@@ -212,68 +223,72 @@ import { MethodologyQuestionnaireComponent } from '../../components/methodology-
       }
 
       h3 {
-        margin: 0 0 var(--fitos-space-1) 0;
-        font-size: var(--fitos-text-base);
+        margin: 0 0 4px 0;
+        font-size: 14px;
         font-weight: 600;
-        color: var(--fitos-text-primary);
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       p {
         margin: 0;
-        font-size: var(--fitos-text-sm);
-        color: var(--fitos-text-secondary);
+        font-size: 13px;
+        color: var(--fitos-text-secondary, #A3A3A3);
         line-height: 1.5;
       }
     }
 
     .questionnaire-section {
       h2 {
-        margin: 0 0 var(--fitos-space-2) 0;
-        font-size: var(--fitos-text-2xl);
+        margin: 0 0 8px 0;
+        font-size: 24px;
         font-weight: 600;
-        color: var(--fitos-text-primary);
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       .subtitle {
         text-align: left;
-        margin-bottom: var(--fitos-space-6);
+        margin-bottom: 24px;
       }
     }
 
     .next-steps {
-      background: var(--fitos-bg-secondary);
-      border-radius: var(--fitos-radius-lg);
-      border: 1px solid var(--fitos-border-subtle);
-      padding: var(--fitos-space-5);
-      margin: var(--fitos-space-6) 0;
+      background: var(--fitos-bg-secondary, #1A1A1A);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 20px;
+      margin: 24px 0;
       text-align: left;
 
       h3 {
-        margin: 0 0 var(--fitos-space-3) 0;
-        font-size: var(--fitos-text-lg);
+        margin: 0 0 12px 0;
+        font-size: 16px;
         font-weight: 600;
-        color: var(--fitos-text-primary);
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       ul {
         margin: 0;
-        padding-left: var(--fitos-space-5);
-        color: var(--fitos-text-secondary);
+        padding-left: 20px;
+        color: var(--fitos-text-secondary, #A3A3A3);
         line-height: 1.8;
 
         li {
-          margin-bottom: var(--fitos-space-2);
+          margin-bottom: 8px;
         }
       }
     }
 
     ion-button {
-      margin-top: var(--fitos-space-4);
+      margin-top: 16px;
+      --border-radius: 8px;
+      height: 48px;
+      font-weight: 700;
+      --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
     }
 
     @media (min-width: 768px) {
       .setup-container {
-        padding: var(--fitos-space-8) var(--fitos-space-6);
+        padding: 48px 24px;
       }
     }
   `]

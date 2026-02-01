@@ -91,7 +91,7 @@ import { AuthService } from '../../../../core/services/auth.service';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/tabs/settings" />
@@ -248,6 +248,33 @@ import { AuthService } from '../../../../core/services/auth.service';
     </ion-content>
   `,
   styles: [`
+    :host {
+      --background: var(--fitos-bg-primary, #0D0D0D);
+    }
+
+    ion-header {
+      ion-toolbar {
+        --background: transparent;
+        --border-width: 0;
+        --color: var(--fitos-text-primary, #F5F5F5);
+      }
+    }
+
+    ion-content {
+      --background: var(--fitos-bg-primary, #0D0D0D);
+    }
+
+    ion-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
+    }
+
+    ion-card-title {
+      color: var(--fitos-text-primary, #F5F5F5);
+    }
+
     .loading-container {
       display: flex;
       flex-direction: column;
@@ -255,6 +282,10 @@ import { AuthService } from '../../../../core/services/auth.service';
       justify-content: center;
       min-height: 50vh;
       gap: 1rem;
+
+      p {
+        color: var(--fitos-text-secondary, #A3A3A3);
+      }
     }
 
     .empty-state {
@@ -268,16 +299,19 @@ import { AuthService } from '../../../../core/services/auth.service';
       ion-icon {
         font-size: 4rem;
         margin-bottom: 1rem;
+        color: var(--fitos-text-tertiary, #737373);
       }
 
       p {
         margin: 0 0 0.5rem 0;
         font-size: 1.1rem;
         font-weight: 500;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       ion-note {
         max-width: 300px;
+        color: var(--fitos-text-tertiary, #737373);
       }
     }
 
@@ -290,14 +324,17 @@ import { AuthService } from '../../../../core/services/auth.service';
 
     .stat-card {
       padding: 1rem;
-      background: var(--ion-color-light);
+      background: var(--fitos-bg-tertiary, #262626);
       border-radius: 8px;
       text-align: center;
 
       ion-label {
         display: block;
-        font-size: 0.875rem;
-        color: var(--ion-color-medium);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 500;
+        color: var(--fitos-text-tertiary, #737373);
         margin-bottom: 0.5rem;
       }
 
@@ -305,6 +342,8 @@ import { AuthService } from '../../../../core/services/auth.service';
         margin: 0;
         font-size: 1.5rem;
         font-weight: 600;
+        font-family: 'Space Mono', monospace;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
     }
 
@@ -313,10 +352,30 @@ import { AuthService } from '../../../../core/services/auth.service';
       align-items: center;
       gap: 0.5rem;
       margin-top: 0.5rem;
+      color: var(--fitos-text-tertiary, #737373);
 
       ion-icon {
         font-size: 1rem;
       }
+    }
+
+    ion-item {
+      --background: transparent;
+      --color: var(--fitos-text-primary, #F5F5F5);
+      --border-color: rgba(255, 255, 255, 0.06);
+
+      h3 {
+        color: var(--fitos-text-primary, #F5F5F5);
+        font-family: 'Space Mono', monospace;
+      }
+
+      p {
+        color: var(--fitos-text-secondary, #A3A3A3);
+      }
+    }
+
+    ion-list {
+      background: transparent;
     }
   `],
 })

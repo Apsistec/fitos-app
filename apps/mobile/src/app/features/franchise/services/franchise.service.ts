@@ -13,7 +13,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { environment } from '@env/environment';
+import { environment } from '../../../../environments/environment';
 import {
   Organization,
   Location,
@@ -208,7 +208,7 @@ export class FranchiseService {
    */
   compareLocations(
     locationsData: LocationAnalytics[],
-    metric: string = 'grossRevenue'
+    metric = 'grossRevenue'
   ): Observable<LocationComparison> {
     return this.http.post<LocationComparison>(`${this.baseUrl}/analytics/compare`, {
       locations_data: locationsData,
@@ -221,8 +221,8 @@ export class FranchiseService {
    */
   getTopPerformers(
     locationsData: LocationAnalytics[],
-    metric: string = 'grossRevenue',
-    limit: number = 5
+    metric = 'grossRevenue',
+    limit = 5
   ): Observable<{ metric: string; top_performers: LocationAnalytics[] }> {
     return this.http.post<any>(`${this.baseUrl}/analytics/top-performers`, {
       locations_data: locationsData,

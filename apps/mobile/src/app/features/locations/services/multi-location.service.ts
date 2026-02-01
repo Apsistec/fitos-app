@@ -202,7 +202,7 @@ export class MultiLocationService {
     limit = 50
   ): Promise<CheckInRecord[]> {
     try {
-      let params: any = {
+      const params: any = {
         select: `
           id,
           location_id,

@@ -14,7 +14,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { sendOutline, sparklesOutline } from 'ionicons/icons';
-import { AICoachService, ChatMessage, UserContext } from '@app/core/services/ai-coach.service';
+import { AICoachService, ChatMessage, UserContext } from '../../../../core/services/ai-coach.service';
 
 const AGENT_CONFIG = {
   workout: { label: 'Workout', color: 'primary', icon: '💪' },
@@ -142,14 +142,14 @@ const AGENT_CONFIG = {
   `,
   styles: [`
     ion-content {
-      --background: var(--fitos-bg-primary);
+      --background: var(--fitos-bg-primary, #0D0D0D);
     }
 
     .chat-container {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-3);
-      padding: var(--fitos-space-4);
+      gap: 12px;
+      padding: 16px;
       min-height: 100%;
     }
 
@@ -158,52 +158,53 @@ const AGENT_CONFIG = {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: var(--fitos-space-8) var(--fitos-space-4);
+      padding: 48px 16px;
       text-align: center;
       flex: 1;
 
       ion-icon {
         font-size: 64px;
-        color: var(--fitos-accent-primary);
-        margin-bottom: var(--fitos-space-4);
+        color: var(--ion-color-primary, #10B981);
+        margin-bottom: 16px;
       }
 
       h3 {
-        margin: 0 0 var(--fitos-space-2);
-        font-size: var(--fitos-text-2xl);
+        margin: 0 0 8px;
+        font-size: 24px;
         font-weight: 700;
-        color: var(--fitos-text-primary);
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       p {
-        margin: 0 0 var(--fitos-space-6);
-        color: var(--fitos-text-secondary);
+        margin: 0 0 24px;
+        color: var(--fitos-text-secondary, #A3A3A3);
         max-width: 300px;
+        font-size: 14px;
       }
     }
 
     .quick-prompts {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-2);
+      gap: 8px;
       width: 100%;
       max-width: 300px;
     }
 
     .prompt-chip {
-      padding: var(--fitos-space-3) var(--fitos-space-4);
-      border-radius: var(--fitos-radius-lg);
-      border: 1px solid var(--fitos-border-default);
-      background: var(--fitos-bg-secondary);
-      color: var(--fitos-text-primary);
-      font-size: var(--fitos-text-sm);
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: var(--fitos-bg-secondary, #1A1A1A);
+      color: var(--fitos-text-primary, #F5F5F5);
+      font-size: 13px;
       text-align: left;
       cursor: pointer;
-      transition: all var(--fitos-duration-fast);
+      transition: all 150ms ease;
 
       &:hover {
-        border-color: var(--fitos-accent-primary);
-        background: var(--fitos-bg-tertiary);
+        border-color: var(--ion-color-primary, #10B981);
+        background: var(--fitos-bg-tertiary, #262626);
       }
 
       &:active {
@@ -220,9 +221,9 @@ const AGENT_CONFIG = {
         align-self: flex-end;
 
         .message-content {
-          background: var(--fitos-accent-primary);
+          background: var(--ion-color-primary, #10B981);
           color: white;
-          border-radius: var(--fitos-radius-lg) var(--fitos-radius-lg) var(--fitos-radius-sm) var(--fitos-radius-lg);
+          border-radius: 12px 12px 6px 12px;
         }
       }
 
@@ -230,20 +231,20 @@ const AGENT_CONFIG = {
         align-self: flex-start;
 
         .message-content {
-          background: var(--fitos-bg-secondary);
-          color: var(--fitos-text-primary);
-          border: 1px solid var(--fitos-border-subtle);
-          border-radius: var(--fitos-radius-lg) var(--fitos-radius-lg) var(--fitos-radius-lg) var(--fitos-radius-sm);
+          background: var(--fitos-bg-secondary, #1A1A1A);
+          color: var(--fitos-text-primary, #F5F5F5);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          border-radius: 12px 12px 12px 6px;
         }
       }
     }
 
     .message-content {
-      padding: var(--fitos-space-3) var(--fitos-space-4);
+      padding: 12px 16px;
 
       p {
         margin: 0;
-        font-size: var(--fitos-text-base);
+        font-size: 14px;
         line-height: 1.5;
         white-space: pre-wrap;
         word-wrap: break-word;
@@ -253,14 +254,14 @@ const AGENT_CONFIG = {
     .message-meta {
       display: flex;
       align-items: center;
-      gap: var(--fitos-space-2);
-      margin-top: var(--fitos-space-2);
-      padding-top: var(--fitos-space-2);
-      border-top: 1px solid var(--fitos-border-subtle);
+      gap: 8px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
 
       ion-chip {
         margin: 0;
-        font-size: var(--fitos-text-xs);
+        font-size: 11px;
       }
 
       .agent-icon {
@@ -269,20 +270,20 @@ const AGENT_CONFIG = {
     }
 
     .confidence-low {
-      font-size: var(--fitos-text-xs);
-      color: var(--fitos-status-warning);
+      font-size: 11px;
+      color: #F59E0B;
     }
 
     .typing-indicator {
       display: flex;
       gap: 4px;
-      padding: var(--fitos-space-2) 0;
+      padding: 8px 0;
 
       span {
         width: 8px;
         height: 8px;
         border-radius: 50%;
-        background: var(--fitos-text-tertiary);
+        background: var(--fitos-text-tertiary, #737373);
         animation: typing 1.4s infinite;
 
         &:nth-child(2) {
@@ -306,27 +307,28 @@ const AGENT_CONFIG = {
 
     ion-footer {
       ion-toolbar {
-        --background: var(--fitos-bg-secondary);
-        --border-color: var(--fitos-border-default);
-        padding: var(--fitos-space-2) var(--fitos-space-3);
+        --background: var(--fitos-bg-secondary, #1A1A1A);
+        --border-color: rgba(255, 255, 255, 0.06);
+        padding: 8px 12px;
       }
     }
 
     .input-container {
       display: flex;
-      gap: var(--fitos-space-2);
+      gap: 8px;
       align-items: flex-end;
 
       ion-textarea {
         flex: 1;
-        --background: var(--fitos-bg-tertiary);
-        --color: var(--fitos-text-primary);
-        --placeholder-color: var(--fitos-text-tertiary);
+        --background: var(--fitos-bg-tertiary, #262626);
+        --color: var(--fitos-text-primary, #F5F5F5);
+        --placeholder-color: var(--fitos-text-tertiary, #737373);
         --padding-start: 12px;
         --padding-end: 12px;
         --padding-top: 10px;
         --padding-bottom: 10px;
-        border-radius: var(--fitos-radius-lg);
+        border-radius: 12px;
+        font-size: 14px;
       }
 
       ion-button {

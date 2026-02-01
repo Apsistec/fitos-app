@@ -1,6 +1,7 @@
 /**
  * Franchise Dashboard Styles
  * Sprint 40: Multi-Location Management
+ * FitOS Design System - Dark-First
  */
 
 // Loading & Error States
@@ -21,7 +22,7 @@
 
   p {
     margin-top: 0.5rem;
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-secondary, #A3A3A3);
   }
 }
 
@@ -31,6 +32,10 @@
 
   ion-card {
     margin: 0;
+    --background: var(--fitos-bg-secondary, #1A1A1A);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    box-shadow: none;
   }
 }
 
@@ -62,24 +67,25 @@
 }
 
 .stat-label {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--ion-color-medium);
+  color: var(--fitos-text-tertiary, #737373);
   margin: 0 0 0.25rem 0;
 }
 
 .stat-value {
   font-size: 1.5rem;
   font-weight: 700;
+  font-family: 'Space Mono', monospace;
   margin: 0;
-  color: var(--ion-text-color);
+  color: var(--fitos-text-primary, #F5F5F5);
 }
 
 .stat-sublabel {
   font-size: 0.75rem;
-  color: var(--ion-color-medium);
+  color: var(--fitos-text-secondary, #A3A3A3);
   margin: 0.25rem 0 0 0;
 }
 
@@ -92,7 +98,7 @@
   font-size: 1.25rem;
   font-weight: 700;
   margin: 1.5rem 0 1rem;
-  color: var(--ion-text-color);
+  color: var(--fitos-text-primary, #F5F5F5);
 }
 
 .action-buttons {
@@ -122,6 +128,13 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1rem;
+
+  ion-card {
+    --background: var(--fitos-bg-secondary, #1A1A1A);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    box-shadow: none;
+  }
 }
 
 .location-header {
@@ -132,7 +145,7 @@
 
   ion-icon {
     font-size: 24px;
-    color: var(--ion-color-primary);
+    color: var(--ion-color-primary, #10B981);
   }
 }
 
@@ -147,7 +160,7 @@
   align-items: center;
   gap: 0.25rem;
   font-size: 0.875rem;
-  color: var(--ion-color-medium);
+  color: var(--fitos-text-secondary, #A3A3A3);
 
   ion-icon {
     font-size: 16px;
@@ -171,7 +184,7 @@
   }
 
   p {
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-secondary, #A3A3A3);
     margin-bottom: 1.5rem;
   }
 }
@@ -207,12 +220,5 @@
 
   .locations-grid {
     grid-template-columns: 1fr;
-  }
-}
-
-// Dark mode adjustments
-@media (prefers-color-scheme: dark) {
-  .stat-value {
-    color: var(--ion-color-light);
   }
 }

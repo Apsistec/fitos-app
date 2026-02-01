@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -91,6 +91,7 @@ import {
   ],
   templateUrl: './wellness-check-in.page.html',
   styleUrls: ['./wellness-check-in.page.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WellnessCheckInPage implements OnInit {
   private readonly wellnessService = inject(WellnessService);

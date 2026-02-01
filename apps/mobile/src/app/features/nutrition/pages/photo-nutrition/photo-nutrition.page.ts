@@ -1,4 +1,4 @@
-import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
@@ -9,12 +9,17 @@ import {
   IonBackButton,
   IonButtons,
   IonButton,
+  IonSpinner,
+  ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { arrowBackOutline } from 'ionicons/icons';
 import { PhotoCaptureComponent } from '../../components/photo-capture/photo-capture.component';
 import { FoodIdentificationResultsComponent } from '../../components/food-identification-results/food-identification-results.component';
-import { IdentifiedFood } from '@app/core/services/photo-nutrition.service';
+import { IdentifiedFood } from '../../../../core/services/photo-nutrition.service';
+import { NutritionService } from '../../../../core/services/nutrition.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { HapticService } from '../../../../core/services/haptic.service';
 
 /**
  * PhotoNutritionPage - Photo-to-nutrition AI flow
@@ -38,6 +43,7 @@ import { IdentifiedFood } from '@app/core/services/photo-nutrition.service';
     IonBackButton,
     IonButtons,
     IonButton,
+    IonSpinner,
     PhotoCaptureComponent,
     FoodIdentificationResultsComponent,
   ],
@@ -98,10 +104,15 @@ import { IdentifiedFood } from '@app/core/services/photo-nutrition.service';
   `],
 })
 export class PhotoNutritionPage {
-  private router = Router;
+  private router = inject(Router);
+  private nutritionService = inject(NutritionService);
+  private authService = inject(AuthService);
+  private haptic = inject(HapticService);
+  private toastCtrl = inject(ToastController);
 
   // State
   identifiedFoods = signal<IdentifiedFood[]>([]);
+  isLogging = signal(false);
 
   constructor() {
     addIcons({ arrowBackOutline });
@@ -136,15 +147,96 @@ export class PhotoNutritionPage {
    * Handle foods confirmed and ready to log
    */
   async onFoodsConfirmed(foods: IdentifiedFood[]): Promise<void> {
-    // TODO: Log foods to nutrition diary via NutritionService
-    console.log('Logging foods:', foods);
+    const userId = this.authService.user()?.id;
+    if (!userId) {
+      await this.showToast('Please log in to add foods', 'warning');
+      return;
+    }
 
-    // For now, navigate back to nutrition page
-    // In production, this would save to the database first
-    // await this.nutritionService.logFoods(foods);
+    this.isLogging.set(true);
+    await this.haptic.light();
 
-    // Navigate back with success message
-    // this.router.navigate(['/nutrition']);
+    try {
+      // Get today's date in YYYY-MM-DD format
+      const today = new Date().toISOString().split('T')[0];
+
+      // Load or create today's nutrition log
+      const log = await this.nutritionService.loadNutritionLog(userId, today);
+
+      if (!log) {
+        throw new Error('Failed to load nutrition log');
+      }
+
+      // Log each food item
+      let successCount = 0;
+      for (const food of foods) {
+        const entry = await this.nutritionService.addEntry(log.log.id, {
+          custom_name: food.foodName,
+          servings: food.servingQty,
+          calories: Math.round(food.calories),
+          protein_g: Math.round(food.protein * 10) / 10,
+          carbs_g: Math.round(food.carbs * 10) / 10,
+          fat_g: Math.round(food.fat * 10) / 10,
+          meal_type: this.inferMealType(),
+        });
+
+        if (entry) {
+          successCount++;
+        }
+      }
+
+      if (successCount === foods.length) {
+        await this.haptic.success();
+        await this.showToast(
+          successCount === 1
+            ? 'Food logged successfully!'
+            : `${successCount} foods logged successfully!`,
+          'success'
+        );
+      } else if (successCount > 0) {
+        await this.haptic.warning();
+        await this.showToast(
+          `${successCount} of ${foods.length} foods logged`,
+          'warning'
+        );
+      } else {
+        throw new Error('Failed to log foods');
+      }
+
+      // Navigate back to nutrition log
+      this.router.navigate(['/tabs/nutrition']);
+    } catch (error) {
+      console.error('Error logging foods:', error);
+      await this.haptic.error();
+      await this.showToast('Failed to log foods. Please try again.', 'danger');
+    } finally {
+      this.isLogging.set(false);
+    }
+  }
+
+  /**
+   * Infer meal type based on current time
+   */
+  private inferMealType(): string {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 11) return 'breakfast';
+    if (hour >= 11 && hour < 15) return 'lunch';
+    if (hour >= 15 && hour < 18) return 'snack';
+    if (hour >= 18 && hour < 22) return 'dinner';
+    return 'snack'; // Late night
+  }
+
+  /**
+   * Show toast message
+   */
+  private async showToast(message: string, color = 'primary'): Promise<void> {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 2000,
+      position: 'bottom',
+      color,
+    });
+    await toast.present();
   }
 
   /**

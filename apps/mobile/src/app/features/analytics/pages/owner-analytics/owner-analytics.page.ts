@@ -657,15 +657,17 @@ export class OwnerAnalyticsPage implements OnInit {
     let startDate: string;
 
     switch (this.selectedPeriod()) {
-      case 'month':
+      case 'month': {
         const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
         startDate = monthStart.toISOString().split('T')[0];
         break;
-      case 'quarter':
+      }
+      case 'quarter': {
         const quarter = Math.floor(now.getMonth() / 3);
         const quarterStart = new Date(now.getFullYear(), quarter * 3, 1);
         startDate = quarterStart.toISOString().split('T')[0];
         break;
+      }
       case 'year':
         startDate = `${now.getFullYear()}-01-01`;
         break;

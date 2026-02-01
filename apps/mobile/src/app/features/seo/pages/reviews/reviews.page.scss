@@ -3,6 +3,12 @@
  * Sprint 42: Local SEO Automation
  */
 
+// Transparent Toolbar
+.transparent-toolbar {
+  --background: transparent;
+  --border-width: 0;
+}
+
 // Loading
 .loading-container {
   display: flex;
@@ -18,27 +24,27 @@
   }
 
   p {
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-secondary, #A3A3A3);
   }
 }
 
 // Section Headers
 .section-header {
   padding: 1.5rem 1rem 0.75rem;
-  background: var(--ion-background-color);
+  background: var(--fitos-bg-primary, #0D0D0D);
 
   h2 {
     font-size: 0.875rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-secondary, #A3A3A3);
     margin: 0;
   }
 
   p {
     font-size: 0.75rem;
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-tertiary, #737373);
     margin: 0.25rem 0 0 0;
   }
 }
@@ -46,6 +52,13 @@
 // Stats Section
 .stats-section {
   padding: 1rem;
+}
+
+ion-card {
+  --background: var(--fitos-bg-secondary, #1A1A1A);
+  border-radius: 12px;
+  box-shadow: none;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .rating-summary {
@@ -65,20 +78,21 @@
   flex-direction: column;
   align-items: center;
   padding-right: 2rem;
-  border-right: 1px solid var(--ion-color-light-shade);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
 
   @media (max-width: 576px) {
     padding-right: 0;
     padding-bottom: 1.5rem;
     border-right: none;
-    border-bottom: 1px solid var(--ion-color-light-shade);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   h1 {
+    font-family: 'Space Mono', monospace;
     font-size: 3rem;
     font-weight: 700;
     margin: 0 0 0.5rem 0;
-    color: var(--ion-text-color);
+    color: var(--fitos-text-primary, #F5F5F5);
   }
 
   .stars {
@@ -94,7 +108,7 @@
   p {
     font-size: 0.875rem;
     margin: 0;
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-secondary, #A3A3A3);
   }
 }
 
@@ -111,9 +125,10 @@
   gap: 0.5rem;
 
   .rating-label {
+    font-family: 'Space Mono', monospace;
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--ion-text-color);
+    color: var(--fitos-text-primary, #F5F5F5);
     width: 12px;
   }
 
@@ -125,7 +140,7 @@
   .bar-track {
     flex: 1;
     height: 8px;
-    background: var(--ion-color-light);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 4px;
     overflow: hidden;
   }
@@ -137,8 +152,9 @@
   }
 
   .rating-count {
+    font-family: 'Space Mono', monospace;
     font-size: 0.875rem;
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-secondary, #A3A3A3);
     width: 30px;
     text-align: right;
   }
@@ -206,13 +222,13 @@
     font-size: 1rem;
     font-weight: 600;
     margin: 0 0 0.25rem 0;
-    color: var(--ion-text-color);
+    color: var(--fitos-text-primary, #F5F5F5);
   }
 
   p {
     font-size: 0.8125rem;
     margin: 0;
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-secondary, #A3A3A3);
   }
 }
 
@@ -232,12 +248,12 @@
     font-size: 0.9375rem;
     line-height: 1.6;
     margin: 0;
-    color: var(--ion-text-color);
+    color: var(--fitos-text-primary, #F5F5F5);
   }
 }
 
 .review-response {
-  background: var(--ion-color-light-tint);
+  background: var(--fitos-bg-tertiary, #262626);
   padding: 1rem;
   border-radius: 8px;
   margin-top: 1rem;
@@ -265,7 +281,7 @@
     font-size: 0.875rem;
     line-height: 1.5;
     margin: 0;
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-secondary, #A3A3A3);
   }
 }
 
@@ -281,6 +297,7 @@
   ion-item {
     --padding-start: 1rem;
     --padding-end: 1rem;
+    --background: var(--fitos-bg-secondary, #1A1A1A);
     margin-bottom: 0.5rem;
 
     ion-icon[slot="start"] {
@@ -293,18 +310,18 @@
         font-size: 1rem;
         font-weight: 600;
         margin: 0 0 0.25rem 0;
-        color: var(--ion-text-color);
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       p {
         font-size: 0.875rem;
         margin: 0.125rem 0;
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
 
       .timestamp {
         font-size: 0.75rem;
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-tertiary, #737373);
         opacity: 0.8;
 
         &.success {
@@ -331,7 +348,7 @@
       gap: 0.75rem;
       margin-bottom: 0.75rem;
       font-size: 0.875rem;
-      color: var(--ion-text-color);
+      color: var(--fitos-text-primary, #F5F5F5);
 
       ion-icon {
         font-size: 20px;
@@ -352,6 +369,7 @@
   ion-item {
     --padding-start: 1rem;
     --padding-end: 1rem;
+    --background: var(--fitos-bg-secondary, #1A1A1A);
     margin-bottom: 0.5rem;
 
     ion-icon[slot="start"] {
@@ -364,13 +382,13 @@
         font-size: 1rem;
         font-weight: 600;
         margin: 0 0 0.25rem 0;
-        color: var(--ion-text-color);
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       p {
         font-size: 0.875rem;
         margin: 0.125rem 0;
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
 
       .client-stats {
@@ -408,7 +426,7 @@
 
   ion-icon {
     font-size: 64px;
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-tertiary, #737373);
     opacity: 0.5;
     margin-bottom: 1rem;
   }
@@ -417,19 +435,19 @@
     font-size: 1.125rem;
     font-weight: 600;
     margin: 0 0 0.5rem 0;
-    color: var(--ion-text-color);
+    color: var(--fitos-text-primary, #F5F5F5);
   }
 
   p {
     font-size: 0.9375rem;
     margin: 0;
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-secondary, #A3A3A3);
   }
 }
 
 // Segment
 ion-segment {
-  --background: var(--ion-color-light);
+  --background: var(--fitos-bg-secondary, #1A1A1A);
 
   ion-segment-button {
     --indicator-color: var(--ion-color-primary);
@@ -449,24 +467,5 @@ ion-segment {
       min-width: 18px;
       height: 18px;
     }
-  }
-}
-
-// Dark Mode
-@media (prefers-color-scheme: dark) {
-  .avg-rating {
-    border-right-color: rgba(255, 255, 255, 0.1);
-
-    @media (max-width: 576px) {
-      border-bottom-color: rgba(255, 255, 255, 0.1);
-    }
-  }
-
-  .rating-bar .bar-track {
-    background: rgba(255, 255, 255, 0.1);
-  }
-
-  .review-response {
-    background: rgba(255, 255, 255, 0.05);
   }
 }

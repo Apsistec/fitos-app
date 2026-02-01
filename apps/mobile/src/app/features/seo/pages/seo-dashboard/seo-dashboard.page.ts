@@ -4,7 +4,7 @@
  * Sprint 42: Local SEO Automation
  */
 
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonicModule,
@@ -64,6 +64,7 @@ interface RecentActivity {
   imports: [CommonModule, IonicModule],
   templateUrl: './seo-dashboard.page.html',
   styleUrls: ['./seo-dashboard.page.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SeoDashboardPage implements OnInit {
   loading = signal(true);

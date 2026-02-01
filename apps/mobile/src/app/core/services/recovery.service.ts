@@ -158,7 +158,7 @@ export class RecoveryService {
    */
   async getRecentScores(
     userId: string,
-    days: number = 7
+    days = 7
   ): Promise<RecoveryScore[]> {
     this.loading.set(true);
     this.error.set(null);
@@ -392,7 +392,7 @@ export class RecoveryService {
    */
   async getAdjustmentHistory(
     userId: string,
-    limit: number = 10
+    limit = 10
   ): Promise<RecoveryAdjustmentLog[]> {
     try {
       const { data, error } = await this.supabase.client

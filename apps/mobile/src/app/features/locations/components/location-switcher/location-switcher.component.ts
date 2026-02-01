@@ -4,7 +4,7 @@
  * Sprint 40: Multi-Location Management (Deferred to Sprint 41)
  */
 
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonicModule,
@@ -30,6 +30,7 @@ interface Location {
   selector: 'app-location-switcher',
   standalone: true,
   imports: [CommonModule, IonicModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './location-switcher.component.html',
   styleUrls: ['./location-switcher.component.scss'],
 })

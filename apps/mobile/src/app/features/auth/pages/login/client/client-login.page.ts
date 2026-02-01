@@ -17,7 +17,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { logoGoogle, logoApple, peopleOutline } from 'ionicons/icons';
-import { AuthService } from '@app/core/services/auth.service';
+import { AuthService } from '../../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-client-login',

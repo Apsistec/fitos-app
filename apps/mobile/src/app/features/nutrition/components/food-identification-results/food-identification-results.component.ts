@@ -21,7 +21,7 @@ import {
   createOutline,
   warningOutline,
 } from 'ionicons/icons';
-import { IdentifiedFood } from '@app/core/services/photo-nutrition.service';
+import { IdentifiedFood } from '../../../../core/services/photo-nutrition.service';
 import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 
 @Component({

@@ -24,8 +24,8 @@ import {
   heartOutline,
   checkmarkCircleOutline,
 } from 'ionicons/icons';
-import { StreakService, StreakType, RepairMethod } from '@app/core/services/streak.service';
-import { HapticService } from '@app/core/services/haptic.service';
+import { StreakService, StreakType, RepairMethod } from '../../../core/services/streak.service';
+import { HapticService } from '../../../core/services/haptic.service';
 
 /**
  * Repair option

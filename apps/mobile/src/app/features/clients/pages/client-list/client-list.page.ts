@@ -25,7 +25,7 @@ import { addIcons } from 'ionicons';
 import { addOutline, filterOutline, chatboxOutline, eyeOutline, personRemoveOutline, mailOutline } from 'ionicons/icons';
 import { ClientService, ClientWithProfile } from '../../../../core/services/client.service';
 import { ClientCardComponent } from '../../../../shared/components/client-card/client-card.component';
-import { listStagger } from '@app/shared/animations';
+import { listStagger } from '../../../../shared/animations';
 
 addIcons({ addOutline, filterOutline, chatboxOutline, eyeOutline, personRemoveOutline, mailOutline });
 
@@ -57,7 +57,7 @@ type SubscriptionFilter = 'all' | 'active' | 'trialing' | 'past_due' | 'canceled
   ],
   animations: [listStagger],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-title>My Clients</ion-title>
         <ion-buttons slot="end">
@@ -160,6 +160,18 @@ type SubscriptionFilter = 'all' | 'active' | 'trialing' | 'past_due' | 'canceled
     </ion-content>
   `,
   styles: [`
+    /* FitOS Header */
+    ion-header ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-header ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     .loading-container,
     .error-container,
     .empty-state {
@@ -174,22 +186,22 @@ type SubscriptionFilter = 'all' | 'active' | 'trialing' | 'past_due' | 'canceled
 
     .loading-container p {
       margin-top: 16px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
     }
 
     .error-message {
-      color: var(--ion-color-danger);
+      color: var(--fitos-status-error, #EF4444);
       margin-bottom: 16px;
     }
 
     .empty-state p {
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
       margin-bottom: 8px;
-      font-size: 1.1rem;
+      font-size: 16px;
     }
 
     .empty-subtitle {
-      font-size: 0.9rem !important;
+      font-size: 14px !important;
       margin-bottom: 16px !important;
     }
 
@@ -203,19 +215,23 @@ type SubscriptionFilter = 'all' | 'active' | 'trialing' | 'past_due' | 'canceled
     }
 
     .results-count {
-      font-size: 0.9rem;
-      color: var(--ion-color-medium);
+      font-size: 13px;
+      color: var(--fitos-text-tertiary, #737373);
       margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 500;
     }
 
     .clients-grid {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 8px;
     }
 
     ion-fab-button {
-      --background: var(--ion-color-primary);
+      --background: var(--ion-color-primary, #10B981);
+      --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
     }
 
     ion-segment {
@@ -224,7 +240,7 @@ type SubscriptionFilter = 'all' | 'active' | 'trialing' | 'past_due' | 'canceled
 
     ion-segment-button {
       --indicator-height: 3px;
-      font-size: 0.875rem;
+      font-size: 14px;
       min-width: 70px;
     }
   `]

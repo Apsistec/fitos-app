@@ -46,8 +46,8 @@ import {
   checkmarkOutline,
 } from 'ionicons/icons';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
-import { MeasurementService, type ProgressPhoto } from '@app/core/services/measurement.service';
-import { AuthService } from '@app/core/services/auth.service';
+import { MeasurementService, type ProgressPhoto } from '../../../../core/services/measurement.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import type { Tables } from '@fitos/shared';
 
 Chart.register(...registerables);
@@ -91,7 +91,7 @@ Chart.register(...registerables);
     IonCol,
   ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/tabs/dashboard"></ion-back-button>
@@ -441,6 +441,18 @@ Chart.register(...registerables);
     </ion-content>
   `,
   styles: [`
+    /* FitOS Header */
+    ion-header ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-header ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     .measurements-container {
       max-width: 1000px;
       margin: 0 auto;
@@ -449,6 +461,20 @@ Chart.register(...registerables);
 
     ion-segment {
       margin-bottom: 16px;
+    }
+
+    /* FitOS Card Styles */
+    ion-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
+    }
+
+    ion-card-header ion-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .chart-container {
@@ -464,7 +490,7 @@ Chart.register(...registerables);
 
       ion-icon {
         font-size: 64px;
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-tertiary, #737373);
         margin-bottom: 16px;
       }
 
@@ -475,10 +501,11 @@ Chart.register(...registerables);
       h3 {
         margin: 0 0 8px;
         font-weight: 600;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       p {
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-secondary, #A3A3A3);
         margin: 0;
       }
     }
@@ -494,22 +521,26 @@ Chart.register(...registerables);
       text-align: center;
 
       .stat-label {
-        font-size: 0.875rem;
-        color: var(--ion-color-medium);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 500;
+        color: var(--fitos-text-secondary, #A3A3A3);
         margin-bottom: 4px;
       }
 
       .stat-value {
-        font-size: 1.5rem;
+        font-size: 24px;
         font-weight: 700;
-        color: var(--ion-color-primary);
+        font-family: 'Space Mono', monospace;
+        color: var(--ion-color-primary, #10B981);
       }
     }
 
     .measurement-date {
       text-align: center;
-      color: var(--ion-color-medium);
-      font-size: 0.875rem;
+      color: var(--fitos-text-secondary, #A3A3A3);
+      font-size: 14px;
       margin: 0;
     }
 
@@ -524,27 +555,29 @@ Chart.register(...registerables);
 
         .measurement-weight {
           font-weight: 600;
-          font-size: 1.1rem;
+          font-size: 16px;
+          font-family: 'Space Mono', monospace;
+          color: var(--fitos-text-primary, #F5F5F5);
         }
 
         .measurement-date {
-          color: var(--ion-color-medium);
-          font-size: 0.875rem;
+          color: var(--fitos-text-tertiary, #737373);
+          font-size: 14px;
         }
       }
 
       .measurement-notes {
-        font-size: 0.875rem;
-        color: var(--ion-color-medium);
+        font-size: 14px;
+        color: var(--fitos-text-secondary, #A3A3A3);
         margin: 0;
       }
     }
 
     .photo-card {
       position: relative;
-      border-radius: 8px;
+      border-radius: 12px;
       overflow: hidden;
-      background: var(--ion-color-light);
+      background: var(--fitos-bg-tertiary, #262626);
       cursor: pointer;
 
       ion-img {
@@ -561,7 +594,7 @@ Chart.register(...registerables);
         background: rgba(0, 0, 0, 0.7);
         color: white;
         padding: 8px;
-        font-size: 0.75rem;
+        font-size: 12px;
         text-align: center;
       }
 
@@ -582,6 +615,15 @@ Chart.register(...registerables);
         --inner-padding-end: 0;
         margin-bottom: 12px;
       }
+    }
+
+    /* FitOS Submit Button */
+    ion-content form ion-button[type="submit"],
+    ion-content form ion-button[expand="block"] {
+      --border-radius: 8px;
+      height: 48px;
+      font-weight: 700;
+      --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
     }
   `],
 })

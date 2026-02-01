@@ -22,7 +22,7 @@ import {
   searchOutline,
   chevronForward,
 } from 'ionicons/icons';
-import { AuthService } from '@app/core/services/auth.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { HelpSearchComponent } from '../../../help/components/help-search/help-search.component';
 import { HelpCardComponent } from '../../../help/components/help-card/help-card.component';
 

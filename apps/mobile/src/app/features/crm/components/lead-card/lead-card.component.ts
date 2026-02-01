@@ -8,7 +8,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { calendarOutline } from 'ionicons/icons';
-import { Lead } from '@app/core/services/lead.service';
+import { Lead } from '../../../../core/services/lead.service';
 
 /**
  * LeadCardComponent - Reusable lead card for pipeline
@@ -68,92 +68,96 @@ import { Lead } from '@app/core/services/lead.service';
     .lead-card {
       margin: 0;
       cursor: move;
-      transition: all var(--fitos-duration-fast);
-      --background: var(--fitos-bg-secondary);
-      border: 1px solid var(--fitos-border-subtle);
+      transition: all 150ms ease;
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
 
       &:hover {
-        border-color: var(--fitos-border-default);
+        border-color: rgba(255, 255, 255, 0.12);
         transform: translateY(-2px);
-        box-shadow: var(--fitos-shadow-md);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       }
 
       &.cdk-drag-preview {
         opacity: 0.8;
         transform: rotate(2deg);
-        box-shadow: var(--fitos-shadow-lg);
-        border-color: var(--fitos-accent-primary);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        border-color: var(--ion-color-primary, #10B981);
       }
 
       &.cdk-drag-animating {
-        transition: transform var(--fitos-duration-normal) cubic-bezier(0.2, 0, 0, 1);
+        transition: transform 200ms cubic-bezier(0.2, 0, 0, 1);
       }
 
       &.cdk-drag-placeholder {
         opacity: 0.3;
-        border: 2px dashed var(--fitos-border-default);
+        border: 2px dashed rgba(255, 255, 255, 0.12);
         background: transparent;
       }
 
       ion-card-content {
-        padding: var(--fitos-space-3);
+        padding: 12px;
       }
     }
 
     .lead-name {
-      margin: 0 0 var(--fitos-space-2);
-      font-size: var(--fitos-text-base);
+      margin: 0 0 8px;
+      font-size: 14px;
       font-weight: 600;
-      color: var(--fitos-text-primary);
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .lead-contact {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-1);
-      margin-bottom: var(--fitos-space-2);
+      gap: 4px;
+      margin-bottom: 8px;
     }
 
     .lead-email {
-      font-size: var(--fitos-text-sm);
-      color: var(--fitos-text-secondary);
+      font-size: 13px;
+      color: var(--fitos-text-secondary, #A3A3A3);
     }
 
     .lead-phone {
-      font-size: var(--fitos-text-xs);
-      color: var(--fitos-text-tertiary);
+      font-size: 11px;
+      color: var(--fitos-text-tertiary, #737373);
     }
 
     .lead-meta {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: var(--fitos-space-2);
+      gap: 8px;
 
       ion-chip {
         margin: 0;
-        font-size: var(--fitos-text-xs);
-        text-transform: capitalize;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 500;
       }
     }
 
     .lead-value {
-      font-family: var(--fitos-font-mono);
-      font-size: var(--fitos-text-sm);
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
       font-weight: 600;
-      color: var(--fitos-status-success);
+      color: #10B981;
     }
 
     .follow-up-alert {
       display: flex;
       align-items: center;
-      gap: var(--fitos-space-1);
-      margin-top: var(--fitos-space-2);
-      padding: var(--fitos-space-2);
+      gap: 4px;
+      margin-top: 8px;
+      padding: 8px;
       background: rgba(239, 68, 68, 0.1);
-      border-radius: var(--fitos-radius-sm);
-      font-size: var(--fitos-text-xs);
-      color: var(--fitos-status-error);
+      border-radius: 6px;
+      font-size: 11px;
+      color: #EF4444;
 
       ion-icon {
         font-size: 14px;

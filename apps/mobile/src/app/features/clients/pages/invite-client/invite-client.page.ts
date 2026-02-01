@@ -61,7 +61,7 @@ addIcons({ mailOutline, linkOutline, copyOutline, shareOutline, checkmarkCircle 
     IonNote,
   ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/tabs/clients"></ion-back-button>
@@ -194,6 +194,18 @@ addIcons({ mailOutline, linkOutline, copyOutline, shareOutline, checkmarkCircle 
     </ion-content>
   `,
   styles: [`
+    /* FitOS Header */
+    ion-header ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-header ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     .invite-container {
       max-width: 600px;
       margin: 0 auto;
@@ -205,13 +217,14 @@ addIcons({ mailOutline, linkOutline, copyOutline, shareOutline, checkmarkCircle 
     }
 
     .invite-header h2 {
-      font-size: 1.5rem;
-      font-weight: 600;
+      font-size: 24px;
+      font-weight: 700;
       margin: 0 0 8px 0;
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .invite-header p {
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
       margin: 0;
     }
 
@@ -219,8 +232,9 @@ addIcons({ mailOutline, linkOutline, copyOutline, shareOutline, checkmarkCircle 
       display: block;
       margin-bottom: 16px;
       padding: 12px;
-      background: var(--ion-color-danger-tint);
+      background: rgba(239, 68, 68, 0.1);
       border-radius: 8px;
+      color: var(--fitos-status-error, #EF4444);
     }
 
     ion-list {
@@ -233,6 +247,10 @@ addIcons({ mailOutline, linkOutline, copyOutline, shareOutline, checkmarkCircle 
 
     .submit-button {
       margin-top: 8px;
+      --border-radius: 8px;
+      height: 48px;
+      font-weight: 700;
+      --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
     }
 
     .success-container {
@@ -248,19 +266,30 @@ addIcons({ mailOutline, linkOutline, copyOutline, shareOutline, checkmarkCircle 
     }
 
     .success-container h2 {
-      font-size: 1.5rem;
-      font-weight: 600;
+      font-size: 24px;
+      font-weight: 700;
       margin: 0 0 8px 0;
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .success-container > p {
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
       margin: 0 0 24px 0;
     }
 
     ion-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
       margin: 0 0 24px 0;
       text-align: left;
+    }
+
+    ion-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .invite-details {
@@ -275,19 +304,23 @@ addIcons({ mailOutline, linkOutline, copyOutline, shareOutline, checkmarkCircle 
     }
 
     .detail-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
       font-weight: 500;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-tertiary, #737373);
     }
 
     .detail-value {
       font-weight: 500;
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .detail-value.code {
-      font-family: 'Courier New', monospace;
-      font-size: 1.1rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 16px;
       font-weight: 600;
-      color: var(--ion-color-primary);
+      color: var(--ion-color-primary, #10B981);
     }
 
     .share-actions {
@@ -299,25 +332,30 @@ addIcons({ mailOutline, linkOutline, copyOutline, shareOutline, checkmarkCircle 
     .share-actions ion-button {
       flex: 1;
       margin: 0;
+      --border-radius: 8px;
+      height: 48px;
+      font-weight: 700;
     }
 
     .invite-link {
       padding: 12px;
-      background: var(--ion-color-light);
+      background: var(--fitos-bg-tertiary, #262626);
       border-radius: 8px;
     }
 
     .link-label {
-      font-size: 0.875rem;
+      font-size: 11px;
       font-weight: 500;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-tertiary, #737373);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
       margin: 0 0 4px 0;
     }
 
     .link-value {
-      font-size: 0.75rem;
+      font-size: 12px;
       word-break: break-all;
-      color: var(--ion-color-dark);
+      color: var(--fitos-text-primary, #F5F5F5);
       margin: 0;
     }
 

@@ -22,7 +22,7 @@ import {
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { openOutline, cardOutline, personOutline } from 'ionicons/icons';
-import { SubscriptionService } from '@app/core/services/subscription.service';
+import { SubscriptionService } from '../../../../core/services/subscription.service';
 
 @Component({
   standalone: true,
@@ -138,6 +138,19 @@ import { SubscriptionService } from '@app/core/services/subscription.service';
     </ion-content>
   `,
   styles: [`
+    :host {
+      ion-header {
+        ion-toolbar {
+          --background: transparent;
+          --border-width: 0;
+        }
+      }
+
+      ion-content {
+        --background: var(--fitos-bg-primary, #0D0D0D);
+      }
+    }
+
     .subscription-container {
       max-width: 600px;
       margin: 0 auto;
@@ -148,10 +161,11 @@ import { SubscriptionService } from '@app/core/services/subscription.service';
       flex-direction: column;
       align-items: center;
       padding: 64px 16px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
 
       p {
         margin-top: 16px;
+        font-size: 14px;
       }
     }
 
@@ -161,22 +175,30 @@ import { SubscriptionService } from '@app/core/services/subscription.service';
 
       .empty-icon {
         font-size: 48px;
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-tertiary, #737373);
         margin-bottom: 16px;
       }
 
       h3 {
         margin: 0 0 8px;
-        font-size: 1.25rem;
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       p {
         margin: 0;
-        color: var(--ion-color-medium);
+        font-size: 14px;
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
     }
 
     .subscription-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
+
       .trainer-header {
         display: flex;
         align-items: center;
@@ -189,12 +211,15 @@ import { SubscriptionService } from '@app/core/services/subscription.service';
           ion-icon {
             width: 100%;
             height: 100%;
-            color: var(--ion-color-medium);
+            color: var(--fitos-text-tertiary, #737373);
           }
         }
 
         .trainer-info {
           ion-card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--fitos-text-primary, #F5F5F5);
             margin-bottom: 4px;
           }
         }
@@ -208,18 +233,23 @@ import { SubscriptionService } from '@app/core/services/subscription.service';
         display: flex;
         justify-content: space-between;
         padding: 8px 0;
-        border-bottom: 1px solid var(--ion-color-light);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 
         &:last-child {
           border-bottom: none;
         }
 
         .label {
-          color: var(--ion-color-medium);
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-weight: 500;
+          color: var(--fitos-text-tertiary, #737373);
         }
 
         .value {
           font-weight: 500;
+          color: var(--fitos-text-primary, #F5F5F5);
         }
       }
     }
@@ -228,7 +258,7 @@ import { SubscriptionService } from '@app/core/services/subscription.service';
       margin-top: 16px;
       padding: 12px;
       border-radius: 8px;
-      background: rgba(var(--ion-color-warning-rgb), 0.1);
+      background: rgba(245, 158, 11, 0.1);
     }
 
     .subscription-actions {
@@ -236,6 +266,12 @@ import { SubscriptionService } from '@app/core/services/subscription.service';
       display: flex;
       flex-direction: column;
       gap: 8px;
+
+      ion-button[fill="outline"] {
+        --border-radius: 8px;
+        height: 48px;
+        font-weight: 700;
+      }
     }
   `],
 })

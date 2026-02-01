@@ -1,3 +1,16 @@
+:host {
+  ion-header {
+    ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+  }
+
+  ion-content {
+    --background: var(--fitos-bg-primary, #0D0D0D);
+  }
+}
+
 .page-container {
   max-width: 800px;
   margin: 0 auto;
@@ -6,8 +19,12 @@
 
 /* Revenue Card */
 .revenue-card {
+  --background: var(--fitos-bg-secondary, #1A1A1A);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  box-shadow: none;
   margin-bottom: 16px;
-  background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));
+  background: linear-gradient(135deg, var(--ion-color-primary, #10B981), var(--ion-color-primary-shade, #0D9668));
   color: white;
 
   .revenue-content {
@@ -16,19 +33,23 @@
   }
 
   .revenue-label {
-    font-size: 0.875rem;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
     opacity: 0.9;
     margin-bottom: 8px;
   }
 
   .revenue-amount {
-    font-size: 2.5rem;
+    font-size: 40px;
     font-weight: 700;
+    font-family: 'Space Mono', monospace;
     margin-bottom: 4px;
   }
 
   .revenue-note {
-    font-size: 0.8125rem;
+    font-size: 13px;
     opacity: 0.8;
   }
 }
@@ -49,12 +70,17 @@
 
   p {
     margin: 0;
-    color: var(--ion-color-medium);
+    font-size: 14px;
+    color: var(--fitos-text-secondary, #A3A3A3);
   }
 }
 
 /* Error Card */
 .error-card {
+  --background: var(--fitos-bg-secondary, #1A1A1A);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  box-shadow: none;
   margin: 16px 0;
 
   .error-content {
@@ -62,26 +88,36 @@
     padding: 32px 16px;
 
     ion-icon {
-      font-size: 64px;
+      font-size: 48px;
       margin-bottom: 16px;
     }
 
     p {
       margin: 0 0 16px 0;
-      color: var(--ion-color-medium);
+      font-size: 14px;
+      color: var(--fitos-text-secondary, #A3A3A3);
+    }
+
+    ion-button {
+      --border-radius: 8px;
+      height: 48px;
+      font-weight: 700;
     }
   }
 }
 
 /* Payment List */
 ion-list {
+  --background: transparent;
   margin-bottom: 16px;
 }
 
 ion-item {
+  --background: transparent;
   --padding-start: 16px;
   --padding-end: 16px;
   --inner-padding-end: 0;
+  --border-color: rgba(255, 255, 255, 0.08);
 
   ion-icon[slot="start"] {
     font-size: 32px;
@@ -91,16 +127,19 @@ ion-item {
   ion-label {
     h3 {
       font-weight: 600;
+      font-size: 14px;
+      color: var(--fitos-text-primary, #F5F5F5);
       margin-bottom: 4px;
     }
 
     p {
-      font-size: 0.875rem;
-      color: var(--ion-color-medium);
+      font-size: 14px;
+      color: var(--fitos-text-secondary, #A3A3A3);
       margin: 2px 0;
 
       &.period {
-        font-size: 0.8125rem;
+        font-size: 13px;
+        color: var(--fitos-text-tertiary, #737373);
       }
     }
   }
@@ -114,13 +153,14 @@ ion-item {
   gap: 4px;
 
   .amount {
-    font-size: 1.125rem;
+    font-size: 18px;
     font-weight: 600;
-    color: var(--ion-color-dark);
+    font-family: 'Space Mono', monospace;
+    color: var(--fitos-text-primary, #F5F5F5);
   }
 
   ion-badge {
-    font-size: 0.75rem;
+    font-size: 12px;
     padding: 4px 8px;
     text-transform: capitalize;
   }
@@ -143,20 +183,22 @@ ion-item {
   padding: 64px 32px;
 
   ion-icon {
-    font-size: 96px;
+    font-size: 48px;
+    color: var(--fitos-text-tertiary, #737373);
     margin-bottom: 16px;
   }
 
   h2 {
     margin: 0 0 8px 0;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--ion-color-dark);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--fitos-text-primary, #F5F5F5);
   }
 
   p {
     margin: 0;
-    color: var(--ion-color-medium);
+    font-size: 14px;
+    color: var(--fitos-text-secondary, #A3A3A3);
     line-height: 1.6;
   }
 }
@@ -165,11 +207,11 @@ ion-item {
 @media (max-width: 576px) {
   .payment-amount {
     .amount {
-      font-size: 1rem;
+      font-size: 16px;
     }
   }
 
   .revenue-amount {
-    font-size: 2rem !important;
+    font-size: 32px !important;
   }
 }

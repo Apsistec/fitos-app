@@ -34,7 +34,7 @@ import {
   timeOutline,
   checkmarkCircleOutline,
 } from 'ionicons/icons';
-import { LeadService, Lead, LeadActivity, LeadStage } from '@app/core/services/lead.service';
+import { LeadService, Lead, LeadActivity, LeadStage } from '../../../../core/services/lead.service';
 import { ActivityLoggerComponent } from '../../components/activity-logger/activity-logger.component';
 
 /**
@@ -75,7 +75,7 @@ import { ActivityLoggerComponent } from '../../components/activity-logger/activi
     IonSpinner,
   ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/crm"></ion-back-button>
@@ -218,33 +218,58 @@ import { ActivityLoggerComponent } from '../../components/activity-logger/activi
     </ion-content>
   `,
   styles: [`
+    ion-header ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-header ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    ion-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
+    }
+
+    ion-card-header ion-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
+    }
+
     .loading-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: var(--fitos-space-8);
-      gap: var(--fitos-space-3);
+      padding: 48px;
+      gap: 12px;
 
       ion-spinner {
-        --color: var(--fitos-accent-primary);
+        --color: var(--ion-color-primary, #10B981);
       }
 
       p {
         margin: 0;
-        color: var(--fitos-text-secondary);
+        font-size: 14px;
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
     }
 
     .lead-header {
-      margin: var(--fitos-space-4);
+      margin: 16px;
     }
 
     .header-content {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: var(--fitos-space-3);
+      gap: 12px;
     }
 
     .lead-info {
@@ -253,100 +278,103 @@ import { ActivityLoggerComponent } from '../../components/activity-logger/activi
     }
 
     ion-card-title {
-      font-size: var(--fitos-text-xl);
+      font-size: 20px;
       font-weight: 700;
-      margin-bottom: var(--fitos-space-2);
+      margin-bottom: 8px;
     }
 
     .contact-info {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-1);
+      gap: 4px;
     }
 
     .email {
-      font-size: var(--fitos-text-sm);
-      color: var(--fitos-text-secondary);
+      font-size: 13px;
+      color: var(--fitos-text-secondary, #A3A3A3);
     }
 
     .phone {
-      font-size: var(--fitos-text-sm);
-      color: var(--fitos-text-tertiary);
+      font-size: 13px;
+      color: var(--fitos-text-tertiary, #737373);
     }
 
     .meta-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: var(--fitos-space-4);
-      margin-bottom: var(--fitos-space-4);
+      gap: 16px;
+      margin-bottom: 16px;
     }
 
     .meta-item {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-1);
+      gap: 4px;
     }
 
     .meta-label {
-      font-size: var(--fitos-text-xs);
-      color: var(--fitos-text-tertiary);
+      font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.5px;
+      font-weight: 500;
+      color: var(--fitos-text-tertiary, #737373);
     }
 
     .meta-value {
-      font-size: var(--fitos-text-base);
+      font-size: 14px;
       font-weight: 600;
-      color: var(--fitos-text-primary);
+      font-family: 'Space Mono', monospace;
+      color: var(--fitos-text-primary, #F5F5F5);
 
       &.overdue {
-        color: var(--fitos-status-error);
+        color: #EF4444;
       }
     }
 
     .quick-actions {
       display: flex;
-      gap: var(--fitos-space-2);
+      gap: 8px;
       flex-wrap: wrap;
     }
 
     .timeline-section {
-      padding: 0 var(--fitos-space-4) var(--fitos-space-4);
+      padding: 0 16px 16px;
     }
 
     .section-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: var(--fitos-space-4);
+      margin-bottom: 16px;
 
       h2 {
         margin: 0;
-        font-size: var(--fitos-text-lg);
+        font-size: 16px;
         font-weight: 600;
-        color: var(--fitos-text-primary);
+        color: var(--fitos-text-primary, #F5F5F5);
       }
     }
 
     .empty-state {
       text-align: center;
-      padding: var(--fitos-space-6);
+      padding: 24px;
 
       .empty-icon {
-        font-size: 64px;
-        color: var(--fitos-text-tertiary);
+        font-size: 48px;
+        color: var(--fitos-text-tertiary, #737373);
         opacity: 0.5;
-        margin-bottom: var(--fitos-space-3);
+        margin-bottom: 12px;
       }
 
       p {
         margin: 0;
-        color: var(--fitos-text-secondary);
+        font-size: 14px;
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
 
       .empty-subtitle {
-        font-size: var(--fitos-text-sm);
-        color: var(--fitos-text-tertiary);
+        font-size: 13px;
+        color: var(--fitos-text-tertiary, #737373);
       }
     }
 
@@ -361,13 +389,13 @@ import { ActivityLoggerComponent } from '../../components/activity-logger/activi
         top: 0;
         bottom: 0;
         width: 2px;
-        background: var(--fitos-border-subtle);
+        background: rgba(255, 255, 255, 0.06);
       }
     }
 
     .timeline-item {
       position: relative;
-      margin-bottom: var(--fitos-space-4);
+      margin-bottom: 16px;
     }
 
     .timeline-marker {
@@ -380,8 +408,8 @@ import { ActivityLoggerComponent } from '../../components/activity-logger/activi
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--fitos-bg-secondary);
-      border: 2px solid var(--fitos-border-default);
+      background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 2px solid rgba(255, 255, 255, 0.06);
       z-index: 1;
 
       ion-icon {
@@ -389,16 +417,16 @@ import { ActivityLoggerComponent } from '../../components/activity-logger/activi
       }
 
       &.marker-note {
-        border-color: var(--fitos-accent-primary);
-        background: var(--fitos-bg-primary);
+        border-color: var(--ion-color-primary, #10B981);
+        background: var(--fitos-bg-primary, #0D0D0D);
         ion-icon {
-          color: var(--fitos-accent-primary);
+          color: var(--ion-color-primary, #10B981);
         }
       }
 
       &.marker-call {
         border-color: var(--ion-color-secondary);
-        background: var(--fitos-bg-primary);
+        background: var(--fitos-bg-primary, #0D0D0D);
         ion-icon {
           color: var(--ion-color-secondary);
         }
@@ -406,7 +434,7 @@ import { ActivityLoggerComponent } from '../../components/activity-logger/activi
 
       &.marker-email {
         border-color: var(--ion-color-tertiary);
-        background: var(--fitos-bg-primary);
+        background: var(--fitos-bg-primary, #0D0D0D);
         ion-icon {
           color: var(--ion-color-tertiary);
         }
@@ -414,17 +442,17 @@ import { ActivityLoggerComponent } from '../../components/activity-logger/activi
 
       &.marker-meeting {
         border-color: var(--ion-color-warning);
-        background: var(--fitos-bg-primary);
+        background: var(--fitos-bg-primary, #0D0D0D);
         ion-icon {
           color: var(--ion-color-warning);
         }
       }
 
       &.marker-status_change {
-        border-color: var(--fitos-status-success);
-        background: var(--fitos-bg-primary);
+        border-color: #10B981;
+        background: var(--fitos-bg-primary, #0D0D0D);
         ion-icon {
-          color: var(--fitos-status-success);
+          color: #10B981;
         }
       }
     }
@@ -437,30 +465,30 @@ import { ActivityLoggerComponent } from '../../components/activity-logger/activi
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: var(--fitos-space-2);
-      margin-bottom: var(--fitos-space-2);
+      gap: 8px;
+      margin-bottom: 8px;
     }
 
     .activity-info {
       flex: 1;
 
       h3 {
-        margin: 0 0 var(--fitos-space-1);
-        font-size: var(--fitos-text-base);
+        margin: 0 0 4px;
+        font-size: 14px;
         font-weight: 600;
-        color: var(--fitos-text-primary);
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       ion-note {
-        font-size: var(--fitos-text-xs);
-        color: var(--fitos-text-tertiary);
+        font-size: 11px;
+        color: var(--fitos-text-tertiary, #737373);
       }
     }
 
     .activity-content {
       margin: 0;
-      font-size: var(--fitos-text-sm);
-      color: var(--fitos-text-secondary);
+      font-size: 13px;
+      color: var(--fitos-text-secondary, #A3A3A3);
       white-space: pre-wrap;
     }
   `],

@@ -1,6 +1,29 @@
 // Wellness Check-In Page Styles
 // Sprint 37: Mental Health Integration
 
+:host {
+  --background: var(--fitos-bg-primary, #0D0D0D);
+}
+
+ion-content {
+  --background: var(--fitos-bg-primary, #0D0D0D);
+}
+
+ion-card {
+  --background: var(--fitos-bg-secondary, #1A1A1A);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+ion-card-title {
+  color: var(--fitos-text-primary, #F5F5F5);
+}
+
+ion-card-content {
+  color: var(--fitos-text-secondary, #A3A3A3);
+}
+
 // =====================================================================
 // INTRO STEP
 // =====================================================================
@@ -20,7 +43,7 @@
     align-items: flex-start;
     gap: 12px;
     padding: 16px;
-    background: var(--ion-color-warning-tint);
+    background: rgba(255, 196, 9, 0.12);
     border-left: 4px solid var(--ion-color-warning);
     border-radius: 8px;
     margin: 1.5rem 0;
@@ -81,7 +104,7 @@
     }
 
     &:hover {
-      --background: var(--ion-color-light);
+      --background: var(--fitos-bg-tertiary, #262626);
     }
   }
 
@@ -125,7 +148,7 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background: var(--ion-color-primary-tint);
+      background: rgba(16, 185, 129, 0.12);
 
       .score-value {
         font-size: 3rem;
@@ -136,7 +159,7 @@
 
       .score-max {
         font-size: 1.2rem;
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
     }
   }
@@ -155,7 +178,7 @@
 
   .research-note {
     padding: 12px;
-    background: var(--ion-color-success-tint);
+    background: rgba(16, 185, 129, 0.12);
     border-radius: 8px;
     margin-bottom: 1rem;
     font-style: italic;
@@ -169,7 +192,7 @@
       align-items: center;
       gap: 12px;
       padding: 16px;
-      background: var(--ion-color-danger-tint);
+      background: rgba(239, 68, 68, 0.12);
       border-radius: 8px;
       margin-bottom: 1rem;
 
@@ -234,14 +257,14 @@
     .workout-details {
       margin: 1.5rem 0;
       padding: 16px;
-      background: var(--ion-color-light);
+      background: var(--fitos-bg-tertiary, #262626);
       border-radius: 8px;
 
       .detail-item {
         display: flex;
         justify-content: space-between;
         padding: 8px 0;
-        border-bottom: 1px solid var(--ion-color-medium-tint);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 
         &:last-child {
           border-bottom: none;
@@ -299,7 +322,7 @@
 
     p {
       margin-bottom: 0.75rem;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
     }
 
     .alt-details {
@@ -309,7 +332,7 @@
 
       span {
         padding: 4px 12px;
-        background: var(--ion-color-light);
+        background: var(--fitos-bg-tertiary, #262626);
         border-radius: 12px;
         font-size: 0.9rem;
       }
@@ -319,7 +342,7 @@
   hr {
     margin: 1.5rem 0;
     border: none;
-    border-top: 1px solid var(--ion-color-medium-tint);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
   }
 }
 
@@ -346,7 +369,7 @@
 
     .crisis-message {
       padding: 16px;
-      background: var(--ion-color-danger-tint);
+      background: rgba(239, 68, 68, 0.12);
       border-radius: 8px;
       margin-bottom: 1rem;
     }
@@ -356,7 +379,7 @@
     .resource-info {
       margin: 1rem 0;
       padding: 12px;
-      background: var(--ion-color-light);
+      background: var(--fitos-bg-tertiary, #262626);
       border-radius: 8px;
 
       .info-item {
@@ -407,17 +430,4 @@
   }
 }
 
-// =====================================================================
-// DARK MODE OVERRIDES
-// =====================================================================
-
-@media (prefers-color-scheme: dark) {
-  .disclaimer-box {
-    background: rgba(var(--ion-color-warning-rgb), 0.2);
-  }
-
-  .workout-details,
-  .resource-info {
-    background: var(--ion-color-step-100);
-  }
-}
+// Dark-first: no @media (prefers-color-scheme: dark) needed - FitOS is dark by default

@@ -272,7 +272,7 @@ export class AssignmentService {
    * Get recent client activity for trainer dashboard
    * Returns workouts completed in the last N hours
    */
-  async getRecentActivity(trainerId: string, hours: number = 24): Promise<RecentActivity[]> {
+  async getRecentActivity(trainerId: string, hours = 24): Promise<RecentActivity[]> {
     try {
       const cutoffTime = new Date();
       cutoffTime.setHours(cutoffTime.getHours() - hours);

@@ -49,10 +49,10 @@ import { sparklesOutline } from 'ionicons/icons';
   styles: [`
     .typing-indicator {
       display: flex;
-      gap: var(--fitos-space-3);
-      margin-bottom: var(--fitos-space-4);
-      padding: 0 var(--fitos-space-4);
-      animation: fadeIn 0.3s var(--fitos-ease-default);
+      gap: 12px;
+      margin-bottom: 16px;
+      padding: 0 16px;
+      animation: fadeIn 0.3s ease;
     }
 
     @keyframes fadeIn {
@@ -71,7 +71,7 @@ import { sparklesOutline } from 'ionicons/icons';
     .avatar {
       width: 40px;
       height: 40px;
-      background: linear-gradient(135deg, var(--fitos-accent-primary), var(--fitos-accent-secondary));
+      background: linear-gradient(135deg, var(--ion-color-primary, #10B981), #8B5CF6);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -100,10 +100,10 @@ import { sparklesOutline } from 'ionicons/icons';
     }
 
     .typing-bubble {
-      background: var(--fitos-bg-secondary);
-      border: 1px solid var(--fitos-border-subtle);
-      border-radius: var(--fitos-radius-lg);
-      padding: var(--fitos-space-3);
+      background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 12px;
       display: inline-flex;
       align-items: center;
       min-height: 40px;
@@ -119,7 +119,7 @@ import { sparklesOutline } from 'ionicons/icons';
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: var(--fitos-text-tertiary);
+      background: var(--fitos-text-tertiary, #737373);
       animation: dotBounce 1.4s ease-in-out infinite;
     }
 
@@ -148,9 +148,9 @@ import { sparklesOutline } from 'ionicons/icons';
 
     .typing-text {
       display: block;
-      margin-top: var(--fitos-space-2);
-      font-size: var(--fitos-text-xs);
-      color: var(--fitos-text-tertiary);
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--fitos-text-tertiary, #737373);
       font-style: italic;
     }
 

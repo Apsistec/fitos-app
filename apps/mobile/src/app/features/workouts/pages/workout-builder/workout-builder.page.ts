@@ -535,7 +535,7 @@ export class WorkoutBuilderPage implements OnInit {
     }
   }
 
-  async showToast(message: string, color: string = 'primary') {
+  async showToast(message: string, color = 'primary') {
     const toast = await this.toastController.create({
       message,
       duration: 2000,

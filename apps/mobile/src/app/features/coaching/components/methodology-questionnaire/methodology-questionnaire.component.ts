@@ -17,8 +17,8 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { saveOutline, addCircleOutline, closeCircleOutline, informationCircleOutline } from 'ionicons/icons';
-import { TrainerMethodologyService, CreateMethodologyInput } from '@app/core/services/trainer-methodology.service';
-import { HapticService } from '@app/core/services/haptic.service';
+import { TrainerMethodologyService, CreateMethodologyInput } from '../../../../core/services/trainer-methodology.service';
+import { HapticService } from '../../../../core/services/haptic.service';
 
 /**
  * MethodologyQuestionnaireComponent - Capture trainer's coaching philosophy
@@ -207,17 +207,32 @@ import { HapticService } from '@app/core/services/haptic.service';
   styles: [`
     .methodology-questionnaire {
       margin: 0;
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
+    }
+
+    ion-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
+    }
+
+    ion-card-subtitle {
+      color: var(--fitos-text-secondary, #A3A3A3);
+      font-size: 13px;
     }
 
     .section {
-      margin-bottom: var(--fitos-space-6);
+      margin-bottom: 24px;
     }
 
     .section-header {
       display: flex;
       align-items: center;
-      gap: var(--fitos-space-2);
-      margin-bottom: var(--fitos-space-2);
+      gap: 8px;
+      margin-bottom: 8px;
 
       ion-icon {
         font-size: 24px;
@@ -225,48 +240,50 @@ import { HapticService } from '@app/core/services/haptic.service';
 
       h3 {
         margin: 0;
-        font-size: var(--fitos-text-lg);
+        font-size: 16px;
         font-weight: 600;
-        color: var(--fitos-text-primary);
+        color: var(--fitos-text-primary, #F5F5F5);
       }
     }
 
     .hint {
-      margin: 0 0 var(--fitos-space-3) 0;
-      font-size: var(--fitos-text-sm);
+      margin: 0 0 12px 0;
+      font-size: 13px;
     }
 
     .form-item {
       --padding-start: 0;
       --inner-padding-end: 0;
       --background: transparent;
-      margin-bottom: var(--fitos-space-2);
+      margin-bottom: 8px;
     }
 
     ion-textarea {
-      --background: var(--fitos-bg-tertiary);
-      --padding-start: var(--fitos-space-3);
-      --padding-end: var(--fitos-space-3);
-      --padding-top: var(--fitos-space-3);
-      --padding-bottom: var(--fitos-space-3);
-      border: 1px solid var(--fitos-border-subtle);
-      border-radius: var(--fitos-radius-md);
+      --background: var(--fitos-bg-tertiary, #262626);
+      --padding-start: 12px;
+      --padding-end: 12px;
+      --padding-top: 12px;
+      --padding-bottom: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
       min-height: 120px;
+      font-size: 14px;
     }
 
     ion-input {
-      --background: var(--fitos-bg-tertiary);
-      --padding-start: var(--fitos-space-3);
-      --padding-end: var(--fitos-space-3);
-      border: 1px solid var(--fitos-border-subtle);
-      border-radius: var(--fitos-radius-md);
+      --background: var(--fitos-bg-tertiary, #262626);
+      --padding-start: 12px;
+      --padding-end: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      font-size: 14px;
     }
 
     .chips-container {
       display: flex;
       flex-wrap: wrap;
-      gap: var(--fitos-space-2);
-      margin-bottom: var(--fitos-space-3);
+      gap: 8px;
+      margin-bottom: 12px;
 
       ion-chip {
         cursor: pointer;
@@ -279,12 +296,16 @@ import { HapticService } from '@app/core/services/haptic.service';
     }
 
     .actions {
-      margin-top: var(--fitos-space-6);
-      padding-top: var(--fitos-space-4);
-      border-top: 1px solid var(--fitos-border-subtle);
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
 
       ion-button {
         margin: 0;
+        --border-radius: 8px;
+        height: 48px;
+        font-weight: 700;
+        --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
       }
     }
   `]

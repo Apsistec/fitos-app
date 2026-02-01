@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AccordionComponent } from '@fitos/libs';
 import type { AccordionItem } from '@fitos/libs';
@@ -17,6 +17,7 @@ export interface ChangelogVersion {
   selector: 'app-changelog',
   standalone: true,
   imports: [CommonModule, AccordionComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="changelog-container">
       <div class="changelog-header">

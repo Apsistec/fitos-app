@@ -284,7 +284,7 @@ export class AuditLogService {
   /**
    * Get suspicious activity alerts
    */
-  getSuspiciousActivity(daysBack: number = 7): Observable<SuspiciousActivity[]> {
+  getSuspiciousActivity(daysBack = 7): Observable<SuspiciousActivity[]> {
     return this.http.get<SuspiciousActivity[]>(`${this.baseUrl}/suspicious-activity`, {
       params: { days_back: daysBack.toString() },
     });

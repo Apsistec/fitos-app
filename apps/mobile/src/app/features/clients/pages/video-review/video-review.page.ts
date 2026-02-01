@@ -77,7 +77,7 @@ import { VideoAnnotatorComponent } from '../../components/video-annotator/video-
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/clients" />
@@ -179,6 +179,32 @@ import { VideoAnnotatorComponent } from '../../components/video-annotator/video-
   `,
   styles: [
     `
+      /* FitOS Header */
+      ion-header ion-toolbar {
+        --background: transparent;
+        --border-width: 0;
+      }
+
+      ion-header ion-title {
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.3px;
+      }
+
+      /* FitOS Card Styles */
+      ion-card {
+        --background: var(--fitos-bg-secondary, #1A1A1A);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        box-shadow: none;
+      }
+
+      ion-card-header ion-card-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
+      }
+
       .loading-state,
       .error-state {
         display: flex;
@@ -186,42 +212,45 @@ import { VideoAnnotatorComponent } from '../../components/video-annotator/video-
         align-items: center;
         justify-content: center;
         min-height: 300px;
-        padding: var(--fitos-space-6);
+        padding: 24px;
         text-align: center;
 
         ion-spinner {
-          margin-bottom: var(--fitos-space-3);
+          margin-bottom: 12px;
         }
 
         p {
-          font-size: var(--fitos-font-size-base);
-          color: var(--fitos-text-secondary);
-          margin: 0 0 var(--fitos-space-4) 0;
+          font-size: 14px;
+          color: var(--fitos-text-secondary, #A3A3A3);
+          margin: 0 0 16px 0;
         }
       }
 
       .error-message {
-        color: var(--ion-color-danger);
+        color: #EF4444;
       }
 
       .details-card {
-        margin: var(--fitos-space-4);
+        margin: 16px;
 
         .card-header {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: var(--fitos-space-2);
+          gap: 8px;
 
           ion-card-title {
             flex: 1;
-            font-size: var(--fitos-font-size-lg);
-            font-weight: 600;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--fitos-text-primary, #F5F5F5);
           }
 
           ion-badge {
             text-transform: uppercase;
-            font-size: var(--fitos-font-size-xs);
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            font-weight: 500;
             padding: 4px 12px;
           }
         }
@@ -229,28 +258,28 @@ import { VideoAnnotatorComponent } from '../../components/video-annotator/video-
         .meta-info {
           display: flex;
           flex-direction: column;
-          gap: var(--fitos-space-2);
+          gap: 8px;
 
           .meta-item {
             display: flex;
             align-items: flex-start;
-            gap: var(--fitos-space-2);
-            font-size: var(--fitos-font-size-sm);
-            color: var(--fitos-text-secondary);
+            gap: 8px;
+            font-size: 13px;
+            color: var(--fitos-text-secondary, #A3A3A3);
 
             ion-icon {
               font-size: 18px;
               margin-top: 2px;
-              color: var(--fitos-text-tertiary);
+              color: var(--fitos-text-tertiary, #737373);
             }
 
             &.client-notes {
               flex-direction: column;
               align-items: stretch;
-              padding: var(--fitos-space-3);
-              background: var(--fitos-bg-secondary);
-              border-radius: var(--fitos-border-radius);
-              margin-top: var(--fitos-space-2);
+              padding: 12px;
+              background: var(--fitos-bg-secondary, #1A1A1A);
+              border-radius: 8px;
+              margin-top: 8px;
 
               div {
                 width: 100%;
@@ -258,12 +287,12 @@ import { VideoAnnotatorComponent } from '../../components/video-annotator/video-
 
               strong {
                 display: block;
-                color: var(--fitos-text-primary);
-                margin-bottom: var(--fitos-space-1);
+                color: var(--fitos-text-primary, #F5F5F5);
+                margin-bottom: 4px;
               }
 
               p {
-                color: var(--fitos-text-secondary);
+                color: var(--fitos-text-secondary, #A3A3A3);
                 margin: 0;
                 line-height: 1.5;
               }
@@ -273,11 +302,15 @@ import { VideoAnnotatorComponent } from '../../components/video-annotator/video-
       }
 
       .action-buttons {
-        padding: var(--fitos-space-4);
-        padding-bottom: calc(var(--fitos-space-4) + env(safe-area-inset-bottom));
+        padding: 16px;
+        padding-bottom: calc(16px + env(safe-area-inset-bottom));
 
         ion-button {
-          margin-bottom: var(--fitos-space-2);
+          --border-radius: 8px;
+          height: 48px;
+          font-weight: 700;
+          --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+          margin-bottom: 8px;
 
           &:last-child {
             margin-bottom: 0;

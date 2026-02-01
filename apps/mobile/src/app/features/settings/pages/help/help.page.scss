@@ -1,3 +1,22 @@
+:host {
+  ion-header {
+    ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+
+      ion-title {
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.3px;
+      }
+    }
+  }
+
+  ion-content {
+    --background: var(--fitos-bg-primary, #0D0D0D);
+  }
+}
+
 .help-page-container {
   padding: 16px;
   max-width: 800px;
@@ -10,13 +29,13 @@
     .welcome-title {
       font-size: 24px;
       font-weight: 700;
-      color: var(--fitos-text-primary, var(--ion-text-color));
+      color: var(--fitos-text-primary, #F5F5F5);
       margin: 0 0 8px 0;
     }
 
     .welcome-subtitle {
-      font-size: 15px;
-      color: var(--fitos-text-secondary, var(--ion-color-step-600));
+      font-size: 14px;
+      color: var(--fitos-text-secondary, #A3A3A3);
       margin: 0 0 20px 0;
       line-height: 1.5;
     }
@@ -38,7 +57,8 @@
       ion-label {
         font-size: 18px;
         font-weight: 700;
-        color: var(--fitos-text-primary, var(--ion-text-color));
+        letter-spacing: -0.3px;
+        color: var(--fitos-text-primary, #F5F5F5);
         margin: 0;
       }
     }
@@ -50,12 +70,12 @@
       padding: 0;
 
       .guide-link-item {
-        --background: var(--fitos-bg-secondary, var(--ion-color-step-50));
+        --background: var(--fitos-bg-secondary, #1A1A1A);
         --padding-start: 16px;
         --padding-end: 16px;
         --inner-padding-end: 0;
         --min-height: 60px;
-        border: 1px solid var(--fitos-border-subtle, var(--ion-border-color));
+        border: 1px solid rgba(255, 255, 255, 0.06);
         border-radius: 12px;
         margin-bottom: 8px;
         transition: transform 150ms ease-in-out;
@@ -71,9 +91,9 @@
 
         ion-label {
           h3 {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
-            color: var(--fitos-text-primary, var(--ion-text-color));
+            color: var(--fitos-text-primary, #F5F5F5);
             margin: 0;
           }
         }
@@ -90,10 +110,11 @@
     text-align: center;
     margin-top: 32px;
     padding-top: 24px;
-    border-top: 1px solid var(--fitos-border-subtle, var(--ion-border-color));
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 
     p {
       font-size: 13px;
+      color: var(--fitos-text-tertiary, #737373);
       margin: 0;
     }
   }

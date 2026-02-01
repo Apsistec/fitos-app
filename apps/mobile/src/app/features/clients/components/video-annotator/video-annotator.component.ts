@@ -316,19 +316,26 @@ import {
   styles: [
     `
       .annotator-container {
-        padding: var(--fitos-space-4);
+        padding: 16px;
         max-width: 900px;
         margin: 0 auto;
       }
 
+      ion-card {
+        --background: var(--fitos-bg-secondary, #1A1A1A);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        box-shadow: none;
+      }
+
       .video-card {
-        margin-bottom: var(--fitos-space-4);
+        margin-bottom: 16px;
 
         .video-wrapper {
           position: relative;
           width: 100%;
           background: #000;
-          border-radius: var(--fitos-border-radius);
+          border-radius: 8px;
           overflow: hidden;
 
           video {
@@ -350,22 +357,22 @@ import {
         .video-controls {
           display: flex;
           align-items: center;
-          gap: var(--fitos-space-2);
-          margin-top: var(--fitos-space-3);
+          gap: 8px;
+          margin-top: 12px;
 
           .timeline {
             flex: 1;
             height: 8px;
-            background: var(--fitos-bg-secondary);
+            background: var(--fitos-bg-tertiary, #262626);
             border-radius: 4px;
             position: relative;
             cursor: pointer;
 
             .progress {
               height: 100%;
-              background: var(--fitos-accent-primary);
+              background: var(--ion-color-primary, #10B981);
               border-radius: 4px;
-              transition: width 0.1s linear;
+              transition: width 150ms ease;
             }
 
             .marker {
@@ -374,16 +381,17 @@ import {
               transform: translate(-50%, -50%);
               width: 12px;
               height: 12px;
-              background: var(--ion-color-warning);
+              background: #F59E0B;
               border-radius: 50%;
-              border: 2px solid var(--fitos-bg-primary);
+              border: 2px solid var(--fitos-bg-primary, #0D0D0D);
               pointer-events: none;
             }
           }
 
           .time-display {
-            font-size: var(--fitos-font-size-sm);
-            color: var(--fitos-text-secondary);
+            font-size: 13px;
+            font-family: 'Space Mono', monospace;
+            color: var(--fitos-text-secondary, #A3A3A3);
             white-space: nowrap;
           }
         }
@@ -392,26 +400,40 @@ import {
       .tools-card,
       .comment-card,
       .annotations-card {
-        margin-bottom: var(--fitos-space-4);
+        margin-bottom: 16px;
 
         h3 {
-          font-size: var(--fitos-font-size-lg);
-          font-weight: 600;
-          color: var(--fitos-text-primary);
-          margin: 0 0 var(--fitos-space-3) 0;
+          font-size: 16px;
+          font-weight: 700;
+          color: var(--fitos-text-primary, #F5F5F5);
+          margin: 0 0 12px 0;
         }
 
         .help-text {
-          font-size: var(--fitos-font-size-sm);
-          color: var(--fitos-text-secondary);
-          margin: var(--fitos-space-2) 0;
+          font-size: 13px;
+          color: var(--fitos-text-secondary, #A3A3A3);
+          margin: 8px 0;
           font-style: italic;
         }
 
         .tool-actions {
           display: flex;
-          gap: var(--fitos-space-2);
-          margin-top: var(--fitos-space-3);
+          gap: 8px;
+          margin-top: 12px;
+
+          ion-button {
+            --border-radius: 8px;
+            font-weight: 700;
+          }
+        }
+      }
+
+      .comment-card {
+        ion-button[expand="block"] {
+          --border-radius: 8px;
+          height: 48px;
+          font-weight: 700;
+          --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
         }
       }
 
@@ -419,50 +441,53 @@ import {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: var(--fitos-space-3);
+        margin-bottom: 12px;
       }
 
       .empty-state {
         text-align: center;
-        color: var(--fitos-text-secondary);
-        font-size: var(--fitos-font-size-sm);
-        padding: var(--fitos-space-6) var(--fitos-space-4);
+        color: var(--fitos-text-secondary, #A3A3A3);
+        font-size: 13px;
+        padding: 24px 16px;
       }
 
       .annotation-item {
         width: 100%;
-        padding: var(--fitos-space-2) 0;
+        padding: 8px 0;
 
         .annotation-header {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          margin-bottom: var(--fitos-space-2);
+          margin-bottom: 8px;
 
           .annotation-time {
             display: flex;
             align-items: center;
-            gap: var(--fitos-space-2);
+            gap: 8px;
 
             ion-badge {
-              font-size: var(--fitos-font-size-xs);
+              font-size: 11px;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              font-weight: 500;
             }
           }
         }
 
         .annotation-content {
-          margin-bottom: var(--fitos-space-2);
+          margin-bottom: 8px;
 
           .annotation-type {
-            font-size: var(--fitos-font-size-sm);
-            color: var(--fitos-text-tertiary);
-            margin: 0 0 var(--fitos-space-1) 0;
+            font-size: 13px;
+            color: var(--fitos-text-tertiary, #737373);
+            margin: 0 0 4px 0;
             text-transform: capitalize;
           }
 
           .comment-text {
-            font-size: var(--fitos-font-size-base);
-            color: var(--fitos-text-secondary);
+            font-size: 14px;
+            color: var(--fitos-text-secondary, #A3A3A3);
             margin: 0;
             line-height: 1.5;
           }
@@ -472,7 +497,12 @@ import {
       ion-item {
         --padding-start: 0;
         --inner-padding-end: 0;
-        margin-bottom: var(--fitos-space-3);
+        --background: transparent;
+        margin-bottom: 12px;
+      }
+
+      ion-list {
+        background: transparent;
       }
     `,
   ],

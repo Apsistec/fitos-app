@@ -25,10 +25,10 @@ import {
   closeOutline,
   refreshOutline,
 } from 'ionicons/icons';
-import { AICoachService, UserContext } from '@app/core/services/ai-coach.service';
-import { AuthService } from '@app/core/services/auth.service';
-import { VoiceService } from '@app/core/services/voice.service';
-import { HapticService } from '@app/core/services/haptic.service';
+import { AICoachService, UserContext } from '../../../../core/services/ai-coach.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { VoiceService } from '../../../../core/services/voice.service';
+import { HapticService } from '../../../../core/services/haptic.service';
 import { ChatMessageComponent } from '../../components/chat-message/chat-message.component';
 import { TypingIndicatorComponent } from '../../components/typing-indicator/typing-indicator.component';
 import { QuickActionsComponent } from '../../components/quick-actions/quick-actions.component';
@@ -236,8 +236,19 @@ import { QuickActionsComponent } from '../../components/quick-actions/quick-acti
     }
   `,
   styles: [`
+    ion-header ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-header ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     ion-content {
-      --background: var(--fitos-bg-primary);
+      --background: var(--fitos-bg-primary, #0D0D0D);
     }
 
     .agent-toolbar {
@@ -249,17 +260,17 @@ import { QuickActionsComponent } from '../../components/quick-actions/quick-acti
     .agent-indicator {
       display: flex;
       align-items: center;
-      gap: var(--fitos-space-2);
-      padding: var(--fitos-space-2) var(--fitos-space-4);
-      font-size: var(--fitos-text-sm);
-      color: var(--fitos-text-secondary);
+      gap: 8px;
+      padding: 8px 16px;
+      font-size: 13px;
+      color: var(--fitos-text-secondary, #A3A3A3);
     }
 
     .agent-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: var(--fitos-accent-primary);
+      background: var(--ion-color-primary, #10B981);
       animation: pulse 2s ease-in-out infinite;
     }
 
@@ -280,20 +291,20 @@ import { QuickActionsComponent } from '../../components/quick-actions/quick-acti
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: var(--fitos-space-8) var(--fitos-space-4);
+      padding: 48px 16px;
       text-align: center;
-      gap: var(--fitos-space-4);
+      gap: 16px;
     }
 
     .coach-avatar {
       width: 80px;
       height: 80px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--fitos-accent-primary), var(--fitos-accent-secondary));
+      background: linear-gradient(135deg, var(--ion-color-primary, #10B981), #8B5CF6);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: var(--fitos-space-2);
+      margin-bottom: 8px;
 
       ion-icon {
         font-size: 48px;
@@ -303,27 +314,27 @@ import { QuickActionsComponent } from '../../components/quick-actions/quick-acti
 
     .empty-state h2 {
       margin: 0;
-      font-size: var(--fitos-text-2xl);
+      font-size: 24px;
       font-weight: 700;
-      color: var(--fitos-text-primary);
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     .empty-state p {
       margin: 0;
-      font-size: var(--fitos-text-base);
-      color: var(--fitos-text-secondary);
+      font-size: 14px;
+      color: var(--fitos-text-secondary, #A3A3A3);
       max-width: 400px;
     }
 
     .empty-state .tip {
-      font-size: var(--fitos-text-sm);
-      color: var(--fitos-text-tertiary);
+      font-size: 13px;
+      color: var(--fitos-text-tertiary, #737373);
       font-style: italic;
     }
 
     .messages-list {
       flex: 1;
-      padding: var(--fitos-space-4) 0;
+      padding: 16px 0;
     }
 
     .scroll-anchor {
@@ -333,13 +344,13 @@ import { QuickActionsComponent } from '../../components/quick-actions/quick-acti
     .error-banner {
       display: flex;
       align-items: center;
-      gap: var(--fitos-space-3);
-      margin: var(--fitos-space-4);
-      padding: var(--fitos-space-3);
+      gap: 12px;
+      margin: 16px;
+      padding: 12px;
       background: rgba(239, 68, 68, 0.1);
-      border: 1px solid var(--fitos-status-error);
-      border-radius: var(--fitos-radius-lg);
-      color: var(--fitos-status-error);
+      border: 1px solid #EF4444;
+      border-radius: 12px;
+      color: #EF4444;
 
       ion-icon {
         font-size: 24px;
@@ -349,7 +360,7 @@ import { QuickActionsComponent } from '../../components/quick-actions/quick-acti
 
     .error-content {
       flex: 1;
-      font-size: var(--fitos-text-sm);
+      font-size: 13px;
       line-height: 1.4;
 
       strong {
@@ -359,27 +370,27 @@ import { QuickActionsComponent } from '../../components/quick-actions/quick-acti
     }
 
     .chat-input-container {
-      padding: var(--fitos-space-3);
-      background: var(--fitos-bg-secondary);
-      border-top: 1px solid var(--fitos-border-subtle);
+      padding: 12px;
+      background: var(--fitos-bg-secondary, #1A1A1A);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .voice-recording {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: var(--fitos-space-3);
-      background: var(--fitos-status-error);
+      padding: 12px;
+      background: #EF4444;
       color: white;
-      border-radius: var(--fitos-radius-lg);
-      margin-bottom: var(--fitos-space-2);
+      border-radius: 12px;
+      margin-bottom: 8px;
     }
 
     .recording-indicator {
       display: flex;
       align-items: center;
-      gap: var(--fitos-space-2);
-      font-size: var(--fitos-text-sm);
+      gap: 8px;
+      font-size: 13px;
       font-weight: 600;
     }
 
@@ -399,30 +410,30 @@ import { QuickActionsComponent } from '../../components/quick-actions/quick-acti
     .input-wrapper {
       display: flex;
       align-items: flex-end;
-      gap: var(--fitos-space-2);
-      background: var(--fitos-bg-primary);
-      border: 1px solid var(--fitos-border-default);
-      border-radius: var(--fitos-radius-lg);
-      padding: var(--fitos-space-2);
+      gap: 8px;
+      background: var(--fitos-bg-primary, #0D0D0D);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 8px;
     }
 
     ion-textarea {
       flex: 1;
-      --padding-start: var(--fitos-space-2);
-      --padding-end: var(--fitos-space-2);
-      --padding-top: var(--fitos-space-2);
-      --padding-bottom: var(--fitos-space-2);
-      font-size: var(--fitos-text-base);
+      --padding-start: 8px;
+      --padding-end: 8px;
+      --padding-top: 8px;
+      --padding-bottom: 8px;
+      font-size: 14px;
     }
 
     .input-actions {
       display: flex;
       align-items: center;
-      gap: var(--fitos-space-1);
+      gap: 4px;
     }
 
     .voice-button ion-icon.listening {
-      color: var(--fitos-status-error);
+      color: #EF4444;
       animation: pulse 1s ease-in-out infinite;
     }
 
@@ -433,14 +444,14 @@ import { QuickActionsComponent } from '../../components/quick-actions/quick-acti
     }
 
     .char-count {
-      font-size: var(--fitos-text-xs);
-      color: var(--fitos-text-tertiary);
+      font-size: 12px;
+      color: var(--fitos-text-tertiary, #737373);
       text-align: right;
-      margin-top: var(--fitos-space-1);
-      padding: 0 var(--fitos-space-2);
+      margin-top: 4px;
+      padding: 0 8px;
 
       &.warning {
-        color: var(--fitos-status-warning);
+        color: #F59E0B;
         font-weight: 600;
       }
     }
@@ -654,7 +665,7 @@ export class ChatPage implements OnInit {
   /**
    * Show toast notification
    */
-  private async showToast(message: string, color: string = 'primary'): Promise<void> {
+  private async showToast(message: string, color = 'primary'): Promise<void> {
     const toast = await this.toastCtrl.create({
       message,
       duration: 3000,

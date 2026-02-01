@@ -474,7 +474,7 @@ import {
 })
 export class RecoveryStatusComponent implements OnInit {
   @Input({ required: true }) userId!: string;
-  @Input() compact: boolean = false;
+  @Input() compact = false;
 
   service = inject(RecoveryService);
   private router = inject(Router);

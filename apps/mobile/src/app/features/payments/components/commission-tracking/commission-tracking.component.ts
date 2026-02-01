@@ -231,6 +231,17 @@ interface CommissionSettings {
     </ion-card>
   `,
   styles: [`
+    ion-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
+    }
+
+    ion-card-title {
+      color: var(--fitos-text-primary, #F5F5F5);
+    }
+
     .loading-container {
       display: flex;
       flex-direction: column;
@@ -238,6 +249,10 @@ interface CommissionSettings {
       justify-content: center;
       min-height: 200px;
       gap: 1rem;
+
+      p {
+        color: var(--fitos-text-secondary, #A3A3A3);
+      }
     }
 
     .stats-grid {
@@ -251,7 +266,7 @@ interface CommissionSettings {
       align-items: center;
       gap: 1rem;
       padding: 1rem;
-      background: var(--ion-color-light);
+      background: var(--fitos-bg-tertiary, #262626);
       border-radius: 8px;
 
       ion-icon {
@@ -264,8 +279,11 @@ interface CommissionSettings {
 
         ion-label {
           display: block;
-          font-size: 0.875rem;
-          color: var(--ion-color-medium);
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-weight: 500;
+          color: var(--fitos-text-tertiary, #737373);
           margin-bottom: 0.25rem;
         }
 
@@ -273,6 +291,8 @@ interface CommissionSettings {
           margin: 0;
           font-size: 1.5rem;
           font-weight: 600;
+          font-family: 'Space Mono', monospace;
+          color: var(--fitos-text-primary, #F5F5F5);
         }
       }
     }
@@ -280,7 +300,7 @@ interface CommissionSettings {
     .default-commission-section,
     .trainers-section {
       padding: 1rem;
-      background: var(--ion-color-light);
+      background: var(--fitos-bg-tertiary, #262626);
       border-radius: 8px;
     }
 
@@ -298,6 +318,7 @@ interface CommissionSettings {
         margin: 0;
         font-size: 1.1rem;
         font-weight: 600;
+        color: var(--fitos-text-primary, #F5F5F5);
       }
     }
 
@@ -316,11 +337,13 @@ interface CommissionSettings {
           margin: 0;
           font-size: 2rem;
           font-weight: 600;
-          color: var(--ion-color-primary);
+          font-family: 'Space Mono', monospace;
+          color: var(--ion-color-primary, #10B981);
         }
 
         ion-note {
           font-size: 0.875rem;
+          color: var(--fitos-text-tertiary, #737373);
         }
       }
     }
@@ -336,12 +359,18 @@ interface CommissionSettings {
       ion-icon {
         font-size: 4rem;
         margin-bottom: 1rem;
+        color: var(--fitos-text-tertiary, #737373);
       }
 
       p {
         margin: 0 0 0.5rem 0;
         font-size: 1.1rem;
         font-weight: 500;
+        color: var(--fitos-text-primary, #F5F5F5);
+      }
+
+      ion-note {
+        color: var(--fitos-text-tertiary, #737373);
       }
     }
 
@@ -360,12 +389,14 @@ interface CommissionSettings {
           margin: 0 0 0.25rem 0;
           font-size: 1rem;
           font-weight: 600;
+          color: var(--fitos-text-primary, #F5F5F5);
         }
 
         ion-note {
           display: block;
           font-size: 0.875rem;
           margin-bottom: 0.5rem;
+          color: var(--fitos-text-secondary, #A3A3A3);
         }
 
         .trainer-stats {
@@ -391,11 +422,13 @@ interface CommissionSettings {
             margin: 0;
             font-size: 1.5rem;
             font-weight: 600;
+            font-family: 'Space Mono', monospace;
             color: var(--ion-color-success);
           }
 
           ion-note {
             font-size: 0.75rem;
+            color: var(--fitos-text-tertiary, #737373);
           }
         }
       }
@@ -405,7 +438,7 @@ interface CommissionSettings {
       display: flex;
       gap: 1rem;
       padding: 1rem;
-      background: var(--ion-color-light);
+      background: var(--fitos-bg-tertiary, #262626);
       border-radius: 8px;
 
       ion-icon {
@@ -420,18 +453,30 @@ interface CommissionSettings {
         p {
           margin: 0 0 0.5rem 0;
           font-size: 0.9rem;
+          color: var(--fitos-text-secondary, #A3A3A3);
         }
 
         ul {
           margin: 0.5rem 0;
           padding-left: 1.25rem;
           font-size: 0.875rem;
+          color: var(--fitos-text-secondary, #A3A3A3);
 
           li {
             margin-bottom: 0.25rem;
           }
         }
       }
+    }
+
+    ion-item {
+      --background: transparent;
+      --color: var(--fitos-text-primary, #F5F5F5);
+      --border-color: rgba(255, 255, 255, 0.06);
+    }
+
+    ion-list {
+      background: transparent;
     }
   `],
 })

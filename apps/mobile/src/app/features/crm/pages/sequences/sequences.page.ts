@@ -92,7 +92,7 @@ interface SequenceWithDetails extends EmailSequence {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-button routerLink="/tabs/crm/pipeline">
@@ -250,17 +250,41 @@ interface SequenceWithDetails extends EmailSequence {
   `,
   styles: [
     `
+      ion-header ion-toolbar {
+        --background: transparent;
+        --border-width: 0;
+      }
+
+      ion-header ion-title {
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.3px;
+      }
+
+      ion-card {
+        --background: var(--fitos-bg-secondary, #1A1A1A);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        box-shadow: none;
+      }
+
+      ion-card-header ion-card-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
+      }
+
       .loading-container {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         height: 300px;
-        gap: var(--fitos-space-4);
+        gap: 16px;
 
         p {
-          color: var(--fitos-text-secondary);
-          font-size: var(--fitos-font-size-sm);
+          color: var(--fitos-text-secondary, #A3A3A3);
+          font-size: 13px;
         }
       }
 
@@ -270,62 +294,69 @@ interface SequenceWithDetails extends EmailSequence {
         align-items: center;
         justify-content: center;
         text-align: center;
-        padding: var(--fitos-space-8) var(--fitos-space-4);
+        padding: 48px 16px;
         min-height: 400px;
 
         ion-icon {
-          font-size: 80px;
-          color: var(--fitos-text-tertiary);
-          margin-bottom: var(--fitos-space-4);
+          font-size: 48px;
+          color: var(--fitos-text-tertiary, #737373);
+          margin-bottom: 16px;
         }
 
         h2 {
-          font-size: var(--fitos-font-size-xl);
+          font-size: 20px;
           font-weight: 600;
-          color: var(--fitos-text-primary);
-          margin: 0 0 var(--fitos-space-2) 0;
+          color: var(--fitos-text-primary, #F5F5F5);
+          margin: 0 0 8px 0;
         }
 
         p {
-          font-size: var(--fitos-font-size-base);
-          color: var(--fitos-text-secondary);
-          margin: 0 0 var(--fitos-space-6) 0;
+          font-size: 14px;
+          color: var(--fitos-text-secondary, #A3A3A3);
+          margin: 0 0 24px 0;
           max-width: 400px;
+        }
+
+        ion-button {
+          --border-radius: 8px;
+          height: 48px;
+          font-weight: 700;
+          --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
         }
       }
 
       .sequences-list {
         display: flex;
         flex-direction: column;
-        gap: var(--fitos-space-4);
+        gap: 16px;
       }
 
       .sequence-card {
         margin: 0;
 
         ion-card-header {
-          padding-bottom: var(--fitos-space-3);
+          padding-bottom: 12px;
         }
 
         .card-header-top {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
-          gap: var(--fitos-space-4);
+          gap: 16px;
 
           .sequence-info {
             flex: 1;
 
             ion-card-title {
-              font-size: var(--fitos-font-size-lg);
-              font-weight: 600;
-              color: var(--fitos-text-primary);
-              margin-bottom: var(--fitos-space-1);
+              font-size: 16px;
+              font-weight: 700;
+              color: var(--fitos-text-primary, #F5F5F5);
+              margin-bottom: 4px;
             }
 
             ion-card-subtitle {
-              font-size: var(--fitos-font-size-sm);
-              color: var(--fitos-text-secondary);
+              font-size: 13px;
+              color: var(--fitos-text-secondary, #A3A3A3);
             }
           }
 
@@ -333,11 +364,14 @@ interface SequenceWithDetails extends EmailSequence {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: var(--fitos-space-1);
+            gap: 4px;
 
             .status-label {
-              font-size: var(--fitos-font-size-xs);
-              color: var(--fitos-text-secondary);
+              font-size: 11px;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              font-weight: 500;
+              color: var(--fitos-text-secondary, #A3A3A3);
               white-space: nowrap;
             }
           }
@@ -346,46 +380,48 @@ interface SequenceWithDetails extends EmailSequence {
         ion-card-content {
           display: flex;
           flex-direction: column;
-          gap: var(--fitos-space-4);
+          gap: 16px;
         }
       }
 
       .trigger-info {
         display: flex;
         flex-direction: column;
-        gap: var(--fitos-space-2);
-        padding: var(--fitos-space-3);
-        background: var(--fitos-bg-secondary);
-        border-radius: var(--fitos-border-radius);
+        gap: 8px;
+        padding: 12px;
+        background: var(--fitos-bg-secondary, #1A1A1A);
+        border-radius: 8px;
 
         .info-row {
           display: flex;
           align-items: center;
-          gap: var(--fitos-space-2);
-          font-size: var(--fitos-font-size-sm);
+          gap: 8px;
+          font-size: 13px;
 
           ion-icon {
             font-size: 18px;
-            color: var(--fitos-accent-primary);
+            color: var(--ion-color-primary, #10B981);
           }
 
           strong {
-            color: var(--fitos-text-secondary);
+            color: var(--fitos-text-secondary, #A3A3A3);
           }
 
           span {
-            color: var(--fitos-text-primary);
+            color: var(--fitos-text-primary, #F5F5F5);
           }
         }
 
         .trigger-status-badge {
           display: inline-block;
-          padding: var(--fitos-space-1) var(--fitos-space-2);
-          background: var(--fitos-accent-primary);
+          padding: 4px 8px;
+          background: var(--ion-color-primary, #10B981);
           color: white;
           border-radius: 12px;
-          font-size: var(--fitos-font-size-xs);
+          font-size: 11px;
           font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
         }
       }
 
@@ -393,15 +429,15 @@ interface SequenceWithDetails extends EmailSequence {
         h4 {
           display: flex;
           align-items: center;
-          gap: var(--fitos-space-2);
-          font-size: var(--fitos-font-size-base);
+          gap: 8px;
+          font-size: 14px;
           font-weight: 600;
-          color: var(--fitos-text-primary);
-          margin: 0 0 var(--fitos-space-2) 0;
+          color: var(--fitos-text-primary, #F5F5F5);
+          margin: 0 0 8px 0;
 
           ion-icon {
             font-size: 18px;
-            color: var(--fitos-accent-primary);
+            color: var(--ion-color-primary, #10B981);
           }
         }
 
@@ -410,8 +446,9 @@ interface SequenceWithDetails extends EmailSequence {
           margin: 0;
 
           ion-item {
-            --padding-start: var(--fitos-space-3);
-            --padding-end: var(--fitos-space-3);
+            --background: transparent;
+            --padding-start: 12px;
+            --padding-end: 12px;
             --inner-padding-end: 0;
             --min-height: 60px;
 
@@ -421,24 +458,25 @@ interface SequenceWithDetails extends EmailSequence {
               justify-content: center;
               width: 32px;
               height: 32px;
-              background: var(--fitos-accent-primary);
+              background: var(--ion-color-primary, #10B981);
               color: white;
               border-radius: 50%;
-              font-size: var(--fitos-font-size-sm);
+              font-size: 13px;
               font-weight: 600;
+              font-family: 'Space Mono', monospace;
             }
 
             ion-label {
               h3 {
-                font-size: var(--fitos-font-size-sm);
+                font-size: 13px;
                 font-weight: 500;
-                color: var(--fitos-text-primary);
-                margin-bottom: var(--fitos-space-1);
+                color: var(--fitos-text-primary, #F5F5F5);
+                margin-bottom: 4px;
               }
 
               p {
-                font-size: var(--fitos-font-size-xs);
-                color: var(--fitos-text-secondary);
+                font-size: 11px;
+                color: var(--fitos-text-secondary, #A3A3A3);
               }
             }
           }
@@ -446,62 +484,66 @@ interface SequenceWithDetails extends EmailSequence {
       }
 
       .no-steps {
-        padding: var(--fitos-space-4);
+        padding: 16px;
         text-align: center;
 
         p {
           margin: 0;
-          font-size: var(--fitos-font-size-sm);
+          font-size: 13px;
+          color: var(--fitos-text-tertiary, #737373);
         }
       }
 
       .enrollment-stats {
         display: flex;
         align-items: center;
-        gap: var(--fitos-space-4);
-        padding-top: var(--fitos-space-3);
-        border-top: 1px solid var(--fitos-border-color);
+        gap: 16px;
+        padding-top: 12px;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
 
         .stat {
           display: flex;
           align-items: center;
-          gap: var(--fitos-space-2);
-          font-size: var(--fitos-font-size-sm);
-          color: var(--fitos-text-secondary);
+          gap: 8px;
+          font-size: 13px;
+          color: var(--fitos-text-secondary, #A3A3A3);
 
           ion-icon {
             font-size: 18px;
           }
 
           strong {
-            color: var(--fitos-text-primary);
+            color: var(--fitos-text-primary, #F5F5F5);
+            font-family: 'Space Mono', monospace;
           }
 
           ion-badge {
-            font-size: var(--fitos-font-size-xs);
+            font-size: 11px;
           }
         }
       }
 
       .sequence-actions {
         display: flex;
-        gap: var(--fitos-space-2);
-        padding-top: var(--fitos-space-3);
-        border-top: 1px solid var(--fitos-border-color);
+        gap: 8px;
+        padding-top: 12px;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
 
         ion-button {
           flex: 1;
-          --padding-start: var(--fitos-space-3);
-          --padding-end: var(--fitos-space-3);
+          --padding-start: 12px;
+          --padding-end: 12px;
+          --border-radius: 8px;
         }
       }
 
       ion-fab {
-        margin: 0 var(--fitos-space-4) var(--fitos-space-4) 0;
+        margin: 0 16px 16px 0;
 
         ion-fab-button {
-          --background: var(--fitos-accent-primary);
+          --background: var(--ion-color-primary, #10B981);
           --color: white;
+          --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
         }
       }
     `,

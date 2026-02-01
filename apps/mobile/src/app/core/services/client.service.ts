@@ -196,7 +196,7 @@ export class ClientService {
    * Get clients needing attention for trainer dashboard
    * Returns clients with missed workouts, inactive streaks, or low adherence
    */
-  async getClientsNeedingAttention(trainerId: string, limit: number = 5): Promise<ClientNeedingAttention[]> {
+  async getClientsNeedingAttention(trainerId: string, limit = 5): Promise<ClientNeedingAttention[]> {
     try {
       const clientsNeedingAttention: ClientNeedingAttention[] = [];
 

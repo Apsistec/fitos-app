@@ -1,6 +1,6 @@
 .faq-accordion {
-  background: var(--fitos-bg-secondary, var(--ion-color-step-50));
-  border: 1px solid var(--fitos-border-subtle, var(--ion-border-color));
+  background: var(--fitos-bg-secondary, #1A1A1A);
+  border: 1px solid var(--fitos-border-subtle, rgba(255, 255, 255, 0.06));
   border-radius: 12px;
   margin-bottom: 12px;
   overflow: hidden;
@@ -21,7 +21,7 @@
     transition: background-color 150ms ease-in-out;
 
     &:active {
-      background: var(--fitos-bg-tertiary, var(--ion-color-step-100));
+      background: var(--fitos-bg-tertiary, #262626);
     }
 
     h3 {
@@ -29,7 +29,7 @@
       margin: 0;
       font-size: 16px;
       font-weight: 600;
-      color: var(--fitos-text-primary, var(--ion-text-color));
+      color: var(--fitos-text-primary, #F5F5F5);
       line-height: 1.4;
       padding-right: 12px;
     }
@@ -37,18 +37,18 @@
     .toggle-icon {
       flex-shrink: 0;
       font-size: 20px;
-      color: var(--fitos-accent-primary, var(--ion-color-primary));
+      color: var(--fitos-accent-primary, #10B981);
       transition: transform 250ms ease-in-out;
     }
   }
 
   .faq-answer {
-    border-top: 1px solid var(--fitos-border-subtle, var(--ion-border-color));
+    border-top: 1px solid var(--fitos-border-subtle, rgba(255, 255, 255, 0.06));
     padding: 20px;
     animation: expandAnswer 250ms ease-in-out;
 
     .answer-content {
-      color: var(--fitos-text-secondary, var(--ion-color-step-600));
+      color: var(--fitos-text-secondary, #A3A3A3);
       line-height: 1.6;
       font-size: 15px;
 
@@ -62,7 +62,7 @@
       }
 
       strong {
-        color: var(--fitos-text-primary, var(--ion-text-color));
+        color: var(--fitos-text-primary, #F5F5F5);
         font-weight: 600;
       }
 
@@ -76,7 +76,7 @@
           padding-left: 4px;
 
           &::marker {
-            color: var(--fitos-accent-primary, var(--ion-color-primary));
+            color: var(--fitos-accent-primary, #10B981);
           }
         }
 
@@ -94,7 +94,7 @@
       }
 
       a {
-        color: var(--fitos-accent-primary, var(--ion-color-primary));
+        color: var(--fitos-accent-primary, #10B981);
         text-decoration: none;
 
         &:hover {
@@ -106,12 +106,12 @@
     .feedback-section {
       margin-top: 20px;
       padding-top: 16px;
-      border-top: 1px solid var(--fitos-border-subtle, var(--ion-border-color));
+      border-top: 1px solid var(--fitos-border-subtle, rgba(255, 255, 255, 0.06));
 
       .feedback-prompt {
         font-size: 14px;
         font-weight: 600;
-        color: var(--fitos-text-secondary, var(--ion-color-step-600));
+        color: var(--fitos-text-secondary, #A3A3A3);
         margin: 0 0 8px 0;
       }
 

@@ -38,9 +38,9 @@ import {
   LeadWithExtras,
   LeadStatus,
   PipelineStage,
-} from '@app/core/services/lead.service';
-import { AuthService } from '@app/core/services/auth.service';
-import { HapticService } from '@app/core/services/haptic.service';
+} from '../../../../core/services/lead.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { HapticService } from '../../../../core/services/haptic.service';
 import { FormsModule } from '@angular/forms';
 
 /**
@@ -83,7 +83,7 @@ import { FormsModule } from '@angular/forms';
 ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-title>Lead Pipeline</ion-title>
         <ion-buttons slot="end">
@@ -247,6 +247,30 @@ import { FormsModule } from '@angular/forms';
     </ion-content>
   `,
   styles: [`
+    ion-header ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-header ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    ion-card {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
+    }
+
+    ion-card-header ion-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
+    }
+
     .pipeline-page {
       height: 100%;
       display: flex;
@@ -255,10 +279,10 @@ import { FormsModule } from '@angular/forms';
 
     .metrics-bar {
       display: flex;
-      gap: var(--fitos-space-4);
-      padding: var(--fitos-space-4);
-      background: var(--fitos-bg-secondary);
-      border-bottom: 1px solid var(--fitos-border-subtle);
+      gap: 16px;
+      padding: 16px;
+      background: var(--fitos-bg-secondary, #1A1A1A);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .metric {
@@ -269,16 +293,20 @@ import { FormsModule } from '@angular/forms';
       text-align: center;
 
       .metric-value {
-        font-size: var(--fitos-text-2xl);
+        font-family: 'Space Mono', monospace;
+        font-size: 24px;
         font-weight: 700;
-        color: var(--fitos-text-primary);
+        color: var(--fitos-text-primary, #F5F5F5);
         line-height: 1;
       }
 
       .metric-label {
-        font-size: var(--fitos-text-xs);
-        color: var(--fitos-text-secondary);
-        margin-top: var(--fitos-space-1);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 500;
+        color: var(--fitos-text-secondary, #A3A3A3);
+        margin-top: 4px;
       }
     }
 
@@ -287,19 +315,19 @@ import { FormsModule } from '@angular/forms';
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: var(--fitos-space-8);
-      gap: var(--fitos-space-3);
+      padding: 48px;
+      gap: 12px;
 
       p {
-        color: var(--fitos-text-secondary);
+        color: var(--fitos-text-secondary, #A3A3A3);
         margin: 0;
       }
     }
 
     .pipeline-columns {
       display: flex;
-      gap: var(--fitos-space-3);
-      padding: var(--fitos-space-4);
+      gap: 12px;
+      padding: 16px;
       overflow-x: auto;
       flex: 1;
       align-items: flex-start;
@@ -326,17 +354,17 @@ import { FormsModule } from '@angular/forms';
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: var(--fitos-space-3);
-      background: var(--fitos-bg-secondary);
-      border-radius: var(--fitos-radius-md);
+      padding: 12px;
+      background: var(--fitos-bg-secondary, #1A1A1A);
+      border-radius: 8px;
       border-left: 4px solid;
-      margin-bottom: var(--fitos-space-2);
+      margin-bottom: 8px;
 
       h3 {
         margin: 0;
-        font-size: var(--fitos-text-base);
+        font-size: 14px;
         font-weight: 600;
-        color: var(--fitos-text-primary);
+        color: var(--fitos-text-primary, #F5F5F5);
       }
     }
 
@@ -345,32 +373,31 @@ import { FormsModule } from '@angular/forms';
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-2);
-      padding-bottom: var(--fitos-space-2);
+      gap: 8px;
+      padding-bottom: 8px;
     }
 
     .lead-card {
       margin: 0;
       cursor: pointer;
-      transition: transform var(--fitos-duration-fast) var(--fitos-ease-default);
+      transition: transform 150ms ease;
 
       &:hover {
         transform: translateY(-2px);
-        box-shadow: var(--fitos-shadow-md);
       }
 
       ion-card-header {
-        padding: var(--fitos-space-3);
+        padding: 12px;
 
         ion-card-title {
-          font-size: var(--fitos-text-base);
+          font-size: 14px;
           font-weight: 600;
-          margin-bottom: var(--fitos-space-1);
+          margin-bottom: 4px;
         }
       }
 
       ion-card-content {
-        padding: var(--fitos-space-3);
+        padding: 12px;
         padding-top: 0;
       }
     }
@@ -378,40 +405,40 @@ import { FormsModule } from '@angular/forms';
     .lead-info {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-1);
-      margin-bottom: var(--fitos-space-2);
+      gap: 4px;
+      margin-bottom: 8px;
 
       .lead-email,
       .lead-phone {
-        font-size: var(--fitos-text-sm);
-        color: var(--fitos-text-secondary);
+        font-size: 13px;
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
     }
 
     .lead-tags {
       display: flex;
-      gap: var(--fitos-space-1);
+      gap: 4px;
       flex-wrap: wrap;
-      margin-bottom: var(--fitos-space-2);
+      margin-bottom: 8px;
     }
 
     .lead-actions {
       display: flex;
-      gap: var(--fitos-space-1);
+      gap: 4px;
       justify-content: flex-end;
-      border-top: 1px solid var(--fitos-border-subtle);
-      padding-top: var(--fitos-space-2);
-      margin-top: var(--fitos-space-2);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding-top: 8px;
+      margin-top: 8px;
     }
 
     .empty-column {
-      padding: var(--fitos-space-4);
+      padding: 16px;
       text-align: center;
-      color: var(--fitos-text-tertiary);
+      color: var(--fitos-text-tertiary, #737373);
 
       p {
         margin: 0;
-        font-size: var(--fitos-text-sm);
+        font-size: 13px;
       }
     }
 
@@ -420,27 +447,35 @@ import { FormsModule } from '@angular/forms';
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: var(--fitos-space-8);
+      padding: 48px;
       text-align: center;
       flex: 1;
 
       ion-icon {
-        font-size: 64px;
-        color: var(--fitos-text-tertiary);
-        margin-bottom: var(--fitos-space-4);
+        font-size: 48px;
+        color: var(--fitos-text-tertiary, #737373);
+        margin-bottom: 16px;
       }
 
       h2 {
-        margin: 0 0 var(--fitos-space-2) 0;
-        font-size: var(--fitos-text-2xl);
+        margin: 0 0 8px 0;
+        font-size: 24px;
         font-weight: 700;
-        color: var(--fitos-text-primary);
+        color: var(--fitos-text-primary, #F5F5F5);
       }
 
       p {
-        margin: 0 0 var(--fitos-space-4) 0;
-        color: var(--fitos-text-secondary);
+        margin: 0 0 16px 0;
+        font-size: 14px;
+        color: var(--fitos-text-secondary, #A3A3A3);
         max-width: 400px;
+      }
+
+      ion-button {
+        --border-radius: 8px;
+        height: 48px;
+        font-weight: 700;
+        --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
       }
     }
 

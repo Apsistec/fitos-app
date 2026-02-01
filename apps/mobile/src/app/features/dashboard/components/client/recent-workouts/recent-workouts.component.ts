@@ -79,12 +79,12 @@ interface RecentWorkout {
       padding: 32px 16px;
 
       ion-icon {
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-tertiary, #737373);
         margin-bottom: 16px;
       }
 
       p {
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-secondary, #A3A3A3);
         margin: 0 0 16px 0;
       }
     }
@@ -100,13 +100,13 @@ interface RecentWorkout {
       align-items: center;
       justify-content: space-between;
       padding: 12px;
-      background: var(--ion-color-light);
+      background: var(--fitos-bg-tertiary, #262626);
       border-radius: 8px;
       cursor: pointer;
       transition: background 0.2s;
 
       &:active {
-        background: var(--ion-color-light-shade);
+        background: var(--fitos-bg-secondary, #1A1A1A);
       }
     }
 
@@ -125,7 +125,7 @@ interface RecentWorkout {
 
     .workout-meta {
       font-size: 12px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
     }
 
     ion-button {

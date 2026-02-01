@@ -225,30 +225,36 @@ import { CreateLeadInput, UpdateLeadInput, LeadWithExtras } from '@fitos/shared'
     </ion-content>
   `,
   styles: [`
+    ion-header ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+      --color: var(--fitos-text-primary, #F5F5F5);
+    }
+
     .loading-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 200px;
-      gap: var(--fitos-space-4);
+      gap: 16px;
 
       p {
-        color: var(--fitos-text-secondary);
-        font-size: var(--fitos-font-size-sm);
+        color: var(--fitos-text-secondary, #A3A3A3);
+        font-size: 13px;
       }
     }
 
     .section-header {
-      margin-top: var(--fitos-space-6);
-      margin-bottom: var(--fitos-space-3);
-      padding: 0 var(--fitos-space-4);
+      margin-top: 24px;
+      margin-bottom: 12px;
+      padding: 0 16px;
 
       h2 {
-        font-size: var(--fitos-font-size-base);
+        font-size: 14px;
         font-weight: 600;
-        color: var(--fitos-text-primary);
-        margin: 0 0 var(--fitos-space-1) 0;
+        color: var(--fitos-text-primary, #F5F5F5);
+        margin: 0 0 4px 0;
       }
 
       &:first-child {
@@ -257,16 +263,16 @@ import { CreateLeadInput, UpdateLeadInput, LeadWithExtras } from '@fitos/shared'
     }
 
     .section-description {
-      font-size: var(--fitos-font-size-sm);
-      color: var(--fitos-text-secondary);
+      font-size: 13px;
+      color: var(--fitos-text-secondary, #A3A3A3);
       margin: 0;
     }
 
     .error-text {
-      font-size: var(--fitos-font-size-xs);
-      color: var(--ion-color-danger);
-      margin-top: var(--fitos-space-1);
-      padding: 0 var(--fitos-space-4);
+      font-size: 11px;
+      color: #EF4444;
+      margin-top: 4px;
+      padding: 0 16px;
     }
 
     ion-list {
@@ -274,27 +280,28 @@ import { CreateLeadInput, UpdateLeadInput, LeadWithExtras } from '@fitos/shared'
     }
 
     ion-item {
-      --padding-start: var(--fitos-space-4);
-      --padding-end: var(--fitos-space-4);
+      --background: transparent;
+      --padding-start: 16px;
+      --padding-end: 16px;
       --inner-padding-end: 0;
     }
 
     ion-label[position="stacked"] {
-      font-size: var(--fitos-font-size-sm);
+      font-size: 13px;
       font-weight: 500;
-      color: var(--fitos-text-secondary);
-      margin-bottom: var(--fitos-space-2);
+      color: var(--fitos-text-secondary, #A3A3A3);
+      margin-bottom: 8px;
     }
 
     ion-input,
     ion-textarea,
     ion-select {
       --padding-start: 0;
-      font-size: var(--fitos-font-size-base);
+      font-size: 14px;
     }
 
     ion-textarea {
-      margin-top: var(--fitos-space-2);
+      margin-top: 8px;
     }
 
     ion-button[slot="end"] {

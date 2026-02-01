@@ -102,7 +102,7 @@ interface JourneyStats {
     IonSpinner
 ],
   template: `
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-button slot="start" fill="clear" (click)="goBack()">
           <ion-icon slot="icon-only" name="arrow-back-outline" />
@@ -410,8 +410,34 @@ interface JourneyStats {
   `,
   styles: [
     `
+      /* FitOS Header */
+      ion-header ion-toolbar {
+        --background: transparent;
+        --border-width: 0;
+      }
+
+      ion-header ion-title {
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.3px;
+      }
+
+      /* FitOS Card Styles */
+      ion-card {
+        --background: var(--fitos-bg-secondary, #1A1A1A);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        box-shadow: none;
+      }
+
+      ion-card-header ion-card-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--fitos-text-primary, #F5F5F5);
+      }
+
       .graduation-container {
-        padding: var(--fitos-space-4);
+        padding: 16px;
         max-width: 800px;
         margin: 0 auto;
       }
@@ -423,26 +449,26 @@ interface JourneyStats {
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: var(--fitos-space-8) var(--fitos-space-4);
+        padding: 48px 16px;
         text-align: center;
 
         ion-icon {
           font-size: 64px;
-          color: var(--fitos-text-tertiary);
-          margin-bottom: var(--fitos-space-3);
+          color: var(--fitos-text-tertiary, #737373);
+          margin-bottom: 12px;
         }
 
         h3 {
-          font-size: var(--fitos-font-size-lg);
+          font-size: 16px;
           font-weight: 600;
-          color: var(--fitos-text-primary);
-          margin: 0 0 var(--fitos-space-2) 0;
+          color: var(--fitos-text-primary, #F5F5F5);
+          margin: 0 0 8px 0;
         }
 
         p {
-          font-size: var(--fitos-font-size-sm);
-          color: var(--fitos-text-secondary);
-          margin: 0 0 var(--fitos-space-4) 0;
+          font-size: 13px;
+          color: var(--fitos-text-secondary, #A3A3A3);
+          margin: 0 0 16px 0;
         }
       }
 
@@ -452,12 +478,12 @@ interface JourneyStats {
       }
 
       .confetti-container {
-        margin: var(--fitos-space-6) 0;
+        margin: 24px 0;
         animation: float 3s ease-in-out infinite;
 
         .celebration-icon {
           font-size: 120px;
-          color: var(--ion-color-success);
+          color: #10B981;
         }
       }
 
@@ -472,35 +498,36 @@ interface JourneyStats {
       }
 
       .celebration-title {
-        font-size: var(--fitos-font-size-3xl);
+        font-size: 28px;
         font-weight: 700;
-        color: var(--fitos-text-primary);
-        margin: 0 0 var(--fitos-space-2) 0;
+        color: var(--fitos-text-primary, #F5F5F5);
+        margin: 0 0 8px 0;
       }
 
       .celebration-subtitle {
-        font-size: var(--fitos-font-size-lg);
-        color: var(--fitos-text-secondary);
-        margin: 0 0 var(--fitos-space-6) 0;
+        font-size: 16px;
+        color: var(--fitos-text-secondary, #A3A3A3);
+        margin: 0 0 24px 0;
       }
 
       /* Score Card */
       .score-card {
-        margin-bottom: var(--fitos-space-4);
+        margin-bottom: 16px;
       }
 
       .score-display {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: var(--fitos-space-4);
-        margin-bottom: var(--fitos-space-3);
+        gap: 16px;
+        margin-bottom: 12px;
       }
 
       .score-number {
         font-size: 72px;
         font-weight: 700;
-        color: var(--ion-color-success);
+        font-family: 'Space Mono', monospace;
+        color: #10B981;
         line-height: 1;
       }
 
@@ -508,12 +535,12 @@ interface JourneyStats {
         text-align: left;
 
         ion-badge {
-          margin-bottom: var(--fitos-space-1);
+          margin-bottom: 4px;
         }
 
         p {
-          font-size: var(--fitos-font-size-sm);
-          color: var(--fitos-text-secondary);
+          font-size: 13px;
+          color: var(--fitos-text-secondary, #A3A3A3);
           margin: 0;
         }
       }
@@ -527,49 +554,53 @@ interface JourneyStats {
       .stats-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: var(--fitos-space-4);
-        margin-bottom: var(--fitos-space-4);
+        gap: 16px;
+        margin-bottom: 16px;
       }
 
       .stat-item {
         text-align: center;
-        padding: var(--fitos-space-3);
-        background: var(--fitos-bg-secondary);
-        border-radius: var(--fitos-border-radius);
+        padding: 12px;
+        background: var(--fitos-bg-secondary, #1A1A1A);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
       }
 
       .stat-value {
-        font-size: var(--fitos-font-size-2xl);
+        font-size: 24px;
         font-weight: 700;
-        color: var(--fitos-accent-primary);
-        margin-bottom: var(--fitos-space-1);
+        font-family: 'Space Mono', monospace;
+        color: var(--ion-color-primary, #10B981);
+        margin-bottom: 4px;
       }
 
       .stat-label {
-        font-size: var(--fitos-font-size-xs);
-        color: var(--fitos-text-secondary);
+        font-size: 11px;
+        color: var(--fitos-text-secondary, #A3A3A3);
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        font-weight: 500;
       }
 
       .weight-change {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: var(--fitos-space-2);
-        padding: var(--fitos-space-3);
-        background: rgba(var(--ion-color-success-rgb), 0.1);
-        border-radius: var(--fitos-border-radius);
+        gap: 8px;
+        padding: 12px;
+        background: rgba(16, 185, 129, 0.1);
+        border-radius: 8px;
 
         ion-icon {
           font-size: 24px;
-          color: var(--ion-color-success);
+          color: #10B981;
         }
 
         span {
-          font-size: var(--fitos-font-size-base);
+          font-size: 14px;
           font-weight: 600;
-          color: var(--ion-color-success);
+          font-family: 'Space Mono', monospace;
+          color: #10B981;
         }
       }
 
@@ -577,16 +608,17 @@ interface JourneyStats {
       .achievements-list {
         display: flex;
         flex-direction: column;
-        gap: var(--fitos-space-2);
+        gap: 8px;
       }
 
       .achievement-item {
         display: flex;
         align-items: center;
-        gap: var(--fitos-space-2);
-        padding: var(--fitos-space-2);
-        background: var(--fitos-bg-secondary);
-        border-radius: var(--fitos-border-radius);
+        gap: 8px;
+        padding: 8px;
+        background: var(--fitos-bg-secondary, #1A1A1A);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
 
         ion-icon {
           font-size: 20px;
@@ -594,35 +626,35 @@ interface JourneyStats {
         }
 
         span {
-          font-size: var(--fitos-font-size-sm);
-          color: var(--fitos-text-primary);
+          font-size: 13px;
+          color: var(--fitos-text-primary, #F5F5F5);
         }
       }
 
       /* Setup Section */
       .setup-section {
         h2 {
-          font-size: var(--fitos-font-size-2xl);
+          font-size: 24px;
           font-weight: 700;
-          color: var(--fitos-text-primary);
-          margin: 0 0 var(--fitos-space-2) 0;
+          color: var(--fitos-text-primary, #F5F5F5);
+          margin: 0 0 8px 0;
         }
 
         .section-description {
-          font-size: var(--fitos-font-size-base);
-          color: var(--fitos-text-secondary);
-          margin: 0 0 var(--fitos-space-4) 0;
+          font-size: 14px;
+          color: var(--fitos-text-secondary, #A3A3A3);
+          margin: 0 0 16px 0;
         }
       }
 
       ion-card-title {
         display: flex;
         align-items: center;
-        gap: var(--fitos-space-2);
+        gap: 8px;
 
         ion-icon {
           font-size: 20px;
-          color: var(--fitos-accent-primary);
+          color: var(--ion-color-primary, #10B981);
         }
       }
 
@@ -632,18 +664,19 @@ interface JourneyStats {
       }
 
       .pricing-summary {
-        margin-top: var(--fitos-space-3);
-        padding: var(--fitos-space-3);
-        background: var(--fitos-bg-secondary);
-        border-radius: var(--fitos-border-radius);
+        margin-top: 12px;
+        padding: 12px;
+        background: var(--fitos-bg-secondary, #1A1A1A);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
 
         p {
-          font-size: var(--fitos-font-size-sm);
-          color: var(--fitos-text-secondary);
+          font-size: 13px;
+          color: var(--fitos-text-secondary, #A3A3A3);
           margin: 0;
 
           strong {
-            color: var(--fitos-accent-primary);
+            color: var(--ion-color-primary, #10B981);
           }
         }
       }
@@ -651,11 +684,11 @@ interface JourneyStats {
       /* Complete Section */
       .complete-section {
         text-align: center;
-        padding: var(--fitos-space-6) 0;
+        padding: 24px 0;
       }
 
       .success-icon {
-        margin-bottom: var(--fitos-space-4);
+        margin-bottom: 16px;
 
         ion-icon {
           font-size: 120px;
@@ -663,45 +696,45 @@ interface JourneyStats {
       }
 
       .complete-section h1 {
-        font-size: var(--fitos-font-size-3xl);
+        font-size: 28px;
         font-weight: 700;
-        color: var(--fitos-text-primary);
-        margin: 0 0 var(--fitos-space-2) 0;
+        color: var(--fitos-text-primary, #F5F5F5);
+        margin: 0 0 8px 0;
       }
 
       .success-message {
-        font-size: var(--fitos-font-size-lg);
-        color: var(--fitos-text-secondary);
-        margin: 0 0 var(--fitos-space-6) 0;
+        font-size: 16px;
+        color: var(--fitos-text-secondary, #A3A3A3);
+        margin: 0 0 24px 0;
       }
 
       .next-checkin {
         display: flex;
-        gap: var(--fitos-space-3);
+        gap: 12px;
         text-align: left;
 
         ion-icon {
           font-size: 48px;
-          color: var(--fitos-accent-primary);
+          color: var(--ion-color-primary, #10B981);
           flex-shrink: 0;
         }
 
         h4 {
-          font-size: var(--fitos-font-size-base);
+          font-size: 14px;
           font-weight: 600;
-          color: var(--fitos-text-primary);
-          margin: 0 0 var(--fitos-space-1) 0;
+          color: var(--fitos-text-primary, #F5F5F5);
+          margin: 0 0 4px 0;
         }
 
         p {
-          font-size: var(--fitos-font-size-sm);
-          color: var(--fitos-text-secondary);
+          font-size: 13px;
+          color: var(--fitos-text-secondary, #A3A3A3);
           margin: 0;
         }
 
         .frequency-note {
-          font-size: var(--fitos-font-size-xs);
-          color: var(--fitos-text-tertiary);
+          font-size: 11px;
+          color: var(--fitos-text-tertiary, #737373);
         }
       }
 
@@ -709,8 +742,19 @@ interface JourneyStats {
       .actions {
         display: flex;
         flex-direction: column;
-        gap: var(--fitos-space-3);
-        margin-top: var(--fitos-space-6);
+        gap: 12px;
+        margin-top: 24px;
+
+        ion-button {
+          --border-radius: 8px;
+          height: 48px;
+          font-weight: 700;
+          --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        }
+
+        ion-button[fill="outline"] {
+          --box-shadow: none;
+        }
       }
     `,
   ],
@@ -776,7 +820,7 @@ export class GraduationPage implements OnInit {
 
   nextCheckInDate = computed(() => {
     const now = new Date();
-    let nextDate = new Date(now);
+    const nextDate = new Date(now);
 
     switch (this.checkInFrequency) {
       case 'weekly':
@@ -991,16 +1035,17 @@ export class GraduationPage implements OnInit {
       // Get weight measurements for change calculation
       const { data: measurements } = await this.supabase.client
         .from('measurements')
-        .select('weight, recorded_at')
+        .select('value, measured_at')
         .eq('client_id', clientId)
-        .not('weight', 'is', null)
-        .order('recorded_at', { ascending: true })
+        .eq('measurement_type', 'weight')
+        .not('value', 'is', null)
+        .order('measured_at', { ascending: true })
         .limit(100);
 
       let weightChange: number | undefined;
       if (measurements && measurements.length >= 2) {
-        const firstWeight = measurements[0].weight;
-        const lastWeight = measurements[measurements.length - 1].weight;
+        const firstWeight = Number(measurements[0].value);
+        const lastWeight = Number(measurements[measurements.length - 1].value);
         weightChange = Math.round((lastWeight - firstWeight) * 10) / 10;
       }
 

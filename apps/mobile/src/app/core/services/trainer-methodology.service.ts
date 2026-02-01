@@ -225,7 +225,7 @@ export class TrainerMethodologyService {
   /**
    * Get response logs for trainer review
    */
-  async getResponseLogs(limit: number = 50): Promise<MethodologyResponseLog[]> {
+  async getResponseLogs(limit = 50): Promise<MethodologyResponseLog[]> {
     try {
       const { data: user } = await this.supabase.client.auth.getUser();
       if (!user.user) {

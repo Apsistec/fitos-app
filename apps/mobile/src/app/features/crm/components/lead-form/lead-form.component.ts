@@ -17,8 +17,8 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { saveOutline, closeOutline } from 'ionicons/icons';
-import { LeadService, CreateLeadInput, LeadSource } from '@app/core/services/lead.service';
-import { HapticService } from '@app/core/services/haptic.service';
+import { LeadService, CreateLeadInput, LeadSource } from '../../../../core/services/lead.service';
+import { HapticService } from '../../../../core/services/haptic.service';
 import { ModalController } from '@ionic/angular/standalone';
 
 /**
@@ -205,64 +205,76 @@ import { ModalController } from '@ionic/angular/standalone';
   `,
   styles: [`
     .lead-form {
+      --background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      box-shadow: none;
       margin: 0;
     }
 
     .subtitle {
       margin: 4px 0 0 0;
-      font-size: var(--fitos-text-sm);
+      font-size: 13px;
+      color: var(--fitos-text-secondary, #A3A3A3);
     }
 
     .form-item {
       --padding-start: 0;
       --inner-padding-end: 0;
       --background: transparent;
-      margin-bottom: var(--fitos-space-4);
+      margin-bottom: 16px;
     }
 
     ion-label[position="stacked"] {
-      margin-bottom: var(--fitos-space-2);
-      font-size: var(--fitos-text-sm);
+      margin-bottom: 8px;
+      font-size: 13px;
       font-weight: 600;
-      color: var(--fitos-text-primary);
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     ion-input,
     ion-textarea,
     ion-select {
-      --background: var(--fitos-bg-tertiary);
-      --padding-start: var(--fitos-space-3);
-      --padding-end: var(--fitos-space-3);
-      border: 1px solid var(--fitos-border-subtle);
-      border-radius: var(--fitos-radius-md);
+      --background: var(--fitos-bg-tertiary, #262626);
+      --padding-start: 12px;
+      --padding-end: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
     }
 
     ion-textarea {
-      --padding-top: var(--fitos-space-3);
-      --padding-bottom: var(--fitos-space-3);
+      --padding-top: 12px;
+      --padding-bottom: 12px;
     }
 
     .validation-error {
-      margin: var(--fitos-space-4) 0;
-      padding: var(--fitos-space-3);
+      margin: 16px 0;
+      padding: 12px;
       background: rgba(239, 68, 68, 0.1);
-      border-radius: var(--fitos-radius-md);
-      border-left: 3px solid var(--fitos-status-error);
+      border-radius: 8px;
+      border-left: 3px solid #EF4444;
 
       p {
         margin: 0;
-        font-size: var(--fitos-text-sm);
+        font-size: 13px;
       }
     }
 
     .action-buttons {
       display: flex;
       flex-direction: column;
-      gap: var(--fitos-space-2);
-      margin-top: var(--fitos-space-6);
+      gap: 8px;
+      margin-top: 24px;
 
       ion-button {
         margin: 0;
+        --border-radius: 8px;
+        height: 48px;
+        font-weight: 700;
+      }
+
+      ion-button:first-child {
+        --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
       }
     }
   `],

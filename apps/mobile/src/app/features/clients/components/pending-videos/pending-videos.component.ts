@@ -138,27 +138,38 @@ import {
   `,
   styles: [
     `
+      ion-card {
+        --background: var(--fitos-bg-secondary, #1A1A1A);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        box-shadow: none;
+      }
+
       .card-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: var(--fitos-space-2);
+        gap: 8px;
 
         ion-card-title {
           display: flex;
           align-items: center;
-          gap: var(--fitos-space-2);
-          font-size: var(--fitos-font-size-lg);
-          font-weight: 600;
+          gap: 8px;
+          font-size: 16px;
+          font-weight: 700;
+          color: var(--fitos-text-primary, #F5F5F5);
 
           ion-icon {
             font-size: 20px;
-            color: var(--fitos-accent-primary);
+            color: var(--ion-color-primary, #10B981);
           }
         }
 
         ion-badge {
-          font-size: var(--fitos-font-size-xs);
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-weight: 500;
           padding: 4px 10px;
         }
       }
@@ -169,55 +180,57 @@ import {
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: var(--fitos-space-6) var(--fitos-space-4);
+        padding: 24px 16px;
         text-align: center;
 
         ion-icon {
           font-size: 48px;
-          color: var(--fitos-text-tertiary);
-          margin-bottom: var(--fitos-space-2);
+          color: var(--fitos-text-tertiary, #737373);
+          margin-bottom: 8px;
         }
 
         ion-spinner {
-          margin-bottom: var(--fitos-space-2);
+          margin-bottom: 8px;
         }
 
         p {
-          font-size: var(--fitos-font-size-sm);
-          color: var(--fitos-text-secondary);
+          font-size: 13px;
+          color: var(--fitos-text-secondary, #A3A3A3);
           margin: 0;
         }
       }
 
       .video-item {
         width: 100%;
-        padding: var(--fitos-space-2) 0;
+        padding: 8px 0;
 
         .video-header {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: var(--fitos-space-2);
-          margin-bottom: var(--fitos-space-1);
+          gap: 8px;
+          margin-bottom: 4px;
 
           strong {
-            font-size: var(--fitos-font-size-base);
-            color: var(--fitos-text-primary);
+            font-size: 14px;
+            color: var(--fitos-text-primary, #F5F5F5);
           }
 
           ion-badge {
-            font-size: var(--fitos-font-size-xs);
+            font-size: 11px;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
           }
         }
 
         .video-meta {
           display: flex;
           align-items: center;
-          gap: var(--fitos-space-1);
-          margin-bottom: var(--fitos-space-2);
-          font-size: var(--fitos-font-size-sm);
-          color: var(--fitos-text-tertiary);
+          gap: 4px;
+          margin-bottom: 8px;
+          font-size: 13px;
+          color: var(--fitos-text-tertiary, #737373);
 
           ion-icon {
             font-size: 14px;
@@ -225,8 +238,8 @@ import {
         }
 
         .video-notes {
-          font-size: var(--fitos-font-size-sm);
-          color: var(--fitos-text-secondary);
+          font-size: 13px;
+          color: var(--fitos-text-secondary, #A3A3A3);
           margin: 0;
           line-height: 1.4;
           font-style: italic;
@@ -236,6 +249,11 @@ import {
       ion-item {
         --padding-start: 0;
         --inner-padding-end: 0;
+        --background: transparent;
+      }
+
+      ion-list {
+        background: transparent;
       }
     `,
   ],
@@ -243,7 +261,7 @@ import {
 export class PendingVideosComponent implements OnInit {
   @Input({ required: true }) trainerId!: string;
   @Input() clientId?: string; // Optional: filter by specific client
-  @Input() limit: number = 5; // Show first 5 by default
+  @Input() limit = 5; // Show first 5 by default
 
   private videoFeedbackService = inject(VideoFeedbackService);
   private router = inject(Router);

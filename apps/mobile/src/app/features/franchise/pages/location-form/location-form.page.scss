@@ -1,7 +1,22 @@
 /**
  * Location Form Page Styles
  * Sprint 40: Multi-Location Management
+ * FitOS Design System - Dark-First
  */
+
+:host {
+  --background: var(--fitos-bg-primary, #0D0D0D);
+}
+
+ion-header ion-toolbar {
+  --background: transparent;
+  --border-width: 0;
+  --color: var(--fitos-text-primary, #F5F5F5);
+}
+
+ion-content {
+  --background: var(--fitos-bg-primary, #0D0D0D);
+}
 
 .loading-container {
   display: flex;
@@ -17,7 +32,7 @@
   }
 
   p {
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-secondary, #A3A3A3);
   }
 }
 
@@ -27,6 +42,10 @@ form {
 }
 
 ion-card {
+  --background: var(--fitos-bg-secondary, #1A1A1A);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  box-shadow: none;
   margin: 1rem;
 
   ion-card-header {
@@ -36,6 +55,7 @@ ion-card {
   ion-card-title {
     font-size: 1.125rem;
     font-weight: 600;
+    color: var(--fitos-text-primary, #F5F5F5);
   }
 
   ion-card-content {
@@ -46,17 +66,22 @@ ion-card {
 ion-item {
   --padding-start: 0;
   --inner-padding-end: 0;
+  --background: transparent;
   margin-bottom: 1rem;
 
   ion-label[position="stacked"] {
-    font-size: 0.875rem;
-    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+    color: var(--fitos-text-tertiary, #737373);
     margin-bottom: 0.5rem;
   }
 
   ion-note[slot="helper"] {
     font-size: 0.75rem;
     margin-top: 0.25rem;
+    color: var(--fitos-text-tertiary, #737373);
   }
 
   ion-note[slot="error"] {

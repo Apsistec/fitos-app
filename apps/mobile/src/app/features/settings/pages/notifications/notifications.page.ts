@@ -16,8 +16,8 @@ import {
   IonSpinner,
   ToastController,
 } from '@ionic/angular/standalone';
-import { AuthService } from '@app/core/services/auth.service';
-import { SupabaseService } from '@app/core/services/supabase.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { SupabaseService } from '../../../../core/services/supabase.service';
 
 interface NotificationPreferences {
   workoutReminders: boolean;
@@ -235,6 +235,19 @@ interface NotificationPreferences {
     </ion-content>
   `,
   styles: [`
+    :host {
+      ion-header {
+        ion-toolbar {
+          --background: transparent;
+          --border-width: 0;
+        }
+      }
+
+      ion-content {
+        --background: var(--fitos-bg-primary, #0D0D0D);
+      }
+    }
+
     .notifications-container {
       max-width: 768px;
       margin: 0 auto;
@@ -249,41 +262,49 @@ interface NotificationPreferences {
       gap: 16px;
 
       p {
-        color: var(--ion-color-medium);
+        font-size: 14px;
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
     }
 
     ion-list {
+      --background: transparent;
       margin-bottom: 24px;
     }
 
+    ion-item {
+      --background: transparent;
+    }
+
     ion-list-header {
+      --background: transparent;
       padding-top: 24px;
       padding-bottom: 8px;
 
       ion-label {
-        font-size: 0.875rem;
-        font-weight: 600;
+        font-size: 11px;
+        font-weight: 500;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-tertiary, #737373);
       }
     }
 
     .notification-note {
       padding: 16px;
       margin: 16px;
-      background: var(--ion-color-light);
+      background: var(--fitos-bg-tertiary, #262626);
       border-radius: 8px;
 
       ion-note {
         p {
           margin: 0;
           line-height: 1.5;
-          color: var(--ion-color-medium);
+          font-size: 14px;
+          color: var(--fitos-text-secondary, #A3A3A3);
 
           strong {
-            color: var(--ion-color-dark);
+            color: var(--fitos-text-primary, #F5F5F5);
           }
         }
       }

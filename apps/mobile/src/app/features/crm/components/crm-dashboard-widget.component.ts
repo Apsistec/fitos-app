@@ -179,7 +179,11 @@ interface QuickStat {
   styles: [
     `
       .crm-widget {
-        margin: 0 0 var(--fitos-space-4) 0;
+        --background: var(--fitos-bg-secondary, #1A1A1A);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        box-shadow: none;
+        margin: 0 0 16px 0;
       }
 
       .header-content {
@@ -190,19 +194,19 @@ interface QuickStat {
         ion-card-title {
           display: flex;
           align-items: center;
-          gap: var(--fitos-space-2);
-          font-size: var(--fitos-font-size-lg);
-          margin-bottom: var(--fitos-space-1);
+          gap: 8px;
+          font-size: 16px;
+          margin-bottom: 4px;
 
           ion-icon {
             font-size: 20px;
-            color: var(--fitos-accent-primary);
+            color: var(--ion-color-primary, #10B981);
           }
         }
 
         ion-button {
-          --padding-start: var(--fitos-space-2);
-          --padding-end: var(--fitos-space-2);
+          --padding-start: 8px;
+          --padding-end: 8px;
         }
       }
 
@@ -211,12 +215,12 @@ interface QuickStat {
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: var(--fitos-space-8) 0;
-        gap: var(--fitos-space-3);
+        padding: 48px 0;
+        gap: 12px;
 
         p {
-          color: var(--fitos-text-secondary);
-          font-size: var(--fitos-font-size-sm);
+          color: var(--fitos-text-secondary, #A3A3A3);
+          font-size: 13px;
           margin: 0;
         }
       }
@@ -224,24 +228,26 @@ interface QuickStat {
       .stats-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: var(--fitos-space-3);
-        margin-bottom: var(--fitos-space-4);
+        gap: 12px;
+        margin-bottom: 16px;
       }
 
       .stat-item {
         display: flex;
         align-items: center;
-        gap: var(--fitos-space-3);
-        padding: var(--fitos-space-3);
-        background: var(--fitos-bg-secondary);
-        border-radius: var(--fitos-border-radius);
+        gap: 12px;
+        padding: 12px;
+        background: var(--fitos-bg-tertiary, #262626);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
 
         &.clickable {
           cursor: pointer;
-          transition: background 0.2s;
+          transition: background 200ms ease;
 
           &:hover {
-            background: var(--fitos-bg-tertiary);
+            background: var(--fitos-bg-tertiary, #262626);
+            border-color: rgba(255, 255, 255, 0.12);
           }
         }
       }
@@ -266,15 +272,19 @@ interface QuickStat {
         min-width: 0;
 
         h3 {
-          font-size: var(--fitos-font-size-xl);
+          font-size: 20px;
           font-weight: 700;
-          color: var(--fitos-text-primary);
+          font-family: 'Space Mono', monospace;
+          color: var(--fitos-text-primary, #F5F5F5);
           margin: 0 0 2px 0;
         }
 
         p {
-          font-size: var(--fitos-font-size-xs);
-          color: var(--fitos-text-secondary);
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-weight: 500;
+          color: var(--fitos-text-secondary, #A3A3A3);
           margin: 0;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -283,24 +293,27 @@ interface QuickStat {
       }
 
       .email-summary {
-        padding: var(--fitos-space-4);
-        background: var(--fitos-bg-secondary);
-        border-radius: var(--fitos-border-radius);
-        margin-bottom: var(--fitos-space-4);
+        padding: 16px;
+        background: var(--fitos-bg-tertiary, #262626);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        margin-bottom: 16px;
 
         h4 {
-          font-size: var(--fitos-font-size-sm);
+          font-size: 13px;
           font-weight: 600;
-          color: var(--fitos-text-primary);
-          margin: 0 0 var(--fitos-space-3) 0;
+          color: var(--fitos-text-primary, #F5F5F5);
+          margin: 0 0 12px 0;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
         }
       }
 
       .performance-metrics {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: var(--fitos-space-3);
-        margin-bottom: var(--fitos-space-3);
+        gap: 12px;
+        margin-bottom: 12px;
       }
 
       .metric {
@@ -309,23 +322,29 @@ interface QuickStat {
         align-items: center;
 
         .metric-label {
-          font-size: var(--fitos-font-size-sm);
-          color: var(--fitos-text-secondary);
+          font-size: 13px;
+          color: var(--fitos-text-secondary, #A3A3A3);
         }
 
         ion-chip {
           font-weight: 600;
+          font-family: 'Space Mono', monospace;
         }
       }
 
       .analytics-button {
-        margin-top: var(--fitos-space-2);
+        margin-top: 8px;
+        --border-radius: 8px;
       }
 
       .quick-actions {
         display: flex;
         flex-direction: column;
-        gap: var(--fitos-space-2);
+        gap: 8px;
+
+        ion-button {
+          --border-radius: 8px;
+        }
       }
     `,
   ],

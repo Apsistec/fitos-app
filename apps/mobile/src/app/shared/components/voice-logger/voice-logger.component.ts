@@ -7,7 +7,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { micOutline, micOffOutline, stopOutline } from 'ionicons/icons';
-import { VoiceService, ParsedWorkoutCommand } from '@app/core/services/voice.service';
+import { VoiceService, ParsedWorkoutCommand } from '../../../core/services/voice.service';
 
 @Component({
   selector: 'app-voice-logger',

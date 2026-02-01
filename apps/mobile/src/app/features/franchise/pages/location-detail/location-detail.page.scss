@@ -1,7 +1,22 @@
 /**
  * Location Detail Page Styles
  * Sprint 40: Multi-Location Management
+ * FitOS Design System - Dark-First
  */
+
+:host {
+  --background: var(--fitos-bg-primary, #0D0D0D);
+}
+
+ion-header ion-toolbar {
+  --background: transparent;
+  --border-width: 0;
+  --color: var(--fitos-text-primary, #F5F5F5);
+}
+
+ion-content {
+  --background: var(--fitos-bg-primary, #0D0D0D);
+}
 
 // Loading & Error
 .loading-container,
@@ -21,17 +36,19 @@
 
   p {
     margin-top: 0.5rem;
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-secondary, #A3A3A3);
   }
 }
 
 // Section Titles
 .section-title {
-  font-size: 1.125rem;
-  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
   margin: 1.5rem 0 1rem 0;
   padding: 0 1rem;
-  color: var(--ion-text-color);
+  color: var(--fitos-text-tertiary, #737373);
 }
 
 // Location Header
@@ -53,7 +70,7 @@
   width: 60px;
   height: 60px;
   border-radius: 12px;
-  background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));
+  background: linear-gradient(135deg, var(--ion-color-primary, #10B981), var(--ion-color-primary-shade));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -73,12 +90,12 @@
     font-size: 1.5rem;
     font-weight: 700;
     margin: 0 0 0.5rem 0;
-    color: var(--ion-text-color);
+    color: var(--fitos-text-primary, #F5F5F5);
   }
 
   .location-address {
     font-size: 0.9375rem;
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-secondary, #A3A3A3);
     margin: 0 0 0.5rem 0;
   }
 }
@@ -109,6 +126,14 @@
   gap: 1rem;
 }
 
+// Cards (shared)
+ion-card {
+  --background: var(--fitos-bg-secondary, #1A1A1A);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  box-shadow: none;
+}
+
 .metric-card {
   margin: 0;
 
@@ -124,19 +149,20 @@
     h3 {
       font-size: 1.5rem;
       font-weight: 700;
+      font-family: 'Space Mono', monospace;
       margin: 0.5rem 0 0.25rem;
-      color: var(--ion-text-color);
+      color: var(--fitos-text-primary, #F5F5F5);
     }
 
     p {
       font-size: 0.875rem;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
       margin: 0 0 0.5rem 0;
     }
 
     .subtext {
       font-size: 0.75rem;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-tertiary, #737373);
     }
   }
 }
@@ -174,7 +200,7 @@
   padding: 1rem 0;
 
   &:not(:last-child) {
-    border-bottom: 1px solid var(--ion-color-light);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   }
 }
 
@@ -183,6 +209,7 @@
   align-items: center;
   gap: 0.75rem;
   font-size: 0.9375rem;
+  color: var(--fitos-text-secondary, #A3A3A3);
 }
 
 .color-dot {
@@ -195,6 +222,8 @@
 .revenue-value {
   font-size: 1rem;
   font-weight: 600;
+  font-family: 'Space Mono', monospace;
+  color: var(--fitos-text-primary, #F5F5F5);
 }
 
 // Members Section
@@ -205,7 +234,7 @@
   padding: 1rem 0;
 
   &:not(:last-child) {
-    border-bottom: 1px solid var(--ion-color-light);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   }
 }
 
@@ -222,13 +251,14 @@
   h4 {
     font-size: 1.25rem;
     font-weight: 700;
+    font-family: 'Space Mono', monospace;
     margin: 0 0 0.125rem 0;
-    color: var(--ion-text-color);
+    color: var(--fitos-text-primary, #F5F5F5);
   }
 
   p {
     font-size: 0.8125rem;
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-secondary, #A3A3A3);
     margin: 0;
   }
 }
@@ -240,12 +270,12 @@
   padding: 0.75rem 0;
 
   &:not(:last-child) {
-    border-bottom: 1px solid var(--ion-color-light);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   ion-icon {
     font-size: 24px;
-    color: var(--ion-color-primary);
+    color: var(--ion-color-primary, #10B981);
     flex-shrink: 0;
     margin-top: 0.125rem;
   }
@@ -254,6 +284,7 @@
     font-size: 0.9375rem;
     margin: 0;
     line-height: 1.5;
+    color: var(--fitos-text-primary, #F5F5F5);
   }
 }
 
@@ -281,20 +312,5 @@
 
   .location-info h1 {
     font-size: 1.25rem;
-  }
-}
-
-// Dark mode
-@media (prefers-color-scheme: dark) {
-  .metric-card h3,
-  .stat-item h4,
-  .location-info h1 {
-    color: var(--ion-color-light);
-  }
-
-  .revenue-item:not(:last-child),
-  .stats-row:not(:last-child),
-  .info-row:not(:last-child) {
-    border-bottom-color: var(--ion-color-dark);
   }
 }

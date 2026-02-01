@@ -3,12 +3,12 @@
   width: 100%;
 
   .help-searchbar {
-    --background: var(--fitos-bg-secondary, var(--ion-color-step-50));
+    --background: var(--fitos-bg-secondary, #1A1A1A);
     --border-radius: 12px;
     --box-shadow: none;
-    --icon-color: var(--fitos-text-secondary, var(--ion-color-step-600));
-    --placeholder-color: var(--fitos-text-tertiary, var(--ion-color-step-500));
-    --color: var(--fitos-text-primary, var(--ion-text-color));
+    --icon-color: var(--fitos-text-secondary, #A3A3A3);
+    --placeholder-color: var(--fitos-text-tertiary, #737373);
+    --color: var(--fitos-text-primary, #F5F5F5);
     padding: 8px 0;
   }
 
@@ -18,8 +18,8 @@
     left: 0;
     right: 0;
     z-index: 1000;
-    background: var(--fitos-bg-primary, var(--ion-background-color));
-    border: 1px solid var(--fitos-border-subtle, var(--ion-border-color));
+    background: var(--fitos-bg-primary, #0D0D0D);
+    border: 1px solid var(--fitos-border-subtle, rgba(255, 255, 255, 0.06));
     border-radius: 12px;
     margin-top: 4px;
     max-height: 400px;
@@ -37,7 +37,7 @@
         --min-height: 64px;
 
         &:hover {
-          --background: var(--fitos-bg-secondary, var(--ion-color-step-50));
+          --background: var(--fitos-bg-secondary, #1A1A1A);
         }
 
         ion-icon {
@@ -49,13 +49,13 @@
           h3 {
             font-size: 15px;
             font-weight: 600;
-            color: var(--fitos-text-primary, var(--ion-text-color));
+            color: var(--fitos-text-primary, #F5F5F5);
             margin-bottom: 4px;
           }
 
           p {
             font-size: 13px;
-            color: var(--fitos-text-secondary, var(--ion-color-step-600));
+            color: var(--fitos-text-secondary, #A3A3A3);
             line-height: 1.4;
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -85,7 +85,7 @@
               font-size: 13px;
 
               a {
-                color: var(--fitos-accent-primary, var(--ion-color-primary));
+                color: var(--fitos-accent-primary, #10B981);
                 text-decoration: none;
 
                 &:hover {

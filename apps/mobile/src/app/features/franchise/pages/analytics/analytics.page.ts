@@ -10,7 +10,7 @@
  * Sprint 40: Multi-Location Management
  */
 
-import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
@@ -30,6 +30,7 @@ type PeriodType = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
   styleUrls: ['./analytics.page.scss'],
   standalone: true,
   imports: [CommonModule, IonicModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AnalyticsPage implements OnInit, OnDestroy {
   private franchiseService = inject(FranchiseService);

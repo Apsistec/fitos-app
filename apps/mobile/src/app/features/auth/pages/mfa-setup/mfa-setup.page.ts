@@ -33,10 +33,10 @@ import {
   personOutline,
   closeOutline,
 } from 'ionicons/icons';
-import { AuthService } from '@app/core/services/auth.service';
-import { SupabaseService } from '@app/core/services/supabase.service';
-import { PasskeyService, Passkey } from '@app/core/services/passkey.service';
-import { OtpVerifyModalComponent } from '@app/shared/components/otp-verify-modal/otp-verify-modal.component';
+import { AuthService } from '../../../../core/services/auth.service';
+import { SupabaseService } from '../../../../core/services/supabase.service';
+import { PasskeyService, Passkey } from '../../../../core/services/passkey.service';
+import { OtpVerifyModalComponent } from '../../../../shared/components/otp-verify-modal/otp-verify-modal.component';
 
 interface MfaFactor {
   id: string;

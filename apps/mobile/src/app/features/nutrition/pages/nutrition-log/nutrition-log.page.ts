@@ -32,8 +32,8 @@ import {
   calendarOutline,
   trashOutline,
 } from 'ionicons/icons';
-import { NutritionService, type NutritionSummary } from '@app/core/services/nutrition.service';
-import { AuthService } from '@app/core/services/auth.service';
+import { NutritionService, type NutritionSummary } from '../../../../core/services/nutrition.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 // Adherence-neutral colors (no red for "over target")
 const NUTRITION_COLORS = {

@@ -21,10 +21,10 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { send, personCircleOutline } from 'ionicons/icons';
-import { MessagingService, type Message } from '@app/core/services/messaging.service';
-import { AuthService } from '@app/core/services/auth.service';
-import { ClientService } from '@app/core/services/client.service';
-import { AICoachService } from '@app/core/services/ai-coach.service';
+import { MessagingService, type Message } from '../../../../core/services/messaging.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { ClientService } from '../../../../core/services/client.service';
+import { AICoachService } from '../../../../core/services/ai-coach.service';
 
 @Component({
   selector: 'app-chat',
@@ -138,6 +138,21 @@ import { AICoachService } from '@app/core/services/ai-coach.service';
     </ion-footer>
   `,
   styles: [`
+    ion-header ion-toolbar {
+      --background: transparent;
+      --border-width: 0;
+    }
+
+    ion-header ion-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    ion-content {
+      --background: var(--fitos-bg-primary, #0D0D0D);
+    }
+
     .chat-header {
       display: flex;
       align-items: center;
@@ -149,12 +164,12 @@ import { AICoachService } from '@app/core/services/ai-coach.service';
 
         ion-icon {
           font-size: 32px;
-          color: var(--ion-color-medium);
+          color: var(--fitos-text-tertiary, #737373);
         }
       }
 
       span {
-        font-size: 1rem;
+        font-size: 16px;
         font-weight: 600;
       }
     }
@@ -178,8 +193,9 @@ import { AICoachService } from '@app/core/services/ai-coach.service';
       }
 
       p {
-        color: var(--ion-color-medium);
+        color: var(--fitos-text-secondary, #A3A3A3);
         margin: 0;
+        font-size: 14px;
       }
     }
 
@@ -197,8 +213,8 @@ import { AICoachService } from '@app/core/services/ai-coach.service';
         justify-content: flex-end;
 
         .message-bubble {
-          background: var(--ion-color-primary);
-          color: var(--ion-color-primary-contrast);
+          background: var(--ion-color-primary, #10B981);
+          color: white;
           border-radius: 18px 18px 4px 18px;
         }
       }
@@ -207,8 +223,8 @@ import { AICoachService } from '@app/core/services/ai-coach.service';
         justify-content: flex-start;
 
         .message-bubble {
-          background: var(--ion-color-light);
-          color: var(--ion-color-dark);
+          background: var(--fitos-bg-tertiary, #262626);
+          color: var(--fitos-text-primary, #F5F5F5);
           border-radius: 18px 18px 18px 4px;
         }
       }
@@ -217,25 +233,25 @@ import { AICoachService } from '@app/core/services/ai-coach.service';
     .message-bubble {
       max-width: 75%;
       padding: 12px 16px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 
       .message-content {
         margin: 0 0 4px;
-        font-size: 0.9375rem;
+        font-size: 15px;
         line-height: 1.4;
         word-wrap: break-word;
       }
 
       .message-time {
-        font-size: 0.6875rem;
+        font-size: 11px;
         opacity: 0.7;
       }
     }
 
     .message-input-container {
       padding: 12px 16px;
-      background: var(--ion-background-color);
-      border-top: 1px solid var(--ion-color-light);
+      background: var(--fitos-bg-secondary, #1A1A1A);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
 
       form {
         display: flex;
@@ -244,12 +260,13 @@ import { AICoachService } from '@app/core/services/ai-coach.service';
 
         ion-textarea {
           flex: 1;
-          --background: var(--ion-color-light);
+          --background: var(--fitos-bg-tertiary, #262626);
           --padding-start: 12px;
           --padding-end: 12px;
           --padding-top: 8px;
           --padding-bottom: 8px;
           border-radius: 20px;
+          font-size: 14px;
         }
 
         ion-button {
@@ -265,6 +282,7 @@ import { AICoachService } from '@app/core/services/ai-coach.service';
       padding: 16px;
       margin: 16px 0;
       text-align: center;
+      color: #FCA5A5;
     }
   `],
 })

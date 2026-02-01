@@ -124,7 +124,7 @@ export class HealthKitService {
   /**
    * Get recent workouts from Health app
    */
-  async getWorkouts(limit: number = 10): Promise<HealthKitWorkout[]> {
+  async getWorkouts(limit = 10): Promise<HealthKitWorkout[]> {
     try {
       if (!this.isAuthorized()) {
         throw new Error('HealthKit not authorized');

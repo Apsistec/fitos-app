@@ -3,6 +3,12 @@
  * Sprint 42: Local SEO Automation
  */
 
+// Transparent Toolbar
+.transparent-toolbar {
+  --background: transparent;
+  --border-width: 0;
+}
+
 // Loading
 .loading-container {
   display: flex;
@@ -18,7 +24,7 @@
   }
 
   p {
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-secondary, #A3A3A3);
   }
 }
 
@@ -40,14 +46,14 @@
     font-size: 1.5rem;
     font-weight: 600;
     margin: 0 0 1rem 0;
-    color: var(--ion-text-color);
+    color: var(--fitos-text-primary, #F5F5F5);
   }
 
   > p {
     font-size: 1rem;
     line-height: 1.6;
     margin: 0 0 2rem 0;
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-secondary, #A3A3A3);
   }
 }
 
@@ -69,7 +75,7 @@
 
   span {
     font-size: 0.9375rem;
-    color: var(--ion-text-color);
+    color: var(--fitos-text-primary, #F5F5F5);
   }
 }
 
@@ -77,6 +83,13 @@
 .profile-section {
   padding: 1rem;
   padding-bottom: 2rem;
+}
+
+ion-card {
+  --background: var(--fitos-bg-secondary, #1A1A1A);
+  border-radius: 12px;
+  box-shadow: none;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 ion-list {
@@ -91,13 +104,14 @@ ion-list {
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: var(--ion-color-medium);
+      color: var(--fitos-text-secondary, #A3A3A3);
     }
   }
 
   ion-item {
     --padding-start: 1rem;
     --padding-end: 1rem;
+    --background: var(--fitos-bg-secondary, #1A1A1A);
     margin-bottom: 0.5rem;
 
     ion-input,
@@ -128,7 +142,7 @@ ion-list {
     font-size: 1.125rem;
     font-weight: 600;
     margin: 0;
-    color: var(--ion-text-color);
+    color: var(--fitos-text-primary, #F5F5F5);
   }
 }
 
@@ -145,12 +159,12 @@ ion-list {
   }
 
   .time-separator {
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-secondary, #A3A3A3);
   }
 
   .closed-label {
     font-size: 0.875rem;
-    color: var(--ion-color-medium);
+    color: var(--fitos-text-secondary, #A3A3A3);
     font-style: italic;
   }
 
@@ -181,6 +195,7 @@ ion-list {
   ion-card-title {
     font-size: 0.9375rem;
     font-weight: 600;
+    color: var(--fitos-text-primary, #F5F5F5);
   }
 
   ion-card-content {
@@ -199,17 +214,18 @@ ion-list {
   }
 
   h2 {
+    font-family: 'Space Mono', monospace;
     font-size: 2rem;
     font-weight: 700;
     margin: 0;
-    color: var(--ion-text-color);
+    color: var(--fitos-text-primary, #F5F5F5);
   }
 }
 
 .insights-grid ion-card-content p {
   font-size: 0.875rem;
   margin: 0;
-  color: var(--ion-color-medium);
+  color: var(--fitos-text-secondary, #A3A3A3);
 }
 
 // Button Container
@@ -223,7 +239,7 @@ ion-list {
 
 // Segment
 ion-segment {
-  --background: var(--ion-color-light);
+  --background: var(--fitos-bg-secondary, #1A1A1A);
 
   ion-segment-button {
     --indicator-color: var(--ion-color-primary);
@@ -248,12 +264,5 @@ ion-segment {
 
   .insights-grid {
     grid-template-columns: 1fr;
-  }
-}
-
-// Dark Mode
-@media (prefers-color-scheme: dark) {
-  .connect-content ion-icon {
-    opacity: 0.9;
   }
 }

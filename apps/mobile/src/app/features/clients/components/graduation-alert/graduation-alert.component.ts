@@ -110,30 +110,32 @@ interface ActionConfig {
   styles: [
     `
       .graduation-alert {
-        margin: 0 0 var(--fitos-space-4) 0;
+        margin: 0 0 16px 0;
         border-left: 4px solid;
+        border-radius: 12px;
+        box-shadow: none;
 
         &.success {
-          border-left-color: var(--ion-color-success);
-          background: rgba(var(--ion-color-success-rgb), 0.1);
+          border-left-color: #10B981;
+          --background: rgba(16, 185, 129, 0.08);
         }
 
         &.warning {
-          border-left-color: var(--ion-color-warning);
-          background: rgba(var(--ion-color-warning-rgb), 0.1);
+          border-left-color: #F59E0B;
+          --background: rgba(245, 158, 11, 0.08);
         }
 
         &.primary {
-          border-left-color: var(--ion-color-primary);
-          background: rgba(var(--ion-color-primary-rgb), 0.1);
+          border-left-color: var(--ion-color-primary, #10B981);
+          --background: rgba(16, 185, 129, 0.08);
         }
       }
 
       .alert-content {
         display: flex;
         align-items: flex-start;
-        gap: var(--fitos-space-3);
-        margin-bottom: var(--fitos-space-3);
+        gap: 12px;
+        margin-bottom: 12px;
       }
 
       .alert-icon {
@@ -143,25 +145,25 @@ interface ActionConfig {
         width: 48px;
         height: 48px;
         border-radius: 50%;
-        background: var(--fitos-bg-secondary);
+        background: var(--fitos-bg-secondary, #1A1A1A);
         flex-shrink: 0;
 
         ion-icon {
           font-size: 28px;
-          color: var(--fitos-accent-primary);
+          color: var(--ion-color-primary, #10B981);
         }
       }
 
       .graduation-alert.success .alert-icon ion-icon {
-        color: var(--ion-color-success);
+        color: #10B981;
       }
 
       .graduation-alert.warning .alert-icon ion-icon {
-        color: var(--ion-color-warning);
+        color: #F59E0B;
       }
 
       .graduation-alert.primary .alert-icon ion-icon {
-        color: var(--ion-color-primary);
+        color: var(--ion-color-primary, #10B981);
       }
 
       .alert-text {
@@ -169,15 +171,15 @@ interface ActionConfig {
         min-width: 0;
 
         h3 {
-          font-size: var(--fitos-font-size-base);
-          font-weight: 600;
-          color: var(--fitos-text-primary);
-          margin: 0 0 var(--fitos-space-1) 0;
+          font-size: 14px;
+          font-weight: 700;
+          color: var(--fitos-text-primary, #F5F5F5);
+          margin: 0 0 4px 0;
         }
 
         p {
-          font-size: var(--fitos-font-size-sm);
-          color: var(--fitos-text-secondary);
+          font-size: 13px;
+          color: var(--fitos-text-secondary, #A3A3A3);
           margin: 0;
           line-height: 1.5;
         }
@@ -190,20 +192,26 @@ interface ActionConfig {
 
         ion-icon {
           font-size: 20px;
-          color: var(--fitos-text-tertiary);
+          color: var(--fitos-text-tertiary, #737373);
         }
       }
 
       .alert-actions {
-        padding-top: var(--fitos-space-2);
+        padding-top: 8px;
+
+        ion-button {
+          --border-radius: 8px;
+          height: 48px;
+          font-weight: 700;
+        }
       }
     `,
   ],
 })
 export class GraduationAlertComponent {
   @Input() assessment: AutonomyAssessment | null = null;
-  @Input() clientId: string = '';
-  @Input() dismissible: boolean = true;
+  @Input() clientId = '';
+  @Input() dismissible = true;
 
   @Output() graduate = new EventEmitter<void>();
   @Output() viewDetails = new EventEmitter<void>();

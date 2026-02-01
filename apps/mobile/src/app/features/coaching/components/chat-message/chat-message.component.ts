@@ -8,7 +8,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { personCircleOutline, sparklesOutline } from 'ionicons/icons';
-import { ChatMessage } from '@app/core/services/ai-coach.service';
+import { ChatMessage } from '../../../../core/services/ai-coach.service';
 
 /**
  * ChatMessageComponent - Individual chat message bubble
@@ -96,10 +96,10 @@ import { ChatMessage } from '@app/core/services/ai-coach.service';
   styles: [`
     .chat-message {
       display: flex;
-      gap: var(--fitos-space-3);
-      margin-bottom: var(--fitos-space-4);
-      padding: 0 var(--fitos-space-4);
-      animation: slideIn 0.3s var(--fitos-ease-default);
+      gap: 12px;
+      margin-bottom: 16px;
+      padding: 0 16px;
+      animation: slideIn 0.3s ease;
     }
 
     @keyframes slideIn {
@@ -124,19 +124,19 @@ import { ChatMessage } from '@app/core/services/ai-coach.service';
     .avatar {
       width: 40px;
       height: 40px;
-      background: var(--fitos-bg-tertiary);
+      background: var(--fitos-bg-tertiary, #262626);
       display: flex;
       align-items: center;
       justify-content: center;
 
       ion-icon {
         font-size: 24px;
-        color: var(--fitos-text-secondary);
+        color: var(--fitos-text-secondary, #A3A3A3);
       }
     }
 
     .assistant-message .avatar {
-      background: linear-gradient(135deg, var(--fitos-accent-primary), var(--fitos-accent-secondary));
+      background: linear-gradient(135deg, var(--ion-color-primary, #10B981), #8B5CF6);
 
       ion-icon {
         color: white;
@@ -158,8 +158,8 @@ import { ChatMessage } from '@app/core/services/ai-coach.service';
     .message-header {
       display: flex;
       align-items: center;
-      gap: var(--fitos-space-2);
-      margin-bottom: var(--fitos-space-2);
+      gap: 8px;
+      margin-bottom: 8px;
       flex-wrap: wrap;
     }
 
@@ -168,20 +168,20 @@ import { ChatMessage } from '@app/core/services/ai-coach.service';
     }
 
     .message-role {
-      font-size: var(--fitos-text-sm);
+      font-size: 13px;
       font-weight: 600;
-      color: var(--fitos-text-secondary);
+      color: var(--fitos-text-secondary, #A3A3A3);
     }
 
     .agent-badge {
-      font-size: var(--fitos-text-xs);
+      font-size: 11px;
       padding: 2px 8px;
       text-transform: capitalize;
     }
 
     .message-time {
-      font-size: var(--fitos-text-xs);
-      color: var(--fitos-text-tertiary);
+      font-size: 11px;
+      color: var(--fitos-text-tertiary, #737373);
       margin-left: auto;
     }
 
@@ -191,22 +191,22 @@ import { ChatMessage } from '@app/core/services/ai-coach.service';
     }
 
     .message-body {
-      background: var(--fitos-bg-secondary);
-      border: 1px solid var(--fitos-border-subtle);
-      border-radius: var(--fitos-radius-lg);
-      padding: var(--fitos-space-3);
+      background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 12px;
       word-wrap: break-word;
     }
 
     .user-message .message-body {
-      background: var(--fitos-accent-primary);
-      border-color: var(--fitos-accent-primary);
+      background: var(--ion-color-primary, #10B981);
+      border-color: var(--ion-color-primary, #10B981);
       color: white;
     }
 
     .message-body p {
       margin: 0;
-      font-size: var(--fitos-text-base);
+      font-size: 14px;
       line-height: 1.5;
       white-space: pre-wrap;
     }
@@ -214,21 +214,21 @@ import { ChatMessage } from '@app/core/services/ai-coach.service';
     .confidence-warning {
       display: flex;
       align-items: center;
-      gap: var(--fitos-space-2);
-      margin-top: var(--fitos-space-2);
-      padding: var(--fitos-space-2);
+      gap: 8px;
+      margin-top: 8px;
+      padding: 8px;
       background: rgba(245, 158, 11, 0.1);
-      border: 1px solid var(--fitos-status-warning);
-      border-radius: var(--fitos-radius-md);
+      border: 1px solid #F59E0B;
+      border-radius: 8px;
 
       ion-icon {
         flex-shrink: 0;
         font-size: 16px;
-        color: var(--fitos-status-warning);
+        color: #F59E0B;
       }
 
       small {
-        font-size: var(--fitos-text-xs);
+        font-size: 12px;
         line-height: 1.4;
       }
     }
