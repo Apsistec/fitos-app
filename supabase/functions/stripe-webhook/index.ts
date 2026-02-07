@@ -1,10 +1,20 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
-import Stripe from 'https://esm.sh/stripe@14.21.0?target=deno';
+import Stripe from 'https://esm.sh/stripe@20.3.0?target=deno';
 import { corsHeaders } from '../_shared/cors.ts';
 import { createSupabaseClient } from '../_shared/supabase.ts';
 
+/**
+ * Stripe Webhook Handler for V1 Snapshot Events
+ *
+ * Snapshot events contain the full object data in `event.data.object`.
+ * This handles all v1 events (checkout, invoice, subscription, payout, transfer, etc.).
+ *
+ * V2 thin events (like v2.core.account.closed) are handled by the separate
+ * `stripe-webhook-thin` endpoint which uses parseEventNotification().
+ */
+
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
-  apiVersion: '2024-11-20.acacia',
+  apiVersion: '2026-01-28.clover',
 });
 
 const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')!;
@@ -69,7 +79,7 @@ serve(async (req) => {
       }
 
       case 'account.application.deauthorized': {
-        // Handle when a connected account disconnects
+        // Handle when a connected account disconnects (v1 event)
         const application = event.data.object as Stripe.Application;
         const accountId = event.account;
 
@@ -84,6 +94,38 @@ serve(async (req) => {
             .eq('stripe_account_id', accountId);
 
           console.log(`Cleared Stripe connection for account ${accountId}`);
+        }
+        break;
+      }
+
+      case 'v2.core.account.closed': {
+        // NOTE: This v2 event is primarily handled by the stripe-webhook-thin
+        // endpoint using parseEventNotification(). If it arrives here as a
+        // snapshot event, we handle it as a fallback for backward compatibility.
+        const accountId = event.account;
+
+        if (accountId) {
+          // Clear Stripe connection for the trainer
+          await supabase
+            .from('trainer_profiles')
+            .update({
+              stripe_account_id: null,
+              stripe_onboarding_complete: false,
+            })
+            .eq('stripe_account_id', accountId);
+
+          // Mark the connect account as inactive
+          await supabase
+            .from('stripe_connect_accounts')
+            .update({
+              charges_enabled: false,
+              payouts_enabled: false,
+              disabled_reason: 'account_closed',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('stripe_account_id', accountId);
+
+          console.log(`Account closed (v2 snapshot fallback) for ${accountId}`);
         }
         break;
       }
