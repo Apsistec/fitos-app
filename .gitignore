@@ -4,6 +4,7 @@
 .env
 .env.local
 .env.*.local
+apps/ai-backend/.env
 
 # Dependencies
 node_modules/
@@ -33,6 +34,7 @@ ios/
 
 # Supabase
 .supabase/
+supabase/.temp/
 
 # Python
 __pycache__/
@@ -54,6 +56,10 @@ yarn-error.log*
 tmp/
 temp/
 *.tmp
+*.bak
+*.bak[0-9]*
+*.backup
+*.orig
 
 .angular
 .firebase
