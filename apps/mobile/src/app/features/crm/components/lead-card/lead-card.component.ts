@@ -7,7 +7,7 @@ import {
   IonIcon,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { calendarOutline } from 'ionicons/icons';
+import { calendarOutline, timeOutline } from 'ionicons/icons';
 import { Lead } from '../../../../core/services/lead.service';
 
 /**
@@ -34,7 +34,7 @@ import { Lead } from '../../../../core/services/lead.service';
     <ion-card class="lead-card" button (click)="cardClick.emit(lead())">
       <ion-card-content>
         <!-- Lead Name -->
-        <h3 class="lead-name">{{ lead().name }}</h3>
+        <h3 class="lead-name">{{ lead().first_name }} {{ lead().last_name }}</h3>
 
         <!-- Contact Info -->
         <div class="lead-contact">
@@ -47,18 +47,18 @@ import { Lead } from '../../../../core/services/lead.service';
         <!-- Source -->
         <div class="lead-meta">
           <ion-chip size="small" outline="true">
-            <ion-label>{{ lead().source }}</ion-label>
+            <ion-label>{{ lead().source || 'Unknown' }}</ion-label>
           </ion-chip>
-          @if (lead().expected_value) {
-            <span class="lead-value">\${{ lead().expected_value }}</span>
-          }
+          <ion-chip size="small" [color]="getScoreColor(lead().lead_score)">
+            <ion-label>Score: {{ lead().lead_score }}</ion-label>
+          </ion-chip>
         </div>
 
-        <!-- Follow-up indicator -->
-        @if (lead().next_follow_up && isOverdue(lead().next_follow_up!)) {
-          <div class="follow-up-alert">
-            <ion-icon name="calendar-outline"></ion-icon>
-            <span>Follow-up overdue</span>
+        <!-- Last contacted indicator -->
+        @if (lead().last_contacted_at) {
+          <div class="last-contact">
+            <ion-icon name="time-outline"></ion-icon>
+            <span>Last contact: {{ formatDate(lead().last_contacted_at!) }}</span>
           </div>
         }
       </ion-card-content>
@@ -148,16 +148,16 @@ import { Lead } from '../../../../core/services/lead.service';
       color: #10B981;
     }
 
-    .follow-up-alert {
+    .last-contact {
       display: flex;
       align-items: center;
       gap: 4px;
       margin-top: 8px;
       padding: 8px;
-      background: rgba(239, 68, 68, 0.1);
+      background: rgba(16, 185, 129, 0.1);
       border-radius: 6px;
       font-size: 11px;
-      color: #EF4444;
+      color: var(--fitos-text-secondary);
 
       ion-icon {
         font-size: 14px;
@@ -173,13 +173,23 @@ export class LeadCardComponent {
   cardClick = output<Lead>();
 
   constructor() {
-    addIcons({ calendarOutline });
+    addIcons({ calendarOutline, timeOutline });
   }
 
   /**
-   * Check if a date is overdue
+   * Get color based on lead score
    */
-  isOverdue(date: string): boolean {
-    return new Date(date) < new Date();
+  getScoreColor(score: number): string {
+    if (score >= 80) return 'success';
+    if (score >= 50) return 'warning';
+    return 'medium';
+  }
+
+  /**
+   * Format date for display
+   */
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
 }

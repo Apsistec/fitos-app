@@ -24,12 +24,12 @@ import {
   addOutline,
   funnelOutline,
 } from 'ionicons/icons';
-import { LeadService, Lead, LeadStage } from '../../../../core/services/lead.service';
+import { LeadService, Lead, LeadStatus } from '../../../../core/services/lead.service';
 import { LeadCardComponent } from '../lead-card/lead-card.component';
 import { LeadFormComponent } from '../lead-form/lead-form.component';
 import { ModalController } from '@ionic/angular/standalone';
 
-const STAGE_CONFIG = {
+const STAGE_CONFIG: Record<LeadStatus, { label: string; color: string; icon: string }> = {
   new: { label: 'New', color: 'primary', icon: 'person-add-outline' },
   contacted: { label: 'Contacted', color: 'secondary', icon: 'mail-outline' },
   qualified: { label: 'Qualified', color: 'tertiary', icon: 'checkmark-circle-outline' },
@@ -300,7 +300,7 @@ export class LeadPipelineComponent implements OnInit {
   filteredLeads = signal<Lead[]>([]);
 
   STAGE_CONFIG = STAGE_CONFIG;
-  stages: LeadStage[] = ['new', 'contacted', 'qualified', 'consultation', 'won', 'lost'];
+  stages: LeadStatus[] = ['new', 'contacted', 'qualified', 'consultation', 'won', 'lost'];
 
   constructor() {
     addIcons({
@@ -319,17 +319,18 @@ export class LeadPipelineComponent implements OnInit {
     await this.leadService.loadLeads();
   }
 
-  getStageLeads(stage: LeadStage): Lead[] {
+  getStageLeads(stage: LeadStatus): Lead[] {
     const query = this.searchQuery().toLowerCase();
     const leads = this.leadService.leadsByStage()[stage] || [];
 
     if (!query) return leads;
 
-    return leads.filter(lead =>
-      lead.name.toLowerCase().includes(query) ||
-      lead.email.toLowerCase().includes(query) ||
-      lead.phone?.includes(query)
-    );
+    return leads.filter(lead => {
+      const fullName = `${lead.first_name} ${lead.last_name}`.toLowerCase();
+      return fullName.includes(query) ||
+        lead.email.toLowerCase().includes(query) ||
+        lead.phone?.includes(query);
+    });
   }
 
   onSearch(): void {
@@ -343,7 +344,7 @@ export class LeadPipelineComponent implements OnInit {
     } else {
       // Moving to different stage
       const lead = event.previousContainer.data[event.previousIndex];
-      const newStage = event.container.id as LeadStage;
+      const newStage = event.container.id as LeadStatus;
 
       await this.leadService.updateStage(lead.id, newStage);
 

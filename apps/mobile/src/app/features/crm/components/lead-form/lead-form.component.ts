@@ -64,15 +64,26 @@ import { ModalController } from '@ionic/angular/standalone';
 
       <ion-card-content>
         <form #leadFormRef="ngForm">
-          <!-- Name -->
+          <!-- First Name -->
           <ion-item lines="none" class="form-item">
-            <ion-label position="stacked">Name *</ion-label>
+            <ion-label position="stacked">First Name *</ion-label>
             <ion-input
-              [(ngModel)]="formData.name"
-              name="name"
+              [(ngModel)]="formData.first_name"
+              name="first_name"
               type="text"
-              placeholder="Enter full name"
+              placeholder="Enter first name"
               required
+            ></ion-input>
+          </ion-item>
+
+          <!-- Last Name -->
+          <ion-item lines="none" class="form-item">
+            <ion-label position="stacked">Last Name</ion-label>
+            <ion-input
+              [(ngModel)]="formData.last_name"
+              name="last_name"
+              type="text"
+              placeholder="Enter last name"
             ></ion-input>
           </ion-item>
 
@@ -124,8 +135,8 @@ import { ModalController } from '@ionic/angular/standalone';
                   {{ formData.source === 'referral' ? 'Who referred you?' : 'Please specify' }}
                 </ion-label>
                 <ion-input
-                  [(ngModel)]="formData.source_detail"
-                  name="source_detail"
+                  [(ngModel)]="formData.source_details"
+                  name="source_details"
                   type="text"
                   [placeholder]="formData.source === 'referral' ? 'Referrer name' : 'Details'"
                 ></ion-input>
@@ -146,24 +157,6 @@ import { ModalController } from '@ionic/angular/standalone';
                 placeholder="Share your goals, experience level, any injuries, etc."
                 [autoGrow]="true"
               ></ion-textarea>
-            </ion-item>
-          }
-
-          @if (showExpectedValue()) {
-            <!-- Expected Value -->
-            <ion-item lines="none" class="form-item">
-              <ion-label position="stacked">Budget Range</ion-label>
-              <ion-select
-                [(ngModel)]="formData.expected_value"
-                name="expected_value"
-                placeholder="Select budget"
-                interface="action-sheet"
-              >
-                <ion-select-option [value]="50">$50-100/month</ion-select-option>
-                <ion-select-option [value]="150">$100-200/month</ion-select-option>
-                <ion-select-option [value]="250">$200-300/month</ion-select-option>
-                <ion-select-option [value]="350">$300+/month</ion-select-option>
-              </ion-select>
             </ion-item>
           }
 
@@ -301,13 +294,13 @@ export class LeadFormComponent {
 
   // Form state - using plain object for ngModel compatibility
   formData: Partial<CreateLeadInput> = {
-    name: '',
+    first_name: '',
+    last_name: '',
     email: '',
     phone: '',
     source: this.defaultSource() || 'website',
-    source_detail: '',
+    source_details: '',
     notes: '',
-    expected_value: undefined,
   };
 
   submitting = signal(false);
@@ -322,9 +315,9 @@ export class LeadFormComponent {
 
     const data = this.formData;
 
-    // Required: name
-    if (!data.name || data.name.trim().length === 0) {
-      this.validationError.set('Name is required');
+    // Required: first_name
+    if (!data.first_name || data.first_name.trim().length === 0) {
+      this.validationError.set('First name is required');
       return false;
     }
 
@@ -362,13 +355,13 @@ export class LeadFormComponent {
       const data = this.formData;
 
       const input: CreateLeadInput = {
-        name: data.name!.trim(),
+        first_name: data.first_name!.trim(),
+        last_name: data.last_name?.trim() || '',
         email: data.email!.trim(),
         phone: data.phone?.trim(),
         source: data.source as LeadSource,
-        source_detail: data.source_detail?.trim(),
+        source_details: data.source_details?.trim(),
         notes: data.notes?.trim(),
-        expected_value: data.expected_value,
       };
 
       const lead = await this.leadService.createLead(input);
@@ -404,13 +397,13 @@ export class LeadFormComponent {
 
   private resetForm(): void {
     this.formData = {
-      name: '',
+      first_name: '',
+      last_name: '',
       email: '',
       phone: '',
       source: this.defaultSource() || 'website',
-      source_detail: '',
+      source_details: '',
       notes: '',
-      expected_value: undefined,
     };
     this.validationError.set(null);
   }

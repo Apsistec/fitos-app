@@ -213,6 +213,21 @@ export class LeadService {
     return byStatus;
   });
 
+  // Alias for backward compatibility
+  leadsByStage = computed(() => this.leadsByStatus());
+
+  // Pipeline statistics
+  pipelineStats = computed(() => {
+    const leadsList = this.leads();
+    const total = leadsList.length;
+    const won = leadsList.filter(l => l.status === 'won').length;
+    const conversionRate = total > 0 ? Math.round((won / total) * 100) : 0;
+    // Note: totalValue is placeholder since Lead doesn't have expected_value
+    const totalValue = 0;
+
+    return { total, conversionRate, totalValue };
+  });
+
   // Active leads (not won/lost)
   activeLeads = computed(() => {
     return this.leads().filter(

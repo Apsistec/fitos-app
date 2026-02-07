@@ -16,8 +16,6 @@ import {
   IonCardContent,
   IonChip,
   IonLabel,
-  IonList,
-  IonItem,
   IonNote,
   IonBadge,
   IonSpinner,
@@ -34,7 +32,7 @@ import {
   timeOutline,
   checkmarkCircleOutline,
 } from 'ionicons/icons';
-import { LeadService, Lead, LeadActivity, LeadStage } from '../../../../core/services/lead.service';
+import { LeadService, Lead, LeadActivity, LeadStatus } from '../../../../core/services/lead.service';
 import { ActivityLoggerComponent } from '../../components/activity-logger/activity-logger.component';
 
 /**
@@ -68,8 +66,6 @@ import { ActivityLoggerComponent } from '../../components/activity-logger/activi
     IonCardContent,
     IonChip,
     IonLabel,
-    IonList,
-    IonItem,
     IonNote,
     IonBadge,
     IonSpinner,
@@ -101,7 +97,7 @@ import { ActivityLoggerComponent } from '../../components/activity-logger/activi
           <ion-card-header>
             <div class="header-content">
               <div class="lead-info">
-                <ion-card-title>{{ lead()!.name }}</ion-card-title>
+                <ion-card-title>{{ lead()!.first_name }} {{ lead()!.last_name }}</ion-card-title>
                 <div class="contact-info">
                   <span class="email">{{ lead()!.email }}</span>
                   @if (lead()!.phone) {
@@ -109,8 +105,8 @@ import { ActivityLoggerComponent } from '../../components/activity-logger/activi
                   }
                 </div>
               </div>
-              <ion-chip [color]="getStageColor(lead()!.stage)">
-                <ion-label>{{ getStageLabel(lead()!.stage) }}</ion-label>
+              <ion-chip [color]="getStatusColor(lead()!.status)">
+                <ion-label>{{ getStatusLabel(lead()!.status) }}</ion-label>
               </ion-chip>
             </div>
           </ion-card-header>
@@ -120,19 +116,17 @@ import { ActivityLoggerComponent } from '../../components/activity-logger/activi
             <div class="meta-grid">
               <div class="meta-item">
                 <span class="meta-label">Source</span>
-                <span class="meta-value">{{ lead()!.source }}</span>
+                <span class="meta-value">{{ lead()!.source || 'Unknown' }}</span>
               </div>
-              @if (lead()!.expected_value) {
+              <div class="meta-item">
+                <span class="meta-label">Lead Score</span>
+                <span class="meta-value">{{ lead()!.lead_score }}</span>
+              </div>
+              @if (lead()!.last_contacted_at) {
                 <div class="meta-item">
-                  <span class="meta-label">Expected Value</span>
-                  <span class="meta-value">\${{ lead()!.expected_value }}</span>
-                </div>
-              }
-              @if (lead()!.next_follow_up) {
-                <div class="meta-item">
-                  <span class="meta-label">Next Follow-up</span>
-                  <span class="meta-value" [class.overdue]="isOverdue(lead()!.next_follow_up)">
-                    {{ formatDate(lead()!.next_follow_up) }}
+                  <span class="meta-label">Last Contacted</span>
+                  <span class="meta-value">
+                    {{ formatDate(lead()!.last_contacted_at!) }}
                   </span>
                 </div>
               }
@@ -188,8 +182,8 @@ import { ActivityLoggerComponent } from '../../components/activity-logger/activi
               @for (activity of activities(); track activity.id) {
                 <div class="timeline-item">
                   <!-- Timeline Marker -->
-                  <div class="timeline-marker" [class]="'marker-' + activity.type">
-                    <ion-icon [name]="getActivityIcon(activity.type)"></ion-icon>
+                  <div class="timeline-marker" [class]="'marker-' + activity.activity_type">
+                    <ion-icon [name]="getActivityIcon(activity.activity_type)"></ion-icon>
                   </div>
 
                   <!-- Activity Content -->
@@ -197,16 +191,16 @@ import { ActivityLoggerComponent } from '../../components/activity-logger/activi
                     <ion-card-content>
                       <div class="activity-header">
                         <div class="activity-info">
-                          <h3>{{ getActivityTitle(activity.type) }}</h3>
+                          <h3>{{ getActivityTitle(activity.activity_type) }}</h3>
                           <ion-note>{{ formatTimestamp(activity.created_at) }}</ion-note>
                         </div>
-                        @if (activity.type === 'status_change') {
+                        @if (activity.activity_type === 'status_change') {
                           <ion-badge color="primary">
-                            {{ activity.metadata?.new_stage }}
+                            {{ activity.metadata?.['new_status'] }}
                           </ion-badge>
                         }
                       </div>
-                      <p class="activity-content">{{ activity.content }}</p>
+                      <p class="activity-content">{{ activity.description }}</p>
                     </ion-card-content>
                   </ion-card>
                 </div>
@@ -539,7 +533,7 @@ export class LeadDetailPage implements OnInit {
     this.activities.set(activities);
   }
 
-  getStageLabel(stage: LeadStage): string {
+  getStatusLabel(status: LeadStatus): string {
     const labels = {
       new: 'New',
       contacted: 'Contacted',
@@ -548,10 +542,10 @@ export class LeadDetailPage implements OnInit {
       won: 'Won',
       lost: 'Lost',
     };
-    return labels[stage];
+    return labels[status];
   }
 
-  getStageColor(stage: LeadStage): string {
+  getStatusColor(status: LeadStatus): string {
     const colors = {
       new: 'primary',
       contacted: 'secondary',
@@ -560,7 +554,7 @@ export class LeadDetailPage implements OnInit {
       won: 'success',
       lost: 'danger',
     };
-    return colors[stage];
+    return colors[status];
   }
 
   getActivityIcon(type: string): string {

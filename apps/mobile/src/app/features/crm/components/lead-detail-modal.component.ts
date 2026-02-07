@@ -48,9 +48,9 @@ import {
   LeadTask,
   LeadStatus,
   ActivityType,
-} from '../../../../core/services/lead.service';
-import { AuthService } from '../../../../core/services/auth.service';
-import { HapticService } from '../../../../core/services/haptic.service';
+} from '../../../core/services/lead.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { HapticService } from '../../../core/services/haptic.service';
 
 /**
  * LeadDetailModalComponent - Detailed lead view with activity timeline

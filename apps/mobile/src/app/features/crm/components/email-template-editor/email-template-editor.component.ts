@@ -140,7 +140,7 @@ export interface EmailTemplate {
               <ion-textarea
                 [(ngModel)]="templateData.body"
                 rows="15"
-                placeholder="Write your email content here...&#10;&#10;You can use variables like {{client_name}} for personalization."
+                [placeholder]="bodyPlaceholder"
                 [autoGrow]="true"
                 #bodyTextarea
               ></ion-textarea>
@@ -377,15 +377,18 @@ export class EmailTemplateEditorComponent {
 
   // State
   viewMode = signal<'edit' | 'preview'>('edit');
-  templateData = signal<EmailTemplate>({
+  templateData: EmailTemplate = {
     name: '',
     subject: '',
     body: '',
     isHtml: false,
     variables: [],
-  });
+  };
   saving = signal(false);
   validationError = signal<string | null>(null);
+
+  // Placeholder text with escaped template variable syntax
+  readonly bodyPlaceholder = 'Write your email content here...\n\nYou can use variables like {{client_name}} for personalization.';
 
   availableVariables = [
     { key: 'client_name' as EmailTemplateVariable, label: 'Client Name' },
@@ -410,7 +413,7 @@ export class EmailTemplateEditorComponent {
     // Initialize with template if provided
     const existingTemplate = this.template();
     if (existingTemplate) {
-      this.templateData.set({ ...existingTemplate });
+      this.templateData = { ...existingTemplate };
     }
   }
 
@@ -421,15 +424,14 @@ export class EmailTemplateEditorComponent {
   insertVariable(variable: EmailTemplateVariable): void {
     this.haptic.light();
 
-    const currentBody = this.templateData().body;
+    const currentBody = this.templateData.body;
     const variableTag = `{{${variable}}}`;
 
     // Append to end of body (in a real implementation, we'd insert at cursor)
-    this.templateData.update(data => ({
-      ...data,
-      body: currentBody + variableTag,
-      variables: [...new Set([...data.variables, variable])],
-    }));
+    this.templateData.body = currentBody + variableTag;
+    if (!this.templateData.variables.includes(variable)) {
+      this.templateData.variables = [...this.templateData.variables, variable];
+    }
   }
 
   renderPreview(text: string): string {
@@ -454,7 +456,7 @@ export class EmailTemplateEditorComponent {
   validateTemplate(): boolean {
     this.validationError.set(null);
 
-    const data = this.templateData();
+    const data = this.templateData;
 
     if (!data.name || data.name.trim().length === 0) {
       this.validationError.set('Template name is required');
@@ -490,7 +492,7 @@ export class EmailTemplateEditorComponent {
 
     try {
       await this.haptic.success();
-      this.templateSaved.emit(this.templateData());
+      this.templateSaved.emit(this.templateData);
     } catch (err) {
       console.error('Error saving template:', err);
       await this.haptic.error();

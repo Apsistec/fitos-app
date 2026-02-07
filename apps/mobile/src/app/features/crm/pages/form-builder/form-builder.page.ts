@@ -1,4 +1,4 @@
-import {  Component, OnInit, inject, signal , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -15,12 +15,9 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonCardContent,
-  IonList,
   IonItem,
   IonLabel,
   IonInput,
-  IonSelect,
-  IonSelectOption,
   IonToggle,
   IonReorder,
   IonReorderGroup,
@@ -96,12 +93,9 @@ export interface LeadFormConfig {
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
-    IonList,
     IonItem,
     IonLabel,
     IonInput,
-    IonSelect,
-    IonSelectOption,
     IonToggle,
     IonReorder,
     IonReorderGroup,
@@ -388,7 +382,7 @@ export class FormBuilderPage implements OnInit {
   private modalCtrl = inject(ModalController);
   private haptic = inject(HapticService);
 
-  formConfig = signal<LeadFormConfig>({
+  formConfig: LeadFormConfig = {
     name: 'Website Contact Form',
     title: 'Get Started Today',
     subtitle: 'Tell us about your fitness goals',
@@ -396,7 +390,7 @@ export class FormBuilderPage implements OnInit {
     showNotes: true,
     showExpectedValue: false,
     customFields: [],
-  });
+  };
 
   constructor() {
     addIcons({
@@ -422,13 +416,10 @@ export class FormBuilderPage implements OnInit {
       label: 'New Field',
       type: 'text',
       required: false,
-      order: this.formConfig().customFields.length,
+      order: this.formConfig.customFields.length,
     };
 
-    this.formConfig.update(config => ({
-      ...config,
-      customFields: [...config.customFields, newField],
-    }));
+    this.formConfig.customFields.push(newField);
   }
 
   editField(field: CustomField): void {
@@ -440,20 +431,17 @@ export class FormBuilderPage implements OnInit {
   deleteField(fieldId: string): void {
     this.haptic.warning();
 
-    this.formConfig.update(config => ({
-      ...config,
-      customFields: config.customFields.filter(f => f.id !== fieldId),
-    }));
+    this.formConfig.customFields = this.formConfig.customFields.filter(f => f.id !== fieldId);
   }
 
   handleReorder(event: any): void {
     this.haptic.light();
 
-    const itemMove = this.formConfig().customFields.splice(event.detail.from, 1)[0];
-    this.formConfig().customFields.splice(event.detail.to, 0, itemMove);
+    const itemMove = this.formConfig.customFields.splice(event.detail.from, 1)[0];
+    this.formConfig.customFields.splice(event.detail.to, 0, itemMove);
 
     // Update order values
-    this.formConfig().customFields.forEach((field, index) => {
+    this.formConfig.customFields.forEach((field, index) => {
       field.order = index;
     });
 
@@ -463,20 +451,20 @@ export class FormBuilderPage implements OnInit {
   async previewForm(): Promise<void> {
     this.haptic.light();
     // TODO: Open preview modal with LeadFormComponent
-    console.log('Preview form:', this.formConfig());
+    console.log('Preview form:', this.formConfig);
   }
 
   async generateEmbedCode(): Promise<void> {
     this.haptic.light();
 
     // Generate a form ID (in production, this would come from saving the form)
-    const formId = this.formConfig().id || `form_${Date.now()}`;
+    const formId = this.formConfig.id || `form_${Date.now()}`;
 
     const modal = await this.modalCtrl.create({
       component: EmbedCodeComponent,
       componentProps: {
         formId,
-        formName: this.formConfig().name,
+        formName: this.formConfig.name,
       },
     });
 
@@ -486,7 +474,7 @@ export class FormBuilderPage implements OnInit {
   async saveForm(): Promise<void> {
     this.haptic.success();
     // TODO: Save form config to database
-    console.log('Saving form:', this.formConfig());
+    console.log('Saving form:', this.formConfig);
 
     // Navigate back
     this.router.navigate(['/crm']);
