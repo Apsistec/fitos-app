@@ -1,4 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
 import { SupabaseService } from './supabase.service';
 import { Database } from '@fitos/shared';
 
@@ -59,18 +60,22 @@ export class TerraService {
   }
 
   /**
-   * Initiate Terra authentication flow for a provider
-   * Returns the authentication URL to redirect the user to
+   * Initiate Terra authentication flow for a provider.
+   * Returns the authentication URL to redirect the user to.
+   * Sends the current platform (web vs native) so the callback
+   * can redirect back appropriately.
    */
   async connectDevice(provider: string): Promise<string> {
     this.isLoading.set(true);
     this.error.set(null);
 
     try {
+      const platform = Capacitor.isNativePlatform() ? 'native' : 'web';
+
       const { data, error } = await this.supabase.client.functions.invoke(
         'terra-authenticate',
         {
-          body: { provider }
+          body: { provider, platform }
         }
       );
 

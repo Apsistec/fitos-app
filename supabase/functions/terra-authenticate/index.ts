@@ -14,6 +14,7 @@ const corsHeaders = {
 
 interface AuthenticateRequest {
   provider: string;
+  platform?: 'web' | 'native';
 }
 
 serve(async (req) => {
@@ -37,7 +38,7 @@ serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    const { provider }: AuthenticateRequest = await req.json();
+    const { provider, platform }: AuthenticateRequest = await req.json();
 
     if (!provider) {
       throw new Error('Provider is required');
@@ -45,6 +46,10 @@ serve(async (req) => {
 
     // Generate a reference ID for this connection
     const referenceId = `${user.id}_${provider}_${Date.now()}`;
+
+    // Pass platform through to the callback so it can redirect appropriately
+    const callbackPlatform = platform || 'web';
+    const redirectUri = `${SUPABASE_URL}/functions/v1/terra-callback?platform=${callbackPlatform}`;
 
     // Call Terra API to generate auth URL
     const terraResponse = await fetch('https://api.tryterra.co/v2/auth/generateAuthUrl', {
@@ -59,8 +64,7 @@ serve(async (req) => {
         resource: provider,
         reference_id: referenceId,
         language: 'en',
-        // Redirect back to the app after authentication
-        redirect_uri: `${SUPABASE_URL}/functions/v1/terra-callback`,
+        redirect_uri: redirectUri,
       }),
     });
 

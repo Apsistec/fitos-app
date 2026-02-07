@@ -1,5 +1,6 @@
-import {  Component, OnInit, inject, signal , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   IonHeader,
   IonToolbar,
@@ -20,6 +21,7 @@ import {
   ToastController,
   IonText,
 } from '@ionic/angular/standalone';
+import { ViewWillEnter } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
   watch,
@@ -33,8 +35,9 @@ import {
   addCircleOutline,
   trashOutline,
 } from 'ionicons/icons';
-import { TerraService, TERRA_PROVIDERS, TerraProvider } from '../../../../core/services/terra.service';
+import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
+import { TerraService, TERRA_PROVIDERS, TerraProvider } from '../../../../core/services/terra.service';
 import { Database } from '@fitos/shared';
 
 type WearableConnection = Database['public']['Tables']['wearable_connections']['Row'];
@@ -65,10 +68,12 @@ type WearableConnection = Database['public']['Tables']['wearable_connections']['
     IonText,
   ],
 })
-export class WearablesPage implements OnInit {
+export class WearablesPage implements OnInit, ViewWillEnter {
   private terraService = inject(TerraService);
   private alertController = inject(AlertController);
   private toastController = inject(ToastController);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   connections = this.terraService.connections;
   isLoading = this.terraService.isLoading;
@@ -93,6 +98,56 @@ export class WearablesPage implements OnInit {
     await this.loadConnections();
   }
 
+  /**
+   * Check for callback query params each time the view becomes active.
+   * After Terra OAuth completes on web, the user is redirected back here
+   * with ?connected=PROVIDER or ?wearable_error=true.
+   */
+  async ionViewWillEnter() {
+    const params = this.route.snapshot.queryParams;
+
+    if (params['connected']) {
+      const providerInfo = this.terraService.getProviderInfo(params['connected']);
+      const providerName = providerInfo?.name || params['connected'];
+
+      const toast = await this.toastController.create({
+        message: `${providerName} connected successfully!`,
+        duration: 3000,
+        position: 'bottom',
+        color: 'success',
+      });
+      await toast.present();
+
+      // Refresh connections to show the newly connected device
+      await this.loadConnections();
+
+      // Clear the query params so the toast doesn't re-appear on navigation
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {},
+        replaceUrl: true,
+      });
+    } else if (params['wearable_error']) {
+      const toast = await this.toastController.create({
+        message: 'Wearable connection failed. Please try again.',
+        duration: 3000,
+        position: 'bottom',
+        color: 'danger',
+      });
+      await toast.present();
+
+      // Clear the query params
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {},
+        replaceUrl: true,
+      });
+    } else {
+      // Normal page entry — refresh connections in case something changed
+      await this.loadConnections();
+    }
+  }
+
   async loadConnections() {
     await this.terraService.getConnections();
     this.updateAvailableProviders();
@@ -114,23 +169,27 @@ export class WearablesPage implements OnInit {
     try {
       const authUrl = await this.terraService.connectDevice(provider.id);
 
-      // Open the auth URL in the system browser
-      await Browser.open({
-        url: authUrl,
-        presentationStyle: 'popover',
-      });
+      if (Capacitor.isNativePlatform()) {
+        // Native: open in-app browser
+        await Browser.open({
+          url: authUrl,
+          presentationStyle: 'popover',
+        });
 
-      // Show a toast informing the user
-      const toast = await this.toastController.create({
-        message: `Opening ${provider.name} authentication...`,
-        duration: 2000,
-        position: 'bottom',
-        color: 'primary',
-      });
-      await toast.present();
+        const toast = await this.toastController.create({
+          message: `Opening ${provider.name} authentication...`,
+          duration: 2000,
+          position: 'bottom',
+          color: 'primary',
+        });
+        await toast.present();
 
-      // Reload connections after a delay (user might have completed auth)
-      setTimeout(() => this.loadConnections(), 5000);
+        // Reload connections after a delay (user might have completed auth)
+        setTimeout(() => this.loadConnections(), 5000);
+      } else {
+        // Web/PWA: redirect in same tab so the callback comes back here
+        window.location.href = authUrl;
+      }
     } catch (error) {
       console.error('Error connecting device:', error);
       const toast = await this.toastController.create({
