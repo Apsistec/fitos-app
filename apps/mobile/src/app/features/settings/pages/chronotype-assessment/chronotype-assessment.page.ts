@@ -354,7 +354,7 @@ import { LoadingService } from '../../../../core/services/loading.service';
             <h1>Your Chronotype</h1>
 
             <div class="chronotype-category">
-              {{ chronotypeService.getChronotypeLabel(result()!.category) }}
+              {{ getChronotypeLabel(result()!.category) }}
             </div>
 
             <div class="score-badge">
@@ -375,11 +375,11 @@ import { LoadingService } from '../../../../core/services/loading.service';
               <ion-card-content>
                 <h3>
                   {{
-                    chronotypeService.formatTime(result()!.peak_performance_window.start)
+                    formatTime(result()!.peak_performance_window.start)
                   }}
                   -
                   {{
-                    chronotypeService.formatTime(result()!.peak_performance_window.end)
+                    formatTime(result()!.peak_performance_window.end)
                   }}
                 </h3>
                 <p>Schedule strength and power training during this window for best results.</p>
@@ -579,5 +579,19 @@ export class ChronotypeAssessmentPage {
     this.result.set(null);
     this.responses.set({});
     this.currentQuestionIndex.set(0);
+  }
+
+  /**
+   * Get label for chronotype category (wrapper for private service method)
+   */
+  getChronotypeLabel(category: string): string {
+    return this.chronotypeService.getChronotypeLabel(category);
+  }
+
+  /**
+   * Format time for display (wrapper for private service method)
+   */
+  formatTime(isoTime: string): string {
+    return this.chronotypeService.formatTime(isoTime);
   }
 }

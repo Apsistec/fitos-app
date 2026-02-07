@@ -2,11 +2,13 @@
  * Getting Started Page
  *
  * Role-specific onboarding checklist with progress tracking.
- * Stores completion status in localStorage via HelpService.
+ * Completion is derived from real app state — steps auto-complete
+ * when the user has actually performed the required actions.
  */
 
 import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
 import { Router } from '@angular/router';
+import { ViewWillEnter } from '@ionic/angular';
 import {
   IonHeader,
   IonToolbar,
@@ -23,10 +25,8 @@ import {
   IonItem,
   IonLabel,
   IonIcon,
-  IonButton,
   IonProgressBar,
   IonBadge,
-  AlertController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -59,19 +59,17 @@ import type { GettingStartedGuide, GettingStartedStep } from '@fitos/libs';
     IonItem,
     IonLabel,
     IonIcon,
-    IonButton,
     IonProgressBar,
-    IonBadge
-],
+    IonBadge,
+  ],
   templateUrl: './getting-started.page.html',
   styleUrls: ['./getting-started.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class GettingStartedPage {
+export class GettingStartedPage implements ViewWillEnter {
   private helpService = inject(HelpService);
   private authService = inject(AuthService);
   private router = inject(Router);
-  private alertController = inject(AlertController);
 
   // Computed guide for current user role
   guide = computed<GettingStartedGuide | undefined>(() => {
@@ -103,41 +101,16 @@ export class GettingStartedPage {
     });
   }
 
-  onStepClick(step: GettingStartedStep): void {
-    // Toggle completion
-    if (step.completed) {
-      this.helpService.markStepIncomplete(step.id);
-    } else {
-      this.helpService.markStepComplete(step.id);
-    }
+  ionViewWillEnter(): void {
+    // Refresh completion data every time the page is shown,
+    // so steps that were just completed in other parts of the app
+    // are reflected immediately.
+    this.helpService.refreshCompletionData();
   }
 
-  onStepNavigate(step: GettingStartedStep, event: Event): void {
-    event.stopPropagation();
+  onStepClick(step: GettingStartedStep): void {
     if (step.route) {
       this.router.navigate([step.route]);
     }
-  }
-
-  async onResetProgress(): Promise<void> {
-    const alert = await this.alertController.create({
-      header: 'Reset Progress?',
-      message: 'This will uncheck all completed steps. Your actual data will not be affected.',
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel',
-        },
-        {
-          text: 'Reset',
-          role: 'destructive',
-          handler: () => {
-            this.helpService.resetProgress();
-          },
-        },
-      ],
-    });
-
-    await alert.present();
   }
 }

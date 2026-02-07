@@ -121,7 +121,7 @@ import { AuthService } from '../../../../core/services/auth.service';
                     [src]="videoPreviewUrl()"
                     controls
                     playsinline
-                  />
+                  ></video>
                   <div class="video-info">
                     <p><strong>File:</strong> {{ selectedVideo()?.name }}</p>
                     <p><strong>Size:</strong> {{ formatFileSize(selectedVideo()?.size || 0) }}</p>
@@ -154,7 +154,7 @@ import { AuthService } from '../../../../core/services/auth.service';
                   placeholder="Select exercise"
                   interface="action-sheet"
                 >
-                  @for (exercise of exercises(); track exercise.id) {
+                  @for (exercise of exercises; track exercise.id) {
                     <ion-select-option [value]="exercise.id">
                       {{ exercise.name }}
                     </ion-select-option>

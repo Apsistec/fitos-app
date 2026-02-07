@@ -142,7 +142,7 @@ interface RepairOption {
         </div>
 
         <!-- Expiration Warning -->
-        @if (expiresAt) {
+        @if (expiresAt()) {
           <div class="expiration-warning">
             <ion-icon name="time-outline"></ion-icon>
             <span>Repair window expires {{ getTimeRemaining() }}</span>

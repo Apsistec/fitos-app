@@ -4,13 +4,6 @@
       <ion-back-button defaultHref="/tabs/settings/help"></ion-back-button>
     </ion-buttons>
     <ion-title>Getting Started</ion-title>
-    @if (!isComplete()) {
-      <ion-buttons slot="end">
-        <ion-button (click)="onResetProgress()" fill="clear">
-          <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
-        </ion-button>
-      </ion-buttons>
-    }
   </ion-toolbar>
 </ion-header>
 
@@ -56,12 +49,8 @@
           @if (isComplete()) {
             <div class="completion-message">
               <ion-icon name="checkmark-circle" color="success"></ion-icon>
-              <h3>All done! 🎉</h3>
+              <h3>All done!</h3>
               <p>You've completed all the getting started steps. Great job!</p>
-              <ion-button (click)="onResetProgress()" fill="outline" size="small">
-                <ion-icon slot="start" name="refresh-outline"></ion-icon>
-                Reset Checklist
-              </ion-button>
             </div>
           }
         </ion-card-content>
@@ -72,13 +61,13 @@
         @for (step of currentGuide.steps; track step.id) {
           <ion-item
             button
-            [detail]="false"
+            [detail]="!step.completed"
             class="step-item"
             [class.completed]="step.completed"
             [class.optional]="step.optional"
             (click)="onStepClick(step)"
           >
-            <!-- Completion Icon -->
+            <!-- Completion Icon (read-only, driven by real app state) -->
             <ion-icon
               slot="start"
               [name]="step.completed ? 'checkmark-circle' : 'checkmark-circle-outline'"
@@ -96,20 +85,6 @@
               </h3>
               <p class="step-description">{{ step.description }}</p>
             </ion-label>
-
-            <!-- Action Button -->
-            @if (!step.completed && step.route) {
-              <ion-button
-                slot="end"
-                fill="clear"
-                size="small"
-                (click)="onStepNavigate(step, $event)"
-                class="action-button"
-              >
-                Start
-                <ion-icon slot="end" name="chevron-forward-outline"></ion-icon>
-              </ion-button>
-            }
           </ion-item>
         }
       </ion-list>

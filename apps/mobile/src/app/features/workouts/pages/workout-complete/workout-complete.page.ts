@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   IonContent,
@@ -12,7 +12,6 @@ import {
   IonCardTitle,
   IonCardContent,
   IonSpinner,
-  IonText,
   IonBadge,
   IonList,
   IonItem,
@@ -33,7 +32,6 @@ import {
 import { WorkoutSessionService } from '../../../../core/services/workout-session.service';
 import { CelebrationService } from '../../../../core/services/celebration.service';
 import { HapticService } from '../../../../core/services/haptic.service';
-import { GamificationService } from '../../../../core/services/gamification.service';
 
 interface WorkoutSummary {
   name: string;
@@ -54,6 +52,12 @@ interface PersonalRecord {
   unit: string;
 }
 
+interface WorkoutSet {
+  workout_exercise_id: string;
+  reps_completed?: number | null;
+  weight_used?: number | null;
+}
+
 @Component({
   selector: 'app-workout-complete',
   standalone: true,
@@ -70,12 +74,11 @@ interface PersonalRecord {
     IonCardTitle,
     IonCardContent,
     IonSpinner,
-    IonText,
     IonBadge,
     IonList,
     IonItem,
-    IonLabel,
-  ],
+    IonLabel
+],
   template: `
     <ion-header class="ion-no-border">
       <ion-toolbar>
@@ -467,7 +470,6 @@ export class WorkoutCompletePage implements OnInit {
   private sessionService = inject(WorkoutSessionService);
   private celebration = inject(CelebrationService);
   private haptic = inject(HapticService);
-  private gamification = inject(GamificationService);
 
   loading = signal(true);
   summary = signal<WorkoutSummary>({
@@ -584,13 +586,13 @@ export class WorkoutCompletePage implements OnInit {
     this.loading.set(false);
   }
 
-  private async checkPersonalRecords(sets: any[]): Promise<void> {
+  private async checkPersonalRecords(sets: WorkoutSet[]): Promise<void> {
     // In production, this would compare against historical PRs
     // For now, we'll check if any set exceeds typical baselines
     const prs: PersonalRecord[] = [];
 
     // Group sets by exercise
-    const exerciseSets = new Map<string, any[]>();
+    const exerciseSets = new Map<string, WorkoutSet[]>();
     for (const set of sets) {
       const existing = exerciseSets.get(set.workout_exercise_id) || [];
       existing.push(set);
@@ -599,7 +601,7 @@ export class WorkoutCompletePage implements OnInit {
 
     // Check max weight per exercise (simplified PR detection)
     // In production, compare against user's historical data
-    for (const [exerciseId, exerciseSetsArr] of exerciseSets) {
+    for (const [, exerciseSetsArr] of exerciseSets) {
       const maxWeight = Math.max(...exerciseSetsArr.map(s => s.weight_used || 0));
       if (maxWeight > 0) {
         // This would check against actual PR history
@@ -681,7 +683,7 @@ export class WorkoutCompletePage implements OnInit {
           title: 'Workout Complete!',
           text: shareText,
         });
-      } catch (error) {
+      } catch {
         // User cancelled or share failed
         console.log('Share cancelled or failed');
       }

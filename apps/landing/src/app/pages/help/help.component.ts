@@ -52,7 +52,7 @@ import type { FAQItem, HelpCategory, AccordionItem } from '@fitos/libs';
             <p class="hint">Try different keywords or browse by category</p>
           </div>
         } @else {
-          <fitos-accordion [items]="accordionItems()" [singleExpand]="true" />
+          <lib-accordion [items]="accordionItems()" [singleExpand]="true" />
         }
       </div>
 

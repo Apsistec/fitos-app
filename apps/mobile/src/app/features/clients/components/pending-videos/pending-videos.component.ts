@@ -18,8 +18,6 @@ import {
   IonBadge,
   IonList,
   IonItem,
-  IonLabel,
-  IonNote,
   IonSpinner,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -59,8 +57,6 @@ import {
     IonBadge,
     IonList,
     IonItem,
-    IonLabel,
-    IonNote,
     IonSpinner,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,

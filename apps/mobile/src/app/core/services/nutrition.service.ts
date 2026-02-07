@@ -117,7 +117,7 @@ export class NutritionService {
       this.errorSignal.set(null);
 
       // Try to get existing log
-      const { data: log, error: logError } = await this.supabase
+      let { data: log, error: logError } = await this.supabase
         .from('nutrition_logs')
         .select('*')
         .eq('client_id', clientId)

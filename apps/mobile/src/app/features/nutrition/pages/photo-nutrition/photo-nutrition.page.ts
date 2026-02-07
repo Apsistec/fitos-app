@@ -9,7 +9,6 @@ import {
   IonBackButton,
   IonButtons,
   IonButton,
-  IonSpinner,
   ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -43,7 +42,6 @@ import { HapticService } from '../../../../core/services/haptic.service';
     IonBackButton,
     IonButtons,
     IonButton,
-    IonSpinner,
     PhotoCaptureComponent,
     FoodIdentificationResultsComponent,
   ],

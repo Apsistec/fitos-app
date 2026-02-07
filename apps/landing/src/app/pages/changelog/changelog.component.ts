@@ -27,7 +27,7 @@ export interface ChangelogVersion {
 
       <div class="changelog-content">
         @if (accordionItems.length > 0) {
-          <fitos-accordion
+          <lib-accordion
             [items]="accordionItems"
             [singleExpand]="true"
             [defaultExpandedId]="accordionItems[0].id"

@@ -238,7 +238,7 @@ import type { AccordionItem } from '@fitos/libs';
       <div class="faq-section">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 class="section-heading">Frequently Asked Questions</h2>
-          <fitos-accordion [items]="faqItems" [singleExpand]="true" />
+          <lib-accordion [items]="faqItems" [singleExpand]="true" />
         </div>
       </div>
 

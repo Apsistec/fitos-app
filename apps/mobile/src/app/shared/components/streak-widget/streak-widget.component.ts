@@ -17,7 +17,6 @@ import {
   IonIcon,
   IonBadge,
   IonButton,
-  IonText,
   IonSpinner,
   AlertController,
 } from '@ionic/angular/standalone';
@@ -68,7 +67,6 @@ import { HapticService } from '../../../core/services/haptic.service';
     IonBadge,
     IonIcon,
     IonButton,
-    IonText,
     IonSpinner,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,

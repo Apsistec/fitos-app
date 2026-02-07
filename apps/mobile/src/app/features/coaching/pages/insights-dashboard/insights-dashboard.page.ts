@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import {
   IonContent,
   IonHeader,
@@ -18,7 +19,6 @@ import {
   IonSegmentButton,
   IonLabel,
   IonChip,
-  IonText,
   IonProgressBar,
   IonBadge,
   IonRefresher,
@@ -90,6 +90,7 @@ export interface ProgressMetric {
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     IonContent,
     IonHeader,
     IonTitle,
@@ -106,7 +107,6 @@ export interface ProgressMetric {
     IonSegmentButton,
     IonLabel,
     IonChip,
-    IonText,
     IonProgressBar,
     IonBadge,
     IonRefresher,
