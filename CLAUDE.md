@@ -334,15 +334,29 @@ Coverage target: >80% for services.
 
 ## Environment Variables
 
-Required in `.env`:
+**Single root `.env` file** — used by all apps (mobile, ai-backend, edge functions).
+
+See the `.env` file itself for inline comments on where to get each key.
+
+Key groups:
 ```
-SUPABASE_URL=
-SUPABASE_ANON_KEY=
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
-TERRA_API_KEY=
-TERRA_DEV_ID=
-DEEPGRAM_API_KEY=
+# Supabase
+SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
+
+# Stripe
+STRIPE_PUBLISHABLE_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_THIN_WEBHOOK_SECRET
+
+# Terra (Wearables)
+TERRA_API_KEY, TERRA_DEV_ID, TERRA_WEBHOOK_SECRET
+
+# AI Providers
+ANTHROPIC_API_KEY, DEEPGRAM_API_KEY
+
+# Nutrition
+USDA_API_KEY
+
+# Email
+RESEND_API_KEY
 ```
 
 ---

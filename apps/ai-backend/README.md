@@ -36,11 +36,7 @@ poetry install
 
 ### 2. Configure Environment
 
-```bash
-cp .env.example .env
-```
-
-Edit `.env` and add your API keys:
+All configuration is in the **root `.env`** file (`../../.env`). Add your API keys there:
 
 ```bash
 # Required: Choose one LLM provider
@@ -284,7 +280,7 @@ poetry run mypy app
 
 ## Configuration
 
-See `.env.example` for all available settings:
+See the root `.env` file for all available settings:
 
 - **LLM Provider**: Choose Anthropic (Claude) or OpenAI (GPT-4)
 - **Models**: Use fast models (Haiku/GPT-4o-mini) for routing, smart models (Sonnet/GPT-4o) for coaching

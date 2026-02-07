@@ -1,7 +1,11 @@
 """Application configuration using Pydantic Settings"""
 
+from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List
+
+# Resolve path to root .env (two levels up from apps/ai-backend/)
+_ROOT_ENV = Path(__file__).resolve().parents[3] / ".env"
 
 
 class Settings(BaseSettings):
@@ -41,7 +45,7 @@ class Settings(BaseSettings):
     INTERVENTION_THRESHOLD: float = 0.7
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=str(_ROOT_ENV),
         env_file_encoding="utf-8",
         case_sensitive=True,
     )

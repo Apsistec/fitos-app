@@ -210,7 +210,7 @@ Opens Android Studio. Requires Google Play account ($25 one-time)
 ### Voice Logging (Deepgram)
 
 1. Get API key: https://console.deepgram.com
-2. Add to `apps/ai-backend/.env`:
+2. Add to root `.env`:
    ```
    DEEPGRAM_API_KEY=your_key_here
    ```

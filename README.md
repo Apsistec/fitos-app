@@ -52,8 +52,8 @@ npm install
 ### 2. Setup Environment
 
 ```bash
-cp .env.example .env
-# Edit .env with your credentials
+# Edit .env at the project root with your credentials
+# The file has inline comments explaining where to get each key
 ```
 
 ### 3. Start Supabase (requires Docker)

@@ -10,8 +10,8 @@ cd apps/ai-backend
 # Run setup script
 ./scripts/setup.sh
 
-# Add your API key to .env
-echo "ANTHROPIC_API_KEY=sk-ant-your-key-here" >> .env
+# Add your API key to root .env
+echo "ANTHROPIC_API_KEY=sk-ant-your-key-here" >> ../../.env
 
 # Start server
 poetry run uvicorn main:app --reload
@@ -30,9 +30,8 @@ curl -sSL https://install.python-poetry.org | python3 -
 # Install dependencies
 poetry install
 
-# Configure environment
-cp .env.example .env
-# Edit .env and add your API keys
+# All config is in the root .env file (../../.env)
+# Edit it and add your API keys
 
 # Run server
 poetry run uvicorn main:app --reload --host 0.0.0.0 --port 8000
@@ -183,8 +182,8 @@ poetry install
 
 ### "ANTHROPIC_API_KEY not set"
 ```bash
-# Add your API key to .env
-echo "ANTHROPIC_API_KEY=sk-ant-your-key" >> .env
+# Add your API key to the root .env
+echo "ANTHROPIC_API_KEY=sk-ant-your-key" >> ../../.env
 ```
 
 ### "Port 8000 already in use"

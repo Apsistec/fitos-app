@@ -32,20 +32,20 @@ fi
 echo "📦 Installing dependencies..."
 poetry install
 
-# Create .env if it doesn't exist
-if [ ! -f .env ]; then
-    echo "🔧 Creating .env file..."
-    cp .env.example .env
-    echo "⚠️  Please edit .env and add your API keys"
+# Check root .env exists
+ROOT_ENV="../../.env"
+if [ ! -f "$ROOT_ENV" ]; then
+    echo "⚠️  Root .env file not found at $ROOT_ENV"
+    echo "   Create it from the project root with your API keys"
 else
-    echo "✅ .env file already exists"
+    echo "✅ Root .env file found"
 fi
 
 echo ""
 echo "✅ Setup complete!"
 echo ""
 echo "Next steps:"
-echo "  1. Edit .env and add your API keys (ANTHROPIC_API_KEY or OPENAI_API_KEY)"
-echo "  2. Run: poetry run uvicorn main:app --reload"
+echo "  1. Edit the root .env and add your API keys (ANTHROPIC_API_KEY or OPENAI_API_KEY)"
+echo "  2. Run from project root: npm run ai:dev"
 echo "  3. Visit: http://localhost:8000/docs"
 echo ""

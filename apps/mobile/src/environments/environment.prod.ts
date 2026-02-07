@@ -13,6 +13,6 @@ export const environment = {
   supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtY29nbW9wYm9lYnFpaW16b2VqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjczNDYwMjgsImV4cCI6MjA4MjkyMjAyOH0.PfhMh-erVyqlkkTDFFwkt0g8IzAUuddngIoFReJTYPA',
   stripePublishableKey: 'pk_test_51SaoYU8dyNFOBioE9PzoGWPwMCeM7yET0I2mRbkq2LjwLFU0ICxvkTzF3EjwgNYYS72PKvIxjVwTL4HALdeHXFZR00PFVjwXG8', // Using test key for alpha
   terraApiKey: '',
-  usdaApiKey: '', // USDA FoodData Central API key
+  usdaApiKey: 'whIXShXv6RIuHypBFNTLSdrWNc4ad9kSabiKT9D5',
   aiBackendUrl: 'http://localhost:8000', // TODO: Deploy AI backend to Cloud Run
 };

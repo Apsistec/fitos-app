@@ -95,7 +95,6 @@ apps/ai-backend/
 │   └── [feature modules]  # Nutrition, recovery, chronotype, etc.
 ├── tests/                 # pytest tests
 ├── scripts/               # Python setup scripts
-├── .env                   # Backend-specific env vars
 ├── main.py                # FastAPI entry point
 ├── pyproject.toml         # Poetry dependencies
 └── Dockerfile             # Cloud Run deployment
@@ -103,7 +102,7 @@ apps/ai-backend/
 
 **IMPORTANT:**
 - Main code is in `app/` folder (singular), NOT `apps/` (plural)
-- Has its own `.env` file separate from root
+- Uses the root `.env` file (loaded via `app/core/config.py`)
 - Scripts are Python-specific (setup.sh, run-tests.sh)
 
 **Nx Commands:**
@@ -173,33 +172,28 @@ libs/src/
 
 **All documentation lives here**, not in root (except CLAUDE.md and README.md).
 
-**Categories:**
+**Active docs (reference material used during development):**
 
-**Design & UX:**
 - `DESIGN_SYSTEM.md` - Colors, typography, spacing
 - `THEMING.md` - Dark/light mode implementation
 - `UX_PATTERNS.md` - Friction reduction, navigation
-
-**Development:**
-- `ANGULAR_IONIC_RULES.md` - Angular 21 patterns, Ionic 8 APIs
 - `TYPE_SYSTEM_GUIDELINES.md` - Type organization rules
-- `DEVELOPMENT_WORKFLOW.md` - Git workflow, testing
-
-**Features:**
 - `AI_INTEGRATION.md` - Voice, photo AI, coaching
 - `CRM_MARKETING.md` - Lead pipeline, email automation
 - `HIPAA_COMPLIANCE.md` - PHI handling, consent management
-
-**Deployment:**
-- `BUILD_MOBILE_APPS.md` - iOS/Android build process
-- `DEPLOY.md` - Deployment options
+- `OFFLINE_SYNC.md` - Offline-first patterns
+- `SETTINGS_PROFILE_UX.md` - Settings page standards
+- `USER_ROLES_ARCHITECTURE.md` - RBAC, dashboards by role
+- `COMPETITIVE_ANALYSIS.md` - Market research, feature gaps
+- `PHASE1_BACKLOG.md` / `PHASE2_BACKLOG.md` - MVP & AI feature backlogs
+- `STRIPE_CONNECT_IMPLEMENTATION.md` - Payments architecture
+- `WEARABLE_INTEGRATION.md` - Terra API integration
+- `SUPABASE_OAUTH_SETUP.md` - Auth provider configuration
+- `REQUIRED_EXTERNAL_APIS.md` - API key setup guide
 - `LAUNCH_CHECKLIST.md` - Pre-launch tasks
+- `QUICK_START.md` - Getting started for developers
 
-**Status:**
-- `STATUS.md` - Current project status
-- `DEPENDENCY_UPDATE_*.md` - Dependency update logs
-- `TYPE_CONSOLIDATION_*.md` - Type refactoring logs
-- `ALL_SPRINTS_COMPLETE.md` - Sprint completion status
+**Archived docs:** `docs/archive/` contains historical sprint summaries, deployment logs, troubleshooting notes, and planning documents.
 
 ---
 
@@ -263,20 +257,19 @@ libs/src/
 
 ### Environment Variables
 
-**Root `.env`**
+**Single root `.env`** — All apps read from this one file.
 - Supabase keys (URL, anon key, service role key)
-- Shared API keys
-- Development settings
-
-**`apps/ai-backend/.env`**
-- Python-specific environment
-- Anthropic API key
-- Deepgram API key
-- Backend-specific Supabase keys
+- Stripe keys (publishable, secret, webhook secrets)
+- Terra API keys (wearables)
+- AI provider keys (Anthropic, OpenAI, Deepgram)
+- Nutrition API keys (USDA, Nutritionix, Passio)
+- OAuth provider keys (Google, Apple)
+- AI backend configuration (LLM provider, model, tokens)
+- Application settings (ports, CORS, log level)
 
 **Important:**
-- **NO `.env.example` files** - Use commented `.env` instead
-- Each `.env` file documents all required variables with comments
+- **ONE `.env` file** at root — no separate per-app .env files
+- **NO `.env.example` files** — the `.env` itself has inline comments
 - Never commit `.env` files (in .gitignore)
 
 ---
@@ -543,7 +536,7 @@ nx test shared
 - ✅ No `angular.json` at root (correct for Nx)
 - ✅ `libs/src` and `libs/shared` are separate libraries (intentional)
 - ✅ Scripts in root vs ai-backend serve different purposes
-- ✅ `.env` in root vs ai-backend are for different environments
+- ✅ Single `.env` at root shared by all apps
 - ✅ `.angular/` folders in root and mobile are build caches (normal)
 
 **Documentation Added:**
@@ -556,5 +549,4 @@ nx test shared
 
 - `CLAUDE.md` - Project rules and quick reference
 - `TYPE_SYSTEM_GUIDELINES.md` - Type organization rules
-- `DEVELOPMENT_WORKFLOW.md` - Git workflow and testing
-- `ANGULAR_IONIC_RULES.md` - Angular 21 coding patterns
+- `REQUIRED_EXTERNAL_APIS.md` - API key setup guide

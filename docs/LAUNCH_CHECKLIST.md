@@ -53,11 +53,11 @@
 
 ---
 
-### 3. Create AI Backend .env File (2 minutes)
+### 3. Configure API Keys in Root .env (2 minutes)
 
-I'll create this file for you once you provide the keys above.
+All API keys are configured in the single root `.env` file.
 
-**File:** `/Users/dougwhite/Dev/fitos-app/apps/ai-backend/.env`
+**File:** `/Users/dougwhite/Dev/fitos-app/.env`
 
 ```bash
 # LLM Provider (choose one)

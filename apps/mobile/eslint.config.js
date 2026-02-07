@@ -1,6 +1,10 @@
 // @ts-check
 import angular from 'angular-eslint';
 import tseslint from 'typescript-eslint';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default tseslint.config(
   {
@@ -10,6 +14,12 @@ export default tseslint.config(
       ...angular.configs.tsRecommended,
     ],
     processor: angular.processInlineTemplates,
+    languageOptions: {
+      parserOptions: {
+        project: './tsconfig.json',
+        tsconfigRootDir: __dirname,
+      },
+    },
     rules: {
       '@angular-eslint/directive-selector': [
         'error',
