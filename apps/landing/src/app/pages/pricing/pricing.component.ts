@@ -64,7 +64,7 @@ import type { AccordionItem } from '@fitos/libs';
                 </ul>
               </div>
               <div class="card-footer">
-                <a href="https://app.fitos.app/register" class="cta-button secondary">Get Started Free</a>
+                <a href="https://www.nutrifitos.app/auth/register" class="cta-button secondary">Get Started Free</a>
               </div>
             </div>
 
@@ -98,7 +98,7 @@ import type { AccordionItem } from '@fitos/libs';
                 </ul>
               </div>
               <div class="card-footer">
-                <a href="https://app.fitos.app/register?plan=starter" class="cta-button secondary">Start 14-Day Trial</a>
+                <a href="https://www.nutrifitos.app/auth/register?plan=starter" class="cta-button secondary">Start 14-Day Trial</a>
               </div>
             </div>
 
@@ -133,7 +133,7 @@ import type { AccordionItem } from '@fitos/libs';
                 </ul>
               </div>
               <div class="card-footer">
-                <a href="https://app.fitos.app/register?plan=pro" class="cta-button primary">Start 14-Day Trial</a>
+                <a href="https://www.nutrifitos.app/auth/register?plan=pro" class="cta-button primary">Start 14-Day Trial</a>
               </div>
             </div>
 
@@ -167,7 +167,7 @@ import type { AccordionItem } from '@fitos/libs';
                 </ul>
               </div>
               <div class="card-footer">
-                <a href="https://app.fitos.app/register?plan=business" class="cta-button secondary">Start 14-Day Trial</a>
+                <a href="https://www.nutrifitos.app/auth/register?plan=business" class="cta-button secondary">Start 14-Day Trial</a>
               </div>
             </div>
           </div>
@@ -249,8 +249,8 @@ import type { AccordionItem } from '@fitos/libs';
           <p class="cta-text">
             No credit card required. Cancel anytime. Get full access to all Pro features during your trial.
           </p>
-          <a href="https://app.fitos.app/register" class="cta-button large">Try FitOS Free</a>
-          <p class="cta-note">Have questions? <a href="/help" class="help-link">Visit our help center</a> or <a href="mailto:sales@fitos.app" class="help-link">email sales</a></p>
+          <a href="https://www.nutrifitos.app/auth/register" class="cta-button large">Try FitOS Free</a>
+          <p class="cta-note">Have questions? <a href="/help" class="help-link">Visit our help center</a> or <a href="mailto:sales@nutrifitos.com" class="help-link">email sales@nutrifitos.com</a></p>
         </div>
       </div>
     </div>

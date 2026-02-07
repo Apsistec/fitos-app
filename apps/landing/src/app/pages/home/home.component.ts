@@ -33,7 +33,7 @@ import { IconComponent, type IconName } from '../../components/icon/icon.compone
 
           <!-- CTA Buttons -->
           <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="https://app.fitos.app/auth/register" class="btn-primary text-lg px-8 py-4">
+            <a href="https://www.nutrifitos.app/auth/register" class="btn-primary text-lg px-8 py-4">
               Start Free Trial
               <app-icon name="arrow-right" size="sm" class="ml-2" />
             </a>
@@ -157,7 +157,7 @@ import { IconComponent, type IconName } from '../../components/icon/icon.compone
                 <span>AI coaching assistant</span>
               </li>
             </ul>
-            <a href="https://app.fitos.app/auth/register"
+            <a href="https://www.nutrifitos.app/auth/register"
                class="block w-full bg-white text-primary-600 font-semibold py-4 rounded-xl hover:bg-primary-50 transition-colors">
               Start 14-Day Free Trial
             </a>
@@ -210,7 +210,7 @@ import { IconComponent, type IconName } from '../../components/icon/icon.compone
           Join 500+ trainers who've already made the switch.
           Start your free trial today — no credit card required.
         </p>
-        <a href="https://app.fitos.app/auth/register"
+        <a href="https://www.nutrifitos.app/auth/register"
            class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-primary-600 bg-white rounded-xl hover:bg-primary-50 transition-colors shadow-xl">
           Get Started Free
           <app-icon name="arrow-right" size="sm" class="ml-2" />

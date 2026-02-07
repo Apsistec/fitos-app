@@ -363,8 +363,8 @@ RESEND_API_KEY
 
 ## Production URLs
 
-- **Mobile App (PWA)**: https://fitos-mobile.web.app
-- **Landing Page**: https://fitos-landing.web.app (if deployed)
+- **Mobile App (PWA)**: https://www.nutrifitos.app
+- **Landing Page**: https://www.nutrifitos.com
 - **Supabase Project**: `dmcogmopboebqiimzoej`
 
 ---

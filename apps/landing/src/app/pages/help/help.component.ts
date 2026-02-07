@@ -65,7 +65,7 @@ import type { FAQItem, HelpCategory, AccordionItem } from '@fitos/libs';
             Submit Support Request
           </button>
           <p class="email-option">
-            Or email us directly at <a href="mailto:support@fitos.app" class="email-link">support@fitos.app</a>
+            Or email us directly at <a href="mailto:support@nutrifitos.com" class="email-link">support@nutrifitos.com</a>
           </p>
         }
 
@@ -643,13 +643,13 @@ export class HelpComponent {
       );
 
       // Open mailto in new tab (non-blocking)
-      window.open(`mailto:support@fitos.app?subject=${subject}&body=${body}`, '_blank');
+      window.open(`mailto:support@nutrifitos.com?subject=${subject}&body=${body}`, '_blank');
 
       this.submitSuccess.set(true);
     } catch (error) {
       console.error('Failed to submit support ticket:', error);
       this.submitError.set(
-        'Failed to submit support request. Please try again or email us directly at support@fitos.app.'
+        'Failed to submit support request. Please try again or email us directly at support@nutrifitos.com.'
       );
     } finally {
       this.isSubmitting.set(false);

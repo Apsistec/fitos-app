@@ -440,7 +440,7 @@ export class EmailTemplateEditorComponent {
       client_name: 'John Doe',
       client_email: 'john@example.com',
       trainer_name: 'Alex Trainer',
-      trainer_email: 'alex@fitos.app',
+      trainer_email: 'alex@nutrifitos.com',
       current_date: new Date().toLocaleDateString(),
       unsubscribe_link: '[Unsubscribe Link]',
     };

@@ -225,7 +225,7 @@ export class ContactSupportPage implements OnInit {
       console.error('Failed to submit support request:', error);
 
       const errorToast = await this.toastController.create({
-        message: 'Failed to submit support request. Please try again or email support@fitos.app.',
+        message: 'Failed to submit support request. Please try again or email support@nutrifitos.com.',
         duration: 5000,
         color: 'danger',
         position: 'top',
@@ -251,6 +251,6 @@ export class ContactSupportPage implements OnInit {
   }
 
   openEmailClient() {
-    window.location.href = 'mailto:support@fitos.app?subject=FitOS Support Request';
+    window.location.href = 'mailto:support@nutrifitos.com?subject=FitOS Support Request';
   }
 }

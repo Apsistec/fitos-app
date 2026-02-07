@@ -40,10 +40,10 @@ import { IconComponent } from '../icon/icon.component';
           <!-- CTA Buttons + Theme Toggle -->
           <div class="hidden md:flex items-center gap-4">
             <app-theme-toggle />
-            <a href="https://app.fitos.app/auth/login" class="btn-ghost">
+            <a href="https://www.nutrifitos.app/auth/login" class="btn-ghost">
               Sign In
             </a>
-            <a href="https://app.fitos.app/auth/register" class="btn-primary">
+            <a href="https://www.nutrifitos.app/auth/register" class="btn-primary">
               Get Started Free
             </a>
           </div>
@@ -81,11 +81,11 @@ import { IconComponent } from '../icon/icon.component';
                 Docs
               </a>
               <hr class="mobile-divider" />
-              <a href="https://app.fitos.app/auth/login"
+              <a href="https://www.nutrifitos.app/auth/login"
                  class="mobile-nav-link">
                 Sign In
               </a>
-              <a href="https://app.fitos.app/auth/register" class="btn-primary text-center">
+              <a href="https://www.nutrifitos.app/auth/register" class="btn-primary text-center">
                 Get Started Free
               </a>
             </div>

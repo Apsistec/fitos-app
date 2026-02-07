@@ -217,7 +217,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
             Join solo trainers who've switched from Trainerize, TrueCoach, and PT Distinction. Unlimited clients, no per-client fees, and AI features that actually work.
           </p>
           <div class="cta-buttons">
-            <a href="https://app.fitos.app" class="cta-button primary">Start Free Trial</a>
+            <a href="https://www.nutrifitos.app/auth/register" class="cta-button primary">Start Free Trial</a>
             <a href="/pricing" class="cta-button secondary">See Pricing</a>
           </div>
           <p class="cta-note">14-day free trial. No credit card required.</p>

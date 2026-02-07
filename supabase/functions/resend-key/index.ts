@@ -63,7 +63,7 @@ serve(async (req) => {
 
     // Get Resend API key
     const resendKey = Deno.env.get('RESEND_API_KEY');
-    const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@fitos.app';
+    const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@nutrifitos.com';
 
     if (!resendKey) {
       console.error('RESEND_API_KEY environment variable not set');

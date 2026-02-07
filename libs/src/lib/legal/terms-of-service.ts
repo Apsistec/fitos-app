@@ -207,8 +207,8 @@ export const TERMS_OF_SERVICE: LegalDocument = {
       content: `
         <p>If you have questions about these Terms, please contact us:</p>
         <ul>
-          <li>Email: <a href="mailto:legal@fitos.app">legal@fitos.app</a></li>
-          <li>Website: <a href="https://fitos.app/contact">https://fitos.app/contact</a></li>
+          <li>Email: <a href="mailto:legal@nutrifitos.com">legal@nutrifitos.com</a></li>
+          <li>Website: <a href="https://www.nutrifitos.com/help">https://www.nutrifitos.com/help</a></li>
         </ul>
       `,
     },

@@ -131,7 +131,7 @@ export const PRIVACY_POLICY: LegalDocument = {
           <li><strong>Opt-Out:</strong> Unsubscribe from marketing emails</li>
           <li><strong>Withdraw Consent:</strong> Revoke consent for wearable data collection</li>
         </ul>
-        <p>To exercise these rights, please contact us at <a href="mailto:privacy@fitos.app">privacy@fitos.app</a>. We will respond within 30 days.</p>
+        <p>To exercise these rights, please contact us at <a href="mailto:privacy@nutrifitos.com">privacy@nutrifitos.com</a>. We will respond within 30 days.</p>
       `,
     },
     {
@@ -149,7 +149,7 @@ export const PRIVACY_POLICY: LegalDocument = {
     {
       title: 'Children\'s Privacy',
       content: `
-        <p>FitOS is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13. If you are a parent or guardian and believe your child has provided us with personal information, please contact us at <a href="mailto:privacy@fitos.app">privacy@fitos.app</a>.</p>
+        <p>FitOS is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13. If you are a parent or guardian and believe your child has provided us with personal information, please contact us at <a href="mailto:privacy@nutrifitos.com">privacy@nutrifitos.com</a>.</p>
       `,
     },
     {
@@ -169,7 +169,7 @@ export const PRIVACY_POLICY: LegalDocument = {
       content: `
         <p>If you have questions or concerns about this Privacy Policy, please contact us:</p>
         <ul>
-          <li>Email: <a href="mailto:privacy@fitos.app">privacy@fitos.app</a></li>
+          <li>Email: <a href="mailto:privacy@nutrifitos.com">privacy@nutrifitos.com</a></li>
           <li>Website: <a href="https://fitos.app/contact">https://fitos.app/contact</a></li>
         </ul>
       `,

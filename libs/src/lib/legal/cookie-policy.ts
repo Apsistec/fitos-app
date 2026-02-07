@@ -163,8 +163,8 @@ export const COOKIE_POLICY: LegalDocument = {
       content: `
         <p>If you have questions about our use of cookies, please contact us:</p>
         <ul>
-          <li>Email: <a href="mailto:privacy@fitos.app">privacy@fitos.app</a></li>
-          <li>Website: <a href="https://fitos.app/contact">https://fitos.app/contact</a></li>
+          <li>Email: <a href="mailto:privacy@nutrifitos.com">privacy@nutrifitos.com</a></li>
+          <li>Website: <a href="https://www.nutrifitos.com/help">https://www.nutrifitos.com/help</a></li>
         </ul>
       `,
     },

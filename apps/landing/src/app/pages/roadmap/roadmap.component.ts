@@ -41,7 +41,7 @@ interface RoadmapItem {
 
       <div class="feedback-section">
         <h2>Have a feature request?</h2>
-        <p>We'd love to hear from you. Email us at <a href="mailto:feedback@fitos.app">feedback@fitos.app</a></p>
+        <p>We'd love to hear from you. Email us at <a href="mailto:feedback@nutrifitos.com">feedback@nutrifitos.com</a></p>
       </div>
     </div>
   `,

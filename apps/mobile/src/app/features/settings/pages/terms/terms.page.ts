@@ -181,7 +181,7 @@ import { FormsModule } from '@angular/forms';
               <p>
                 If you have questions about these Terms, please contact us at:
                 <br><br>
-                Email: legal@fitos.app
+                Email: legal@nutrifitos.com
                 <br>
                 Address: [Your Company Address]
               </p>
@@ -321,9 +321,9 @@ import { FormsModule } from '@angular/forms';
               <p>
                 For privacy-related questions or to exercise your rights:
                 <br><br>
-                Email: privacy@fitos.app
+                Email: privacy@nutrifitos.com
                 <br>
-                Data Protection Officer: dpo@fitos.app
+                Data Protection Officer: dpo@nutrifitos.com
               </p>
             </section>
 

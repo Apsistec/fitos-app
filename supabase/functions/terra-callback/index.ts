@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const WEB_APP_URL = Deno.env.get('WEB_APP_URL') || 'https://fitos-mobile.web.app';
+const WEB_APP_URL = Deno.env.get('WEB_APP_URL') || 'https://www.nutrifitos.app';
 
 /**
  * Build the redirect URL based on the platform.
