@@ -1,0 +1,187 @@
+================================================================================
+FITOS USER JOURNEYS & ROLE ARCHITECTURE - DOCUMENT GENERATION SUMMARY
+================================================================================
+
+DOCUMENT LOCATION:
+/sessions/pensive-clever-heisenberg/mnt/fitos-app/docs/FitOS_User_Journeys_and_Role_Architecture.docx
+
+DOCUMENT SPECIFICATIONS:
+✓ Format: Microsoft Word 2007+ (.docx)
+✓ File Size: 23 KB
+✓ Page Layout: US Letter (12240 x 15840 DXA)
+✓ Font: Arial throughout
+✓ Color Scheme: Primary (Dark Blue #1F4788), Accent (Bright Blue #0066CC), Light Gray (#F5F5F5)
+
+DOCUMENT STRUCTURE:
+================================================================================
+
+1. TITLE PAGE
+   - Professional title page with FitOS branding
+   - Document version and generation date
+   - Page break for separation
+
+2. TABLE OF CONTENTS
+   - All major sections listed
+   - Color-coded entries for navigation
+
+3. EXECUTIVE SUMMARY (Section 1)
+   - Overview of FitOS platform and three user roles
+   - Current state issues documented:
+     * Auth allows cross-role login
+     * Single shared dashboard with conditional rendering
+     * Insufficient role-based access control
+     * Missing onboarding flows per role
+     * Stubbed/empty dashboard data
+
+4. CURRENT STATE ANALYSIS (Section 2)
+   - Detailed critical issues:
+     * Security: Cross-role authentication bypass
+     * Architecture: Fragile dashboard approach
+     * Permissions: Lacks RLS and API-level enforcement
+   - Recommended solutions for implementation
+
+5. CLIENT USER JOURNEYS (Section 3)
+   - 28 comprehensive journeys organized in 9 categories:
+     * Onboarding (4 journeys)
+     * Workouts (5 journeys)
+     * Nutrition (5 journeys)
+     * Communication (3 journeys)
+     * Recovery & Wellness (3 journeys)
+     * Gamification & Social (3 journeys)
+     * Account & Settings (5 journeys)
+   - Each journey includes: Code (J-C##), Category, Title, Detailed Description
+
+6. TRAINER USER JOURNEYS (Section 4)
+   - 36 comprehensive journeys organized in 11 categories:
+     * Onboarding (4 journeys)
+     * Client Management (6 journeys)
+     * Workout Management (5 journeys)
+     * Video & Form Review (2 journeys)
+     * Communication (3 journeys)
+     * CRM & Business (5 journeys)
+     * Analytics & Revenue (4 journeys)
+     * Time & Session Management (3 journeys)
+     * Account & Settings (4 journeys)
+   - Each journey includes: Code (J-T##), Category, Title, Detailed Description
+
+7. GYM OWNER USER JOURNEYS (Section 5)
+   - 26 comprehensive journeys organized in 8 categories:
+     * Onboarding (4 journeys)
+     * Trainer Management (4 journeys)
+     * Client/Member Oversight (3 journeys)
+     * Business & Revenue (5 journeys)
+     * Analytics & Reporting (3 journeys)
+     * CRM & Marketing (3 journeys)
+     * Settings & Administration (4 journeys)
+   - Each journey includes: Code (J-O##), Category, Title, Detailed Description
+
+8. TAB NAVIGATION ARCHITECTURE (Section 6)
+   - Client Tabs: Home, Workouts, Nutrition, AI Coach, More
+   - Trainer Tabs: Home, Clients, Workouts, Business, More
+   - Owner Tabs: Home, Trainers, Members, Business, More
+   - Detailed descriptions of each tab's purpose and contents
+
+9. FEATURE MATRIX (Section 7)
+   - Professional table showing feature access by role
+   - 20+ features across Client, Trainer, and Owner columns
+   - ✓ checkmarks for accessible features
+   - Color-coded header row with dark blue background
+   - Alternating row shading for readability
+
+10. PERMISSION ENFORCEMENT STRATEGY (Section 8)
+    - 8 comprehensive enforcement layers:
+      1. Route Guards (Application Level)
+         - Role-specific route lists
+      2. Tab Visibility (UI Level)
+         - JWT-based conditional rendering
+      3. Feature Flags (Component Level)
+         - Per-role dashboard widgets
+      4. API-Level RLS (Database Level)
+         - Supabase RLS policies
+         - Data isolation by role
+      5. Middleware Validation (Edge Functions)
+         - Permission checking before processing
+      6. Token-Based Authorization
+         - JWT structure and management
+      7. Data Isolation Strategy
+         - Table-level isolation patterns
+      8. Audit & Compliance
+         - HIPAA and GDPR logging
+
+FORMATTING & STYLING:
+================================================================================
+✓ Headers: Hierarchical heading levels (1-3) with color-coded borders
+  - Level 1 (H1): 32pt, Dark Blue, Double border
+  - Level 2 (H2): 28pt, Dark Blue, Single border
+  - Level 3 (H3): 24pt, Dark Blue, Single border
+
+✓ Body Text: 22pt Arial, Dark Gray (#333333)
+  - Proper spacing (240 line height, 100-120pt after)
+  - Left alignment for readability
+
+✓ Bullet Points: 
+  - Multi-level nesting support
+  - Consistent formatting using docx-js numbering config
+  - 200-220 line height with 80pt spacing after
+
+✓ Tables:
+  - Proper cell widths in DXA units
+  - Dual width specification (columnWidths + cell width)
+  - ShadingType.CLEAR for backgrounds
+  - Professional borders (CCCCCC light gray)
+  - Header row with white text on dark blue background
+  - Feature column with light gray background
+
+✓ Page Layout:
+  - 1.0 inch margins on all sides (1440 DXA)
+  - Headers with document title (right-aligned)
+  - Footers with page numbers (center-aligned)
+  - Page breaks between major sections
+
+CONTENT SUMMARY:
+================================================================================
+Total Journeys: 90 user journeys across 3 roles
+  - Client: 28 journeys
+  - Trainer: 36 journeys
+  - Gym Owner: 26 journeys
+
+Total Features Documented: 20+ features in feature matrix
+Total Enforcement Strategies: 8 comprehensive layers
+Total Sections: 8 main sections + title + TOC
+
+Words Approximately: 8,000-10,000 words
+Professional Formatting: Fully compliant with specifications
+
+GENERATION SCRIPT:
+================================================================================
+Script Location: /sessions/pensive-clever-heisenberg/mnt/fitos-app/docs/generate-user-journeys.js
+Script Size: ~630 lines
+Dependencies: docx v9.5.1
+Node Version: 20+ required
+
+SCRIPT FEATURES:
+✓ Modular utility functions for document generation
+✓ Color scheme management for professional appearance
+✓ Hierarchical heading creation with proper spacing
+✓ Bullet point and body text formatting
+✓ Journey data organization with code/category/title/description
+✓ Feature matrix generation with proper table formatting
+✓ Journey section generation with category grouping
+✓ Professional document structure with title page and TOC
+
+USAGE:
+================================================================================
+To regenerate the document with modifications:
+  cd /sessions/pensive-clever-heisenberg/mnt/fitos-app/docs
+  node generate-user-journeys.js
+
+To add new journeys:
+  1. Add journey objects to clientJourneys, trainerJourneys, or ownerJourneys arrays
+  2. Follow format: { code, category, title, description }
+  3. Re-run the generation script
+
+================================================================================
+Generated: 2026-02-07
+Document Version: 1.0
+Status: Complete and Ready for Use
+================================================================================
