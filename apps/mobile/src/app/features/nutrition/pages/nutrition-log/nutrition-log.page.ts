@@ -31,6 +31,8 @@ import {
   trendingUpOutline,
   calendarOutline,
   trashOutline,
+  chevronBackOutline,
+  chevronForwardOutline,
 } from 'ionicons/icons';
 import { NutritionService, type NutritionSummary } from '../../../../core/services/nutrition.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -50,6 +52,8 @@ addIcons({
   trendingUpOutline,
   calendarOutline,
   trashOutline,
+  chevronBackOutline,
+  chevronForwardOutline,
 });
 
 interface WeeklyAverage {
@@ -363,6 +367,16 @@ interface WeeklyAverage {
                   💡 Weekly averages provide a more forgiving view of your nutrition.
                   Consistency over time matters more than hitting targets every single day.
                 </p>
+                <ion-button
+                  expand="block"
+                  fill="outline"
+                  size="small"
+                  class="history-button"
+                  (click)="navigateToHistory()"
+                >
+                  <ion-icon slot="start" name="trending-up-outline"></ion-icon>
+                  View Full History
+                </ion-button>
               </ion-card-content>
             </ion-card>
           }
@@ -580,6 +594,11 @@ interface WeeklyAverage {
       color: var(--fitos-text-secondary, #A3A3A3);
       font-size: 13px;
     }
+
+    .history-button {
+      margin-top: 16px;
+      --border-radius: 8px;
+    }
   `],
 })
 export class NutritionLogPage implements OnInit {
@@ -693,7 +712,11 @@ export class NutritionLogPage implements OnInit {
   }
 
   navigateToAddFood() {
-    this.router.navigate(['/tabs/nutrition/add-food']);
+    this.router.navigate(['/tabs/nutrition/add']);
+  }
+
+  navigateToHistory() {
+    this.router.navigate(['/tabs/nutrition/history']);
   }
 
   getProgressPercent(current: number, target: number): number {

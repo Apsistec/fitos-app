@@ -24,6 +24,7 @@ import {
   IonSegmentButton,
   IonLabel,
   ModalController,
+  AlertController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -508,6 +509,7 @@ export class AddFoodPage implements OnInit {
   private modalCtrl = inject(ModalController);
   private haptic = inject(HapticService);
   private toastCtrl = inject(ToastController);
+  private alertCtrl = inject(AlertController);
 
   // Input method
   inputMethod: 'search' | 'voice' | 'photo' = 'search';
@@ -560,17 +562,86 @@ export class AddFoodPage implements OnInit {
   }
 
   async selectFood(food: Food) {
-    // TODO: Open food detail modal with serving size selector
-    // For now, just navigate back with the selected food
-    console.log('Selected food:', food);
+    const userId = this.authService.user()?.id;
+    if (!userId) {
+      await this.showToast('Please log in to add foods', 'warning');
+      return;
+    }
 
-    // In the next epic (6.2 Nutrition Logging), we'll:
-    // 1. Open a modal to select serving size and meal type
-    // 2. Log the food entry
-    // 3. Navigate back to nutrition log
+    // Present serving size selector
+    const servingAlert = await this.alertCtrl.create({
+      header: food.name,
+      subHeader: food.brand
+        ? `${food.brand} • ${food.calories} cal per serving`
+        : `${food.calories} cal per serving`,
+      inputs: [
+        {
+          name: 'servings',
+          type: 'number',
+          placeholder: 'Number of servings',
+          value: 1,
+          min: 0.25,
+          max: 20,
+        },
+      ],
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        {
+          text: 'Log Food',
+          handler: async (data) => {
+            const servings = parseFloat(data.servings) || 1;
+            await this.logFoodEntry(food, servings);
+          },
+        },
+      ],
+    });
 
-    // Placeholder: Navigate back
-    this.router.navigate(['/tabs/nutrition']);
+    await servingAlert.present();
+  }
+
+  /**
+   * Log a food entry from USDA search to the nutrition diary
+   */
+  private async logFoodEntry(food: Food, servings: number): Promise<void> {
+    const userId = this.authService.user()?.id;
+    if (!userId) return;
+
+    this.isLogging.set(true);
+    this.haptic.light();
+
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const log = await this.nutritionService.loadNutritionLog(userId, today);
+
+      if (!log) {
+        throw new Error('Failed to load nutrition log');
+      }
+
+      const entry = await this.nutritionService.addEntry(log.log.id, {
+        food_id: food.id,
+        custom_name: food.name,
+        servings,
+        calories: Math.round(food.calories * servings),
+        protein_g: Math.round(food.protein * servings * 10) / 10,
+        carbs_g: Math.round(food.carbs * servings * 10) / 10,
+        fat_g: Math.round(food.fat * servings * 10) / 10,
+        meal_type: this.inferMealType(),
+      });
+
+      if (entry) {
+        await this.haptic.success();
+        await this.showToast('Food logged successfully!', 'success');
+        this.router.navigate(['/tabs/nutrition']);
+      } else {
+        throw new Error('Failed to log food');
+      }
+    } catch (error) {
+      console.error('Error logging food:', error);
+      await this.haptic.error();
+      await this.showToast('Failed to log food. Please try again.', 'danger');
+    } finally {
+      this.isLogging.set(false);
+    }
   }
 
   /**

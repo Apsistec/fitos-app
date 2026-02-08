@@ -282,6 +282,13 @@ export const routes: Routes = [
                 (m) => m.PhotoNutritionPage
               ),
           },
+          {
+            path: 'history',
+            loadComponent: () =>
+              import('./features/nutrition/pages/nutrition-history/nutrition-history.page').then(
+                (m) => m.NutritionHistoryPage
+              ),
+          },
         ],
       },
       {
