@@ -18,7 +18,7 @@ import { ChatMessage } from '../../../../core/services/ai-coach.service';
  * - Avatar display
  * - Timestamp formatting
  * - Agent badge (workout/nutrition/recovery)
- * - Markdown rendering (future: add markdown library)
+ * - Lightweight markdown rendering (bold, italic, code, lists, headers, links)
  * - Confidence indicator for low confidence (<70%)
  *
  * Usage:
@@ -211,6 +211,52 @@ import { ChatMessage } from '../../../../core/services/ai-coach.service';
       white-space: pre-wrap;
     }
 
+    .message-body :deep(.code-block) {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px;
+      margin: 8px 0;
+      overflow-x: auto;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      white-space: pre;
+    }
+
+    .message-body :deep(.inline-code) {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+    }
+
+    .message-body :deep(.md-h3) {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 12px 0 8px 0;
+      color: var(--fitos-text-primary, #F5F5F5);
+    }
+
+    .message-body :deep(.md-h4) {
+      font-size: 14px;
+      font-weight: 700;
+      margin: 8px 0 4px 0;
+      color: var(--fitos-text-primary, #F5F5F5);
+    }
+
+    .message-body :deep(.md-list) {
+      margin: 8px 0;
+      padding-left: 20px;
+    }
+
+    .message-body :deep(.md-list li) {
+      margin-bottom: 4px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
     .confidence-warning {
       display: flex;
       align-items: center;
@@ -306,27 +352,62 @@ export class ChatMessageComponent {
   }
 
   /**
-   * Format message content
-   * TODO: Add markdown rendering library (e.g., marked.js)
+   * Format message content with lightweight markdown rendering
+   * Supports: bold, italic, inline code, code blocks, bullet lists,
+   * numbered lists, headers (h3/h4), links, and line breaks
    */
   formatContent(content: string): string {
-    // Basic formatting for now
     let formatted = content;
 
-    // Convert newlines to <br>
-    formatted = formatted.replace(/\n/g, '<br>');
+    // Code blocks (```...```)
+    formatted = formatted.replace(
+      /```(?:\w+)?\n?([\s\S]*?)```/g,
+      '<pre class="code-block"><code>$1</code></pre>'
+    );
+
+    // Inline code (`code`)
+    formatted = formatted.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+
+    // Headers (### and ####)
+    formatted = formatted.replace(/^####\s+(.+)$/gm, '<h4 class="md-h4">$1</h4>');
+    formatted = formatted.replace(/^###\s+(.+)$/gm, '<h3 class="md-h3">$1</h3>');
 
     // Bold text **text**
     formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
     // Italic text *text*
-    formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    formatted = formatted.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>');
+
+    // Numbered lists (1. item)
+    formatted = formatted.replace(
+      /(?:^|\n)(\d+\.\s+.+(?:\n(?!\n)\d+\.\s+.+)*)/g,
+      (match) => {
+        const items = match.trim().split('\n').map(item =>
+          `<li>${item.replace(/^\d+\.\s+/, '')}</li>`
+        ).join('');
+        return `<ol class="md-list">${items}</ol>`;
+      }
+    );
+
+    // Bullet lists (- item or * item)
+    formatted = formatted.replace(
+      /(?:^|\n)([-*]\s+.+(?:\n(?!\n)[-*]\s+.+)*)/g,
+      (match) => {
+        const items = match.trim().split('\n').map(item =>
+          `<li>${item.replace(/^[-*]\s+/, '')}</li>`
+        ).join('');
+        return `<ul class="md-list">${items}</ul>`;
+      }
+    );
 
     // Convert URLs to links
     formatted = formatted.replace(
-      /(https?:\/\/[^\s]+)/g,
+      /(https?:\/\/[^\s<]+)/g,
       '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
     );
+
+    // Convert remaining newlines to <br> (but not inside pre/code blocks)
+    formatted = formatted.replace(/\n/g, '<br>');
 
     return formatted;
   }

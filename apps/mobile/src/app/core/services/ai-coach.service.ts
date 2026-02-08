@@ -2,6 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { SupabaseService } from './supabase.service';
 
 /**
  * Chat message interface
@@ -90,13 +91,27 @@ interface CoachBrainResponse {
 }
 
 /**
+ * Conversation metadata from Supabase
+ */
+interface ConversationRecord {
+  id: string;
+  user_id: string;
+  title: string | null;
+  is_active: boolean;
+  last_agent: string | null;
+  message_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
  * AICoachService - Multi-agent AI coaching integration
  *
  * Features:
  * - Chat with specialized AI agents
  * - Workout, nutrition, recovery, motivation coaching
- * - Conversation history management
- * - Auto-escalation to trainer
+ * - Conversation history management with Supabase persistence
+ * - Auto-escalation to trainer with notification
  * - RAG for personalized context
  *
  * Backend:
@@ -114,9 +129,9 @@ interface CoachBrainResponse {
 })
 export class AICoachService {
   private http = inject(HttpClient);
+  private supabase = inject(SupabaseService);
 
   // AI Backend URL
-  // TODO: Load from environment
   private readonly AI_BACKEND_URL = environment.aiBackendUrl || 'http://localhost:8000';
 
   // State
@@ -124,6 +139,112 @@ export class AICoachService {
   isProcessing = signal(false);
   error = signal<string | null>(null);
   currentAgent = signal<string | null>(null);
+  conversationId = signal<string | null>(null);
+
+  /**
+   * Load or create active conversation for user
+   */
+  async loadConversation(userId: string): Promise<void> {
+    try {
+      // Try to find an active conversation
+      const { data: conversations, error } = await this.supabase.client
+        .from('ai_conversations')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .order('updated_at', { ascending: false })
+        .limit(1);
+
+      if (error) {
+        console.error('Error loading conversation:', error);
+        return;
+      }
+
+      if (conversations && conversations.length > 0) {
+        const conversation = conversations[0] as ConversationRecord;
+        this.conversationId.set(conversation.id);
+
+        // Load messages for this conversation
+        const { data: msgData, error: msgError } = await this.supabase.client
+          .from('ai_conversation_messages')
+          .select('*')
+          .eq('conversation_id', conversation.id)
+          .order('created_at', { ascending: true });
+
+        if (msgError) {
+          console.error('Error loading messages:', msgError);
+          return;
+        }
+
+        if (msgData && msgData.length > 0) {
+          const messages: ChatMessage[] = msgData.map((m: any) => ({
+            id: m.id,
+            role: m.role,
+            content: m.content,
+            timestamp: m.created_at,
+            agent: m.agent || undefined,
+            confidence: m.confidence || undefined,
+          }));
+          this.messages.set(messages);
+
+          // Restore last agent
+          if (conversation.last_agent) {
+            this.currentAgent.set(conversation.last_agent);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error in loadConversation:', err);
+    }
+  }
+
+  /**
+   * Create a new conversation
+   */
+  private async createConversation(userId: string): Promise<string | null> {
+    try {
+      const { data, error } = await this.supabase.client
+        .from('ai_conversations')
+        .insert({
+          user_id: userId,
+          is_active: true,
+        })
+        .select('id')
+        .single();
+
+      if (error) {
+        console.error('Error creating conversation:', error);
+        return null;
+      }
+
+      return data?.id || null;
+    } catch (err) {
+      console.error('Error in createConversation:', err);
+      return null;
+    }
+  }
+
+  /**
+   * Persist a message to Supabase
+   */
+  private async persistMessage(
+    conversationId: string,
+    message: ChatMessage
+  ): Promise<void> {
+    try {
+      await this.supabase.client
+        .from('ai_conversation_messages')
+        .insert({
+          conversation_id: conversationId,
+          role: message.role,
+          content: message.content,
+          agent: message.agent || null,
+          confidence: message.confidence || null,
+        });
+    } catch (err) {
+      console.error('Error persisting message:', err);
+    }
+  }
 
   /**
    * Send message to AI coach
@@ -133,6 +254,14 @@ export class AICoachService {
     this.error.set(null);
 
     try {
+      // Ensure we have a conversation
+      if (!this.conversationId()) {
+        const newId = await this.createConversation(userContext.user_id);
+        if (newId) {
+          this.conversationId.set(newId);
+        }
+      }
+
       // Add user message to history
       const userMessage: ChatMessage = {
         id: this.generateId(),
@@ -141,6 +270,12 @@ export class AICoachService {
         timestamp: new Date().toISOString(),
       };
       this.messages.update(msgs => [...msgs, userMessage]);
+
+      // Persist user message
+      const convId = this.conversationId();
+      if (convId) {
+        this.persistMessage(convId, userMessage);
+      }
 
       // Prepare conversation history (last 10 messages)
       const history = this.messages()
@@ -174,10 +309,19 @@ export class AICoachService {
 
       this.currentAgent.set(response.agent);
 
+      // Persist assistant message
+      if (convId) {
+        this.persistMessage(convId, assistantMessage);
+      }
+
       // Handle escalation
       if (response.shouldEscalate) {
         console.warn('AI Coach escalating to trainer:', response.escalationReason);
-        // TODO: Notify trainer
+        await this.createEscalation(
+          userContext.user_id,
+          response.escalationReason || 'AI confidence too low',
+          message
+        );
       }
 
       return assistantMessage;
@@ -191,11 +335,60 @@ export class AICoachService {
   }
 
   /**
-   * Clear conversation history
+   * Create an escalation record when AI can't confidently answer
    */
-  clearHistory(): void {
+  private async createEscalation(
+    clientId: string,
+    reason: string,
+    messageContent: string
+  ): Promise<void> {
+    try {
+      // Find the client's trainer
+      const { data: profile } = await this.supabase.client
+        .from('profiles')
+        .select('trainer_id')
+        .eq('id', clientId)
+        .single();
+
+      const trainerId = profile?.trainer_id || null;
+
+      await this.supabase.client
+        .from('ai_escalations')
+        .insert({
+          conversation_id: this.conversationId(),
+          client_id: clientId,
+          trainer_id: trainerId,
+          reason,
+          message_content: messageContent,
+          status: 'pending',
+        });
+
+      console.log('Escalation created for trainer:', trainerId);
+    } catch (err) {
+      console.error('Error creating escalation:', err);
+    }
+  }
+
+  /**
+   * Clear conversation history and start a new conversation
+   */
+  async clearHistory(): Promise<void> {
+    // Mark current conversation as inactive
+    const convId = this.conversationId();
+    if (convId) {
+      try {
+        await this.supabase.client
+          .from('ai_conversations')
+          .update({ is_active: false })
+          .eq('id', convId);
+      } catch (err) {
+        console.error('Error deactivating conversation:', err);
+      }
+    }
+
     this.messages.set([]);
     this.currentAgent.set(null);
+    this.conversationId.set(null);
   }
 
   /**
@@ -298,4 +491,3 @@ export class AICoachService {
   }
 
 }
-

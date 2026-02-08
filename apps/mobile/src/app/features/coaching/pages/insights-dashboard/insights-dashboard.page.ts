@@ -39,6 +39,7 @@ import {
   chatbubbleOutline,
 } from 'ionicons/icons';
 import { HapticService } from '../../../../core/services/haptic.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { JITAIService, JITAIContext } from '../../../../core/services/jitai.service';
 
 export type InsightCategory = 'workout' | 'nutrition' | 'recovery' | 'adherence' | 'all';
@@ -690,6 +691,7 @@ export interface ProgressMetric {
 export class InsightsDashboardPage implements OnInit {
   private router = inject(Router);
   private haptic = inject(HapticService);
+  private auth = inject(AuthService);
   private jitaiService = inject(JITAIService);
 
   // State
@@ -725,8 +727,11 @@ export class InsightsDashboardPage implements OnInit {
 
     // Load JITAI context
     try {
-      const context = await this.jitaiService.getContext('test-user');
-      this.jitaiContext.set(context);
+      const userId = this.auth.user()?.id;
+      if (userId) {
+        const context = await this.jitaiService.getContext(userId);
+        this.jitaiContext.set(context);
+      }
     } catch (err) {
       console.error('Error loading JITAI context:', err);
     }

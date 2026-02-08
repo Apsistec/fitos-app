@@ -24,6 +24,7 @@ import {
   micOutline,
   closeOutline,
   refreshOutline,
+  sparklesOutline,
 } from 'ionicons/icons';
 import { AICoachService, UserContext } from '../../../../core/services/ai-coach.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -42,7 +43,7 @@ import { QuickActionsComponent } from '../../components/quick-actions/quick-acti
  * - Voice input support
  * - Quick action buttons
  * - Typing indicators
- * - Message persistence (TODO: Supabase integration)
+ * - Message persistence via Supabase (ai_conversations + ai_conversation_messages)
  * - Escalation to trainer notifications
  *
  * Flow:
@@ -50,7 +51,7 @@ import { QuickActionsComponent } from '../../components/quick-actions/quick-acti
  * 2. Message sent to AI backend
  * 3. AI processes with user context
  * 4. Response streams back (TODO: implement streaming)
- * 5. Conversation saved to database
+ * 5. Conversation persisted to Supabase
  *
  * Usage:
  * Navigate to /coaching/chat
@@ -87,6 +88,9 @@ import { QuickActionsComponent } from '../../components/quick-actions/quick-acti
         </ion-buttons>
         <ion-title>AI Coach</ion-title>
         <ion-buttons slot="end">
+          <ion-button (click)="navigateToInsights()" aria-label="AI Insights">
+            <ion-icon slot="icon-only" name="sparkles-outline"></ion-icon>
+          </ion-button>
           @if (messages().length > 0) {
             <ion-button (click)="clearChat()">
               <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
@@ -488,7 +492,7 @@ export class ChatPage implements OnInit {
   );
 
   constructor() {
-    addIcons({ sendOutline, micOutline, closeOutline, refreshOutline });
+    addIcons({ sendOutline, micOutline, closeOutline, refreshOutline, sparklesOutline });
 
     // Auto-scroll when new messages arrive
     effect(() => {
@@ -500,11 +504,11 @@ export class ChatPage implements OnInit {
   }
 
   async ngOnInit() {
-    // TODO: Load conversation history from Supabase
-    // const userId = this.auth.user()?.id;
-    // if (userId) {
-    //   await this.loadConversationHistory(userId);
-    // }
+    // Load conversation history from Supabase
+    const userId = this.auth.user()?.id;
+    if (userId) {
+      await this.aiCoach.loadConversation(userId);
+    }
   }
 
   /**
@@ -603,7 +607,7 @@ export class ChatPage implements OnInit {
   async clearChat(): Promise<void> {
     const confirmed = confirm('Are you sure you want to clear this conversation?');
     if (confirmed) {
-      this.aiCoach.clearHistory();
+      await this.aiCoach.clearHistory();
       await this.haptic.light();
       await this.showToast('Conversation cleared', 'success');
     }
@@ -646,6 +650,14 @@ export class ChatPage implements OnInit {
       fitness_level: 'intermediate',
       preferences: {},
     };
+  }
+
+  /**
+   * Navigate to AI insights dashboard
+   */
+  navigateToInsights(): void {
+    this.haptic.light();
+    this.router.navigate(['/tabs/coaching/insights']);
   }
 
   /**

@@ -322,6 +322,13 @@ export const routes: Routes = [
                 (m) => m.ResponseReviewComponent
               ),
           },
+          {
+            path: 'insights',
+            loadComponent: () =>
+              import('./features/coaching/pages/insights-dashboard/insights-dashboard.page').then(
+                (m) => m.InsightsDashboardPage
+              ),
+          },
         ],
       },
       {
