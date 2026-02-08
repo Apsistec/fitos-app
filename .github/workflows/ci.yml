@@ -1,0 +1,55 @@
+# CI Pipeline - Validates all PRs and pushes to main
+# Runs: lint, test (with coverage), production builds
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Lint, Test & Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for Nx affected
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      # Nx affected needs base/head SHAs for comparison
+      - name: Derive Nx SHAs
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Lint affected projects (fast - parallel)
+      - name: Lint
+        run: npx nx affected -t lint --parallel=3
+
+      # Test affected projects with coverage (CI mode)
+      - name: Test
+        run: npx nx affected -t test --parallel=3 --configuration=ci
+
+      # Always build both apps in production mode to catch build errors
+      - name: Build Mobile App
+        run: npx nx build fitos-mobile --configuration=production
+
+      - name: Build Landing Page
+        run: |
+          node scripts/generate-changelog.js
+          npx nx build fitos-landing --configuration=production

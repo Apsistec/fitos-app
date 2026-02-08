@@ -1,0 +1,63 @@
+# Preview Deployment Pipeline
+# Creates Firebase preview channels on pull requests
+# Auto-comments preview URLs on the PR (expires after 7 days)
+name: Preview Deploy
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-preview:
+    name: Build & Deploy Previews
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate changelog
+        run: node scripts/generate-changelog.js
+
+      # Build both apps for production
+      - name: Build Mobile App
+        run: npx nx build fitos-mobile --configuration=production
+
+      - name: Build Landing Page
+        run: npx nx build fitos-landing --configuration=production
+
+      # Deploy preview: Landing Page
+      # When channelId is omitted, a preview channel is auto-created
+      # and a comment with the preview URL is posted on the PR
+      - name: Preview Deploy - Landing
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FITOS_88FFF }}
+          projectId: fitos-88fff
+          target: fitos-88fff
+          expires: 7d
+
+      # Deploy preview: Mobile PWA
+      - name: Preview Deploy - Mobile
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FITOS_88FFF }}
+          projectId: fitos-88fff
+          target: fitos-mobile
+          expires: 7d

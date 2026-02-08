@@ -1,4 +1,4 @@
-import { enableProdMode, ErrorHandler, Injectable } from '@angular/core';
+import { enableProdMode, ErrorHandler, Injectable, Injector } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import {
@@ -21,6 +21,7 @@ import { environment } from './environments/environment';
 import { authInterceptor } from './app/core/interceptors/auth.interceptor';
 import { analyticsInterceptor } from './app/core/interceptors/analytics.interceptor';
 import { errorInterceptor } from './app/core/interceptors/error.interceptor';
+import { FirebaseService } from './app/core/services/firebase.service';
 
 /**
  * Idle preloading strategy — waits for the browser to be idle before preloading routes.
@@ -46,19 +47,36 @@ class IdlePreloadStrategy implements PreloadingStrategy {
 }
 
 /**
- * Global error handler - captures unhandled errors for monitoring
- * In production, these would be sent to an error tracking service (Sentry, etc.)
+ * Global error handler - captures unhandled errors and sends to Firebase Analytics.
+ * Also maintains localStorage fallback for offline error tracking.
  */
 @Injectable()
 class GlobalErrorHandler implements ErrorHandler {
+  private firebaseService: FirebaseService | null = null;
+
+  constructor(private injector: Injector) {}
+
   handleError(error: any): void {
     // Log to console in all environments
     console.error('[FitOS Error]', error);
 
-    // In production, send to error tracking
+    // In production, send to Firebase Analytics + localStorage fallback
     if (environment.production) {
-      // Future: Send to Sentry, LogRocket, etc.
-      // Sentry.captureException(error.originalError || error);
+      // Lazy-inject FirebaseService (ErrorHandler runs before some services are ready)
+      if (!this.firebaseService) {
+        try {
+          this.firebaseService = this.injector.get(FirebaseService);
+        } catch {
+          // Service may not be available during very early bootstrap
+        }
+      }
+
+      const message = error?.message || error?.toString?.() || 'Unknown error';
+
+      // Send to Firebase Analytics as app_exception event
+      this.firebaseService?.trackError(message, false);
+
+      // Keep localStorage fallback for offline scenarios
       try {
         const errorInfo = {
           message: error.message || 'Unknown error',
@@ -66,7 +84,6 @@ class GlobalErrorHandler implements ErrorHandler {
           timestamp: new Date().toISOString(),
           url: window.location.href,
         };
-        // Store locally for later sync
         const errors = JSON.parse(localStorage.getItem('fitos_errors') || '[]');
         errors.push(errorInfo);
         // Keep only last 20 errors

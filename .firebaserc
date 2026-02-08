@@ -1,5 +1,6 @@
 {
   "projects": {
+    "default": "fitos-88fff",
     "staging": "fitos-88fff"
   },
   "targets": {},

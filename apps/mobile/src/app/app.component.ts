@@ -1,7 +1,10 @@
 import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
+import { filter } from 'rxjs/operators';
 import { AuthService } from './core/services/auth.service';
 import { ThemeService } from './core/services/theme.service';
+import { FirebaseService } from './core/services/firebase.service';
 import { addIcons } from 'ionicons';
 import {
   // Outline icons (used across the app)
@@ -88,8 +91,17 @@ import {
 export class AppComponent implements OnInit {
   private authService = inject(AuthService);
   private themeService = inject(ThemeService); // Initialize theme service
+  private firebaseService = inject(FirebaseService); // Initialize Firebase Analytics & Performance
+  private router = inject(Router);
 
   constructor() {
+    // Track screen views on route navigation (Firebase Analytics)
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+    ).subscribe((event) => {
+      this.firebaseService.trackScreenView(event.urlAfterRedirects);
+    });
+
     // Register only the icons actually used in the app (tree-shakeable)
     addIcons({
       // Outline icons

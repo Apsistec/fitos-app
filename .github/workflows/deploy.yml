@@ -1,0 +1,157 @@
+# Production Deployment Pipeline
+# Triggers on push to main (after CI passes) or manual dispatch
+# Deploys: Landing (Firebase Hosting + Functions), Mobile PWA (Firebase Hosting), Edge Functions (Supabase)
+name: Deploy Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false # Never cancel an in-flight deploy
+
+jobs:
+  # ────────────────────────────────────────────────────────────
+  # Build once, deploy everywhere
+  # ────────────────────────────────────────────────────────────
+  build:
+    name: Build All Apps
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Generate changelog (required by landing build)
+      - name: Generate changelog
+        run: node scripts/generate-changelog.js
+
+      # Build both apps for production
+      - name: Build Mobile App
+        run: npx nx build fitos-mobile --configuration=production
+
+      - name: Build Landing Page
+        run: npx nx build fitos-landing --configuration=production
+
+      # Upload artifacts for deploy jobs
+      - name: Upload landing build
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-landing
+          path: dist/apps/landing
+          retention-days: 1
+
+      - name: Upload mobile build
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-mobile
+          path: dist/apps/mobile
+          retention-days: 1
+
+  # ────────────────────────────────────────────────────────────
+  # Deploy Landing Page (Firebase Hosting + Cloud Functions SSR)
+  # ────────────────────────────────────────────────────────────
+  deploy-landing:
+    name: Deploy Landing
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download landing build
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-landing
+          path: dist/apps/landing
+
+      # Deploy hosting (static assets)
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FITOS_88FFF }}
+          channelId: live
+          projectId: fitos-88fff
+          target: fitos-88fff
+
+      # Deploy Cloud Functions (SSR)
+      - name: Setup Node.js for Firebase CLI
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Deploy Cloud Functions
+        run: |
+          npm install -g firebase-tools
+          firebase deploy --only functions --project fitos-88fff
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-sa.json
+
+      - name: Write service account key
+        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_FITOS_88FFF }}' > ${{ runner.temp }}/firebase-sa.json
+
+  # ────────────────────────────────────────────────────────────
+  # Deploy Mobile PWA (Firebase Hosting)
+  # ────────────────────────────────────────────────────────────
+  deploy-mobile:
+    name: Deploy Mobile PWA
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download mobile build
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-mobile
+          path: dist/apps/mobile
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FITOS_88FFF }}
+          channelId: live
+          projectId: fitos-88fff
+          target: fitos-mobile
+
+  # ────────────────────────────────────────────────────────────
+  # Deploy Supabase Edge Functions
+  # ────────────────────────────────────────────────────────────
+  deploy-edge-functions:
+    name: Deploy Edge Functions
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Deploy Edge Functions
+        run: supabase functions deploy --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
