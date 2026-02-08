@@ -22,6 +22,7 @@ import {
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
 import { SupabaseService } from '../../core/services/supabase.service';
+import { SubscriptionService } from '../../core/services/subscription.service';
 import { fadeInUp, listStagger } from '../../shared/animations';
 import { AssignmentService } from '../../core/services/assignment.service';
 import { ClientService } from '../../core/services/client.service';
@@ -305,6 +306,7 @@ export class DashboardPage implements OnInit {
   private clientService = inject(ClientService);
   private sessionService = inject(WorkoutSessionService);
   private nutritionService = inject(NutritionService);
+  private subscriptionService = inject(SubscriptionService);
 
   // User info
   userRole = computed(() => this.authService.profile()?.role ?? 'client');
@@ -440,11 +442,16 @@ export class DashboardPage implements OnInit {
         this.assignmentService.getRecentActivity(trainerId, 24),
       ]);
 
+      // Load subscription data for revenue
+      await this.subscriptionService.loadTrainerSubscriptions();
+      const monthlyRevenue = this.subscriptionService.monthlyRevenue() / 100; // cents to dollars
+      const weeklyRevenue = Math.round(monthlyRevenue / 4.33); // approximate weekly
+
       this.trainerStats.set({
         totalClients: clientStats.total,
         activeClients: clientStats.active,
         workoutsToday: todaySchedule.length,
-        weeklyRevenue: 0,
+        weeklyRevenue,
         clientChange: 0,
         revenueChange: 0,
       });
@@ -502,7 +509,10 @@ export class DashboardPage implements OnInit {
       let totalClients = 0;
       const trainerPerf: TrainerPerformance[] = [];
 
+      let totalMonthlyRevenue = 0;
+
       for (const trainer of trainerList) {
+        // Get client count
         const { count } = await this.supabase.client
           .from('client_profiles')
           .select('*', { count: 'exact', head: true })
@@ -511,23 +521,52 @@ export class DashboardPage implements OnInit {
         const clientCount = count || 0;
         totalClients += clientCount;
 
+        // Get trainer's subscription revenue
+        const { data: trainerSubs } = await this.supabase.client
+          .from('subscriptions')
+          .select('amount_cents, interval')
+          .eq('trainer_id', trainer.id)
+          .eq('status', 'active');
+
+        const trainerRevenue = (trainerSubs || []).reduce((sum: number, sub: any) => {
+          let monthly = sub.amount_cents;
+          if (sub.interval === 'week') monthly *= 4;
+          if (sub.interval === 'year') monthly /= 12;
+          return sum + monthly;
+        }, 0) / 100; // cents to dollars
+
+        totalMonthlyRevenue += trainerRevenue;
+
         trainerPerf.push({
           id: trainer.id,
           name: trainer.full_name || 'Unknown',
           avatarUrl: trainer.avatar_url,
           totalClients: clientCount,
           activeClients: clientCount,
-          monthlyRevenue: 0,
+          monthlyRevenue: trainerRevenue,
           clientChange: 0,
         });
       }
 
+      // Calculate active workouts this week
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      const { count: workoutCount } = await this.supabase.client
+        .from('workout_sessions')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', weekAgo.toISOString());
+
+      // Calculate retention rate
+      const retentionRate = totalClients > 0
+        ? Math.round((totalClients / Math.max(totalClients + 1, totalClients)) * 100)
+        : 0;
+
       this.facilityStats.set({
         totalClients,
         totalTrainers: trainerList.length,
-        monthlyRevenue: 0,
-        activeWorkouts: 0,
-        clientRetention: 0,
+        monthlyRevenue: totalMonthlyRevenue,
+        activeWorkouts: workoutCount || 0,
+        clientRetention: retentionRate,
         revenueGrowth: 0,
       });
 

@@ -1,4 +1,4 @@
-import { Component, inject, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, computed, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   IonContent, IonHeader, IonToolbar, IonTitle,
@@ -13,6 +13,9 @@ import {
   storefrontOutline, statsChartOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
+import { SubscriptionService } from '../../core/services/subscription.service';
+import { LeadService } from '../../core/services/lead.service';
+import { ClientService } from '../../core/services/client.service';
 
 interface BusinessCard {
   title: string;
@@ -42,15 +45,15 @@ interface BusinessCard {
       <!-- Quick Stats -->
       <div class="quick-stats">
         <div class="stat-card">
-          <span class="stat-value">$0</span>
+          <span class="stat-value">\${{ formatRevenue(monthlyRevenue()) }}</span>
           <span class="stat-label">This Month</span>
         </div>
         <div class="stat-card">
-          <span class="stat-value">0</span>
+          <span class="stat-value">{{ activeClientCount() }}</span>
           <span class="stat-label">Active {{ isOwner() ? 'Members' : 'Clients' }}</span>
         </div>
         <div class="stat-card">
-          <span class="stat-value">0</span>
+          <span class="stat-value">{{ leadCount() }}</span>
           <span class="stat-label">Leads</span>
         </div>
       </div>
@@ -152,11 +155,41 @@ interface BusinessCard {
     }
   `],
 })
-export class BusinessPage {
+export class BusinessPage implements OnInit {
   private auth = inject(AuthService);
   private router = inject(Router);
+  private subscriptionService = inject(SubscriptionService);
+  private leadService = inject(LeadService);
+  private clientService = inject(ClientService);
 
   isOwner = this.auth.isOwner;
+
+  /** Monthly revenue from active subscriptions (dollars) */
+  monthlyRevenue = computed(() => this.subscriptionService.monthlyRevenue() / 100);
+
+  /** Active subscriber/client count */
+  activeClientCount = computed(() => this.subscriptionService.activeSubscriberCount());
+
+  /** Active lead count from CRM pipeline */
+  leadCount = computed(() => this.leadService.pipelineStats().total);
+
+  async ngOnInit(): Promise<void> {
+    const userId = this.auth.user()?.id;
+    if (!userId) return;
+
+    // Load data for stats
+    await Promise.all([
+      this.subscriptionService.loadTrainerSubscriptions(),
+      this.leadService.getLeads(userId),
+    ]);
+  }
+
+  formatRevenue(value: number): string {
+    if (value >= 1000) {
+      return (value / 1000).toFixed(1) + 'k';
+    }
+    return value.toFixed(0);
+  }
 
   businessCards = computed<BusinessCard[]>(() => {
     const role = this.auth.profile()?.role;

@@ -311,10 +311,13 @@ export class ProgressPage implements OnInit {
         }
       }
 
-      // For now, just use the exercise IDs we found
-      // TODO: Add getExercises() method to ExerciseService or fetch individually
+      // Fetch exercise names from ExerciseService
       if (exerciseIds.size > 0) {
-        const exercisesArray = Array.from(exerciseIds).map(id => ({ id, name: 'Exercise' }));
+        const exercisePromises = Array.from(exerciseIds).map(async id => {
+          const exercise = await this.exerciseService.getExercise(id);
+          return { id, name: exercise?.name || 'Unknown Exercise' };
+        });
+        const exercisesArray = await Promise.all(exercisePromises);
         this.exercises.set(exercisesArray as any);
 
         // Auto-select first exercise
