@@ -8,7 +8,7 @@ export interface ChangelogVersion {
   version: string;
   date: string;
   changes: {
-    type: 'feature' | 'improvement' | 'bugfix' | 'breaking';
+    type: 'feature' | 'improvement' | 'bugfix' | 'breaking' | 'fix' | 'security';
     description: string;
   }[];
 }
@@ -160,18 +160,22 @@ export class ChangelogComponent implements OnInit {
   }
 
   private renderChangelogContent(version: ChangelogVersion): string {
-    const emojiMap = {
+    const emojiMap: Record<string, string> = {
       feature: '✨',
       improvement: '🔧',
       bugfix: '🐛',
+      fix: '🐛',
       breaking: '⚠️',
+      security: '🔒',
     };
 
-    const typeLabels = {
+    const typeLabels: Record<string, string> = {
       feature: 'New Feature',
       improvement: 'Improvement',
       bugfix: 'Bug Fix',
+      fix: 'Bug Fix',
       breaking: 'Breaking Change',
+      security: 'Security',
     };
 
     const groupedChanges = version.changes.reduce((acc, change) => {
