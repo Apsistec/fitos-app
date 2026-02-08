@@ -69,6 +69,22 @@ export const GETTING_STARTED_GUIDES: GettingStartedGuide[] = [
         optional: false,
       },
       {
+        id: 'client-step-6b',
+        title: 'Try Photo Nutrition',
+        description: 'Snap a photo of your meal and let AI identify the foods and estimate macros. You can edit anything the AI gets wrong.',
+        icon: 'camera-outline',
+        route: '/tabs/nutrition/photo',
+        optional: true,
+      },
+      {
+        id: 'client-step-6c',
+        title: 'Ask the AI Coach',
+        description: 'Chat with your AI fitness coach for workout tips, nutrition advice, or motivation. It learns your trainer\'s methodology.',
+        icon: 'sparkles-outline',
+        route: '/tabs/coaching',
+        optional: true,
+      },
+      {
         id: 'client-step-7',
         title: 'Message Your Trainer',
         description: 'Say hello to your trainer and ask any questions. They\'re here to help you succeed!',
