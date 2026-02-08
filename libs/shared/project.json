@@ -9,10 +9,15 @@
       "executor": "@nx/eslint:lint"
     },
     "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "executor": "nx:run-commands",
       "options": {
-        "jestConfig": "libs/shared/jest.config.ts"
+        "command": "vitest run --config libs/shared/vitest.config.ts",
+        "cwd": "{workspaceRoot}"
+      },
+      "configurations": {
+        "ci": {
+          "command": "vitest run --config libs/shared/vitest.config.ts --reporter=default"
+        }
       }
     }
   }
