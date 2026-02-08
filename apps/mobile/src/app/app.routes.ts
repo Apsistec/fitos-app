@@ -458,6 +458,13 @@ export const routes: Routes = [
                 (m) => m.FormBuilderPage
               ),
           },
+          {
+            path: 'campaigns',
+            loadComponent: () =>
+              import('./features/crm/pages/email-campaigns/email-campaigns.page').then(
+                (m) => m.EmailCampaignsPage
+              ),
+          },
         ],
       },
       {

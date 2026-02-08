@@ -74,52 +74,72 @@ serve(async (req) => {
 
     // Send email notification for 2nd+ attempts
     if (attemptCount >= 2) {
-      // TODO: Integrate with email service (SendGrid, Resend, etc.)
-      // For now, we'll just log it
-      console.log(`Email notification needed for trainer ${trainer.email}:`);
-      console.log(`  Client: ${client.full_name} (${client.email})`);
-      console.log(`  Amount: $${amount.toFixed(2)}`);
-      console.log(`  Attempt: ${attemptCount}`);
-      console.log(`  Invoice: ${invoiceId}`);
+      const appUrl = Deno.env.get('APP_URL') || 'https://www.nutrifitos.app';
+      const whatYouCanDo = attemptCount === 2
+        ? '<p>Consider reaching out to the client to ensure their payment method is up to date. A quick, friendly message can help prevent churn.</p>'
+        : `<p>This is attempt #${attemptCount}. You may want to reach out to the client to discuss their payment method or offer alternative options.</p>`;
 
-      // Example email content:
-      const emailContent = {
-        to: trainer.email,
-        subject: `Payment Issue: ${client.full_name} - $${amount.toFixed(2)}`,
-        html: `
-          <h2>Payment Failure Alert</h2>
-          <p>Hi ${trainer.full_name},</p>
-          <p>We wanted to let you know that a payment from <strong>${client.full_name}</strong> has failed.</p>
+      const emailHtml = `
+        <h2>Payment Failure Alert</h2>
+        <p>Hi ${trainer.full_name},</p>
+        <p>We wanted to let you know that a payment from <strong>${client.full_name}</strong> has failed.</p>
 
-          <h3>Details:</h3>
-          <ul>
-            <li><strong>Amount:</strong> $${amount.toFixed(2)}</li>
-            <li><strong>Attempt:</strong> ${attemptCount}</li>
-            <li><strong>Status:</strong> Stripe Smart Retries is active</li>
-          </ul>
+        <h3>Details:</h3>
+        <ul>
+          <li><strong>Amount:</strong> $${amount.toFixed(2)}</li>
+          <li><strong>Attempt:</strong> ${attemptCount}</li>
+          <li><strong>Status:</strong> Stripe Smart Retries is active</li>
+        </ul>
 
-          <h3>What This Means:</h3>
-          <p>Stripe's Smart Retries system is automatically attempting to recover this payment using ML-optimized timing. On average, this recovers 57% of failed payments without any action needed.</p>
+        <h3>What This Means:</h3>
+        <p>Stripe's Smart Retries system is automatically attempting to recover this payment using ML-optimized timing. On average, this recovers 57% of failed payments without any action needed.</p>
 
-          <h3>What You Can Do:</h3>
-          ${
-            attemptCount === 2
-              ? '<p>Consider reaching out to the client to ensure their payment method is up to date. A quick, friendly message can help prevent churn.</p>'
-              : '<p>This is attempt #' +
-                attemptCount +
-                '. You may want to reach out to the client to discuss their payment method or offer alternative options.</p>'
+        <h3>What You Can Do:</h3>
+        ${whatYouCanDo}
+
+        <p><a href="${appUrl}/clients/${clientId}/billing" style="background: #10B981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin-top: 16px;">View Client Billing</a></p>
+
+        <p style="margin-top: 32px; color: #6B7280; font-size: 14px;">
+          You're receiving this notification because you have payment failure alerts enabled. You can adjust your notification preferences in Settings.
+        </p>
+      `;
+
+      // Send via Resend using the send-email Edge Function
+      const resendApiKey = Deno.env.get('RESEND_API_KEY');
+      const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@nutrifitos.com';
+
+      if (resendApiKey) {
+        try {
+          const resendResponse = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${resendApiKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from: fromEmail,
+              to: [trainer.email],
+              subject: `Payment Issue: ${client.full_name} - $${amount.toFixed(2)}`,
+              html: emailHtml,
+              tags: [
+                { name: 'type', value: 'payment_failure' },
+                { name: 'attempt', value: String(attemptCount) },
+              ],
+            }),
+          });
+
+          const resendData = await resendResponse.json();
+          if (resendResponse.ok) {
+            console.log(`[payment-failure] Email sent to ${trainer.email}, Resend ID: ${resendData.id}`);
+          } else {
+            console.error('[payment-failure] Resend API error:', resendData);
           }
-
-          <p><a href="${Deno.env.get('APP_URL')}/clients/${clientId}/billing" style="background: #10B981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin-top: 16px;">View Client Billing</a></p>
-
-          <p style="margin-top: 32px; color: #6B7280; font-size: 14px;">
-            You're receiving this notification because you have payment failure alerts enabled. You can adjust your notification preferences in Settings.
-          </p>
-        `,
-      };
-
-      // Store email for batch processing or send via edge function
-      // await sendEmail(emailContent);
+        } catch (emailError) {
+          console.error('[payment-failure] Failed to send email:', emailError);
+        }
+      } else {
+        console.warn('[payment-failure] RESEND_API_KEY not set, skipping email notification');
+      }
     }
 
     return new Response(

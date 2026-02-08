@@ -182,7 +182,7 @@ export class EmailService {
   }
 
   /**
-   * Send email using template
+   * Send email using template via Resend Edge Function
    */
   async sendEmail(
     templateId: string,
@@ -209,8 +209,28 @@ export class EmailService {
         bodyHtml = bodyHtml.replace(regex, value);
       });
 
-      // TODO: Send via Resend/SendGrid API
-      // For now, just log to email_sends table
+      // Send via Resend Edge Function
+      const { data: sendResult, error: sendError } = await this.supabase.client.functions.invoke(
+        'send-email',
+        {
+          body: {
+            to: recipientEmail,
+            subject,
+            html: bodyHtml,
+            tags: [
+              { name: 'template_id', value: templateId },
+              { name: 'source', value: 'email_campaign' },
+            ],
+          },
+        }
+      );
+
+      if (sendError) {
+        console.error('Resend Edge Function error:', sendError);
+        throw new Error(sendError.message || 'Email delivery failed');
+      }
+
+      // Log to email_sends table for tracking
       const { data, error } = await this.supabase.client
         .from('email_sends')
         .insert({
@@ -218,14 +238,17 @@ export class EmailService {
           recipient_email: recipientEmail,
           recipient_type: 'lead',
           subject,
-          metadata: { variables },
+          metadata: {
+            variables,
+            resend_id: sendResult?.id,
+          },
         })
         .select()
         .single();
 
       if (error) throw error;
 
-      console.log('Email queued for sending:', { subject, to: recipientEmail });
+      console.log('Email sent via Resend:', { subject, to: recipientEmail, resendId: sendResult?.id });
 
       return data;
     } catch (err) {

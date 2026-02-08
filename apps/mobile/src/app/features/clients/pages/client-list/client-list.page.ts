@@ -18,6 +18,8 @@ import {
   IonSegment,
   IonSegmentButton,
   IonLabel,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
   ActionSheetController,
   ToastController
 } from '@ionic/angular/standalone';
@@ -53,6 +55,8 @@ type SubscriptionFilter = 'all' | 'active' | 'trialing' | 'past_due' | 'canceled
     IonSegment,
     IonSegmentButton,
     IonLabel,
+    IonInfiniteScroll,
+    IonInfiniteScrollContent,
     ClientCardComponent
   ],
   animations: [listStagger],
@@ -137,8 +141,8 @@ type SubscriptionFilter = 'all' | 'active' | 'trialing' | 'past_due' | 'canceled
               <p class="results-count">{{ filteredClients().length }} client{{ filteredClients().length !== 1 ? 's' : '' }}</p>
             </div>
 
-            <div class="clients-grid" [@listAnimation]="filteredClients().length">
-              @for (client of filteredClients(); track client.id) {
+            <div class="clients-grid" [@listAnimation]="visibleClients().length">
+              @for (client of visibleClients(); track client.id) {
                 <app-client-card
                   [client]="client"
                   (cardClick)="onClientClick($event)"
@@ -147,6 +151,14 @@ type SubscriptionFilter = 'all' | 'active' | 'trialing' | 'past_due' | 'canceled
                 ></app-client-card>
               }
             </div>
+
+            <!-- Infinite scroll for large client lists -->
+            <ion-infinite-scroll
+              [disabled]="visibleClients().length >= filteredClients().length"
+              (ionInfinite)="loadMoreClients($event)"
+            >
+              <ion-infinite-scroll-content loadingSpinner="crescent"></ion-infinite-scroll-content>
+            </ion-infinite-scroll>
           }
         </div>
       }
@@ -256,6 +268,10 @@ export class ClientListPage implements OnInit {
   filterStatus: SubscriptionFilter = 'all';
   showFilters = signal(false);
 
+  // Progressive rendering: show 20 items initially, load more on scroll
+  private readonly PAGE_SIZE = 20;
+  displayCount = signal(20);
+
   // Computed filtered clients
   filteredClients = computed(() => {
     let clients = this.clientService.clients();
@@ -278,6 +294,10 @@ export class ClientListPage implements OnInit {
     return clients;
   });
 
+  visibleClients = computed(() =>
+    this.filteredClients().slice(0, this.displayCount())
+  );
+
   ngOnInit() {
     this.loadClients();
   }
@@ -293,6 +313,12 @@ export class ClientListPage implements OnInit {
 
   onSearchChange(event: any) {
     this.searchQuery = event.target.value || '';
+    this.displayCount.set(this.PAGE_SIZE);
+  }
+
+  loadMoreClients(event: any): void {
+    this.displayCount.update(count => count + this.PAGE_SIZE);
+    setTimeout(() => event.target.complete(), 100);
   }
 
   onFilterChange() {
