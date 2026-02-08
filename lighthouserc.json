@@ -6,7 +6,8 @@
       "numberOfRuns": 3,
       "settings": {
         "preset": "desktop",
-        "onlyCategories": ["performance", "accessibility", "best-practices", "seo"]
+        "onlyCategories": ["performance", "accessibility", "best-practices", "seo"],
+        "chromeFlags": ["--headless=new", "--no-sandbox", "--disable-gpu"]
       }
     },
     "assert": {
