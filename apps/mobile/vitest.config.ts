@@ -1,13 +1,22 @@
 import { defineConfig } from 'vitest/config';
 import angular from '@analogjs/vite-plugin-angular';
+import { resolve } from 'path';
+
+const appRoot = resolve(__dirname);
 
 export default defineConfig({
-  plugins: [angular()],
+  plugins: [
+    angular({
+      tsconfig: resolve(appRoot, 'tsconfig.spec.json'),
+    }),
+  ],
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['src/test-setup.ts'],
-    include: ['src/**/*.spec.ts'],
+    setupFiles: [resolve(appRoot, 'src/test-setup.ts')],
+    include: [resolve(appRoot, 'src/**/*.spec.ts')],
+    root: appRoot,
+    passWithNoTests: true,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -17,8 +26,8 @@ export default defineConfig({
         '**/*.config.ts',
         '**/main.ts',
         '**/polyfills.ts',
-        '**/environments/**'
-      ]
-    }
-  }
+        '**/environments/**',
+      ],
+    },
+  },
 });

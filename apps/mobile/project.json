@@ -102,28 +102,18 @@
       }
     },
     "test": {
-      "executor": "@angular-devkit/build-angular:karma",
+      "executor": "nx:run-commands",
       "options": {
-        "polyfills": ["zone.js", "zone.js/testing"],
-        "tsConfig": "apps/mobile/tsconfig.spec.json",
-        "inlineStyleLanguage": "scss",
-        "assets": [
-          {
-            "glob": "**/*",
-            "input": "apps/mobile/src/assets",
-            "output": "/assets"
-          },
-          {
-            "glob": "**/*.svg",
-            "input": "node_modules/ionicons/dist/ionicons/svg",
-            "output": "./svg"
-          }
-        ],
-        "styles": [
-          "apps/mobile/src/theme/variables.scss",
-          "apps/mobile/src/global.scss"
-        ],
-        "scripts": []
+        "command": "vitest run --config apps/mobile/vitest.config.ts",
+        "cwd": "{workspaceRoot}"
+      },
+      "configurations": {
+        "ci": {
+          "command": "vitest run --config apps/mobile/vitest.config.ts --reporter=default --coverage"
+        },
+        "watch": {
+          "command": "vitest --config apps/mobile/vitest.config.ts"
+        }
       }
     },
     "lint": {
