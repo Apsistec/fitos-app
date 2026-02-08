@@ -1,0 +1,74 @@
+# Dependabot - Automated dependency security updates
+# https://docs.github.com/en/code-security/dependabot
+#
+# Creates PRs for outdated/vulnerable dependencies.
+# The CI workflow validates each update before merge.
+version: 2
+
+updates:
+  # npm dependencies (root monorepo)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    # Group minor/patch updates to reduce PR noise
+    groups:
+      angular:
+        patterns:
+          - "@angular/*"
+          - "@angular-devkit/*"
+          - "@schematics/angular"
+        update-types: ["minor", "patch"]
+      ionic-capacitor:
+        patterns:
+          - "@ionic/*"
+          - "@capacitor/*"
+        update-types: ["minor", "patch"]
+      nx:
+        patterns:
+          - "@nx/*"
+          - "nx"
+        update-types: ["minor", "patch"]
+      testing:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+          - "jest"
+          - "jest-*"
+        update-types: ["minor", "patch"]
+      firebase:
+        patterns:
+          - "firebase"
+          - "@sentry/*"
+        update-types: ["minor", "patch"]
+    labels:
+      - "dependencies"
+      - "automated"
+
+  # Python dependencies (AI backend)
+  - package-ecosystem: "pip"
+    directory: "/apps/ai-backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "ai-backend"
+
+  # GitHub Actions versions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "ci"

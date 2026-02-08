@@ -15,4 +15,5 @@ export const environment = {
   terraApiKey: '',
   usdaApiKey: 'whIXShXv6RIuHypBFNTLSdrWNc4ad9kSabiKT9D5',
   aiBackendUrl: 'http://localhost:8000', // TODO: Deploy AI backend to Cloud Run
+  sentryDsn: '', // TODO: Add your Sentry DSN from https://sentry.io → Settings → Projects → Client Keys (DSN)
 };

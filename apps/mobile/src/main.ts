@@ -14,6 +14,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideServiceWorker } from '@angular/service-worker';
 import { Observable, of, timer } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
+import * as Sentry from '@sentry/angular';
 
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
@@ -22,6 +23,40 @@ import { authInterceptor } from './app/core/interceptors/auth.interceptor';
 import { analyticsInterceptor } from './app/core/interceptors/analytics.interceptor';
 import { errorInterceptor } from './app/core/interceptors/error.interceptor';
 import { FirebaseService } from './app/core/services/firebase.service';
+
+// ─── Sentry Initialization (must run before Angular bootstrap) ──────────────
+// Provides: stack traces, breadcrumbs, release tracking, error grouping,
+// session replay, and performance tracing.
+//
+// To activate: Add your DSN in environment.prod.ts from
+// https://sentry.io → Settings → Projects → Client Keys (DSN)
+if (environment.sentryDsn) {
+  Sentry.init({
+    dsn: environment.sentryDsn,
+    environment: environment.production ? 'production' : 'development',
+    enabled: environment.production,
+    // Capture 10% of transactions for performance monitoring
+    tracesSampleRate: 0.1,
+    // Capture 10% of sessions for replay (reduces quota usage)
+    replaysSessionSampleRate: 0.1,
+    // Always capture replay on error for debugging
+    replaysOnErrorSampleRate: 1.0,
+    integrations: [
+      Sentry.browserTracingIntegration(),
+      Sentry.replayIntegration({
+        maskAllText: false,
+        blockAllMedia: false,
+      }),
+    ],
+    // Filter noisy/unhelpful errors
+    ignoreErrors: [
+      'ResizeObserver loop',
+      'Non-Error promise rejection',
+      'Loading chunk',
+      'ChunkLoadError',
+    ],
+  });
+}
 
 /**
  * Idle preloading strategy — waits for the browser to be idle before preloading routes.
@@ -47,8 +82,10 @@ class IdlePreloadStrategy implements PreloadingStrategy {
 }
 
 /**
- * Global error handler - captures unhandled errors and sends to Firebase Analytics.
- * Also maintains localStorage fallback for offline error tracking.
+ * Global error handler - captures unhandled errors and sends to:
+ * 1. Sentry (stack traces, breadcrumbs, session replay)
+ * 2. Firebase Analytics (app_exception events for GA4 dashboards)
+ * 3. localStorage (offline fallback)
  */
 @Injectable()
 class GlobalErrorHandler implements ErrorHandler {
@@ -60,7 +97,12 @@ class GlobalErrorHandler implements ErrorHandler {
     // Log to console in all environments
     console.error('[FitOS Error]', error);
 
-    // In production, send to Firebase Analytics + localStorage fallback
+    // Send to Sentry (if initialized — captures full stack trace, breadcrumbs, replay)
+    if (environment.sentryDsn) {
+      Sentry.captureException(error.originalError || error);
+    }
+
+    // In production, also send to Firebase Analytics + localStorage fallback
     if (environment.production) {
       // Lazy-inject FirebaseService (ErrorHandler runs before some services are ready)
       if (!this.firebaseService) {
