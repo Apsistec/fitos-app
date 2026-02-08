@@ -2,9 +2,25 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
-    <title>FitOS</title>
+    <title>FitOS - AI-Powered Fitness Coaching</title>
 
     <base href="/"/>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="FitOS is the AI-powered fitness coaching platform for trainers and clients. Log workouts, track nutrition, get coached — all in one app."/>
+    <meta name="keywords" content="fitness app, workout tracker, nutrition tracker, personal trainer, AI coaching, fitness coaching"/>
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="FitOS - AI-Powered Fitness Coaching"/>
+    <meta property="og:description" content="Log workouts, track nutrition, and get AI-powered coaching. The all-in-one fitness platform."/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:url" content="https://www.nutrifitos.app"/>
+    <meta property="og:image" content="https://www.nutrifitos.app/assets/icons/icon-512x512.png"/>
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="FitOS - AI-Powered Fitness Coaching"/>
+    <meta name="twitter:description" content="Log workouts, track nutrition, and get AI-powered coaching."/>
 
     <!-- Dark-first color scheme -->
     <meta name="color-scheme" content="dark light"/>
@@ -14,10 +30,12 @@
 
     <link rel="icon" type="image/png" href="assets/icon/favicon.png"/>
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Fonts: preconnect + async load to avoid render-blocking -->
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"/></noscript>
 
     <!-- PWA -->
     <meta name="mobile-web-app-capable" content="yes"/>
@@ -28,11 +46,29 @@
     <!-- Theme color - dark mode default -->
     <meta name="theme-color" content="#0D0D0D" media="(prefers-color-scheme: dark)"/>
     <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)"/>
-    
-    <link rel="manifest" href="manifest.webmanifest">
-</head>
+
+    <link rel="manifest" href="manifest.webmanifest"/>
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "FitOS",
+      "description": "AI-powered fitness coaching platform for trainers and clients",
+      "url": "https://www.nutrifitos.app",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "iOS, Android, Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+  </head>
   <body class="dark">
     <app-root></app-root>
     <noscript>Please enable JavaScript to continue using this application.</noscript>
-</body>
+  </body>
 </html>

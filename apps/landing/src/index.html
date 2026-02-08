@@ -2,32 +2,77 @@
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
-  <title>FitOS - AI-Powered Fitness Coaching Platform</title>
+  <title>FitOS - AI-Powered Fitness Coaching Platform for Personal Trainers</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  
+
   <!-- SEO Meta Tags -->
-  <meta name="description" content="FitOS is the all-in-one AI-powered fitness coaching platform for solo trainers. Unlimited clients, one price. Build workouts, track nutrition, get paid - all in one place.">
-  <meta name="keywords" content="fitness coaching, personal trainer software, workout builder, nutrition tracking, AI fitness, trainer app">
-  
+  <meta name="description" content="FitOS is the all-in-one AI-powered fitness coaching platform for solo trainers. Unlimited clients, one price. Build workouts, track nutrition, get paid — all in one place.">
+  <meta name="keywords" content="fitness coaching, personal trainer software, workout builder, nutrition tracking, AI fitness, trainer app, client management">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://www.nutrifitos.com/">
+
   <!-- Open Graph -->
   <meta property="og:title" content="FitOS - AI-Powered Fitness Coaching Platform">
-  <meta property="og:description" content="The personal trainer's personal trainer software. Unlimited clients, one price.">
+  <meta property="og:description" content="The all-in-one platform for personal trainers. Unlimited clients, one price. Build workouts, track nutrition, get paid.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://www.nutrifitos.com">
   <meta property="og:image" content="https://www.nutrifitos.com/assets/og-image.png">
-  
+  <meta property="og:site_name" content="FitOS">
+  <meta property="og:locale" content="en_US">
+
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="FitOS - AI-Powered Fitness Coaching Platform">
-  <meta name="twitter:description" content="The personal trainer's personal trainer software.">
-  
+  <meta name="twitter:description" content="The all-in-one platform for personal trainers. Unlimited clients, one price.">
+  <meta name="twitter:image" content="https://www.nutrifitos.com/assets/og-image.png">
+
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-  
+
   <!-- Theme Color -->
   <meta name="theme-color" content="#0D0D0D">
+
+  <!-- DNS Prefetch & Preconnect for external resources -->
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Non-render-blocking Google Fonts (preload + media swap pattern) -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"></noscript>
+
+  <!-- Structured Data (JSON-LD) - Organization -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "FitOS",
+    "description": "AI-powered fitness coaching platform for personal trainers. Build workouts, track nutrition, manage clients, and get paid — all in one place.",
+    "url": "https://www.nutrifitos.com",
+    "applicationCategory": "HealthApplication",
+    "operatingSystem": "iOS, Android, Web",
+    "offers": {
+      "@type": "AggregateOffer",
+      "priceCurrency": "USD",
+      "lowPrice": "0",
+      "offerCount": "3"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "FitOS",
+      "url": "https://www.nutrifitos.com"
+    }
+  }
+  </script>
+
+  <!-- Inline critical theme script to prevent FOUC -->
+  <script>
+    try{var t=localStorage.getItem('fitos-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light')}else{document.documentElement.setAttribute('data-theme','dark')}}catch(e){}
+  </script>
 </head>
 <body class="antialiased">
   <app-root></app-root>

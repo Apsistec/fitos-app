@@ -29,6 +29,19 @@
   ],
   "dataGroups": [
     {
+      "name": "google-fonts",
+      "urls": [
+        "https://fonts.googleapis.com/**",
+        "https://fonts.gstatic.com/**"
+      ],
+      "cacheConfig": {
+        "maxSize": 10,
+        "maxAge": "30d",
+        "timeout": "5s",
+        "strategy": "performance"
+      }
+    },
+    {
       "name": "api-cache",
       "urls": [
         "https://*.supabase.co/**"
