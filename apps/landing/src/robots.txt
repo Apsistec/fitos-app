@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://www.nutrifitos.com/sitemap.xml
+
+# Disallow non-content paths
+Disallow: /api/

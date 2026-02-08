@@ -20,6 +20,11 @@
             "glob": "**/*",
             "input": "apps/landing/src/assets",
             "output": "/assets"
+          },
+          {
+            "glob": "robots.txt",
+            "input": "apps/landing/src",
+            "output": "/"
           }
         ],
         "styles": ["apps/landing/src/styles.scss"],
