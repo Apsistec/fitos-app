@@ -162,7 +162,7 @@ export class FirebaseService {
         description: description.substring(0, 500), // GA4 max param length
         fatal,
       });
-    } catch (e) {
+    } catch {
       // Silently fail - error logging should never throw
     }
   }
@@ -208,7 +208,7 @@ export class FirebaseService {
    */
   startTrace(traceName: string): { stop: () => void } {
     if (!this.performance) {
-      return { stop: () => {} }; // No-op
+      return { stop: () => { /* no-op when performance monitoring is unavailable */ } };
     }
 
     try {
@@ -225,7 +225,7 @@ export class FirebaseService {
       };
     } catch (e) {
       console.warn('[FirebaseService] startTrace failed:', e);
-      return { stop: () => {} };
+      return { stop: () => { /* no-op on trace start failure */ } };
     }
   }
 }

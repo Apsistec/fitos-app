@@ -63,8 +63,6 @@ export class HelpService {
   private _hasMethodologySetup = signal(false);
   private _asyncChecksLoaded = signal(false);
 
-  constructor() {}
-
   /**
    * Load async completion data that can't be derived from existing signals.
    * Call this when the Getting Started page is opened.
