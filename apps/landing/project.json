@@ -25,6 +25,11 @@
             "glob": "robots.txt",
             "input": "apps/landing/src",
             "output": "/"
+          },
+          {
+            "glob": "sitemap.xml",
+            "input": "apps/landing/src",
+            "output": "/"
           }
         ],
         "styles": ["apps/landing/src/styles.scss"],
