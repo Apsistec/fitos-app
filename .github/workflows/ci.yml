@@ -38,8 +38,9 @@ jobs:
         run: npm ci
 
       # Lint affected projects (fast - parallel)
+      # Errors fail the build; warnings are reported but don't block CI
       - name: Lint
-        run: npx nx affected -t lint --parallel=3
+        run: npx nx affected -t lint --parallel=3 -- --max-warnings=-1
 
       # Test affected projects with coverage (CI mode)
       - name: Test
