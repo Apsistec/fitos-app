@@ -705,13 +705,104 @@ export class EditProfilePage implements OnInit {
   }
 
   async changePhoto() {
-    // TODO: Implement photo upload with Capacitor Camera
-    const toast = await this.toastController.create({
-      message: 'Photo upload coming soon',
-      duration: 2000,
-      position: 'bottom',
+    const alert = await this.alertController.create({
+      header: 'Profile Photo',
+      buttons: [
+        {
+          text: 'Choose from Library',
+          handler: () => { this.pickPhoto(); },
+        },
+        {
+          text: 'Cancel',
+          role: 'cancel',
+        },
+      ],
     });
-    await toast.present();
+    await alert.present();
+  }
+
+  private async pickPhoto() {
+    try {
+      // Create a file input element
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+
+      input.onchange = async (event: any) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          const toast = await this.toastController.create({
+            message: 'Photo must be under 5MB',
+            duration: 2000,
+            color: 'warning',
+            position: 'bottom',
+          });
+          await toast.present();
+          return;
+        }
+
+        this.saving.set(true);
+
+        try {
+          const userId = this.authService.user()?.id;
+          if (!userId) throw new Error('Not authenticated');
+
+          // Upload to Supabase Storage
+          const fileName = `avatars/${userId}/${Date.now()}.${file.name.split('.').pop()}`;
+          const { data: uploadData, error: uploadError } = await this.supabase.client
+            .storage
+            .from('avatars')
+            .upload(fileName, file, {
+              cacheControl: '3600',
+              upsert: true,
+            });
+
+          if (uploadError) throw uploadError;
+
+          // Get public URL
+          const { data: urlData } = this.supabase.client
+            .storage
+            .from('avatars')
+            .getPublicUrl(uploadData.path);
+
+          const avatarUrl = urlData.publicUrl;
+
+          // Update profile
+          const { error: updateError } = await this.supabase.client
+            .from('profiles')
+            .update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() })
+            .eq('id', userId);
+
+          if (updateError) throw updateError;
+
+          const toast = await this.toastController.create({
+            message: 'Profile photo updated!',
+            duration: 2000,
+            color: 'success',
+            position: 'bottom',
+          });
+          await toast.present();
+        } catch (err) {
+          console.error('Error uploading photo:', err);
+          const toast = await this.toastController.create({
+            message: 'Failed to upload photo. Please try again.',
+            duration: 2000,
+            color: 'danger',
+            position: 'bottom',
+          });
+          await toast.present();
+        } finally {
+          this.saving.set(false);
+        }
+      };
+
+      input.click();
+    } catch (err) {
+      console.error('Error picking photo:', err);
+    }
   }
 
   async changePassword() {

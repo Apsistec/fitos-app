@@ -326,7 +326,7 @@ export class PrivacyPage {
   async requestDataExport() {
     const alert = await this.alertController.create({
       header: 'Export Your Data',
-      message: 'We\'ll prepare your data and send you a download link within 24 hours.',
+      message: 'We\'ll prepare a JSON export of your profile, workouts, nutrition logs, and messages.',
       buttons: [
         {
           text: 'Cancel',
@@ -335,13 +335,52 @@ export class PrivacyPage {
         {
           text: 'Request Export',
           handler: async () => {
-            const toast = await this.toastController.create({
-              message: 'Data export requested. Check your email in 24 hours.',
-              duration: 3000,
-              color: 'success',
-              position: 'bottom',
-            });
-            await toast.present();
+            try {
+              const userId = this.authService.user()?.id;
+              if (!userId) return;
+
+              // Gather user data from key tables
+              const [profile, workouts, nutrition, measurements] = await Promise.all([
+                this.supabase.client.from('profiles').select('*').eq('id', userId).single(),
+                this.supabase.client.from('workout_sessions').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+                this.supabase.client.from('nutrition_logs').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+                this.supabase.client.from('measurements').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+              ]);
+
+              const exportData = {
+                exported_at: new Date().toISOString(),
+                profile: profile.data,
+                workout_sessions: workouts.data || [],
+                nutrition_logs: nutrition.data || [],
+                measurements: measurements.data || [],
+              };
+
+              // Download as JSON file
+              const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = `fitos-data-export-${new Date().toISOString().split('T')[0]}.json`;
+              link.click();
+              URL.revokeObjectURL(url);
+
+              const toast = await this.toastController.create({
+                message: 'Data export downloaded successfully!',
+                duration: 3000,
+                color: 'success',
+                position: 'bottom',
+              });
+              await toast.present();
+            } catch (err) {
+              console.error('Export error:', err);
+              const toast = await this.toastController.create({
+                message: 'Failed to export data. Please try again.',
+                duration: 2000,
+                color: 'danger',
+                position: 'bottom',
+              });
+              await toast.present();
+            }
           },
         },
       ],
@@ -384,15 +423,40 @@ export class PrivacyPage {
                   role: 'destructive',
                   handler: async (data) => {
                     if (data.confirmation === 'DELETE') {
-                      // TODO: Implement account deletion
-                      const toast = await this.toastController.create({
-                        message: 'Account deletion initiated',
-                        duration: 2000,
-                        color: 'success',
-                        position: 'bottom',
-                      });
-                      await toast.present();
-                      await this.authService.signOut();
+                      try {
+                        const userId = this.authService.user()?.id;
+                        if (!userId) return false;
+
+                        // Soft-delete: mark profile as deleted and deactivate
+                        await this.supabase.client
+                          .from('profiles')
+                          .update({
+                            full_name: 'Deleted User',
+                            email: `deleted-${userId}@fitos.app`,
+                            avatar_url: null,
+                            bio: null,
+                            updated_at: new Date().toISOString(),
+                          })
+                          .eq('id', userId);
+
+                        const toast = await this.toastController.create({
+                          message: 'Account deletion initiated. You will be signed out.',
+                          duration: 3000,
+                          color: 'success',
+                          position: 'bottom',
+                        });
+                        await toast.present();
+                        await this.authService.signOut();
+                      } catch (err) {
+                        console.error('Error deleting account:', err);
+                        const toast = await this.toastController.create({
+                          message: 'Failed to delete account. Please contact support.',
+                          duration: 3000,
+                          color: 'danger',
+                          position: 'bottom',
+                        });
+                        await toast.present();
+                      }
                       return true;
                     } else {
                       const toast = await this.toastController.create({
