@@ -636,6 +636,13 @@ export const routes: Routes = [
                 (m) => m.LeaderboardPage
               ),
           },
+          {
+            path: 'feed',
+            loadComponent: () =>
+              import('./features/social/pages/feed/feed.page').then(
+                (m) => m.FeedPage
+              ),
+          },
         ],
       },
       {
