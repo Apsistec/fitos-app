@@ -1,6 +1,5 @@
 import { Component, inject, input, ChangeDetectionStrategy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Clipboard } from '@capacitor/clipboard';
 import {
   IonCard,
   IonCardHeader,
@@ -329,9 +328,7 @@ export class EmbedCodeComponent {
 
   async copyCode(): Promise<void> {
     try {
-      await Clipboard.write({
-        string: this.getEmbedCode(),
-      });
+      await navigator.clipboard.writeText(this.getEmbedCode());
 
       this.copied.set(true);
       await this.haptic.success();

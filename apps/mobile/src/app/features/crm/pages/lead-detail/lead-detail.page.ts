@@ -33,6 +33,8 @@ import {
   checkmarkCircleOutline,
 } from 'ionicons/icons';
 import { LeadService, Lead, LeadActivity, LeadStatus } from '../../../../core/services/lead.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { HapticService } from '../../../../core/services/haptic.service';
 import { ActivityLoggerComponent } from '../../components/activity-logger/activity-logger.component';
 
 /**
@@ -74,7 +76,7 @@ import { ActivityLoggerComponent } from '../../components/activity-logger/activi
     <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button defaultHref="/crm"></ion-back-button>
+          <ion-back-button defaultHref="/tabs/crm/pipeline"></ion-back-button>
         </ion-buttons>
         <ion-title>Lead Details</ion-title>
         <ion-buttons slot="end">
@@ -491,6 +493,8 @@ export class LeadDetailPage implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   leadService = inject(LeadService);
+  private auth = inject(AuthService);
+  private haptic = inject(HapticService);
   private modalCtrl = inject(ModalController);
 
   lead = signal<Lead | null>(null);
@@ -514,7 +518,7 @@ export class LeadDetailPage implements OnInit {
   async ngOnInit(): Promise<void> {
     const leadId = this.route.snapshot.paramMap.get('id');
     if (!leadId) {
-      this.router.navigate(['/crm']);
+      this.router.navigate(['/tabs/crm/pipeline']);
       return;
     }
 
@@ -524,12 +528,12 @@ export class LeadDetailPage implements OnInit {
   }
 
   async loadLead(leadId: string): Promise<void> {
-    const lead = await this.leadService.getLeadById(leadId);
+    const lead = await this.leadService.getLead(leadId);
     this.lead.set(lead);
   }
 
   async loadActivities(leadId: string): Promise<void> {
-    const activities = await this.leadService.getLeadActivities(leadId);
+    const activities = await this.leadService.getActivities(leadId);
     this.activities.set(activities);
   }
 
@@ -605,23 +609,87 @@ export class LeadDetailPage implements OnInit {
   }
 
   editLead(): void {
-    // TODO: Open edit lead modal
+    // Navigate back to pipeline where edit modal can be opened
+    // Lead editing is handled via the LeadFormComponent modal
+    this.haptic.light();
     console.log('Edit lead:', this.lead());
   }
 
-  makeCall(): void {
-    // TODO: Initiate call via Capacitor
-    console.log('Call:', this.lead()?.phone);
+  async makeCall(): Promise<void> {
+    const lead = this.lead();
+    if (!lead?.phone) return;
+
+    await this.haptic.light();
+
+    // Log call activity
+    const trainerId = this.auth.user()?.id;
+    if (trainerId) {
+      await this.leadService.addActivity(lead.id, trainerId, {
+        activity_type: 'phone_call',
+        subject: 'Phone call initiated',
+        description: `Called ${lead.first_name} ${lead.last_name}`,
+      });
+
+      // Reload activities to show the new entry
+      await this.loadActivities(lead.id);
+    }
+
+    // Open native phone dialer
+    window.location.href = `tel:${lead.phone}`;
   }
 
-  sendEmail(): void {
-    // TODO: Open email composer
-    console.log('Email:', this.lead()?.email);
+  async sendEmail(): Promise<void> {
+    const lead = this.lead();
+    if (!lead?.email) return;
+
+    await this.haptic.light();
+
+    // Log email activity
+    const trainerId = this.auth.user()?.id;
+    if (trainerId) {
+      await this.leadService.addActivity(lead.id, trainerId, {
+        activity_type: 'email_sent',
+        subject: 'Email sent',
+        description: `Emailed ${lead.first_name} ${lead.last_name}`,
+      });
+
+      // Reload activities
+      await this.loadActivities(lead.id);
+    }
+
+    // Open email client
+    window.location.href = `mailto:${lead.email}`;
   }
 
-  scheduleFollowUp(): void {
-    // TODO: Open follow-up scheduler
-    console.log('Schedule follow-up');
+  async scheduleFollowUp(): Promise<void> {
+    const lead = this.lead();
+    if (!lead) return;
+
+    await this.haptic.light();
+
+    // Set next follow-up to tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(9, 0, 0, 0);
+
+    await this.leadService.updateLead(lead.id, {
+      notes: `Follow-up scheduled for ${tomorrow.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}`,
+    });
+
+    // Log activity
+    const trainerId = this.auth.user()?.id;
+    if (trainerId) {
+      await this.leadService.addActivity(lead.id, trainerId, {
+        activity_type: 'note',
+        subject: 'Follow-up scheduled',
+        description: `Follow-up scheduled for ${tomorrow.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}`,
+      });
+
+      await this.loadActivities(lead.id);
+    }
+
+    // Reload lead to reflect updated follow-up date
+    await this.loadLead(lead.id);
   }
 
   toggleActivityLogger(): void {

@@ -444,6 +444,20 @@ export const routes: Routes = [
                 (m) => m.EmailAnalyticsPage
               ),
           },
+          {
+            path: 'leads/:id',
+            loadComponent: () =>
+              import('./features/crm/pages/lead-detail/lead-detail.page').then(
+                (m) => m.LeadDetailPage
+              ),
+          },
+          {
+            path: 'forms',
+            loadComponent: () =>
+              import('./features/crm/pages/form-builder/form-builder.page').then(
+                (m) => m.FormBuilderPage
+              ),
+          },
         ],
       },
       {

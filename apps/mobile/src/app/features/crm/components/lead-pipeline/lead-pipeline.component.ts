@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, CdkDrag, CdkDropList, CdkDropListGroup, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import {
@@ -294,6 +295,7 @@ const STAGE_CONFIG: Record<LeadStatus, { label: string; color: string; icon: str
 export class LeadPipelineComponent implements OnInit {
   leadService = inject(LeadService);
   private modalCtrl = inject(ModalController);
+  private router = inject(Router);
 
   // Component state
   searchQuery = signal('');
@@ -359,8 +361,7 @@ export class LeadPipelineComponent implements OnInit {
   }
 
   viewLead(lead: Lead): void {
-    // TODO: Navigate to lead detail page
-    console.log('View lead:', lead);
+    this.router.navigate(['/tabs/crm/leads', lead.id]);
   }
 
   async addLead(): Promise<void> {

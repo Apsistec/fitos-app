@@ -48,6 +48,8 @@ import {
 import { ClientService } from '../../../../core/services/client.service';
 import { WorkoutSessionService } from '../../../../core/services/workout-session.service';
 import { AutonomyService } from '../../../../core/services/autonomy.service';
+import { SupabaseService } from '../../../../core/services/supabase.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { AutonomyIndicatorComponent } from '../../components/autonomy-indicator/autonomy-indicator.component';
 import { GraduationAlertComponent } from '../../components/graduation-alert/graduation-alert.component';
 import { AssessmentFormComponent } from '../../components/assessment-form/assessment-form.component';
@@ -649,6 +651,8 @@ export class ClientDetailPage implements OnInit {
   private clientService = inject(ClientService);
   private workoutService = inject(WorkoutSessionService);
   private autonomyService = inject(AutonomyService);
+  private supabase = inject(SupabaseService);
+  private auth = inject(AuthService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private toastCtrl = inject(ToastController);
@@ -753,9 +757,22 @@ export class ClientDetailPage implements OnInit {
   async loadNotes(clientId: string) {
     this.loadingNotes.set(true);
     try {
-      // TODO: Implement trainer notes service
-      // For now, use placeholder
-      this.trainerNotes.set([]);
+      const trainerId = this.auth.user()?.id;
+      if (!trainerId) return;
+
+      const { data, error } = await this.supabase.client
+        .from('trainer_notes')
+        .select('id, note, created_at')
+        .eq('trainer_id', trainerId)
+        .eq('client_id', clientId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading notes:', error);
+        return;
+      }
+
+      this.trainerNotes.set(data || []);
     } catch (err) {
       console.error('Error loading notes:', err);
     } finally {
@@ -766,19 +783,30 @@ export class ClientDetailPage implements OnInit {
   async addNote() {
     if (!this.noteForm.valid || !this.client()) return;
 
+    const trainerId = this.auth.user()?.id;
+    const clientId = this.client()?.id;
+    if (!trainerId || !clientId) return;
+
     this.savingNote.set(true);
     try {
-      // TODO: Implement trainer notes service
       const noteText = this.noteForm.value.note;
 
-      // Placeholder: Add to local state
-      const newNote: TrainerNote = {
-        id: crypto.randomUUID(),
-        note: noteText,
-        created_at: new Date().toISOString(),
-      };
+      const { data, error } = await this.supabase.client
+        .from('trainer_notes')
+        .insert({
+          trainer_id: trainerId,
+          client_id: clientId,
+          note: noteText,
+        })
+        .select('id, note, created_at')
+        .single();
 
-      this.trainerNotes.update(notes => [newNote, ...notes]);
+      if (error) throw error;
+
+      if (data) {
+        this.trainerNotes.update(notes => [data, ...notes]);
+      }
+
       this.noteForm.reset();
 
       const toast = await this.toastCtrl.create({
@@ -788,6 +816,7 @@ export class ClientDetailPage implements OnInit {
       });
       await toast.present();
     } catch (err) {
+      console.error('Error adding note:', err);
       const toast = await this.toastCtrl.create({
         message: 'Failed to add note',
         duration: 2000,
@@ -800,15 +829,31 @@ export class ClientDetailPage implements OnInit {
   }
 
   async deleteNote(noteId: string) {
-    // TODO: Implement note deletion
-    this.trainerNotes.update(notes => notes.filter(n => n.id !== noteId));
+    try {
+      const { error } = await this.supabase.client
+        .from('trainer_notes')
+        .delete()
+        .eq('id', noteId);
 
-    const toast = await this.toastCtrl.create({
-      message: 'Note deleted',
-      duration: 2000,
-      color: 'success',
-    });
-    await toast.present();
+      if (error) throw error;
+
+      this.trainerNotes.update(notes => notes.filter(n => n.id !== noteId));
+
+      const toast = await this.toastCtrl.create({
+        message: 'Note deleted',
+        duration: 2000,
+        color: 'success',
+      });
+      await toast.present();
+    } catch (err) {
+      console.error('Error deleting note:', err);
+      const toast = await this.toastCtrl.create({
+        message: 'Failed to delete note',
+        duration: 2000,
+        color: 'danger',
+      });
+      await toast.present();
+    }
   }
 
   onTabChange() {

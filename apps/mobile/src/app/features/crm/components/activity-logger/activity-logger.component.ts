@@ -24,8 +24,9 @@ import {
   saveOutline,
   closeOutline,
 } from 'ionicons/icons';
-import { LeadService, LeadActivity } from '../../../../core/services/lead.service';
+import { LeadService, LeadActivity, ActivityType as ServiceActivityType } from '../../../../core/services/lead.service';
 import { HapticService } from '../../../../core/services/haptic.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 type ActivityType = 'note' | 'call' | 'email' | 'meeting';
 
@@ -288,6 +289,7 @@ type ActivityType = 'note' | 'call' | 'email' | 'meeting';
 export class ActivityLoggerComponent {
   private leadService = inject(LeadService);
   private haptic = inject(HapticService);
+  private auth = inject(AuthService);
 
   // Inputs
   leadId = input.required<string>();
@@ -394,7 +396,20 @@ export class ActivityLoggerComponent {
         break;
     }
 
-    await this.leadService.logActivity(this.leadId(), type, content, metadata);
+    // Map local activity types to service ActivityType
+    const typeMap: Record<ActivityType, ServiceActivityType> = {
+      note: 'note',
+      call: 'phone_call',
+      email: 'email_sent',
+      meeting: 'meeting',
+    };
+
+    const trainerId = this.auth.user()?.id || '';
+    await this.leadService.addActivity(this.leadId(), trainerId, {
+      activity_type: typeMap[type],
+      description: content,
+      metadata,
+    });
     await this.haptic.success();
 
     this.resetForm();
