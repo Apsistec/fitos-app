@@ -20,11 +20,12 @@ import {
   IonRefresherContent,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { send, personCircleOutline } from 'ionicons/icons';
+import { send, personCircleOutline, checkmarkDoneOutline, checkmarkOutline, trashOutline } from 'ionicons/icons';
 import { MessagingService, type Message } from '../../../../core/services/messaging.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ClientService } from '../../../../core/services/client.service';
 import { AICoachService } from '../../../../core/services/ai-coach.service';
+import { ActionSheetController, ToastController } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-chat',
@@ -88,10 +89,20 @@ import { AICoachService } from '../../../../core/services/ai-coach.service';
                 class="message"
                 [class.sent]="message.sender_id === currentUserId()"
                 [class.received]="message.sender_id !== currentUserId()"
+                (click)="onMessagePress(message)"
               >
                 <div class="message-bubble">
                   <p class="message-content">{{ message.content }}</p>
-                  <span class="message-time">{{ formatTime(message.created_at) }}</span>
+                  <div class="message-meta">
+                    <span class="message-time">{{ formatTime(message.created_at) }}</span>
+                    @if (message.sender_id === currentUserId()) {
+                      <ion-icon
+                        [name]="message.read_at ? 'checkmark-done-outline' : 'checkmark-outline'"
+                        class="read-indicator"
+                        [class.read]="message.read_at"
+                      ></ion-icon>
+                    }
+                  </div>
                 </div>
               </div>
             }
@@ -242,9 +253,26 @@ import { AICoachService } from '../../../../core/services/ai-coach.service';
         word-wrap: break-word;
       }
 
+      .message-meta {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 4px;
+      }
+
       .message-time {
         font-size: 11px;
         opacity: 0.7;
+      }
+
+      .read-indicator {
+        font-size: 14px;
+        opacity: 0.5;
+      }
+
+      .read-indicator.read {
+        opacity: 1;
+        color: #34D399;
       }
     }
 
@@ -295,6 +323,8 @@ export class ChatPage implements OnInit, AfterViewChecked {
   private clientService = inject(ClientService);
   private aiCoachService = inject(AICoachService);
   private route = inject(ActivatedRoute);
+  private actionSheetCtrl = inject(ActionSheetController);
+  private toastCtrl = inject(ToastController);
 
   messages = this.messagingService.currentMessagesSignal;
   loading = this.messagingService.isLoadingSignal;
@@ -315,6 +345,9 @@ export class ChatPage implements OnInit, AfterViewChecked {
     addIcons({
       send,
       personCircleOutline,
+      checkmarkDoneOutline,
+      checkmarkOutline,
+      trashOutline,
     });
   }
 
@@ -401,6 +434,39 @@ export class ChatPage implements OnInit, AfterViewChecked {
     } finally {
       this.sending.set(false);
     }
+  }
+
+  async onMessagePress(message: Message): Promise<void> {
+    // Only show actions for messages sent by the current user
+    if (message.sender_id !== this.currentUserId()) return;
+
+    const actionSheet = await this.actionSheetCtrl.create({
+      header: 'Message Options',
+      buttons: [
+        {
+          text: 'Delete Message',
+          icon: 'trash-outline',
+          role: 'destructive',
+          handler: () => this.deleteMessage(message.id),
+        },
+        {
+          text: 'Cancel',
+          role: 'cancel',
+        },
+      ],
+    });
+
+    await actionSheet.present();
+  }
+
+  private async deleteMessage(messageId: string): Promise<void> {
+    const success = await this.messagingService.deleteMessage(messageId);
+    const toast = await this.toastCtrl.create({
+      message: success ? 'Message deleted' : 'Failed to delete message',
+      duration: 2000,
+      color: success ? 'success' : 'danger',
+    });
+    await toast.present();
   }
 
   formatTime(dateStr: string | null | undefined): string {
