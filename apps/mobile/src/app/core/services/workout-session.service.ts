@@ -93,7 +93,7 @@ export class WorkoutSessionService {
 
     try {
       const { data: session, error: sessionError } = await this.supabase.client
-        .from('workout_sessions')
+        .from('workouts')
         .select('*')
         .eq('id', sessionId)
         .single();
@@ -101,9 +101,9 @@ export class WorkoutSessionService {
       if (sessionError) throw sessionError;
 
       const { data: sets, error: setsError } = await this.supabase.client
-        .from('logged_sets')
+        .from('workout_sets')
         .select('*')
-        .eq('session_id', sessionId)
+        .eq('workout_id', sessionId)
         .order('set_number');
 
       if (setsError) throw setsError;
@@ -171,10 +171,10 @@ export class WorkoutSessionService {
   async updateSet(setId: string, updates: Partial<SetLog>): Promise<boolean> {
     try {
       const { error } = await this.supabase.client
-        .from('logged_sets')
+        .from('workout_sets')
         .update({
-          reps: updates.reps,
-          weight: updates.weight || null,
+          reps_completed: updates.reps,
+          weight_used: updates.weight || null,
           rpe: updates.rpe || null,
           notes: updates.notes || null
         })
@@ -206,7 +206,7 @@ export class WorkoutSessionService {
   async deleteSet(setId: string): Promise<boolean> {
     try {
       const { error } = await this.supabase.client
-        .from('logged_sets')
+        .from('workout_sets')
         .delete()
         .eq('id', setId);
 

@@ -928,16 +928,47 @@ export class AuthService {
   /**
    * Sign in with email and password
    */
-  async signIn(email: string, password: string): Promise<{ error: Error | null }> {
+  async signIn(email: string, password: string, expectedRole?: UserRole): Promise<{ error: Error | null }> {
     try {
       this._state.update((s) => ({ ...s, loading: true }));
 
-      const { error } = await this.supabase.auth.signInWithPassword({
+      const { data, error } = await this.supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
+
+      // If an expected role was specified, validate it
+      if (expectedRole && data.user) {
+        // Load the profile to check role
+        const { data: profileData, error: profileError } = await this.supabase.client
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user.id)
+          .single();
+
+        if (profileError || !profileData) {
+          await this.supabase.auth.signOut();
+          this._state.update((s) => ({ ...s, loading: false }));
+          throw new Error('Unable to verify account role. Please try again.');
+        }
+
+        const actualRole = profileData.role as UserRole;
+        const roleLabels: Record<string, string> = {
+          'client': 'Client',
+          'trainer': 'Trainer',
+          'gym_owner': 'Gym Owner',
+        };
+
+        if (actualRole !== expectedRole) {
+          await this.supabase.auth.signOut();
+          this._state.update((s) => ({ ...s, loading: false }));
+          throw new Error(
+            `This account is registered as a ${roleLabels[actualRole] || actualRole}. Please use the ${roleLabels[actualRole] || actualRole} login page.`
+          );
+        }
+      }
 
       return { error: null };
     } catch (error) {

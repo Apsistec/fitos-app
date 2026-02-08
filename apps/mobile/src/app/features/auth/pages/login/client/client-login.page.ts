@@ -401,7 +401,7 @@ export class ClientLoginPage {
     this.showResendLink.set(false);
 
     const { email, password } = this.loginForm.value;
-    const { error } = await this.authService.signIn(email, password);
+    const { error } = await this.authService.signIn(email, password, 'client');
 
     this.loading.set(false);
 

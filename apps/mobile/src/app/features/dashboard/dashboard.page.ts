@@ -21,6 +21,7 @@ import {
   peopleOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
+import { SupabaseService } from '../../core/services/supabase.service';
 import { fadeInUp, listStagger } from '../../shared/animations';
 import { AssignmentService } from '../../core/services/assignment.service';
 import { ClientService } from '../../core/services/client.service';
@@ -93,7 +94,8 @@ import type { WorkoutWithExercises } from '../../core/services/workout.service';
         <ion-refresher-content></ion-refresher-content>
       </ion-refresher>
 
-      @if (!isTrainer()) {
+      @switch (userRole()) {
+        @case ('client') {
         <!-- Client Dashboard -->
         <div class="client-dashboard" @fadeInUp>
           <!-- Today's Workout -->
@@ -123,7 +125,8 @@ import type { WorkoutWithExercises } from '../../core/services/workout.service';
           <!-- Upcoming Workouts -->
           <app-upcoming-workouts-list [workouts]="upcomingWorkouts()" />
         </div>
-      } @else if (isOwner()) {
+        }
+        @case ('gym_owner') {
         <!-- Gym Owner Dashboard -->
         <div class="owner-dashboard" @fadeInUp>
           <!-- Facility Stats -->
@@ -135,7 +138,8 @@ import type { WorkoutWithExercises } from '../../core/services/workout.service';
           <!-- Activity Feed -->
           <app-trainer-activity-feed [activities]="recentActivity()" />
         </div>
-      } @else {
+        }
+        @case ('trainer') {
         <!-- Trainer Dashboard -->
         <div class="trainer-dashboard" @fadeInUp>
           <!-- Quick Actions Card -->
@@ -173,6 +177,7 @@ import type { WorkoutWithExercises } from '../../core/services/workout.service';
           <!-- Activity Feed -->
           <app-trainer-activity-feed [activities]="recentActivity()" />
         </div>
+        }
       }
     </ion-content>
   `,
@@ -295,12 +300,14 @@ import type { WorkoutWithExercises } from '../../core/services/workout.service';
 })
 export class DashboardPage implements OnInit {
   private authService = inject(AuthService);
+  private supabase = inject(SupabaseService);
   private assignmentService = inject(AssignmentService);
   private clientService = inject(ClientService);
   private sessionService = inject(WorkoutSessionService);
   private nutritionService = inject(NutritionService);
 
   // User info
+  userRole = computed(() => this.authService.profile()?.role ?? 'client');
   isTrainer = computed(() => this.authService.isTrainer());
   isOwner = computed(() => this.authService.isOwner());
   firstName = computed(() => {
@@ -379,220 +386,156 @@ export class DashboardPage implements OnInit {
     const userId = this.authService.user()?.id;
     if (!userId) return;
 
-    // For now, set default/empty values
-    // TODO: Implement actual service methods when backend is ready
-    this.todayWorkout.set(null);
-    this.weeklyWorkouts.set(0);
-    this.currentStreak.set(0);
-    this.upcomingWorkouts.set([]);
-    this.nutritionSummary.set(null);
+    try {
+      // Load all client dashboard data in parallel
+      const [todayWorkout, weeklyCount, streak, upcoming] = await Promise.all([
+        this.sessionService.getTodayWorkout(userId),
+        this.sessionService.getWorkoutCount(userId, 7),
+        this.sessionService.getCurrentStreak(userId),
+        this.sessionService.getUpcomingWorkouts(userId, 5),
+      ]);
 
-    // TODO: Uncomment when services are fully implemented
-    /*
-    const today = new Date().toISOString().split('T')[0];
+      this.todayWorkout.set(todayWorkout as any);
+      this.weeklyWorkouts.set(weeklyCount);
+      this.currentStreak.set(streak);
+      this.upcomingWorkouts.set(upcoming);
 
-    // Load today's workout assignment
-    const assignments = await this.assignmentService.getAssignmentsForDate(userId, today);
-    if (assignments.length > 0) {
-      // Get the full workout details with exercises
-      const workoutId = assignments[0].workout_template_id;
-      // Fetch workout with exercises from WorkoutService
-      this.todayWorkout.set(null);
+      // Load nutrition summary
+      const today = new Date().toISOString().split('T')[0];
+      const nutritionData = await this.nutritionService.getDailySummary(userId, today);
+      if (nutritionData) {
+        this.nutritionSummary.set({
+          calories: {
+            consumed: nutritionData.calories || 0,
+            target: nutritionData.targets?.calories || 2000,
+          },
+          protein: {
+            consumed: nutritionData.protein || 0,
+            target: nutritionData.targets?.protein || 150,
+          },
+          carbs: {
+            consumed: nutritionData.carbs || 0,
+            target: nutritionData.targets?.carbs || 200,
+          },
+          fat: {
+            consumed: nutritionData.fat || 0,
+            target: nutritionData.targets?.fat || 65,
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Error loading client dashboard:', error);
     }
-
-    // Load weekly workout count
-    const sessions = await this.sessionService.getSessionsForDateRange(
-      userId,
-      this.getStartOfWeek(),
-      today
-    );
-    this.weeklyWorkouts.set(sessions.filter((s: any) => s.status === 'completed').length);
-
-    // Calculate streak (simplified - should be more robust)
-    this.currentStreak.set(this.calculateStreak(sessions));
-
-    // Load upcoming workouts
-    const upcomingAssignments = await this.assignmentService.getAssignmentsForDateRange(
-      userId,
-      today,
-      this.getEndOfWeek()
-    );
-    this.upcomingWorkouts.set(upcomingAssignments);
-
-    // Load nutrition summary
-    const nutritionData = await this.nutritionService.getDailySummary(userId, today);
-    if (nutritionData) {
-      this.nutritionSummary.set({
-        calories: {
-          consumed: nutritionData.total_calories || 0,
-          target: nutritionData.target_calories || 2000,
-        },
-        protein: {
-          consumed: nutritionData.total_protein || 0,
-          target: nutritionData.target_protein || 150,
-        },
-        carbs: {
-          consumed: nutritionData.total_carbs || 0,
-          target: nutritionData.target_carbs || 200,
-        },
-        fat: {
-          consumed: nutritionData.total_fat || 0,
-          target: nutritionData.target_fat || 65,
-        },
-      });
-    }
-    */
   }
 
   private async loadTrainerDashboard(): Promise<void> {
     const trainerId = this.authService.user()?.id;
     if (!trainerId) return;
 
-    // For now, set default/empty values
-    // TODO: Implement actual service methods when backend is ready
-    this.trainerStats.set({
-      totalClients: 0,
-      activeClients: 0,
-      workoutsToday: 0,
-      weeklyRevenue: 0,
-      clientChange: 0,
-      revenueChange: 0,
-    });
-    this.clientAlerts.set([]);
-    this.recentActivity.set([]);
+    try {
+      // Load client stats and today's schedule in parallel
+      const [clientStats, todaySchedule, recentActivity] = await Promise.all([
+        this.clientService.getClientStats(trainerId),
+        this.assignmentService.getTodaySchedule(trainerId),
+        this.assignmentService.getRecentActivity(trainerId, 24),
+      ]);
 
-    // TODO: Uncomment when services are fully implemented
-    /*
-    // Load clients
-    const clients = await this.clientService.getClients(trainerId);
-    const activeClients = clients.filter((c: any) => c.status === 'active');
+      this.trainerStats.set({
+        totalClients: clientStats.total,
+        activeClients: clientStats.active,
+        workoutsToday: todaySchedule.length,
+        weeklyRevenue: 0,
+        clientChange: 0,
+        revenueChange: 0,
+      });
 
-    // Load today's workouts for all clients
-    const today = new Date().toISOString().split('T')[0];
-    let workoutsToday = 0;
-    for (const client of activeClients) {
-      const assignments = await this.assignmentService.getAssignmentsForDate(client.id, today);
-      workoutsToday += assignments.length;
+      // Map recent activity to the expected ActivityItem format
+      this.recentActivity.set(recentActivity.map((a: any) => ({
+        id: a.id,
+        clientId: a.client_id || '',
+        clientName: a.client_name || 'Client',
+        type: a.status === 'completed' ? 'workout_completed' as const : 'checkin' as const,
+        message: a.status === 'completed' ? 'Completed workout' : 'Started workout',
+        timestamp: new Date(a.completed_at || a.started_at || a.created_at),
+      })));
+
+      // Load client alerts (clients who may need attention)
+      await this.clientService.loadClients();
+      const clients = this.clientService.clients();
+      const alerts: ClientAlert[] = [];
+      for (const client of clients) {
+        // Check if client has been inactive (no workouts in 7+ days)
+        const recentCount = await this.sessionService.getWorkoutCount(client.id, 7);
+        if (recentCount === 0 && client.subscription_status === 'active') {
+          alerts.push({
+            id: client.id,
+            clientId: client.id,
+            clientName: client.full_name || client.email || 'Unknown',
+            type: 'missed_workout',
+            message: 'No workouts in the past 7 days',
+            daysAgo: 7,
+            severity: 'medium',
+          });
+        }
+      }
+      this.clientAlerts.set(alerts);
+    } catch (error) {
+      console.error('Error loading trainer dashboard:', error);
     }
-
-    // Set trainer stats
-    this.trainerStats.set({
-      totalClients: clients.length,
-      activeClients: activeClients.length,
-      workoutsToday,
-      weeklyRevenue: 0, // TODO: Implement revenue tracking
-      clientChange: 0, // TODO: Calculate from historical data
-      revenueChange: 0, // TODO: Calculate from historical data
-    });
-
-    // Load client alerts
-    // TODO: Implement actual alert logic based on missed workouts, low adherence, etc.
-    this.clientAlerts.set([]);
-
-    // Load recent activity
-    // TODO: Implement actual activity feed from workout sessions
-    this.recentActivity.set([]);
-    */
   }
 
   private async loadOwnerDashboard(): Promise<void> {
     const ownerId = this.authService.user()?.id;
     if (!ownerId) return;
 
-    // For now, set default/empty values
-    // TODO: Implement actual service methods when backend is ready
-    this.facilityStats.set({
-      totalClients: 0,
-      totalTrainers: 0,
-      monthlyRevenue: 0,
-      activeWorkouts: 0,
-      clientRetention: 85,
-      revenueGrowth: 0,
-    });
-    this.trainerPerformance.set([]);
-    this.recentActivity.set([]);
+    try {
+      // Load trainers that belong to this gym owner
+      const { data: trainers, error: trainersError } = await this.supabase.client
+        .from('profiles')
+        .select('*')
+        .eq('gym_owner_id', ownerId)
+        .eq('role', 'trainer');
 
-    // TODO: Uncomment when services are fully implemented
-    /*
-    // Load all trainers at the facility
-    const trainers = await this.clientService.getTrainersAtFacility(ownerId);
+      if (trainersError) throw trainersError;
 
-    // Load all clients across all trainers
-    let totalClients = 0;
-    const trainerPerf: TrainerPerformance[] = [];
+      const trainerList = trainers || [];
+      let totalClients = 0;
+      const trainerPerf: TrainerPerformance[] = [];
 
-    for (const trainer of trainers) {
-      const clients = await this.clientService.getClients(trainer.id);
-      const activeClients = clients.filter((c: any) => c.status === 'active');
+      for (const trainer of trainerList) {
+        const { count } = await this.supabase.client
+          .from('client_profiles')
+          .select('*', { count: 'exact', head: true })
+          .eq('trainer_id', trainer.id);
 
-      totalClients += clients.length;
+        const clientCount = count || 0;
+        totalClients += clientCount;
 
-      trainerPerf.push({
-        id: trainer.id,
-        name: trainer.fullName,
-        avatarUrl: trainer.avatarUrl,
-        totalClients: clients.length,
-        activeClients: activeClients.length,
-        monthlyRevenue: 0, // TODO: Calculate from subscriptions
-        clientChange: 0, // TODO: Calculate from historical data
-      });
-    }
-
-    this.facilityStats.set({
-      totalClients,
-      totalTrainers: trainers.length,
-      monthlyRevenue: 0, // TODO: Sum all trainer revenues
-      activeWorkouts: 0, // TODO: Count today's workouts across all trainers
-      clientRetention: 85, // TODO: Calculate from historical data
-      revenueGrowth: 0, // TODO: Calculate from historical data
-    });
-
-    this.trainerPerformance.set(trainerPerf);
-    */
-  }
-
-  private getStartOfWeek(): string {
-    const now = new Date();
-    const day = now.getDay();
-    const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Adjust for Sunday
-    const monday = new Date(now.setDate(diff));
-    return monday.toISOString().split('T')[0];
-  }
-
-  private getEndOfWeek(): string {
-    const now = new Date();
-    const day = now.getDay();
-    const diff = now.getDate() - day + 7; // Next Sunday
-    const sunday = new Date(now.setDate(diff));
-    return sunday.toISOString().split('T')[0];
-  }
-
-  private calculateStreak(sessions: any[]): number {
-    // Simplified streak calculation
-    // TODO: Implement proper streak logic considering scheduled vs completed workouts
-    const completedDates = new Set(
-      sessions
-        .filter(s => s.status === 'completed')
-        .map(s => s.started_at?.split('T')[0])
-    );
-
-    let streak = 0;
-    const today = new Date();
-
-    for (let i = 0; i < 365; i++) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
-
-      if (completedDates.has(dateStr)) {
-        streak++;
-      } else if (i > 0) {
-        // Allow grace for today
-        break;
+        trainerPerf.push({
+          id: trainer.id,
+          name: trainer.full_name || 'Unknown',
+          avatarUrl: trainer.avatar_url,
+          totalClients: clientCount,
+          activeClients: clientCount,
+          monthlyRevenue: 0,
+          clientChange: 0,
+        });
       }
-    }
 
-    return streak;
+      this.facilityStats.set({
+        totalClients,
+        totalTrainers: trainerList.length,
+        monthlyRevenue: 0,
+        activeWorkouts: 0,
+        clientRetention: 0,
+        revenueGrowth: 0,
+      });
+
+      this.trainerPerformance.set(trainerPerf);
+      this.recentActivity.set([]);
+    } catch (error) {
+      console.error('Error loading owner dashboard:', error);
+    }
   }
 
   async handleRefresh(event: CustomEvent): Promise<void> {

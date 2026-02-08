@@ -399,7 +399,7 @@ export class TrainerLoginPage {
     this.showResendLink.set(false);
 
     const { email, password } = this.loginForm.value;
-    const { error } = await this.authService.signIn(email, password);
+    const { error } = await this.authService.signIn(email, password, 'trainer');
 
     this.loading.set(false);
 

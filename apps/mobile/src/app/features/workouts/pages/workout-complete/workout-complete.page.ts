@@ -32,6 +32,8 @@ import {
 import { WorkoutSessionService } from '../../../../core/services/workout-session.service';
 import { CelebrationService } from '../../../../core/services/celebration.service';
 import { HapticService } from '../../../../core/services/haptic.service';
+import { SupabaseService } from '../../../../core/services/supabase.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 interface WorkoutSummary {
   name: string;
@@ -470,6 +472,8 @@ export class WorkoutCompletePage implements OnInit {
   private sessionService = inject(WorkoutSessionService);
   private celebration = inject(CelebrationService);
   private haptic = inject(HapticService);
+  private supabase = inject(SupabaseService);
+  private auth = inject(AuthService);
 
   loading = signal(true);
   summary = signal<WorkoutSummary>({
@@ -546,8 +550,8 @@ export class WorkoutCompletePage implements OnInit {
           notes: workout.notes || undefined,
         });
 
-        // Check for personal records (mock for now)
-        await this.checkPersonalRecords(sets);
+        // Check for personal records against historical data
+        await this.checkPersonalRecords(sets, workoutId);
 
         // Award points
         await this.awardPoints();
@@ -586,12 +590,12 @@ export class WorkoutCompletePage implements OnInit {
     this.loading.set(false);
   }
 
-  private async checkPersonalRecords(sets: WorkoutSet[]): Promise<void> {
-    // In production, this would compare against historical PRs
-    // For now, we'll check if any set exceeds typical baselines
+  private async checkPersonalRecords(sets: WorkoutSet[], workoutId: string): Promise<void> {
     const prs: PersonalRecord[] = [];
+    const userId = this.auth.user()?.id;
+    if (!userId) return;
 
-    // Group sets by exercise
+    // Group current sets by workout_exercise_id
     const exerciseSets = new Map<string, WorkoutSet[]>();
     for (const set of sets) {
       const existing = exerciseSets.get(set.workout_exercise_id) || [];
@@ -599,19 +603,82 @@ export class WorkoutCompletePage implements OnInit {
       exerciseSets.set(set.workout_exercise_id, existing);
     }
 
-    // Check max weight per exercise (simplified PR detection)
-    // In production, compare against user's historical data
-    for (const [, exerciseSetsArr] of exerciseSets) {
-      const maxWeight = Math.max(...exerciseSetsArr.map(s => s.weight_used || 0));
-      if (maxWeight > 0) {
-        // This would check against actual PR history
-        // For now, just simulate occasional PRs
-        if (Math.random() > 0.7) {
+    // Get workout_exercises for this workout to find exercise_ids and names
+    const { data: workoutExercises } = await this.supabase.client
+      .from('workout_exercises')
+      .select('id, exercise_id, exercise:exercises(name)')
+      .eq('workout_id', workoutId);
+
+    if (!workoutExercises) return;
+
+    // Build map: workout_exercise_id -> { exercise_id, name }
+    const exerciseMap = new Map<string, { exerciseId: string; name: string }>();
+    for (const we of workoutExercises) {
+      const name = (we.exercise as any)?.name || 'Unknown Exercise';
+      exerciseMap.set(we.id, { exerciseId: we.exercise_id, name });
+    }
+
+    // Collect unique exercise IDs for batch historical lookup
+    const exerciseIds = new Set<string>();
+    const currentMaxWeights = new Map<string, { maxWeight: number; name: string }>();
+
+    for (const [workoutExerciseId, setsArr] of exerciseSets) {
+      const exerciseInfo = exerciseMap.get(workoutExerciseId);
+      if (!exerciseInfo) continue;
+
+      const maxWeight = Math.max(...setsArr.map(s => s.weight_used || 0));
+      if (maxWeight <= 0) continue;
+
+      exerciseIds.add(exerciseInfo.exerciseId);
+      const existing = currentMaxWeights.get(exerciseInfo.exerciseId);
+      if (!existing || maxWeight > existing.maxWeight) {
+        currentMaxWeights.set(exerciseInfo.exerciseId, { maxWeight, name: exerciseInfo.name });
+      }
+    }
+
+    if (exerciseIds.size === 0) return;
+
+    // Get all historical workout_exercise IDs for these exercises (excluding current workout)
+    const { data: historicalWEs } = await this.supabase.client
+      .from('workout_exercises')
+      .select('id, exercise_id')
+      .in('exercise_id', Array.from(exerciseIds))
+      .neq('workout_id', workoutId);
+
+    if (historicalWEs && historicalWEs.length > 0) {
+      const historicalWEIds = historicalWEs.map(we => we.id);
+
+      // Get max weight per exercise from historical sets
+      const { data: historicalSets } = await this.supabase.client
+        .from('workout_sets')
+        .select('weight_used, workout_exercise_id')
+        .in('workout_exercise_id', historicalWEIds)
+        .not('weight_used', 'is', null)
+        .order('weight_used', { ascending: false });
+
+      // Build historical max per exercise_id
+      const historicalMaxMap = new Map<string, number>();
+      if (historicalSets) {
+        for (const set of historicalSets) {
+          const we = historicalWEs.find(w => w.id === set.workout_exercise_id);
+          if (!we) continue;
+          const current = historicalMaxMap.get(we.exercise_id) ?? 0;
+          if ((set.weight_used ?? 0) > current) {
+            historicalMaxMap.set(we.exercise_id, set.weight_used ?? 0);
+          }
+        }
+      }
+
+      // Compare current max vs historical max
+      for (const [exerciseId, { maxWeight, name }] of currentMaxWeights) {
+        const previousBest = historicalMaxMap.get(exerciseId) ?? 0;
+        if (maxWeight > previousBest && previousBest > 0) {
+          const improvement = Math.round(((maxWeight - previousBest) / previousBest) * 100);
           prs.push({
-            exerciseName: 'Exercise', // Would get from exercise service
-            previousBest: Math.round(maxWeight * 0.95),
+            exerciseName: name,
+            previousBest,
             newRecord: maxWeight,
-            improvement: 5,
+            improvement,
             unit: 'lbs',
           });
         }
@@ -620,7 +687,6 @@ export class WorkoutCompletePage implements OnInit {
 
     if (prs.length > 0) {
       this.personalRecords.set(prs);
-      // Trigger special PR celebration
       await this.celebration.personalRecord();
     }
   }

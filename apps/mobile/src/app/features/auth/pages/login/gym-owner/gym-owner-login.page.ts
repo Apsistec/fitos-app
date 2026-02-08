@@ -384,7 +384,7 @@ export class GymOwnerLoginPage {
     this.showResendLink.set(false);
 
     const { email, password } = this.loginForm.value;
-    const { error } = await this.authService.signIn(email, password);
+    const { error } = await this.authService.signIn(email, password, 'gym_owner');
 
     this.loading.set(false);
 

@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, noAuthGuard, trainerOrOwnerGuard, onboardingCompleteGuard, mfaRequiredGuard } from './core/guards';
+import { authGuard, noAuthGuard, trainerOrOwnerGuard, clientGuard, onboardingCompleteGuard, mfaRequiredGuard } from './core/guards';
 
 export const routes: Routes = [
   {
@@ -252,6 +252,7 @@ export const routes: Routes = [
       },
       {
         path: 'nutrition',
+        canActivate: [clientGuard],
         children: [
           {
             path: '',
@@ -608,6 +609,15 @@ export const routes: Routes = [
               ),
           },
         ],
+      },
+      {
+        path: 'more',
+        loadComponent: () => import('./features/more/more.page').then(m => m.MorePage),
+      },
+      {
+        path: 'business',
+        canActivate: [trainerOrOwnerGuard],
+        loadComponent: () => import('./features/business/business.page').then(m => m.BusinessPage),
       },
     ],
   },

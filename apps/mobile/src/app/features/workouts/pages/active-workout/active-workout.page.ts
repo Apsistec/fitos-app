@@ -30,6 +30,8 @@ import { checkmarkOutline, closeOutline, addCircleOutline, trashOutline } from '
 addIcons({ checkmarkOutline, closeOutline, addCircleOutline, trashOutline });
 import { WorkoutSessionService, SetLog } from '../../../../core/services/workout-session.service';
 import { AssignmentService } from '../../../../core/services/assignment.service';
+import { WorkoutService } from '../../../../core/services/workout.service';
+import { SupabaseService } from '../../../../core/services/supabase.service';
 import { RestTimerComponent } from '../../../../shared/components/rest-timer/rest-timer.component';
 import { HapticService } from '../../../../core/services/haptic.service';
 import { CelebrationService } from '../../../../core/services/celebration.service';
@@ -439,6 +441,8 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
   private router = inject(Router);
   private sessionService = inject(WorkoutSessionService);
   private assignmentService = inject(AssignmentService);
+  private workoutService = inject(WorkoutService);
+  private supabase = inject(SupabaseService);
   private alertController = inject(AlertController);
   private toastController = inject(ToastController);
   private celebration = inject(CelebrationService);
@@ -487,31 +491,107 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
   }
 
   async loadWorkout() {
-    // Load assignment details
-    // For now, mock data - in production would load from AssignmentService
-    this.workoutName.set('Upper Body Push');
-    this.exercises.set([
-      {
-        exerciseId: '1',
-        exerciseName: 'Barbell Bench Press',
-        targetSets: 4,
-        targetReps: '8-10',
-        restSeconds: 120,
-        completedSets: 0,
-        currentSet: 1,
-        sets: []
-      },
-      {
-        exerciseId: '2',
-        exerciseName: 'Dumbbell Press',
-        targetSets: 3,
-        targetReps: '10-12',
-        restSeconds: 90,
-        completedSets: 0,
-        currentSet: 1,
-        sets: []
+    this.loading.set(true);
+
+    try {
+      if (!this.assignedWorkoutId) return;
+
+      // Load the workout record with its template
+      const { data: workout, error: workoutError } = await this.supabase.client
+        .from('workouts')
+        .select('*, template:workout_templates(*, exercises:workout_template_exercises(*, exercise:exercises(*)))')
+        .eq('id', this.assignedWorkoutId)
+        .single();
+
+      if (workoutError || !workout) {
+        this.showToast('Failed to load workout', 'danger');
+        return;
       }
-    ]);
+
+      this.workoutName.set(workout.name || workout.template?.name || 'Workout');
+
+      // Build exercise list from template exercises
+      const templateExercises = workout.template?.exercises || [];
+
+      // Sort by order_index
+      templateExercises.sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0));
+
+      const exerciseProgress: ExerciseProgress[] = templateExercises.map((te: any) => ({
+        exerciseId: te.id, // workout_template_exercise ID for set logging
+        exerciseName: te.exercise?.name || 'Unknown Exercise',
+        targetSets: te.sets || 3,
+        targetReps: te.reps_min && te.reps_max
+          ? (te.reps_min === te.reps_max ? `${te.reps_min}` : `${te.reps_min}-${te.reps_max}`)
+          : `${te.reps_min || te.reps_max || 10}`,
+        restSeconds: te.rest_seconds || 90,
+        completedSets: 0,
+        currentSet: 1,
+        sets: []
+      }));
+
+      // If no template exercises, try loading from workout_exercises table
+      if (exerciseProgress.length === 0) {
+        const { data: workoutExercises } = await this.supabase.client
+          .from('workout_exercises')
+          .select('*, exercise:exercises(*)')
+          .eq('workout_id', this.assignedWorkoutId)
+          .order('order_index');
+
+        if (workoutExercises && workoutExercises.length > 0) {
+          workoutExercises.forEach((we: any) => {
+            exerciseProgress.push({
+              exerciseId: we.id,
+              exerciseName: we.exercise?.name || 'Unknown Exercise',
+              targetSets: we.prescribed_sets || 3,
+              targetReps: we.prescribed_reps_min && we.prescribed_reps_max
+                ? `${we.prescribed_reps_min}-${we.prescribed_reps_max}`
+                : `${we.prescribed_reps || 10}`,
+              restSeconds: we.rest_seconds || 90,
+              completedSets: 0,
+              currentSet: 1,
+              sets: []
+            });
+          });
+        }
+      }
+
+      this.exercises.set(exerciseProgress);
+
+      // Load any previously logged sets (for resumed workouts)
+      if (workout.status === 'in_progress') {
+        const { data: existingSets } = await this.supabase.client
+          .from('workout_sets')
+          .select('*')
+          .eq('workout_id', this.assignedWorkoutId)
+          .order('set_number');
+
+        if (existingSets && existingSets.length > 0) {
+          this.exercises.update(exercises => {
+            const updated = [...exercises];
+            for (const set of existingSets) {
+              const exerciseIdx = updated.findIndex(e => e.exerciseId === set.workout_exercise_id);
+              if (exerciseIdx >= 0) {
+                updated[exerciseIdx].sets.push({
+                  exerciseId: set.workout_exercise_id,
+                  setNumber: set.set_number,
+                  reps: set.reps_completed || 0,
+                  weight: set.weight_used || undefined,
+                  rpe: set.rpe || undefined,
+                });
+                updated[exerciseIdx].completedSets = updated[exerciseIdx].sets.length;
+                updated[exerciseIdx].currentSet = updated[exerciseIdx].completedSets + 1;
+              }
+            }
+            return updated;
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error loading workout:', error);
+      this.showToast('Error loading workout', 'danger');
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   async startSession() {
