@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -12,7 +12,6 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonCardContent,
-  IonRadioGroup,
   IonRadio,
   IonList,
   IonItem,
@@ -23,7 +22,6 @@ import {
   IonBackButton,
   IonButtons,
   IonProgressBar,
-  IonAlert,
   IonSpinner,
   AlertController,
   LoadingController,
@@ -77,7 +75,6 @@ import {
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
-    IonRadioGroup,
     IonRadio,
     IonList,
     IonItem,
@@ -88,14 +85,13 @@ import {
     IonBackButton,
     IonButtons,
     IonProgressBar,
-    IonAlert,
-    IonSpinner,
-  ],
+    IonSpinner
+],
   templateUrl: './wellness-check-in.page.html',
   styleUrls: ['./wellness-check-in.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WellnessCheckInPage implements OnInit {
+export class WellnessCheckInPage  {
   private readonly wellnessService = inject(WellnessService);
   private readonly router = inject(Router);
   private readonly alertController = inject(AlertController);
@@ -151,9 +147,7 @@ export class WellnessCheckInPage implements OnInit {
     });
   }
 
-  async ngOnInit() {
-    // Show intro step first
-  }
+  
 
   // =====================================================================
   // INTRO STEP

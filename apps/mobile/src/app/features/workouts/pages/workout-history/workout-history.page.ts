@@ -123,7 +123,7 @@ addIcons({ barbellOutline, timeOutline, calendarOutline, trophyOutline });
                     <div class="workout-details">
                       <div class="detail-item">
                         <ion-icon name="calendar-outline"></ion-icon>
-                        <span>{{ formatDate(workout.completed_at) }}</span>
+                        <span>{{ workout.completed_at ? formatDate(workout.completed_at) : '-' }}</span>
                       </div>
 
                       @if (workout.started_at && workout.completed_at) {
@@ -136,7 +136,7 @@ addIcons({ barbellOutline, timeOutline, calendarOutline, trophyOutline });
                       @if (workout.template?.estimated_duration_minutes) {
                         <div class="detail-item">
                           <ion-icon name="barbell-outline"></ion-icon>
-                          <span>{{ workout.template.estimated_duration_minutes }} min planned</span>
+                          <span>{{ workout.template?.estimated_duration_minutes }} min planned</span>
                         </div>
                       }
                     </div>

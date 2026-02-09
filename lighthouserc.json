@@ -1,8 +1,9 @@
 {
   "ci": {
     "collect": {
-      "staticDistDir": "./dist/apps/mobile/browser",
-      "url": ["http://localhost/"],
+      "startServerCommand": "npx serve dist/apps/mobile/browser -s -l 9222",
+      "startServerReadyPattern": "Accepting connections",
+      "url": ["http://localhost:9222/"],
       "numberOfRuns": 3,
       "settings": {
         "preset": "desktop",

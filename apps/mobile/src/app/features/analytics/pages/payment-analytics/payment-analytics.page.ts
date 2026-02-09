@@ -130,7 +130,7 @@ interface FailedPayment {
         </div>
       } @else {
         <!-- Time Period Segment -->
-        <ion-segment [(value)]="selectedPeriod" class="ion-padding">
+        <ion-segment [value]="selectedPeriod()" (ionChange)="onPeriodChange($event)" class="ion-padding">
           <ion-segment-button value="7d">
             <ion-label>7 Days</ion-label>
           </ion-segment-button>
@@ -638,6 +638,7 @@ interface FailedPayment {
 })
 export class PaymentAnalyticsPage implements OnInit {
   private supabase = inject(SupabaseService);
+  protected Math = Math;
 
   // State
   loading = signal(true);
@@ -681,8 +682,8 @@ export class PaymentAnalyticsPage implements OnInit {
     this.loading.set(true);
 
     try {
-      const user = await this.supabase.getCurrentUser();
-      if (!user) throw new Error('Not authenticated');
+      const { data: { user }, error: userError } = await this.supabase.client.auth.getUser();
+      if (userError || !user) throw new Error('Not authenticated');
 
       // Determine date range based on selected period
       const days = this.selectedPeriod() === '7d' ? 7 : this.selectedPeriod() === '30d' ? 30 : 90;
@@ -714,7 +715,7 @@ export class PaymentAnalyticsPage implements OnInit {
       );
 
       // Load active failed payments
-      const { data: failuresData, error: failuresError } = await this.supabase.client
+      const failuresResponse = await this.supabase.client
         .from('payment_failures')
         .select(`
           id,
@@ -732,6 +733,8 @@ export class PaymentAnalyticsPage implements OnInit {
         .in('status', ['retrying'])
         .order('created_at', { ascending: false })
         .limit(10);
+
+      const { data: failuresData, error: failuresError } = failuresResponse as { data: Array<{ id: string; amount_cents: number; attempt_count: number; status: string; next_payment_attempt: string | null; failure_message: string | null; created_at: string; profiles: { full_name: string } | null }> | null; error: { message: string } | null };
 
       if (failuresError) throw failuresError;
 
@@ -751,6 +754,14 @@ export class PaymentAnalyticsPage implements OnInit {
       console.error('Error loading payment analytics:', error);
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  onPeriodChange(event: CustomEvent) {
+    const value = event.detail.value as string;
+    if (value === '7d' || value === '30d' || value === '90d') {
+      this.selectedPeriod.set(value);
+      this.loadData();
     }
   }
 

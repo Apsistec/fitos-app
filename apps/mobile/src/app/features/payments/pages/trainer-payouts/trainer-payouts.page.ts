@@ -106,7 +106,7 @@ import { AuthService } from '../../../../core/services/auth.service';
       </ion-refresher>
 
       <!-- Segment to switch between payouts and transfers -->
-      <ion-segment [(value)]="selectedSegment" class="ion-padding">
+      <ion-segment [value]="selectedSegment()" (ionChange)="onSegmentChange($event)" class="ion-padding">
         <ion-segment-button value="payouts">
           <ion-label>Payouts</ion-label>
         </ion-segment-button>
@@ -432,6 +432,13 @@ export class TrainerPayoutsPage implements OnInit {
       await this.presentToast('Error loading payout data', 'danger');
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  onSegmentChange(event: CustomEvent) {
+    const value = event.detail.value as 'payouts' | 'transfers';
+    if (value) {
+      this.selectedSegment.set(value);
     }
   }
 

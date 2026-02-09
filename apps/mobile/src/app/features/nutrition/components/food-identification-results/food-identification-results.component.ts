@@ -504,8 +504,9 @@ export class FoodIdentificationResultsComponent {
   /**
    * Adjust portion size
    */
-  async adjustPortion(index: number, event: CustomEvent<{ value: number }>): Promise<void> {
-    const multiplier = event.detail.value;
+  async adjustPortion(index: number, event: CustomEvent): Promise<void> {
+    const value = event.detail.value;
+    const multiplier = typeof value === 'number' ? value : 1;
     const food = this.foods()[index];
 
     const adjustedFood: IdentifiedFood = {

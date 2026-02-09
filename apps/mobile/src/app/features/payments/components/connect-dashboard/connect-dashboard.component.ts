@@ -10,8 +10,6 @@ import {
 import { CommonModule } from '@angular/common';
 import {
   IonCard,
-  IonCardHeader,
-  IonCardTitle,
   IonCardContent,
   IonSpinner,
   IonButton,
@@ -49,19 +47,17 @@ interface WindowWithStripeConnect {
  * Sprint 28: Stripe Connect Marketplace
  */
 @Component({
-  selector: 'fit-connect-dashboard',
+  selector: 'app-connect-dashboard',
   standalone: true,
   imports: [
     CommonModule,
     IonCard,
-    IonCardHeader,
-    IonCardTitle,
     IonCardContent,
     IonSpinner,
     IonButton,
     IonIcon,
-    IonNote,
-  ],
+    IonNote
+],
   schemas: [CUSTOM_ELEMENTS_SCHEMA], // Required for Stripe's custom elements
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `

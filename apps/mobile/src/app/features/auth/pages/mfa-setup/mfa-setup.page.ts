@@ -113,7 +113,7 @@ import { OtpVerifyModalComponent } from '../../../../shared/components/otp-verif
                 <div class="method-content">
                   @if (isGoogleLinked()) {
                     <h3>Google Account</h3>
-                    <p>{{ googleIdentity()?.identity_data?.email || 'Connected' }}</p>
+                    <p>{{ googleIdentity()?.identity_data?.['email'] || 'Connected' }}</p>
                   } @else {
                     <h3>Link Google Account</h3>
                     <p>Add your Google account for backup sign-in</p>
@@ -245,7 +245,7 @@ import { OtpVerifyModalComponent } from '../../../../shared/components/otp-verif
                 <div class="method-content">
                   @if (isGoogleLinked()) {
                     <h3>Google Account</h3>
-                    <p>{{ googleIdentity()?.identity_data?.email || 'Connected' }}</p>
+                    <p>{{ googleIdentity()?.identity_data?.['email'] || 'Connected' }}</p>
                   } @else {
                     <h3>Sign in with Google</h3>
                     <p>Use your Google account for secure authentication</p>
@@ -499,8 +499,8 @@ import { OtpVerifyModalComponent } from '../../../../shared/components/otp-verif
                     <ion-icon name="logo-google"></ion-icon>
                   </div>
                   <div class="method-content">
-                    <h3>{{ identity.identity_data?.full_name || 'Google Account' }}</h3>
-                    <p>{{ identity.identity_data?.email || 'Connected' }}</p>
+                    <h3>{{ identity.identity_data?.['full_name'] || 'Google Account' }}</h3>
+                    <p>{{ identity.identity_data?.['email'] || 'Connected' }}</p>
                   </div>
                   <ion-icon name="checkmark-circle" color="success" class="method-check"></ion-icon>
                 </ion-card-content>
@@ -1318,8 +1318,8 @@ export class MfaSetupPage implements OnInit {
         console.error('[MFA Setup] Error from listFactors:', {
           message: error.message,
           name: error.name,
-          status: (error as unknown as Record<string, unknown>).status,
-          code: (error as unknown as Record<string, unknown>).code,
+          status: (error as unknown as Record<string, unknown>)['status'],
+          code: (error as unknown as Record<string, unknown>)['code'],
         });
 
         const errorMsg = (error.message || '').toLowerCase();

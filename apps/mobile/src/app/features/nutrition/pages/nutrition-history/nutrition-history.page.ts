@@ -17,7 +17,6 @@ import {
   IonSegmentButton,
   IonLabel,
   IonIcon,
-  IonBadge,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -65,9 +64,8 @@ interface DayData {
     IonSegment,
     IonSegmentButton,
     IonLabel,
-    IonIcon,
-    IonBadge,
-  ],
+    IonIcon
+],
   template: `
     <ion-header class="ion-no-border">
       <ion-toolbar>
@@ -78,7 +76,7 @@ interface DayData {
       </ion-toolbar>
 
       <ion-toolbar>
-        <ion-segment [value]="timeRange()" (ionChange)="onTimeRangeChange($event)">
+        <ion-segment [value]="timeRange()" (ionChange)="onTimeRangeChange($event.detail.value)">
           <ion-segment-button value="7">
             <ion-label>7 Days</ion-label>
           </ion-segment-button>
@@ -489,9 +487,11 @@ export class NutritionHistoryPage implements OnInit {
     this.loadHistory();
   }
 
-  onTimeRangeChange(event: CustomEvent<{ value: string }>) {
-    this.timeRange.set(event.detail.value);
-    this.loadHistory();
+  onTimeRangeChange(value: string | number | undefined) {
+    if (value) {
+      this.timeRange.set(String(value));
+      this.loadHistory();
+    }
   }
 
   async loadHistory() {

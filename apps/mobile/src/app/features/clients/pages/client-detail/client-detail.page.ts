@@ -76,6 +76,15 @@ interface TrainerNote {
   created_at: string;
 }
 
+interface RecentWorkout {
+  id: string;
+  completed_at: string;
+  rating?: number;
+  template?: {
+    name: string;
+  };
+}
+
 @Component({
   selector: 'app-client-detail',
   standalone: true,
@@ -199,15 +208,15 @@ interface TrainerNote {
                   @if (client()!.height_inches) {
                     <div class="info-item">
                       <ion-label class="info-label">Height</ion-label>
-                      <ion-note>{{ formatHeight(client()!.height_inches) }}</ion-note>
+                      <ion-note>{{ formatHeight(client()!.height_inches!) }}</ion-note>
                     </div>
                   }
 
                   @if (client()!.fitness_level) {
                     <div class="info-item">
                       <ion-label class="info-label">Fitness Level</ion-label>
-                      <ion-badge [color]="getFitnessLevelColor(client()!.fitness_level)">
-                        {{ formatFitnessLevel(client()!.fitness_level) }}
+                      <ion-badge [color]="getFitnessLevelColor(client()!.fitness_level!)">
+                        {{ formatFitnessLevel(client()!.fitness_level!) }}
                       </ion-badge>
                     </div>
                   }
@@ -216,7 +225,7 @@ interface TrainerNote {
             </ion-card>
 
             <!-- Goals Card -->
-            @if (client()!.goals && client()!.goals.length > 0) {
+            @if (client()?.goals?.length) {
               <ion-card>
                 <ion-card-header>
                   <ion-card-title>
@@ -264,22 +273,17 @@ interface TrainerNote {
                 <div class="info-grid">
                   <div class="info-item">
                     <ion-label class="info-label">Status</ion-label>
-                    <ion-badge [color]="getSubscriptionColor(client()!.subscription_status)">
-                      {{ formatSubscriptionStatus(client()!.subscription_status) }}
+                    <ion-badge [color]="getSubscriptionColor(client()!.subscription_status || 'active')">
+                      {{ formatSubscriptionStatus(client()!.subscription_status || 'active') }}
                     </ion-badge>
                   </div>
 
-                  @if (client()!.subscription_ends_at) {
+                  @if (client()!.created_at) {
                     <div class="info-item">
-                      <ion-label class="info-label">Ends</ion-label>
-                      <ion-note>{{ formatDate(client()!.subscription_ends_at) }}</ion-note>
+                      <ion-label class="info-label">Member Since</ion-label>
+                      <ion-note>{{ formatDate(client()!.created_at!) }}</ion-note>
                     </div>
                   }
-
-                  <div class="info-item">
-                    <ion-label class="info-label">Member Since</ion-label>
-                    <ion-note>{{ formatDate(client()!.created_at) }}</ion-note>
-                  </div>
                 </div>
               </ion-card-content>
             </ion-card>
@@ -669,7 +673,7 @@ export class ClientDetailPage implements OnInit {
   autonomyAssessment = signal<AutonomyAssessment | null>(null);
 
   // Workouts tab
-  recentWorkouts = signal<Record<string, unknown>[]>([]);
+  recentWorkouts = signal<RecentWorkout[]>([]);
   loadingWorkouts = signal(false);
   workoutStats = computed(() => {
     const workouts = this.recentWorkouts();
@@ -746,7 +750,7 @@ export class ClientDetailPage implements OnInit {
     this.loadingWorkouts.set(true);
     try {
       const workouts = await this.workoutService.getClientWorkoutHistory(clientId, 10, 0);
-      this.recentWorkouts.set(workouts);
+      this.recentWorkouts.set(workouts as RecentWorkout[]);
     } catch (err) {
       console.error('Error loading workouts:', err);
     } finally {
@@ -903,7 +907,8 @@ export class ClientDetailPage implements OnInit {
   }
 
   // Formatting helpers
-  calculateAge(dateOfBirth: string): number {
+  calculateAge(dateOfBirth: string | null): number {
+    if (!dateOfBirth) return 0;
     const today = new Date();
     const birthDate = new Date(dateOfBirth);
     let age = today.getFullYear() - birthDate.getFullYear();
@@ -920,7 +925,8 @@ export class ClientDetailPage implements OnInit {
     return `${feet}'${remainingInches}"`;
   }
 
-  formatGender(gender: string): string {
+  formatGender(gender: string | null): string {
+    if (!gender) return '';
     const genderMap: Record<string, string> = {
       male: 'Male',
       female: 'Female',

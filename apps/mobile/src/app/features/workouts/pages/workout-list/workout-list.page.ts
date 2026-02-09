@@ -173,7 +173,7 @@ addIcons({
                       <ion-text color="medium">
                         <small>
                           @for (ex of workout.exercises.slice(0, 3); track ex.id; let last = $last) {
-                            <span>{{ ex.exercise?.name || 'Exercise' }}{{ !last ? ', ' : '' }}</span>
+                            <span>Exercise {{ $index + 1 }}{{ !last ? ', ' : '' }}</span>
                           }
                           @if (workout.exercises.length > 3) {
                             <span> +{{ workout.exercises.length - 3 }} more</span>

@@ -101,7 +101,7 @@ addIcons({
                   <ion-icon name="calendar-outline"></ion-icon>
                   <div class="summary-content">
                     <div class="summary-label">Completed</div>
-                    <div class="summary-value">{{ formatDate(workout()!.completed_at) }}</div>
+                    <div class="summary-value">{{ workout()!.completed_at ? formatDate(workout()!.completed_at!) : '-' }}</div>
                   </div>
                 </div>
 
@@ -496,7 +496,10 @@ export class WorkoutDetailPage implements OnInit {
     });
   }
 
-  calculateDuration(startedAt: string, completedAt: string): string {
+  calculateDuration(startedAt: string | null, completedAt: string | null): string {
+    if (!startedAt || !completedAt) {
+      return '-';
+    }
     const start = new Date(startedAt);
     const end = new Date(completedAt);
     const durationMs = end.getTime() - start.getTime();

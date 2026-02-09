@@ -101,10 +101,7 @@ import { WorkoutService, WorkoutTemplateWithExercises } from '../../../../core/s
                 <div class="workout-meta">
                   <ion-text color="medium">
                     <small>
-                      {{ workout()!.exercises?.length || 0 }} exercises
-                      @if (workout()!.estimated_duration) {
-                        · {{ formatDuration(workout()!.estimated_duration) }}
-                      }
+                      {{ workout()!.exercises.length || 0 }} exercises
                     </small>
                   </ion-text>
                 </div>

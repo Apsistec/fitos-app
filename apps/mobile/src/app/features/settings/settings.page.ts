@@ -278,7 +278,7 @@ import { ThemeService, ThemeMode } from '../../core/services/theme.service';
           </ion-item>
 
           <div class="theme-selector">
-            <ion-segment [value]="themeMode()" (ionChange)="onThemeModeChange($event)">
+            <ion-segment [value]="themeMode()" (ionChange)="onThemeModeChange($event.detail.value)">
               <ion-segment-button value="dark">
                 <ion-icon name="moon-outline"></ion-icon>
                 <ion-label>Dark</ion-label>
@@ -584,9 +584,11 @@ export class SettingsPage implements OnInit {
     await alert.present();
   }
 
-  onThemeModeChange(event: CustomEvent<{ value: string }>): void {
-    const mode = event.detail.value as ThemeMode;
-    this.themeService.setMode(mode);
+  onThemeModeChange(value: string | number | undefined): void {
+    if (value) {
+      const mode = String(value) as ThemeMode;
+      this.themeService.setMode(mode);
+    }
   }
 
   toggleDarkMode(event: CustomEvent<{ checked: boolean }>): void {
