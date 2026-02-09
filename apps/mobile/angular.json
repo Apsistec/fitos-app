@@ -78,8 +78,7 @@
               }
             },
             "externalDependencies": [
-              "@angular/cdk",
-              "@angular/service-worker"
+              "@angular/cdk"
             ]
           },
           "configurations": {
