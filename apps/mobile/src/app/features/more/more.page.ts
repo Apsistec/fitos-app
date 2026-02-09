@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import {
   IonContent, IonHeader, IonToolbar, IonTitle,
   IonList, IonItem, IonIcon, IonLabel, IonBadge,
-  IonNote, IonItemGroup, IonItemDivider,
+  IonItemGroup, IonItemDivider,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -37,7 +37,7 @@ interface MoreMenuSection {
   imports: [
     IonContent, IonHeader, IonToolbar, IonTitle,
     IonList, IonItem, IonIcon, IonLabel, IonBadge,
-    IonNote, IonItemGroup, IonItemDivider,
+    IonItemGroup, IonItemDivider,
   ],
   template: `
     <ion-header class="ion-no-border">

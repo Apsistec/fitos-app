@@ -178,12 +178,12 @@ export class AICoachService {
 
         if (msgData && msgData.length > 0) {
           const messages: ChatMessage[] = msgData.map((m: Record<string, unknown>) => ({
-            id: m.id,
-            role: m.role,
-            content: m.content,
-            timestamp: m.created_at,
-            agent: m.agent || undefined,
-            confidence: m.confidence || undefined,
+            id: m.id as string,
+            role: m.role as ChatMessage['role'],
+            content: m.content as string,
+            timestamp: m.created_at as string,
+            agent: (m.agent as ChatMessage['agent']) || undefined,
+            confidence: (m.confidence as number) || undefined,
           }));
           this.messages.set(messages);
 

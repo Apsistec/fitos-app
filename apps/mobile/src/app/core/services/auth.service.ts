@@ -871,7 +871,7 @@ export class AuthService {
       if (error) {
         console.error('[AuthService] SignUp error:', error);
         console.error('[AuthService] Error message:', error.message);
-        console.error('[AuthService] Error status:', (error as Record<string, unknown>).status);
+        console.error('[AuthService] Error status:', (error as unknown as Record<string, unknown>).status);
         console.error('[AuthService] Full error:', JSON.stringify(error, null, 2));
         throw error;
       }

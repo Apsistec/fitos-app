@@ -263,10 +263,12 @@ export class GamificationService {
       if (error) throw error;
 
       // Enhance entries with user names and current user flag
+      const currentUser = await this.supabase.client.auth.getUser();
+      const currentUserId = currentUser.data.user?.id;
       const entries: LeaderboardEntry[] = (data || []).map((entry: LeaderboardEntry & { profiles?: { full_name?: string } }) => ({
         ...entry,
         user_name: entry.profiles?.full_name || 'Unknown User',
-        is_current_user: entry.user_id === this.supabase.client.auth.getUser().then(u => u.data.user?.id),
+        is_current_user: entry.user_id === currentUserId,
       }));
 
       this.leaderboardEntries.set(entries);

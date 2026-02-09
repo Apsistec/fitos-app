@@ -173,8 +173,8 @@ export class ResponseReviewComponent implements OnInit {
     if (!context || context.length === 0) return 'No context used';
 
     const firstItem = context[0];
-    if (firstItem.content) {
-      return firstItem.content.substring(0, 100) + (firstItem.content.length > 100 ? '...' : '');
+    if (firstItem.content && typeof firstItem.content === 'string') {
+      return (firstItem.content as string).substring(0, 100) + ((firstItem.content as string).length > 100 ? '...' : '');
     }
 
     return `${context.length} context item(s)`;

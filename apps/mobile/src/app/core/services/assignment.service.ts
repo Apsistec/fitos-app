@@ -22,7 +22,7 @@ export interface RecentActivity {
   workout: AssignedWorkout;
   clientName: string;
   clientAvatar: string | null;
-  completedAt: string;
+  completedAt: string | null;
 }
 
 @Injectable({

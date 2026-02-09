@@ -316,7 +316,7 @@ export class ProgressPage implements OnInit {
       // Extract unique exercise IDs from completed sessions
       const exerciseIds = new Set<string>();
       for (const session of sessions) {
-        for (const exercise of session.logged_exercises || []) {
+        for (const exercise of ((session as unknown as Record<string, unknown>).logged_exercises as Array<{ exercise_id: string }>) || []) {
           exerciseIds.add(exercise.exercise_id);
         }
       }
@@ -371,10 +371,10 @@ export class ProgressPage implements OnInit {
     for (const session of sessions) {
       if (session.status !== 'completed') continue;
 
-      const loggedExercise = (session.logged_exercises as unknown as LoggedExercise[] | undefined)?.find((ex: LoggedExercise) => ex.exercise_id === exerciseId);
+      const loggedExercise = ((session as unknown as Record<string, unknown>).logged_exercises as LoggedExercise[] | undefined)?.find((ex: LoggedExercise) => ex.exercise_id === exerciseId);
       if (!loggedExercise) continue;
 
-      const date = new Date(session.completed_at || session.created_at).toLocaleDateString();
+      const date = new Date(session.completed_at || session.created_at || new Date()).toLocaleDateString();
 
       if (this.chartType() === 'strength') {
         // Max weight for the exercise in this session

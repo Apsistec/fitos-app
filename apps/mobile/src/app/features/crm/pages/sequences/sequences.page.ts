@@ -665,7 +665,7 @@ export class SequencesPage implements OnInit {
       await this.showToast('Failed to update sequence', 'danger');
 
       // Revert toggle on error
-      event.target.checked = !event.detail.checked;
+      (event.target as HTMLInputElement).checked = !event.detail.checked;
     } finally {
       this.toggling.set(false);
     }

@@ -457,13 +457,13 @@ export class DashboardPage implements OnInit {
       });
 
       // Map recent activity to the expected ActivityItem format
-      this.recentActivity.set(recentActivity.map((a: Record<string, unknown>) => ({
-        id: a.id,
-        clientId: a.client_id || '',
-        clientName: a.client_name || 'Client',
-        type: a.status === 'completed' ? 'workout_completed' as const : 'checkin' as const,
-        message: a.status === 'completed' ? 'Completed workout' : 'Started workout',
-        timestamp: new Date(a.completed_at || a.started_at || a.created_at),
+      this.recentActivity.set(recentActivity.map((a) => ({
+        id: String(a.workout?.id || ''),
+        clientId: a.clientName || '',
+        clientName: a.clientName || 'Client',
+        type: 'workout_completed' as const,
+        message: 'Completed workout',
+        timestamp: new Date(a.completedAt || a.workout?.created_at || new Date()),
       })));
 
       // Load client alerts (clients who may need attention)

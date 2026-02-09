@@ -2,8 +2,8 @@ import { Component, inject, computed, OnInit, ChangeDetectionStrategy } from '@a
 import { Router } from '@angular/router';
 import {
   IonContent, IonHeader, IonToolbar, IonTitle,
-  IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-  IonIcon, IonGrid, IonRow, IonCol, IonChip, IonLabel,
+  IonCard, IonCardContent,
+  IonIcon, IonGrid, IonRow, IonCol,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -31,8 +31,8 @@ interface BusinessCard {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     IonContent, IonHeader, IonToolbar, IonTitle,
-    IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-    IonIcon, IonGrid, IonRow, IonCol, IonChip, IonLabel,
+    IonCard, IonCardContent,
+    IonIcon, IonGrid, IonRow, IonCol,
   ],
   template: `
     <ion-header class="ion-no-border">

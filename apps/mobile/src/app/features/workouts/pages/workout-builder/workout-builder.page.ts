@@ -376,18 +376,27 @@ export class WorkoutBuilderPage implements OnInit {
       this.workoutDescription = template.description || '';
 
       // Convert template exercises to ExerciseConfig
-      const configs: ExerciseConfig[] = template.exercises.map((ex, index) => ({
-        id: `${ex.id}`,
-        exerciseId: ex.exercise_id,
-        exercise: ex.exercise,
-        order: index,
-        sets: ex.sets,
-        reps: ex.reps,
-        restSeconds: ex.rest_seconds,
-        notes: ex.notes || undefined,
-        rpe: ex.rpe_target || undefined,
-        tempo: ex.tempo || undefined
-      }));
+      const configs: ExerciseConfig[] = template.exercises.map((ex, index) => {
+        // Format reps as a range if both min and max are provided
+        let reps: string;
+        if (ex.reps_min && ex.reps_max && ex.reps_min !== ex.reps_max) {
+          reps = `${ex.reps_min}-${ex.reps_max}`;
+        } else {
+          reps = String(ex.reps_max || ex.reps_min || 10);
+        }
+        return {
+          id: `${ex.id}`,
+          exerciseId: ex.exercise_id,
+          exercise: (ex as unknown as Record<string, unknown>).exercise as Exercise | undefined,
+          order: index,
+          sets: ex.sets || 3,
+          reps,
+          restSeconds: ex.rest_seconds || 60,
+          notes: ex.notes || undefined,
+          rpe: (ex as unknown as Record<string, unknown>).rpe_target as number | undefined,
+          tempo: (ex as unknown as Record<string, unknown>).tempo as string | undefined,
+        };
+      });
 
       this.exercises.set(configs);
     }
