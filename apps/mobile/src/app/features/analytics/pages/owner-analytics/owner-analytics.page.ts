@@ -644,9 +644,9 @@ export class OwnerAnalyticsPage implements OnInit {
     this.loadAnalytics();
   }
 
-  async handleRefresh(event: any): Promise<void> {
+  async handleRefresh(event: CustomEvent): Promise<void> {
     await this.loadAnalytics();
-    event.target.complete();
+    (event.target as HTMLIonRefresherElement).complete();
   }
 
   private getDateRange(): { startDate: string; endDate: string } {

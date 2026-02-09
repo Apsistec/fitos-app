@@ -122,7 +122,7 @@ export class ContactSupportPage implements OnInit {
   private async loadDeviceInfo() {
     try {
       const info = await Device.getInfo();
-      const deviceId = await Device.getId();
+      await Device.getId();
 
       this.deviceInfo.set({
         appVersion: '1.0.0', // TODO: Get from environment or package.json
@@ -194,7 +194,6 @@ export class ContactSupportPage implements OnInit {
 
     try {
       const formValue = this.supportForm.value;
-      const profile = this.authService.profile();
 
       const payload: SupportTicketPayload = {
         category: formValue.category as 'bug' | 'feature_request' | 'billing' | 'other',
@@ -205,7 +204,7 @@ export class ContactSupportPage implements OnInit {
       };
 
       // Submit ticket via SupportService
-      const response = await this.supportService.submitTicket(payload);
+      await this.supportService.submitTicket(payload);
 
       await loading.dismiss();
 

@@ -45,9 +45,9 @@ import {
   checkmarkCircle,
   closeCircle,
 } from 'ionicons/icons';
-import { ClientService } from '../../../../core/services/client.service';
+import { ClientService, ClientWithProfile } from '../../../../core/services/client.service';
 import { WorkoutSessionService } from '../../../../core/services/workout-session.service';
-import { AutonomyService } from '../../../../core/services/autonomy.service';
+import { AutonomyService, AutonomyAssessment } from '../../../../core/services/autonomy.service';
 import { SupabaseService } from '../../../../core/services/supabase.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AutonomyIndicatorComponent } from '../../components/autonomy-indicator/autonomy-indicator.component';
@@ -661,15 +661,15 @@ export class ClientDetailPage implements OnInit {
   private fb = inject(FormBuilder);
 
   // State
-  client = signal<any | null>(null);
+  client = signal<ClientWithProfile | null>(null);
   clientId = signal<string>('');
   loading = signal(false);
   error = signal<string | null>(null);
   selectedTab = 'overview';
-  autonomyAssessment = signal<any | null>(null);
+  autonomyAssessment = signal<AutonomyAssessment | null>(null);
 
   // Workouts tab
-  recentWorkouts = signal<any[]>([]);
+  recentWorkouts = signal<Record<string, unknown>[]>([]);
   loadingWorkouts = signal(false);
   workoutStats = computed(() => {
     const workouts = this.recentWorkouts();
@@ -860,9 +860,9 @@ export class ClientDetailPage implements OnInit {
     this.loadTabData();
   }
 
-  async handleRefresh(event: any) {
+  async handleRefresh(event: CustomEvent) {
     await this.loadClientProfile();
-    event.target.complete();
+    (event.target as HTMLIonRefresherElement).complete();
   }
 
   async showActionSheet() {

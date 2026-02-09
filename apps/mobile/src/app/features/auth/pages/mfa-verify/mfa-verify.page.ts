@@ -335,7 +335,7 @@ export class MfaVerifyPage implements OnInit {
         this.router.navigate(['/tabs/dashboard']);
       }, 500);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error verifying MFA:', error);
       this.hasError.set(true);
       this.isSuccess.set(false);

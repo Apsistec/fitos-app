@@ -260,7 +260,7 @@ export class SubscriptionService {
     this._error.set(null);
 
     try {
-      const { data: _data, error } = await this.supabase.functions.invoke('stripe-create-price', {
+      const { error } = await this.supabase.functions.invoke('stripe-create-price', {
         body: {
           trainerId,
           ...pricing,

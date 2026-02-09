@@ -38,15 +38,7 @@ import { SupabaseService } from '../../../../core/services/supabase.service';
 import { PasskeyService, Passkey } from '../../../../core/services/passkey.service';
 import { OtpVerifyModalComponent } from '../../../../shared/components/otp-verify-modal/otp-verify-modal.component';
 
-interface _MfaFactor {
-  id: string;
-  type: string;
-  totp?: {
-    qr_code: string;
-    secret: string;
-    uri: string;
-  };
-}
+// _MfaFactor interface removed - unused
 
 @Component({
   selector: 'app-mfa-setup',

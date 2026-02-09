@@ -1,4 +1,4 @@
-import {  Component, inject, signal, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import {  Component, inject, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import {
@@ -19,7 +19,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { chatbubbleOutline, personCircleOutline } from 'ionicons/icons';
-import { MessagingService, type Conversation } from '../../../../core/services/messaging.service';
+import { MessagingService } from '../../../../core/services/messaging.service';
 
 @Component({
   selector: 'app-conversations',

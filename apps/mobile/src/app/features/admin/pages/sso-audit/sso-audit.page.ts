@@ -22,8 +22,8 @@ interface AuditEvent {
   ipAddress?: string;
   userAgent?: string;
   errorCode?: string;
-  errorDetails?: any;
-  metadata?: any;
+  errorDetails?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
   createdAt: string;
 }
 
@@ -109,10 +109,10 @@ export class SSOAuditPage implements OnInit {
   /**
    * Refresh audit log
    */
-  async refresh(event?: any) {
+  async refresh(event?: CustomEvent) {
     await this.loadAuditLog();
     if (event) {
-      event.target.complete();
+      (event.target as HTMLIonRefresherElement).complete();
     }
   }
 
@@ -228,7 +228,7 @@ export class SSOAuditPage implements OnInit {
   /**
    * Handle search
    */
-  handleSearch(event: any) {
-    this.searchTerm.set(event.target.value || '');
+  handleSearch(event: Event) {
+    this.searchTerm.set((event.target as HTMLInputElement).value || '');
   }
 }

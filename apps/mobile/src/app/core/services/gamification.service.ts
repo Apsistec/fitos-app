@@ -240,7 +240,7 @@ export class GamificationService {
 
     try {
       // Get current period dates
-      const { periodStart, periodEnd: _periodEnd } = this.getCurrentPeriod(type);
+      const { periodStart } = this.getCurrentPeriod(type);
 
       let query = this.supabase.client
         .from('leaderboard_entries')
@@ -292,7 +292,7 @@ export class GamificationService {
     scopeId?: string
   ): Promise<LeaderboardEntry | null> {
     try {
-      const { periodStart, periodEnd: _periodEnd2 } = this.getCurrentPeriod(type);
+      const { periodStart } = this.getCurrentPeriod(type);
 
       let query = this.supabase.client
         .from('leaderboard_entries')

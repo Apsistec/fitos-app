@@ -127,7 +127,7 @@ export class FoodService {
 
     try {
       // Check database cache
-      const { data, error: _error } = await this.supabase.client
+      const { data } = await this.supabase.client
         .from('cached_foods')
         .select('*')
         .eq('fdc_id', fdcId)

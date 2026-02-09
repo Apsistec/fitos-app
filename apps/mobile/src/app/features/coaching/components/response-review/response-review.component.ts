@@ -169,7 +169,7 @@ export class ResponseReviewComponent implements OnInit {
     return date.toLocaleDateString();
   }
 
-  getContextSnippet(context: any[]): string {
+  getContextSnippet(context: Record<string, unknown>[]): string {
     if (!context || context.length === 0) return 'No context used';
 
     const firstItem = context[0];

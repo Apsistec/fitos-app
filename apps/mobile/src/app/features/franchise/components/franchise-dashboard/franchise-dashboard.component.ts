@@ -19,7 +19,6 @@ import { FranchiseService } from '../../services/franchise.service';
 import {
   Organization,
   Location,
-  LocationAnalytics,
   OrganizationAnalytics,
   RoyaltyPayment,
 } from '../../models/franchise.models';
@@ -204,7 +203,7 @@ export class FranchiseDashboardComponent implements OnInit, OnDestroy {
   /**
    * Refresh dashboard
    */
-  async refresh(event?: any) {
+  async refresh(event?: { target: { complete: () => void } }) {
     await this.loadDashboardData();
     if (event) {
       event.target.complete();

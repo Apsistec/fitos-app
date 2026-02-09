@@ -722,7 +722,6 @@ export class VideoAnnotatorComponent implements OnInit, OnDestroy {
     this.isDrawing = false;
 
     // Create drawing data
-    const _canvas = this.canvasRef.nativeElement;
     const currentX = this.drawingStartPoint.x;
     const currentY = this.drawingStartPoint.y;
 

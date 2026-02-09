@@ -40,7 +40,7 @@ export interface LeadActivity {
   lead_id: string;
   type: LeadActivityType;
   description: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   created_at: string;
   created_by: string;
 }
@@ -198,7 +198,7 @@ export interface CreateActivityRequest {
   lead_id: string;
   type: LeadActivityType;
   description: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**

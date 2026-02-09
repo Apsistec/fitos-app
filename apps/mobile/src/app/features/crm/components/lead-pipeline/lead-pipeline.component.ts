@@ -4,14 +4,10 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, CdkDrag, CdkDropList, CdkDropListGroup, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import {
-  IonCard,
-  IonCardContent,
   IonBadge,
   IonIcon,
   IonButton,
   IonSearchbar,
-  IonChip,
-  IonLabel,
   IonSpinner,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';

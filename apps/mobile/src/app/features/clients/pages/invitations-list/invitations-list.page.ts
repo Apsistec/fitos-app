@@ -380,9 +380,9 @@ export class InvitationsListPage implements OnInit {
     await this.invitationService.loadInvitations();
   }
 
-  async handleRefresh(event: any) {
+  async handleRefresh(event: CustomEvent) {
     await this.loadInvitations();
-    event.target.complete();
+    (event.target as HTMLIonRefresherElement).complete();
   }
 
   inviteClient() {

@@ -13,7 +13,7 @@ export interface ActivityItem {
   type: 'workout_completed' | 'progress_photo' | 'checkin' | 'milestone' | 'payment';
   message: string;
   timestamp: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 @Component({

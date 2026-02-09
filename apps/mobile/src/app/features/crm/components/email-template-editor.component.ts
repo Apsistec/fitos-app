@@ -511,7 +511,7 @@ export class EmailTemplateEditorComponent implements OnInit {
   activeTab = signal<'edit' | 'preview'>('edit');
 
   templateForm!: FormGroup;
-  bodyTextarea: any; // Reference to textarea for cursor position
+  bodyTextarea: HTMLTextAreaElement | undefined; // Reference to textarea for cursor position
 
   // Available variables from service
   availableVariables: TemplateVariable[] = this.emailTemplateService.availableVariables;

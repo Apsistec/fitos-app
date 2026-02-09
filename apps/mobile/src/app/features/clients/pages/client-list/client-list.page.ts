@@ -306,19 +306,19 @@ export class ClientListPage implements OnInit {
     await this.clientService.loadClients();
   }
 
-  async handleRefresh(event: any) {
+  async handleRefresh(event: CustomEvent) {
     await this.loadClients();
-    event.target.complete();
+    (event.target as HTMLIonRefresherElement).complete();
   }
 
-  onSearchChange(event: any) {
-    this.searchQuery = event.target.value || '';
+  onSearchChange(event: Event) {
+    this.searchQuery = (event.target as HTMLInputElement).value || '';
     this.displayCount.set(this.PAGE_SIZE);
   }
 
-  loadMoreClients(event: any): void {
+  loadMoreClients(event: CustomEvent): void {
     this.displayCount.update(count => count + this.PAGE_SIZE);
-    setTimeout(() => event.target.complete(), 100);
+    setTimeout(() => (event.target as HTMLIonInfiniteScrollElement).complete(), 100);
   }
 
   onFilterChange() {
@@ -353,7 +353,7 @@ export class ClientListPage implements OnInit {
     await toast.present();
   }
 
-  async onMenuClick({ event: _event, client }: { event: Event; client: ClientWithProfile }) {
+  async onMenuClick({ client }: { event: Event; client: ClientWithProfile }) {
     const actionSheet = await this.actionSheetCtrl.create({
       header: client.profile?.full_name || 'Client',
       buttons: [

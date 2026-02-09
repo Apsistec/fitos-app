@@ -754,9 +754,9 @@ export class PaymentAnalyticsPage implements OnInit {
     }
   }
 
-  async handleRefresh(event: any) {
+  async handleRefresh(event: CustomEvent) {
     await this.loadData();
-    event.target.complete();
+    (event.target as HTMLIonRefresherElement).complete();
   }
 
   formatCurrency(cents: number): string {

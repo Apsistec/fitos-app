@@ -634,7 +634,7 @@ export class GymOwnerRegisterPage {
         });
         await alert.present();
       }
-    } catch (_err) {
+    } catch {
       this.isSubmitting.set(false);
       this.errorMessage.set('An unexpected error occurred. Please try again.');
     }

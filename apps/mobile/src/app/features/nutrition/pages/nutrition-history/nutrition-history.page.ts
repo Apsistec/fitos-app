@@ -503,8 +503,6 @@ export class NutritionHistoryPage implements OnInit {
     try {
       const range = parseInt(this.timeRange(), 10);
       const today = new Date();
-      const days: DayData[] = [];
-
       // Fetch daily summaries for the period in parallel
       const promises = [];
       for (let i = 0; i < range; i++) {

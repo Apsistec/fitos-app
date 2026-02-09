@@ -23,6 +23,7 @@ import {
   IonBadge,
   IonRefresher,
   IonRefresherContent,
+  RefresherCustomEvent,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -886,7 +887,7 @@ export class InsightsDashboardPage implements OnInit {
     await this.loadData();
   }
 
-  async handleRefresh(event: any): Promise<void> {
+  async handleRefresh(event: RefresherCustomEvent): Promise<void> {
     await this.loadData();
     event.target.complete();
   }

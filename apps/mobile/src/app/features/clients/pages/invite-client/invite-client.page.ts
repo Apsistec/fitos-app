@@ -30,7 +30,7 @@ import {
   shareOutline,
   checkmarkCircle,
 } from 'ionicons/icons';
-import { InvitationService } from '../../../../core/services/invitation.service';
+import { InvitationService, Invitation } from '../../../../core/services/invitation.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
 addIcons({ mailOutline, linkOutline, copyOutline, shareOutline, checkmarkCircle });
@@ -373,7 +373,7 @@ export class InviteClientPage {
 
   inviteForm: FormGroup;
   invitationCreated = signal(false);
-  createdInvitation = signal<any>(null);
+  createdInvitation = signal<Invitation | null>(null);
 
   inviteLink = computed(() => {
     const invitation = this.createdInvitation();

@@ -5,8 +5,11 @@ import { Database } from '@fitos/shared';
 
 type WorkoutSession = Database['public']['Tables']['workouts']['Row'];
 type _WorkoutSessionInsert = Database['public']['Tables']['workouts']['Insert'];
+type WorkoutTemplate = Database['public']['Tables']['workout_templates']['Row'];
 type LoggedSet = Database['public']['Tables']['workout_sets']['Row'];
 type LoggedSetInsert = Database['public']['Tables']['workout_sets']['Insert'];
+
+type WorkoutWithTemplate = WorkoutSession & { template: WorkoutTemplate | null };
 
 export interface SetLog {
   exerciseId: string;
@@ -429,7 +432,7 @@ export class WorkoutSessionService {
   /**
    * Get workout history for the current user (client view)
    */
-  async getWorkoutHistory(limit = 50, offset = 0): Promise<any[]> {
+  async getWorkoutHistory(limit = 50, offset = 0): Promise<WorkoutWithTemplate[]> {
     try {
       const userId = this.auth.user()?.id;
       if (!userId) throw new Error('User not authenticated');
@@ -454,7 +457,7 @@ export class WorkoutSessionService {
   /**
    * Get workout history for a specific client (trainer view)
    */
-  async getClientWorkoutHistory(clientId: string, limit = 50, offset = 0): Promise<any[]> {
+  async getClientWorkoutHistory(clientId: string, limit = 50, offset = 0): Promise<WorkoutWithTemplate[]> {
     try {
       const { data, error } = await this.supabase.client
         .from('workouts')
@@ -477,7 +480,7 @@ export class WorkoutSessionService {
    * Get workout detail with all sets
    */
   async getWorkoutDetail(workoutId: string): Promise<{
-    workout: any;
+    workout: WorkoutWithTemplate;
     sets: LoggedSet[];
   } | null> {
     try {

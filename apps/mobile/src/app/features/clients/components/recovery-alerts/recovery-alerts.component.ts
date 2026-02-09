@@ -343,12 +343,12 @@ export class RecoveryAlertsComponent implements OnInit {
 
       if (clientError) throw clientError;
 
-      const clientIds = new Set(clientData.map((c: any) => c.client_id));
+      const clientIds = new Set(clientData.map((c: { client_id: string }) => c.client_id));
 
       // Map and filter
       const mappedAlerts = (data || [])
-        .filter((score: any) => clientIds.has(score.user_id))
-        .map((score: any) => ({
+        .filter((score: { user_id: string; profiles?: { full_name: string }; overall_score: number; category: string; score_date: string; user_acknowledged: boolean }) => clientIds.has(score.user_id))
+        .map((score: { user_id: string; profiles?: { full_name: string }; overall_score: number; category: string; score_date: string; user_acknowledged: boolean }) => ({
           client_id: score.user_id,
           client_name: score.profiles?.full_name || 'Unknown',
           overall_score: score.overall_score,

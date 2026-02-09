@@ -728,7 +728,7 @@ export class NutritionLogPage implements OnInit {
     return NUTRITION_COLORS[type.toUpperCase() as keyof typeof NUTRITION_COLORS];
   }
 
-  getEncouragingMessage(current: number, target: number, type: string): string {
+  getEncouragingMessage(current: number, target: number, _type: string): string {
     const percent = (current / target) * 100;
 
     if (percent < 50) {

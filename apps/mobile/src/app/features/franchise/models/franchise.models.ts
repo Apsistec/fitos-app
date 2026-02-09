@@ -69,7 +69,7 @@ export interface LocationStaff {
   role: 'owner' | 'manager' | 'trainer' | 'front_desk';
 
   // Permissions
-  permissions: Record<string, any>;
+  permissions: Record<string, boolean>;
   canManageClients: boolean;
   canViewReports: boolean;
   canManageStaff: boolean;

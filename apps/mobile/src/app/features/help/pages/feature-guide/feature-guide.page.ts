@@ -106,7 +106,7 @@ export class FeatureGuidePage {
           text: currentGuide.description,
           url: window.location.href,
         });
-      } catch (error) {
+      } catch {
         // User cancelled share or error occurred
         console.log('Share cancelled or failed');
       }

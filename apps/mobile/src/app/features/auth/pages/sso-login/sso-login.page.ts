@@ -27,7 +27,7 @@ export class SSOLoginPage implements OnInit {
   organizationId = signal<string>('');
   loading = signal(false);
   error = signal<string | null>(null);
-  ssoConfig = signal<any>(null);
+  ssoConfig = signal<Record<string, unknown> | null>(null);
 
   ngOnInit() {
     // Get organization ID from query params

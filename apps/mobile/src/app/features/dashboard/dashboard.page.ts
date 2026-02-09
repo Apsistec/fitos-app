@@ -330,7 +330,7 @@ export class DashboardPage implements OnInit {
   todayWorkout = signal<WorkoutWithExercises | null>(null);
   weeklyWorkouts = signal(0);
   currentStreak = signal(0);
-  upcomingWorkouts = signal<any[]>([]);
+  upcomingWorkouts = signal<Record<string, unknown>[]>([]);
   nutritionSummary = signal<NutritionSummary | null>(null);
 
   // Trainer data signals
@@ -397,7 +397,7 @@ export class DashboardPage implements OnInit {
         this.sessionService.getUpcomingWorkouts(userId, 5),
       ]);
 
-      this.todayWorkout.set(todayWorkout as any);
+      this.todayWorkout.set(todayWorkout as unknown as WorkoutWithExercises);
       this.weeklyWorkouts.set(weeklyCount);
       this.currentStreak.set(streak);
       this.upcomingWorkouts.set(upcoming);
@@ -457,7 +457,7 @@ export class DashboardPage implements OnInit {
       });
 
       // Map recent activity to the expected ActivityItem format
-      this.recentActivity.set(recentActivity.map((a: any) => ({
+      this.recentActivity.set(recentActivity.map((a: Record<string, unknown>) => ({
         id: a.id,
         clientId: a.client_id || '',
         clientName: a.client_name || 'Client',
@@ -528,7 +528,7 @@ export class DashboardPage implements OnInit {
           .eq('trainer_id', trainer.id)
           .eq('status', 'active');
 
-        const trainerRevenue = (trainerSubs || []).reduce((sum: number, sub: any) => {
+        const trainerRevenue = (trainerSubs || []).reduce((sum: number, sub: { amount_cents: number; interval: string }) => {
           let monthly = sub.amount_cents;
           if (sub.interval === 'week') monthly *= 4;
           if (sub.interval === 'year') monthly /= 12;

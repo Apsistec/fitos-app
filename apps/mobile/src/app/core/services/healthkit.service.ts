@@ -90,7 +90,7 @@ export class HealthKitService {
   /**
    * Get health metrics for date range
    */
-  async getMetrics(startDate: Date, _endDate: Date): Promise<HealthKitMetrics> {
+  async getMetrics(_startDate: Date, _endDate: Date): Promise<HealthKitMetrics> {
     try {
       if (!this.isAuthorized()) {
         throw new Error('HealthKit not authorized');

@@ -139,7 +139,7 @@ export class FAQPage {
     return this.expandedFaqIds().has(faqId);
   }
 
-  async onFeedbackHelpful(faqId: string): Promise<void> {
+  async onFeedbackHelpful(_faqId: string): Promise<void> {
     // In a real implementation, this would send feedback to the backend
     const toast = await this.toastController.create({
       message: 'Thank you for your feedback!',
@@ -150,7 +150,7 @@ export class FAQPage {
     await toast.present();
   }
 
-  async onFeedbackNotHelpful(faqId: string): Promise<void> {
+  async onFeedbackNotHelpful(_faqId: string): Promise<void> {
     // In a real implementation, this would send feedback to the backend
     const toast = await this.toastController.create({
       message: 'Thank you for your feedback. We\'ll improve this answer.',

@@ -14,7 +14,7 @@ import { Component, OnInit, OnDestroy, inject, signal, computed, ChangeDetection
 import { CommonModule } from '@angular/common';
 import { IonicModule, AlertController } from '@ionic/angular';
 import { Router, ActivatedRoute } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject } from 'rxjs';
 import { FranchiseService } from '../../services/franchise.service';
 import { Location, LocationAnalytics } from '../../models/franchise.models';
 

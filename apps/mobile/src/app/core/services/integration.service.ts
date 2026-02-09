@@ -357,7 +357,7 @@ export class IntegrationService {
   ): Promise<boolean> {
     try {
       // Schedule next sync
-      const { data: _nextSync, error: scheduleError } = await this.supabase.client
+      const { error: scheduleError } = await this.supabase.client
         .rpc('schedule_next_sync', {
           p_user_integration_id: userIntegrationId,
           p_frequency: frequency,

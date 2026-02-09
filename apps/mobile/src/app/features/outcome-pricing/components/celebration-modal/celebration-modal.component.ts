@@ -398,7 +398,7 @@ export class CelebrationModalComponent {
       '#8B5CF6'
     ];
 
-    return Array.from({ length: 50 }, (_, i) => ({
+    return Array.from({ length: 50 }, () => ({
       left: Math.random() * 100,
       delay: Math.random() * 3,
       color: colors[Math.floor(Math.random() * colors.length)]

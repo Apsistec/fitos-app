@@ -365,7 +365,7 @@ export class ActivityLoggerComponent {
 
     const type = this.activityType();
     let content = '';
-    let metadata: Record<string, any> = {};
+    let metadata: Record<string, unknown> = {};
 
     switch (type) {
       case 'note':

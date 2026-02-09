@@ -46,7 +46,7 @@ import {
   arrowBackOutline,
 } from 'ionicons/icons';
 
-import { EmailTemplateService } from '../../../../core/services/email-template.service';
+import { EmailTemplateService, TemplateCategory } from '../../../../core/services/email-template.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { HapticService } from '../../../../core/services/haptic.service';
 import { EmailTemplate } from '@fitos/shared';
@@ -524,8 +524,8 @@ export class TemplatesPage implements OnInit {
     }
   }
 
-  onSearchChange(event: any) {
-    this.searchQuery.set(event.target.value || '');
+  onSearchChange(event: Event) {
+    this.searchQuery.set((event.target as HTMLInputElement).value || '');
   }
 
   async filterByCategory(category: string | null) {
@@ -655,7 +655,7 @@ export class TemplatesPage implements OnInit {
         trainerId,
         {
           name: `${template.name} (Copy)`,
-          category: (template.category as any) || 'general',
+          category: (template.category as TemplateCategory) || 'custom',
           subject: template.subject,
           body: template.body || '',
         }

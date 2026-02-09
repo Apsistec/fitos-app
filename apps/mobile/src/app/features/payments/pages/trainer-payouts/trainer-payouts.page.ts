@@ -471,7 +471,7 @@ export class TrainerPayoutsPage implements OnInit {
       }
 
       // Call Edge Function to process instant payout
-      const { data, error } = await this.stripeService['supabase'].functions.invoke(
+      const { error } = await this.stripeService['supabase'].functions.invoke(
         'process-instant-payout',
         {
           body: { accountId: status.stripeAccountId },

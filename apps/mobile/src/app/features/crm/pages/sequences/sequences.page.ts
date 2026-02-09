@@ -4,7 +4,6 @@ import {
   ChangeDetectionStrategy,
   inject,
   signal,
-  computed,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -632,7 +631,7 @@ export class SequencesPage implements OnInit {
 
   async toggleSequenceStatus(
     sequence: SequenceWithDetails,
-    event: any
+    event: CustomEvent<{ checked: boolean }>
   ) {
     await this.haptic.light();
     this.toggling.set(true);

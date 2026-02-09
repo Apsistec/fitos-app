@@ -1,4 +1,4 @@
-import {  Component, inject, signal, OnInit, ViewChild, ElementRef, AfterViewChecked , ChangeDetectionStrategy } from '@angular/core';
+import {  Component, inject, signal, OnInit, ViewChild, AfterViewChecked , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
