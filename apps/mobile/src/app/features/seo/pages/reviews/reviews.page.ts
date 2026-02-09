@@ -320,7 +320,7 @@ export class ReviewsPage implements OnInit {
     return total > 0 ? `${(count / total) * 100}%` : '0%';
   }
 
-  async refresh(event: any) {
+  async refresh(event: CustomEvent & { target: { complete: () => void } }) {
     await this.loadData();
     event.target.complete();
   }

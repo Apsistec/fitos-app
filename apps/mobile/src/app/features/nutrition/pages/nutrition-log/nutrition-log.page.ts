@@ -34,7 +34,7 @@ import {
   chevronBackOutline,
   chevronForwardOutline,
 } from 'ionicons/icons';
-import { NutritionService, type NutritionSummary } from '../../../../core/services/nutrition.service';
+import { NutritionService, type NutritionSummary, type NutritionLogWithEntries } from '../../../../core/services/nutrition.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
 // Adherence-neutral colors (no red for "over target")
@@ -613,7 +613,7 @@ export class NutritionLogPage implements OnInit {
 
   // State
   dailySummary = signal<NutritionSummary | null>(null);
-  currentLog = signal<any>(null);
+  currentLog = signal<NutritionLogWithEntries | null>(null);
   weeklyAverage = signal<WeeklyAverage | null>(null);
   loading = signal(false);
   error = signal<string | null>(null);
@@ -669,7 +669,7 @@ export class NutritionLogPage implements OnInit {
     }
 
     const summaries = await Promise.all(promises);
-    const validSummaries = summaries.filter((s: any) => s !== null) as NutritionSummary[];
+    const validSummaries = summaries.filter((s): s is NutritionSummary => s !== null);
 
     if (validSummaries.length === 0) {
       this.weeklyAverage.set(null);
@@ -743,7 +743,7 @@ export class NutritionLogPage implements OnInit {
     }
   }
 
-  async showEntryActions(entry: any) {
+  async showEntryActions(entry: NutritionLogWithEntries['entries'][number]) {
     const actionSheet = await this.actionSheetCtrl.create({
       header: entry.food?.name || entry.custom_name || 'Food Entry',
       buttons: [

@@ -614,7 +614,7 @@ export class WorkoutCompletePage implements OnInit {
     // Build map: workout_exercise_id -> { exercise_id, name }
     const exerciseMap = new Map<string, { exerciseId: string; name: string }>();
     for (const we of workoutExercises) {
-      const name = (we.exercise as any)?.name || 'Unknown Exercise';
+      const name = (we.exercise as unknown as { name: string } | null)?.name || 'Unknown Exercise';
       exerciseMap.set(we.id, { exerciseId: we.exercise_id, name });
     }
 

@@ -550,7 +550,7 @@ export class SetNutritionTargetsPage implements OnInit {
       // Load client profile
       await this.clientService.loadClients();
       const clients = this.clientService.clients();
-      const client = clients.find((c: any) => c.id === this.clientId());
+      const client = clients.find((c) => c.id === this.clientId());
       if (client) {
         this.clientProfile.set(client);
       }

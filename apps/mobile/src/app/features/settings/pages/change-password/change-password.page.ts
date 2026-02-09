@@ -437,7 +437,7 @@ export class ChangePasswordPage {
           this.router.navigate(['/tabs/settings/privacy']);
         }, 1500);
       }
-    } catch (err) {
+    } catch {
       this.isSaving.set(false);
       this.errorMessage.set('An unexpected error occurred. Please try again.');
     }

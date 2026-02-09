@@ -25,6 +25,19 @@ import {
   checkmarkCircle,
 } from 'ionicons/icons';
 import { WorkoutSessionService } from '../../../../core/services/workout-session.service';
+import { Database } from '@fitos/shared';
+
+type WorkoutSession = Database['public']['Tables']['workouts']['Row'];
+type WorkoutTemplate = Database['public']['Tables']['workout_templates']['Row'];
+type WorkoutWithTemplate = WorkoutSession & { template: WorkoutTemplate | null };
+type LoggedSet = Database['public']['Tables']['workout_sets']['Row'];
+
+interface GroupedExercise {
+  exerciseId: string;
+  exerciseName: string;
+  sets: LoggedSet[];
+  totalVolume: number;
+}
 
 addIcons({
   barbellOutline,
@@ -402,11 +415,11 @@ export class WorkoutDetailPage implements OnInit {
   private route = inject(ActivatedRoute);
 
   // State
-  workout = signal<any | null>(null);
-  sets = signal<any[]>([]);
+  workout = signal<WorkoutWithTemplate | null>(null);
+  sets = signal<LoggedSet[]>([]);
   loading = signal(false);
   error = signal<string | null>(null);
-  groupedSets = signal<any[]>([]);
+  groupedSets = signal<GroupedExercise[]>([]);
 
   ngOnInit() {
     const workoutId = this.route.snapshot.paramMap.get('id');
@@ -446,8 +459,8 @@ export class WorkoutDetailPage implements OnInit {
     }
   }
 
-  groupSetsByExercise(sets: any[]) {
-    const grouped = new Map<string, any>();
+  groupSetsByExercise(sets: LoggedSet[]) {
+    const grouped = new Map<string, GroupedExercise>();
 
     sets.forEach(set => {
       const exerciseId = set.workout_exercise_id;
@@ -498,7 +511,7 @@ export class WorkoutDetailPage implements OnInit {
     }
   }
 
-  hasRpe(exercise: any): boolean {
-    return exercise.sets.some((s: any) => s.rpe);
+  hasRpe(exercise: GroupedExercise): boolean {
+    return exercise.sets.some((s: LoggedSet) => s.rpe);
   }
 }

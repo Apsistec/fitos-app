@@ -435,7 +435,7 @@ export class TrainerPayoutsPage implements OnInit {
     }
   }
 
-  async handleRefresh(event: any) {
+  async handleRefresh(event: CustomEvent & { target: { complete: () => void } }) {
     await this.loadData();
     event.target.complete();
   }

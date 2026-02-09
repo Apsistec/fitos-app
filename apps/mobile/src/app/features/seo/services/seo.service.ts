@@ -9,6 +9,88 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
+export interface SeoDashboardStats {
+  googleBusinessProfile: {
+    connected: boolean;
+    verified: boolean;
+    views: number;
+    searches: number;
+    actions: number;
+  };
+  keywords: {
+    total: number;
+    topTen: number;
+    topThree: number;
+    avgRank: number;
+    improving: number;
+    declining: number;
+  };
+  reviews: {
+    total: number;
+    avgRating: number;
+    pending: number;
+    responseRate: number;
+  };
+  napConsistency: {
+    score: number;
+    issues: number;
+    platforms: number;
+  };
+  schemaOrg: {
+    implemented: boolean;
+    types: string[];
+    validated: boolean;
+  };
+}
+
+export interface SeoActivity {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  timestamp: string;
+  status: string;
+}
+
+export interface SeoKeyword {
+  id: string;
+  keyword: string;
+  type: string;
+  currentRank?: number;
+  bestRank?: number;
+  previousRank?: number;
+  searchVolume?: number;
+  competition?: string;
+  url?: string;
+  lastChecked?: string;
+  rankHistory?: { date: string; rank: number }[];
+}
+
+export interface SeoReview {
+  id: string;
+  clientName: string;
+  rating: number;
+  comment: string;
+  source: string;
+  createdAt: string;
+  responded: boolean;
+  response?: string;
+}
+
+export interface NAPConsistencyReport {
+  score: number;
+  issues: number;
+  platforms: number;
+  details?: Record<string, unknown>;
+}
+
+export interface SchemaMarkup {
+  implemented: boolean;
+  types: string[];
+  validated: boolean;
+  markup?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -20,7 +102,7 @@ export class SeoService {
   /**
    * Get SEO dashboard statistics
    */
-  async getDashboardStats(timeRange: '7d' | '30d' | '90d'): Promise<any> {
+  async getDashboardStats(timeRange: '7d' | '30d' | '90d'): Promise<SeoDashboardStats> {
     try {
       const response = await firstValueFrom(
         this.http.get(`${this.apiUrl}/seo/dashboard`, {
@@ -38,10 +120,10 @@ export class SeoService {
   /**
    * Get recent SEO activity
    */
-  async getRecentActivity(limit = 10): Promise<any[]> {
+  async getRecentActivity(limit = 10): Promise<SeoActivity[]> {
     try {
       const response = await firstValueFrom(
-        this.http.get<any[]>(`${this.apiUrl}/seo/activity`, {
+        this.http.get<SeoActivity[]>(`${this.apiUrl}/seo/activity`, {
           params: { limit: limit.toString() },
         })
       );
@@ -72,7 +154,7 @@ export class SeoService {
   /**
    * Get Google Business Profile data
    */
-  async getGoogleBusinessProfile(): Promise<any> {
+  async getGoogleBusinessProfile(): Promise<Record<string, unknown>> {
     try {
       const response = await firstValueFrom(
         this.http.get(`${this.apiUrl}/seo/google/profile`)
@@ -87,7 +169,7 @@ export class SeoService {
   /**
    * Update Google Business Profile
    */
-  async updateGoogleBusinessProfile(data: any): Promise<any> {
+  async updateGoogleBusinessProfile(data: Record<string, unknown>): Promise<Record<string, unknown>> {
     try {
       const response = await firstValueFrom(
         this.http.put(`${this.apiUrl}/seo/google/profile`, data)
@@ -102,10 +184,10 @@ export class SeoService {
   /**
    * Get keyword rankings
    */
-  async getKeywords(): Promise<any[]> {
+  async getKeywords(): Promise<SeoKeyword[]> {
     try {
       const response = await firstValueFrom(
-        this.http.get<any[]>(`${this.apiUrl}/seo/keywords`)
+        this.http.get<SeoKeyword[]>(`${this.apiUrl}/seo/keywords`)
       );
       return response;
     } catch (error) {
@@ -117,7 +199,7 @@ export class SeoService {
   /**
    * Add keyword to track
    */
-  async addKeyword(keyword: string, type: string): Promise<any> {
+  async addKeyword(keyword: string, type: string): Promise<Record<string, unknown>> {
     try {
       const response = await firstValueFrom(
         this.http.post(`${this.apiUrl}/seo/keywords`, { keyword, type })
@@ -149,10 +231,10 @@ export class SeoService {
   /**
    * Get reviews
    */
-  async getReviews(): Promise<any[]> {
+  async getReviews(): Promise<SeoReview[]> {
     try {
       const response = await firstValueFrom(
-        this.http.get<any[]>(`${this.apiUrl}/seo/reviews`)
+        this.http.get<SeoReview[]>(`${this.apiUrl}/seo/reviews`)
       );
       return response;
     } catch (error) {
@@ -181,7 +263,7 @@ export class SeoService {
   /**
    * Get NAP consistency report
    */
-  async getNAPConsistency(): Promise<any> {
+  async getNAPConsistency(): Promise<NAPConsistencyReport> {
     try {
       const response = await firstValueFrom(
         this.http.get(`${this.apiUrl}/seo/nap-consistency`)
@@ -196,7 +278,7 @@ export class SeoService {
   /**
    * Run NAP consistency check
    */
-  async runNAPCheck(): Promise<any> {
+  async runNAPCheck(): Promise<NAPConsistencyReport> {
     try {
       const response = await firstValueFrom(
         this.http.post(`${this.apiUrl}/seo/nap-consistency/check`, {})
@@ -211,7 +293,7 @@ export class SeoService {
   /**
    * Get Schema.org markup
    */
-  async getSchemaMarkup(): Promise<any> {
+  async getSchemaMarkup(): Promise<SchemaMarkup> {
     try {
       const response = await firstValueFrom(
         this.http.get(`${this.apiUrl}/seo/schema`)
@@ -226,7 +308,7 @@ export class SeoService {
   /**
    * Generate Schema.org markup
    */
-  async generateSchemaMarkup(type: string, data: any): Promise<any> {
+  async generateSchemaMarkup(type: string, data: Record<string, unknown>): Promise<SchemaMarkup> {
     try {
       const response = await firstValueFrom(
         this.http.post(`${this.apiUrl}/seo/schema/generate`, {
@@ -242,7 +324,7 @@ export class SeoService {
   }
 
   // Mock data for development
-  private getMockDashboardStats(): any {
+  private getMockDashboardStats(): SeoDashboardStats {
     return {
       googleBusinessProfile: {
         connected: true,
@@ -278,7 +360,7 @@ export class SeoService {
     };
   }
 
-  private getMockActivity(): any[] {
+  private getMockActivity(): SeoActivity[] {
     return [
       {
         id: '1',

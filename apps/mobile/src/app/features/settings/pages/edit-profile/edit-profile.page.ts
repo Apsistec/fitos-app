@@ -542,7 +542,7 @@ export class EditProfilePage implements OnInit {
   avatarUrl = signal<string | null>(null);
   email = signal('');
   initials = signal('');
-  subscriptionInfo = signal<any>(null);
+  subscriptionInfo = signal<{ planName: string; status: string; isActive: boolean; nextBillingDate?: string } | null>(null);
   isClient = this.authService.isClient;
 
   profileForm: FormGroup;
@@ -728,8 +728,8 @@ export class EditProfilePage implements OnInit {
       input.type = 'file';
       input.accept = 'image/*';
 
-      input.onchange = async (event: any) => {
-        const file = event.target.files?.[0];
+      input.onchange = async (event: Event) => {
+        const file = (event.target as HTMLInputElement).files?.[0];
         if (!file) return;
 
         // Validate file size (max 5MB)

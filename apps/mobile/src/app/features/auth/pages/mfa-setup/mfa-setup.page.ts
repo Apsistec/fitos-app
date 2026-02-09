@@ -33,6 +33,7 @@ import {
   personOutline,
   closeOutline,
 } from 'ionicons/icons';
+import { UserIdentity } from '@supabase/supabase-js';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SupabaseService } from '../../../../core/services/supabase.service';
 import { PasskeyService, Passkey } from '../../../../core/services/passkey.service';
@@ -1170,7 +1171,7 @@ export class MfaSetupPage implements OnInit {
   secret = signal<string | null>(null);
   factorId = signal<string | null>(null);
   canSkip = signal(true);
-  linkedIdentities = signal<any[]>([]);
+  linkedIdentities = signal<UserIdentity[]>([]);
 
   // Management mode - when user already has MFA set up
   isManagementMode = signal(false);
@@ -1193,10 +1194,10 @@ export class MfaSetupPage implements OnInit {
   // TOTP management
   showTotpManagement = signal(false);
   isGoogleLinked = computed(() =>
-    this.linkedIdentities().some((i: any) => i.provider === 'google')
+    this.linkedIdentities().some((i) => i.provider === 'google')
   );
   googleIdentity = computed(() =>
-    this.linkedIdentities().find((i: any) => i.provider === 'google')
+    this.linkedIdentities().find((i) => i.provider === 'google')
   );
 
   // Track initial identity count to detect OAuth returns
@@ -1248,7 +1249,7 @@ export class MfaSetupPage implements OnInit {
     if (!this.isManagementMode()) {
       const hasPasskeys = this.passkeys().length > 0;
       const hasLinkedOAuth = this.linkedIdentities().some(
-        (i: any) => i.provider !== 'email' && i.provider !== 'phone'
+        (i) => i.provider !== 'email' && i.provider !== 'phone'
       );
       if (hasPasskeys || hasLinkedOAuth) {
         this.isManagementMode.set(true);
@@ -1317,8 +1318,8 @@ export class MfaSetupPage implements OnInit {
         console.error('[MFA Setup] Error from listFactors:', {
           message: error.message,
           name: error.name,
-          status: (error as any).status,
-          code: (error as any).code,
+          status: (error as unknown as Record<string, unknown>).status,
+          code: (error as unknown as Record<string, unknown>).code,
         });
 
         const errorMsg = (error.message || '').toLowerCase();
@@ -1350,7 +1351,7 @@ export class MfaSetupPage implements OnInit {
         this.existingFactorId.set(verifiedTotp.id);
         this.canSkip.set(false); // No skip button in management mode
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('[MFA Setup] Unexpected error:', err);
       this.errorMessage.set('An unexpected error occurred. You can skip MFA setup for now.');
       this.canSkip.set(true);
@@ -1380,11 +1381,11 @@ export class MfaSetupPage implements OnInit {
       this.qrCode.set(data.totp.qr_code);
       this.secret.set(data.totp.secret);
       this.enrollmentStarted.set(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[MFA Setup] Error in startTotpEnrollment:', error);
 
       let message = 'Failed to start MFA enrollment';
-      const errorMsg = (error?.message || '').toLowerCase();
+      const errorMsg = ((error instanceof Error ? error.message : '') || '').toLowerCase();
 
       if (errorMsg.includes('edge function') || errorMsg.includes('non-2xx')) {
         message = 'The authentication system is experiencing issues. You can skip MFA setup for now.';
@@ -1424,10 +1425,10 @@ export class MfaSetupPage implements OnInit {
       }
 
       console.log('[MFA Setup] Google link initiated, waiting for OAuth redirect...');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[MFA Setup] Error linking Google account:', error);
       sessionStorage.removeItem('fitos_linking_in_progress');
-      this.errorMessage.set(error.message || 'Failed to link Google account');
+      this.errorMessage.set(error instanceof Error ? error.message : 'Failed to link Google account');
       this.isSigningInWithGoogle.set(false);
     }
   }
@@ -1492,7 +1493,7 @@ export class MfaSetupPage implements OnInit {
         await toast.present();
       }, 500);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error verifying TOTP:', error);
       this.otpVerifyModal?.setError('Invalid code. Please check your authenticator app and try again.');
     }
@@ -1669,9 +1670,9 @@ you can use one of these codes to sign in.
       } else {
         this.errorMessage.set(result.error || 'Failed to register passkey');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error registering passkey:', error);
-      this.errorMessage.set(error.message || 'Failed to register passkey');
+      this.errorMessage.set(error instanceof Error ? error.message : 'Failed to register passkey');
     } finally {
       this.isRegisteringPasskey.set(false);
     }
@@ -1760,9 +1761,9 @@ you can use one of these codes to sign in.
       await this.showSuccessToast('Google account unlinked');
       await this.loadLinkedIdentities();
       this.showGoogleManagement.set(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error unlinking Google:', error);
-      this.errorMessage.set(error.message || 'Failed to unlink Google account');
+      this.errorMessage.set(error instanceof Error ? error.message : 'Failed to unlink Google account');
     } finally {
       this.isUnlinkingGoogle.set(false);
     }
@@ -1832,7 +1833,7 @@ you can use one of these codes to sign in.
       // Check if user still has other MFA factors - if so, stay in management mode
       const hasPasskeys = this.passkeys().length > 0;
       const hasLinkedOAuth = this.linkedIdentities().some(
-        (i: any) => i.provider !== 'email' && i.provider !== 'phone'
+        (i) => i.provider !== 'email' && i.provider !== 'phone'
       );
 
       if (!hasPasskeys && !hasLinkedOAuth) {
@@ -1840,9 +1841,9 @@ you can use one of these codes to sign in.
         this.canSkip.set(true);
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error removing MFA:', error);
-      this.errorMessage.set(error.message || 'Failed to remove authenticator app');
+      this.errorMessage.set(error instanceof Error ? error.message : 'Failed to remove authenticator app');
     } finally {
       this.isRemovingMfa.set(false);
     }

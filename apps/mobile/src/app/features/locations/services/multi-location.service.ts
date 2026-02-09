@@ -21,6 +21,26 @@ interface LocationAccess {
   check_in_count?: number;
 }
 
+interface LocationApiResponse {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  is_active: boolean;
+  location_memberships?: { has_access: boolean; status: 'active' | 'pending' | 'expired' }[];
+  check_ins?: { count: number }[];
+}
+
+interface CheckInApiRecord {
+  id: string;
+  location_id: string;
+  locations?: { name: string };
+  checked_in_at: string;
+  checked_out_at?: string;
+  duration_minutes?: number;
+}
+
 interface CheckInRecord {
   id: string;
   location_id: string;
@@ -68,7 +88,7 @@ export class MultiLocationService {
   async getUserLocations(): Promise<LocationAccess[]> {
     try {
       const response = await firstValueFrom(
-        this.http.get<LocationAccess[]>(`${this.apiUrl}/locations`, {
+        this.http.get<LocationApiResponse[]>(`${this.apiUrl}/locations`, {
           params: {
             select: `
               id,
@@ -88,7 +108,7 @@ export class MultiLocationService {
         })
       );
 
-      return response.map((loc: any) => ({
+      return response.map((loc) => ({
         id: loc.id,
         name: loc.name,
         address: loc.address,
@@ -202,7 +222,7 @@ export class MultiLocationService {
     limit = 50
   ): Promise<CheckInRecord[]> {
     try {
-      const params: any = {
+      const params: Record<string, string> = {
         select: `
           id,
           location_id,
@@ -220,7 +240,7 @@ export class MultiLocationService {
       }
 
       const response = await firstValueFrom(
-        this.http.get<any[]>(`${this.apiUrl}/check_ins`, { params })
+        this.http.get<CheckInApiRecord[]>(`${this.apiUrl}/check_ins`, { params })
       );
 
       return response.map((record) => ({
@@ -243,7 +263,7 @@ export class MultiLocationService {
   async getActiveCheckIn(): Promise<CheckInRecord | null> {
     try {
       const response = await firstValueFrom(
-        this.http.get<any[]>(`${this.apiUrl}/check_ins`, {
+        this.http.get<CheckInApiRecord[]>(`${this.apiUrl}/check_ins`, {
           params: {
             select: `
               id,

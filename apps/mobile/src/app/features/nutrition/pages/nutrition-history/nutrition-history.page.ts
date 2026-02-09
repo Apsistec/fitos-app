@@ -489,7 +489,7 @@ export class NutritionHistoryPage implements OnInit {
     this.loadHistory();
   }
 
-  onTimeRangeChange(event: any) {
+  onTimeRangeChange(event: CustomEvent<{ value: string }>) {
     this.timeRange.set(event.detail.value);
     this.loadHistory();
   }

@@ -36,7 +36,7 @@ export class LocationDetailPage implements OnInit, OnDestroy {
   // State
   location = signal<Location | null>(null);
   analytics = signal<LocationAnalytics | null>(null);
-  networkAverage = signal<any | null>(null);
+  networkAverage = signal<{ revenue: number; members: number; retention: number; workouts: number } | null>(null);
   loading = signal(true);
   error = signal<string | null>(null);
 
@@ -209,7 +209,7 @@ export class LocationDetailPage implements OnInit, OnDestroy {
   /**
    * Refresh data
    */
-  async refresh(event?: any) {
+  async refresh(event?: { target: { complete: () => void } }) {
     const locationId = this.route.snapshot.paramMap.get('id');
     if (locationId) {
       this.loadLocationDetails(locationId);

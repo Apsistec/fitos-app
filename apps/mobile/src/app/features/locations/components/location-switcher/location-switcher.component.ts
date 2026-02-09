@@ -175,7 +175,7 @@ export class LocationSwitcherComponent implements OnInit {
     await toast.present();
   }
 
-  async dismiss(data?: any) {
+  async dismiss(data?: unknown) {
     await this.modalController.dismiss(data);
   }
 }

@@ -7,7 +7,6 @@ import {
   IonCardTitle,
   IonCardContent,
   IonIcon,
-  IonBadge,
   IonButton,
   IonSpinner,
   IonText,

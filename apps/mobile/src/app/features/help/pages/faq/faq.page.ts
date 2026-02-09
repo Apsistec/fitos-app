@@ -104,7 +104,7 @@ export class FAQPage {
     });
   }
 
-  onCategoryChange(event: any): void {
+  onCategoryChange(event: CustomEvent<{ value: string }>): void {
     const category = event.detail.value as HelpCategoryId | 'all';
     this.selectedCategory.set(category);
 
@@ -116,8 +116,8 @@ export class FAQPage {
     }
   }
 
-  onSearchInput(event: any): void {
-    const query = event.target.value || '';
+  onSearchInput(event: CustomEvent<{ value: string }>): void {
+    const query = event.detail.value || '';
     this.searchQuery.set(query);
   }
 

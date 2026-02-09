@@ -280,7 +280,7 @@ export interface PricingTier {
   base_price_cents: number;
   outcome_bonus_cents?: number;
   verification_method: VerificationMethod;
-  tier_config?: Record<string, any>;
+  tier_config?: Record<string, unknown>;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -292,7 +292,7 @@ export interface CreatePricingTierRequest {
   base_price_cents: number;
   outcome_bonus_cents?: number;
   verification_method: 'weight_loss' | 'strength_gain' | 'body_comp' | 'consistency' | 'custom';
-  tier_config?: Record<string, any>;
+  tier_config?: Record<string, unknown>;
 }
 
 export interface ClientGoal {
@@ -313,7 +313,7 @@ export interface ClientGoal {
   next_verification_due?: string;
   status: GoalStatus;
   notes?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
@@ -328,7 +328,7 @@ export interface CreateClientGoalRequest {
   target_date: string;
   verification_frequency?: 'daily' | 'weekly' | 'biweekly' | 'monthly';
   notes?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface VerifyGoalRequest {
@@ -363,7 +363,7 @@ export interface Verification {
   notes?: string;
   photo_urls?: string[];
   source_ids?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface GoalProgressResponse {
@@ -418,7 +418,7 @@ export interface PricingAdjustment {
   stripe_invoice_id?: string;
   stripe_invoice_item_id?: string;
   payment_status: 'pending' | 'invoiced' | 'paid' | 'failed' | 'refunded';
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface PendingCelebration {

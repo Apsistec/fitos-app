@@ -1,4 +1,4 @@
-import { Component, input, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonHeader,

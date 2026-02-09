@@ -470,7 +470,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 })
 export class VideoUploadComponent implements OnInit {
   @Input() trainerId = '';
-  @Input() exercises: any[] = []; // Exercise list passed in
+  @Input() exercises: { id: string; name: string }[] = []; // Exercise list passed in
 
   private videoFeedbackService = inject(VideoFeedbackService);
   private authService = inject(AuthService);
@@ -486,7 +486,7 @@ export class VideoUploadComponent implements OnInit {
   clientNotes = '';
   uploading = signal(false);
   uploadProgress = signal(0);
-  exercises = signal<any[]>([]);
+  exercises = signal<{ id: string; name: string }[]>([]);
 
   constructor() {
     addIcons({
@@ -503,7 +503,7 @@ export class VideoUploadComponent implements OnInit {
 
   async recordVideo(): Promise<void> {
     try {
-      const video = await Camera.getPhoto({
+      const _video = await Camera.getPhoto({
         resultType: CameraResultType.Uri,
         source: CameraSource.Camera,
         quality: 90,
@@ -528,8 +528,8 @@ export class VideoUploadComponent implements OnInit {
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = 'video/mp4,video/quicktime,video/x-msvideo';
-      input.onchange = (event: any) => {
-        const file = event.target?.files?.[0];
+      input.onchange = (event: Event) => {
+        const file = (event.target as HTMLInputElement)?.files?.[0];
         if (file) {
           // Validate file size (max 100MB)
           if (file.size > 100 * 1024 * 1024) {

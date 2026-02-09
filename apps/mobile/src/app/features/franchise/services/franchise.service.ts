@@ -140,9 +140,9 @@ export class FranchiseService {
     organizationId: string,
     periodStart: string,
     periodEnd: string,
-    locationsRevenue: any[]
-  ): Observable<any> {
-    return this.http.post(`${this.baseUrl}/royalties/organization`, {
+    locationsRevenue: { location_id: string; revenue: number }[]
+  ): Observable<RoyaltyCalculationResponse> {
+    return this.http.post<RoyaltyCalculationResponse>(`${this.baseUrl}/royalties/organization`, {
       organization_id: organizationId,
       period_start: periodStart,
       period_end: periodEnd,
@@ -158,7 +158,11 @@ export class FranchiseService {
     overdue_payments: RoyaltyPayment[];
     total_overdue_amount: number;
   }> {
-    return this.http.get<any>(`${this.baseUrl}/royalties/overdue/${organizationId}`);
+    return this.http.get<{
+      organization_id: string;
+      overdue_payments: RoyaltyPayment[];
+      total_overdue_amount: number;
+    }>(`${this.baseUrl}/royalties/overdue/${organizationId}`);
   }
 
   // =====================================================================
@@ -173,7 +177,7 @@ export class FranchiseService {
     periodType: string,
     periodStart: string,
     periodEnd: string,
-    data: any
+    data: Record<string, unknown>
   ): Observable<LocationAnalytics> {
     return this.http.post<LocationAnalytics>(`${this.baseUrl}/analytics/location`, {
       location_id: locationId,
@@ -224,7 +228,7 @@ export class FranchiseService {
     metric = 'grossRevenue',
     limit = 5
   ): Observable<{ metric: string; top_performers: LocationAnalytics[] }> {
-    return this.http.post<any>(`${this.baseUrl}/analytics/top-performers`, {
+    return this.http.post<{ metric: string; top_performers: LocationAnalytics[] }>(`${this.baseUrl}/analytics/top-performers`, {
       locations_data: locationsData,
       metric,
       limit,

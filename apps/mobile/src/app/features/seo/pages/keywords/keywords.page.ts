@@ -281,7 +281,7 @@ export class KeywordsPage implements OnInit {
     }
   }
 
-  async refresh(event: any) {
+  async refresh(event: CustomEvent & { target: { complete: () => void } }) {
     await this.loadKeywords();
     event.target.complete();
   }

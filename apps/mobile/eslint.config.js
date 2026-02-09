@@ -21,6 +21,12 @@ export default tseslint.config(
       },
     },
     rules: {
+      '@angular-eslint/component-class-suffix': [
+        'error',
+        {
+          suffixes: ['Page', 'Component'],
+        },
+      ],
       '@angular-eslint/directive-selector': [
         'error',
         {
@@ -46,6 +52,7 @@ export default tseslint.config(
           caughtErrorsIgnorePattern: '^_',
         },
       ],
+      '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
   {

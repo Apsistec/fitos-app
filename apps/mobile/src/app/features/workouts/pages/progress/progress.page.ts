@@ -32,6 +32,16 @@ interface ChartDataPoint {
   value: number;
 }
 
+interface LoggedSet {
+  weight?: number;
+  reps?: number;
+}
+
+interface LoggedExercise {
+  exercise_id: string;
+  logged_sets: LoggedSet[];
+}
+
 @Component({
   selector: 'app-progress',
   standalone: true,
@@ -284,7 +294,7 @@ export class ProgressPage implements OnInit {
 
   chartType = signal<'strength' | 'volume'>('strength');
   selectedExerciseId = signal<string | null>(null);
-  exercises = signal<Exercise[]>([]);
+  exercises = signal<Pick<Exercise, 'id' | 'name'>[]>([]);
   chartData = signal<ChartDataPoint[]>([]);
   loading = signal(false);
 
@@ -318,7 +328,7 @@ export class ProgressPage implements OnInit {
           return { id, name: exercise?.name || 'Unknown Exercise' };
         });
         const exercisesArray = await Promise.all(exercisePromises);
-        this.exercises.set(exercisesArray as any);
+        this.exercises.set(exercisesArray);
 
         // Auto-select first exercise
         if (exercisesArray.length > 0 && !this.selectedExerciseId()) {
@@ -361,7 +371,7 @@ export class ProgressPage implements OnInit {
     for (const session of sessions) {
       if (session.status !== 'completed') continue;
 
-      const loggedExercise = session.logged_exercises?.find((ex: any) => ex.exercise_id === exerciseId);
+      const loggedExercise = (session.logged_exercises as unknown as LoggedExercise[] | undefined)?.find((ex: LoggedExercise) => ex.exercise_id === exerciseId);
       if (!loggedExercise) continue;
 
       const date = new Date(session.completed_at || session.created_at).toLocaleDateString();
@@ -369,14 +379,14 @@ export class ProgressPage implements OnInit {
       if (this.chartType() === 'strength') {
         // Max weight for the exercise in this session
         const maxWeight = Math.max(
-          ...loggedExercise.logged_sets.map((set: any) => set.weight || 0)
+          ...loggedExercise.logged_sets.map((set: LoggedSet) => set.weight || 0)
         );
         if (maxWeight > 0) {
           dataPoints.push({ date, value: maxWeight });
         }
       } else {
         // Total volume (sets × reps × weight)
-        const totalVolume = loggedExercise.logged_sets.reduce((sum: number, set: any) => {
+        const totalVolume = loggedExercise.logged_sets.reduce((sum: number, set: LoggedSet) => {
           return sum + ((set.reps || 0) * (set.weight || 0));
         }, 0);
         if (totalVolume > 0) {

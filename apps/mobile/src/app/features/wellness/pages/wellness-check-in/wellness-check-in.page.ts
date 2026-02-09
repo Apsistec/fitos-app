@@ -47,6 +47,8 @@ import {
   ScreeningType,
   WorkoutPlan,
   CrisisResource,
+  MoodWorkoutType,
+  WorkoutIntensity,
 } from '../../../../core/services/wellness.service';
 
 /**
@@ -167,8 +169,8 @@ export class WellnessCheckInPage implements OnInit {
       );
       this.questions.set(data.questions);
       this.step.set('questions');
-    } catch (err: any) {
-      this.error.set(err.message || 'Failed to load screening questions');
+    } catch (err: unknown) {
+      this.error.set(err instanceof Error ? err.message : 'Failed to load screening questions');
     } finally {
       this.loading.set(false);
     }
@@ -234,8 +236,8 @@ export class WellnessCheckInPage implements OnInit {
       }
 
       this.step.set('results');
-    } catch (err: any) {
-      this.error.set(err.message || 'Failed to calculate screening results');
+    } catch (err: unknown) {
+      this.error.set(err instanceof Error ? err.message : 'Failed to calculate screening results');
     } finally {
       await loading.dismiss();
     }
@@ -262,7 +264,7 @@ export class WellnessCheckInPage implements OnInit {
       );
       this.workoutPlan.set(plan);
       this.step.set('workouts');
-    } catch (err: any) {
+    } catch (_err: unknown) {
       await this.showAlert('Error', 'Failed to load workout recommendations');
     } finally {
       await loading.dismiss();
@@ -282,15 +284,15 @@ export class WellnessCheckInPage implements OnInit {
   // =====================================================================
 
   getWorkoutIcon(type: string): string {
-    return this.wellnessService.getWorkoutIcon(type as any);
+    return this.wellnessService.getWorkoutIcon(type as MoodWorkoutType);
   }
 
   formatWorkoutType(type: string): string {
-    return this.wellnessService.formatWorkoutType(type as any);
+    return this.wellnessService.formatWorkoutType(type as MoodWorkoutType);
   }
 
   formatIntensity(intensity: string): string {
-    return this.wellnessService.formatIntensity(intensity as any);
+    return this.wellnessService.formatIntensity(intensity as WorkoutIntensity);
   }
 
   backToResults() {
@@ -383,7 +385,7 @@ export class WellnessCheckInPage implements OnInit {
   // HELPERS
   // =====================================================================
 
-  async showCrisisAlert(result: ScreeningResult) {
+  async showCrisisAlert(_result: ScreeningResult) {
     const alert = await this.alertController.create({
       header: '🆘 Immediate Support Available',
       message:

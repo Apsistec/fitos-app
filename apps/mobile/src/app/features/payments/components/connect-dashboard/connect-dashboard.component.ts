@@ -24,6 +24,15 @@ import { refreshOutline, alertCircleOutline } from 'ionicons/icons';
 import { StripeService } from '../../../../core/services/stripe.service';
 import { SupabaseService } from '../../../../core/services/supabase.service';
 
+interface StripeConnectInstance {
+  create: (component: string) => HTMLElement;
+  destroy: () => void;
+}
+
+interface WindowWithStripeConnect {
+  StripeConnect?: (clientSecret: string) => StripeConnectInstance;
+}
+
 /**
  * ConnectDashboardComponent - Stripe Connect Embedded Dashboard
  *
@@ -209,7 +218,7 @@ export class ConnectDashboardComponent implements OnInit, OnDestroy {
   loading = signal(true);
   error = signal<string | null>(null);
   clientSecret = signal<string | null>(null);
-  connectInstance = signal<any>(null);
+  connectInstance = signal<StripeConnectInstance | null>(null);
 
   private sessionRefreshInterval?: number;
 
@@ -243,7 +252,7 @@ export class ConnectDashboardComponent implements OnInit, OnDestroy {
       }
 
       // Load Stripe Connect SDK if not already loaded
-      if (!(window as any).StripeConnect) {
+      if (!(window as unknown as WindowWithStripeConnect).StripeConnect) {
         await this.loadStripeConnectSDK();
       }
 
@@ -257,7 +266,10 @@ export class ConnectDashboardComponent implements OnInit, OnDestroy {
       this.clientSecret.set(data.clientSecret);
 
       // Initialize Stripe Connect instance
-      const StripeConnect = (window as any).StripeConnect;
+      const StripeConnect = (window as unknown as WindowWithStripeConnect).StripeConnect;
+      if (!StripeConnect) {
+        throw new Error('StripeConnect not loaded');
+      }
       const instance = StripeConnect(data.clientSecret);
       this.connectInstance.set(instance);
 

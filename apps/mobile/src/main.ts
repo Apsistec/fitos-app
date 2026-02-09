@@ -12,7 +12,7 @@ import {
 import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalone';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideServiceWorker } from '@angular/service-worker';
-import { Observable, of, timer } from 'rxjs';
+import { Observable, timer } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import * as Sentry from '@sentry/angular';
 
@@ -65,7 +65,7 @@ if (environment.sentryDsn) {
  */
 @Injectable({ providedIn: 'root' })
 class IdlePreloadStrategy implements PreloadingStrategy {
-  preload(route: Route, load: () => Observable<any>): Observable<any> {
+  preload(route: Route, load: () => Observable<unknown>): Observable<unknown> {
     return timer(2000).pipe(
       mergeMap(() => {
         if (typeof requestIdleCallback === 'function') {
@@ -93,13 +93,14 @@ class GlobalErrorHandler implements ErrorHandler {
 
   constructor(private injector: Injector) {}
 
-  handleError(error: any): void {
+  handleError(error: unknown): void {
     // Log to console in all environments
     console.error('[FitOS Error]', error);
 
     // Send to Sentry (if initialized — captures full stack trace, breadcrumbs, replay)
     if (environment.sentryDsn) {
-      Sentry.captureException(error.originalError || error);
+      const originalError = error instanceof Error ? error : (error as Record<string, unknown>)?.originalError;
+      Sentry.captureException(originalError || error);
     }
 
     // In production, also send to Firebase Analytics + localStorage fallback
@@ -113,7 +114,7 @@ class GlobalErrorHandler implements ErrorHandler {
         }
       }
 
-      const message = error?.message || error?.toString?.() || 'Unknown error';
+      const message = error instanceof Error ? error.message : String(error || 'Unknown error');
 
       // Send to Firebase Analytics as app_exception event
       this.firebaseService?.trackError(message, false);
@@ -121,8 +122,8 @@ class GlobalErrorHandler implements ErrorHandler {
       // Keep localStorage fallback for offline scenarios
       try {
         const errorInfo = {
-          message: error.message || 'Unknown error',
-          stack: error.stack?.substring(0, 500),
+          message: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack?.substring(0, 500) : undefined,
           timestamp: new Date().toISOString(),
           url: window.location.href,
         };

@@ -2,7 +2,6 @@ import {
   Component,
   OnInit,
   signal,
-  computed,
   inject,
   ChangeDetectionStrategy,
 } from '@angular/core';
@@ -657,7 +656,7 @@ export class StripeConnectOnboardingPage implements OnInit {
     await alert.present();
   }
 
-  private formatPayoutsMessage(payouts: any[]): string {
+  private formatPayoutsMessage(payouts: { amountCents: number; createdAt: string; status: string }[]): string {
     return payouts
       .map(p => {
         const amount = (p.amountCents / 100).toFixed(2);

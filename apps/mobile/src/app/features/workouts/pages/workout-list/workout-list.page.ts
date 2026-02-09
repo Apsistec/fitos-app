@@ -22,7 +22,8 @@ import {
   IonText,
   AlertController,
   ToastController,
-  ActionSheetController
+  ActionSheetController,
+  RefresherCustomEvent,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -35,14 +36,9 @@ import {
   timeOutline,
   barbellOutline
 } from 'ionicons/icons';
-import { WorkoutService } from '../../../../core/services/workout.service';
+import { WorkoutService, WorkoutTemplateWithExercises } from '../../../../core/services/workout.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import { Database } from '@fitos/shared';
 import { listStagger } from '../../../../shared/animations';
-
-type WorkoutTemplateWithExercises = Database['public']['Tables']['workout_templates']['Row'] & {
-  exercises: any[];
-};
 
 // Register icons at module level
 addIcons({
@@ -394,13 +390,13 @@ export class WorkoutListPage implements OnInit {
     this.updateFilteredWorkouts();
   }
 
-  async handleRefresh(event: any) {
+  async handleRefresh(event: RefresherCustomEvent) {
     await this.loadWorkouts();
     event.target.complete();
   }
 
-  onSearchChange(event: any) {
-    this.searchQuery = event.target.value || '';
+  onSearchChange(event: CustomEvent) {
+    this.searchQuery = event.detail.value || '';
     this.updateFilteredWorkouts();
   }
 
@@ -415,8 +411,8 @@ export class WorkoutListPage implements OnInit {
     const filtered = this.workoutService.templates().filter(workout => {
       const nameMatch = workout.name.toLowerCase().includes(query);
       const descMatch = workout.description?.toLowerCase().includes(query);
-      const exerciseMatch = workout.exercises?.some((ex: any) =>
-        ex.exercise?.name.toLowerCase().includes(query)
+      const exerciseMatch = workout.exercises?.some((ex) =>
+        (ex as unknown as { exercise?: { name: string } }).exercise?.name.toLowerCase().includes(query)
       );
 
       return nameMatch || descMatch || exerciseMatch;

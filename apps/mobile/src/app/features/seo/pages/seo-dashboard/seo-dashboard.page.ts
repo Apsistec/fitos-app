@@ -143,7 +143,7 @@ export class SeoDashboardPage implements OnInit {
     }
   }
 
-  async refresh(event: any) {
+  async refresh(event: CustomEvent & { target: { complete: () => void } }) {
     await this.loadDashboard();
     event.target.complete();
   }

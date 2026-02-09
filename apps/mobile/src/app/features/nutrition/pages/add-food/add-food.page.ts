@@ -543,8 +543,8 @@ export class AddFoodPage implements OnInit {
     }
   }
 
-  async onSearchInput(event: any) {
-    const query = event.target.value;
+  async onSearchInput(event: Event) {
+    const query = (event.target as HTMLInputElement).value;
     if (query && query.trim().length >= 2) {
       await this.foodService.searchFoods(query.trim());
     }

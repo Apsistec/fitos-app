@@ -33,7 +33,6 @@ import {
 
 import {
   RecoveryService,
-  RecoveryScore,
 } from '../../../core/services/recovery.service';
 
 /**

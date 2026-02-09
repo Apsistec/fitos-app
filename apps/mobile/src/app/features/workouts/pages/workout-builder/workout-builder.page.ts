@@ -376,7 +376,7 @@ export class WorkoutBuilderPage implements OnInit {
       this.workoutDescription = template.description || '';
 
       // Convert template exercises to ExerciseConfig
-      const configs: ExerciseConfig[] = template.exercises.map((ex: any, index) => ({
+      const configs: ExerciseConfig[] = template.exercises.map((ex, index) => ({
         id: `${ex.id}`,
         exerciseId: ex.exercise_id,
         exercise: ex.exercise,

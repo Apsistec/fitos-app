@@ -21,6 +21,7 @@ import {
   IonButton,
   IonSegment,
   IonSegmentButton,
+  RefresherCustomEvent,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -144,7 +145,7 @@ export class PaymentHistoryPage implements OnInit {
     }
   }
 
-  async handleRefresh(event: any) {
+  async handleRefresh(event: RefresherCustomEvent) {
     await this.loadPayments();
     event.target.complete();
   }

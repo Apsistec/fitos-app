@@ -316,7 +316,7 @@ export class AnalyticsPage implements OnInit, OnDestroy {
   /**
    * Refresh data
    */
-  async refresh(event?: any) {
+  async refresh(event?: { target: { complete: () => void } }) {
     await this.loadAnalytics();
     if (event) {
       event.target.complete();

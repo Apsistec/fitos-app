@@ -11,14 +11,17 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { calendarOutline, timeOutline } from 'ionicons/icons';
-import type { Tables } from '@fitos/shared';
-
 addIcons({
   'calendar-outline': calendarOutline,
   'time-outline': timeOutline,
 });
 
-type Workout = Tables<'workouts'>;
+interface UpcomingWorkout {
+  id: string;
+  name: string;
+  scheduled_date: string | null;
+  scheduled_time?: string | null;
+}
 
 @Component({
   selector: 'app-upcoming-workouts-list',
@@ -37,13 +40,13 @@ type Workout = Tables<'workouts'>;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UpcomingWorkoutsListComponent {
-  workouts = input<any[]>();
+  workouts = input<UpcomingWorkout[]>();
   loading = input<boolean>(false);
-  workoutClicked = output<any>();
+  workoutClicked = output<UpcomingWorkout>();
 
   constructor(private router: Router) {}
 
-  onWorkoutClick(workout: any): void {
+  onWorkoutClick(workout: UpcomingWorkout): void {
     this.workoutClicked.emit(workout);
   }
 

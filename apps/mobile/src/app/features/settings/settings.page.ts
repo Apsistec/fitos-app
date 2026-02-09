@@ -9,7 +9,6 @@ import {
   IonItem,
   IonLabel,
   IonIcon,
-  IonToggle,
   IonButton,
   IonSpinner,
   IonBadge,
@@ -585,12 +584,12 @@ export class SettingsPage implements OnInit {
     await alert.present();
   }
 
-  onThemeModeChange(event: any): void {
+  onThemeModeChange(event: CustomEvent<{ value: string }>): void {
     const mode = event.detail.value as ThemeMode;
     this.themeService.setMode(mode);
   }
 
-  toggleDarkMode(event: any): void {
+  toggleDarkMode(event: CustomEvent<{ checked: boolean }>): void {
     this.themeService.setDarkMode(event.detail.checked);
   }
 

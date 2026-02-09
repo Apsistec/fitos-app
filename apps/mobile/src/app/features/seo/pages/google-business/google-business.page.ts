@@ -183,7 +183,7 @@ export class GoogleBusinessPage implements OnInit {
 
   async saveHours() {
     try {
-      const hoursData: any = {};
+      const hoursData: Record<string, { closed: boolean; open: string; close: string }> = {};
 
       this.daysOfWeek.forEach(day => {
         hoursData[day] = {
@@ -244,7 +244,7 @@ export class GoogleBusinessPage implements OnInit {
     return num.toString();
   }
 
-  async refresh(event: any) {
+  async refresh(event: CustomEvent & { target: { complete: () => void } }) {
     await this.loadProfile();
     event.target.complete();
   }

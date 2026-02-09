@@ -206,7 +206,7 @@ export class RoyaltyDashboardPage implements OnInit, OnDestroy {
   /**
    * Search payments
    */
-  onSearchChange(event: any) {
+  onSearchChange(event: CustomEvent<{ value: string }>) {
     this.searchTerm.set(event.detail.value || '');
   }
 
@@ -272,7 +272,7 @@ export class RoyaltyDashboardPage implements OnInit, OnDestroy {
   /**
    * Refresh data
    */
-  async refresh(event?: any) {
+  async refresh(event?: { target: { complete: () => void } }) {
     await this.loadRoyaltyPayments();
     if (event) {
       event.target.complete();

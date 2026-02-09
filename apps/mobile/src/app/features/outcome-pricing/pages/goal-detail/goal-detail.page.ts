@@ -196,7 +196,7 @@ export class GoalDetailPage implements OnInit {
     });
   }
 
-  onTabChange(event: any) {
+  onTabChange(event: CustomEvent<{ value: string }>) {
     this.selectedTab.set(event.detail.value as ViewTab);
   }
 

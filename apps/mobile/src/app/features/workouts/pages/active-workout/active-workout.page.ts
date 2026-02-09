@@ -38,6 +38,26 @@ import { CelebrationService } from '../../../../core/services/celebration.servic
 import { VoiceLoggerComponent } from '../../../../shared/components/voice-logger/voice-logger.component';
 import { ParsedWorkoutCommand } from '../../../../core/services/voice.service';
 
+interface TemplateExerciseRow {
+  id: string;
+  order_index?: number | null;
+  exercise?: { name: string } | null;
+  sets?: number | null;
+  reps_min?: number | null;
+  reps_max?: number | null;
+  rest_seconds?: number | null;
+}
+
+interface WorkoutExerciseRow {
+  id: string;
+  exercise?: { name: string } | null;
+  prescribed_sets?: number | null;
+  prescribed_reps_min?: number | null;
+  prescribed_reps_max?: number | null;
+  prescribed_reps?: number | null;
+  rest_seconds?: number | null;
+}
+
 interface ExerciseProgress {
   exerciseId: string;
   exerciseName: string;
@@ -514,9 +534,9 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
       const templateExercises = workout.template?.exercises || [];
 
       // Sort by order_index
-      templateExercises.sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0));
+      templateExercises.sort((a: TemplateExerciseRow, b: TemplateExerciseRow) => (a.order_index ?? 0) - (b.order_index ?? 0));
 
-      const exerciseProgress: ExerciseProgress[] = templateExercises.map((te: any) => ({
+      const exerciseProgress: ExerciseProgress[] = templateExercises.map((te: TemplateExerciseRow) => ({
         exerciseId: te.id, // workout_template_exercise ID for set logging
         exerciseName: te.exercise?.name || 'Unknown Exercise',
         targetSets: te.sets || 3,
@@ -538,7 +558,7 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
           .order('order_index');
 
         if (workoutExercises && workoutExercises.length > 0) {
-          workoutExercises.forEach((we: any) => {
+          workoutExercises.forEach((we: WorkoutExerciseRow) => {
             exerciseProgress.push({
               exerciseId: we.id,
               exerciseName: we.exercise?.name || 'Unknown Exercise',

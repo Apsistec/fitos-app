@@ -27,7 +27,7 @@ import {
 } from '@ionic/angular/standalone';
 import { AssignmentService, WorkoutAssignment } from '../../../../core/services/assignment.service';
 import { ClientService } from '../../../../core/services/client.service';
-import { WorkoutService } from '../../../../core/services/workout.service';
+import { WorkoutService, WorkoutTemplateWithExercises } from '../../../../core/services/workout.service';
 
 @Component({
   standalone: true,
@@ -349,7 +349,7 @@ export class AssignWorkoutPage implements OnInit {
   templateId?: string;
 
   // State
-  workout = signal<any>(null);
+  workout = signal<WorkoutTemplateWithExercises | null>(null);
   loading = signal(false);
   saving = signal(false);
 

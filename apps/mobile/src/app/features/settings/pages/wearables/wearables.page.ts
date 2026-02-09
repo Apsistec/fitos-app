@@ -20,6 +20,7 @@ import {
   AlertController,
   ToastController,
   IonText,
+  RefresherCustomEvent,
 } from '@ionic/angular/standalone';
 import { ViewWillEnter } from '@ionic/angular';
 import { addIcons } from 'ionicons';
@@ -160,7 +161,7 @@ export class WearablesPage implements OnInit, ViewWillEnter {
     );
   }
 
-  async handleRefresh(event: any) {
+  async handleRefresh(event: RefresherCustomEvent) {
     await this.loadConnections();
     event.target.complete();
   }

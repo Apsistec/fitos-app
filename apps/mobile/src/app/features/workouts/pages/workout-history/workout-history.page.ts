@@ -19,6 +19,7 @@ import {
   IonBadge,
   IonIcon,
   IonList,
+  RefresherCustomEvent,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -28,6 +29,11 @@ import {
   trophyOutline,
 } from 'ionicons/icons';
 import { WorkoutSessionService } from '../../../../core/services/workout-session.service';
+import { Database } from '@fitos/shared';
+
+type WorkoutSession = Database['public']['Tables']['workouts']['Row'];
+type WorkoutTemplate = Database['public']['Tables']['workout_templates']['Row'];
+type WorkoutWithTemplate = WorkoutSession & { template: WorkoutTemplate | null };
 
 addIcons({ barbellOutline, timeOutline, calendarOutline, trophyOutline });
 
@@ -349,7 +355,7 @@ export class WorkoutHistoryPage implements OnInit {
   private router = inject(Router);
 
   // State
-  workouts = signal<any[]>([]);
+  workouts = signal<WorkoutWithTemplate[]>([]);
   loading = signal(false);
   loadingMore = signal(false);
   error = signal<string | null>(null);
@@ -398,7 +404,7 @@ export class WorkoutHistoryPage implements OnInit {
     }
   }
 
-  async handleRefresh(event: any) {
+  async handleRefresh(event: RefresherCustomEvent) {
     await this.loadHistory();
     event.target.complete();
   }

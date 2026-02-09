@@ -24,7 +24,9 @@ import {
   IonCol,
   IonInfiniteScroll,
   IonInfiniteScrollContent,
-  ModalController
+  ModalController,
+  RefresherCustomEvent,
+  InfiniteScrollCustomEvent,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { filterOutline, addOutline, closeCircle } from 'ionicons/icons';
@@ -361,18 +363,18 @@ export class ExerciseLibraryPage implements OnInit {
     await this.exerciseService.loadExercises();
   }
 
-  loadMoreExercises(event: any): void {
+  loadMoreExercises(event: InfiniteScrollCustomEvent): void {
     this.displayCount.update(count => count + this.PAGE_SIZE);
     setTimeout(() => event.target.complete(), 100);
   }
 
-  async handleRefresh(event: any) {
+  async handleRefresh(event: RefresherCustomEvent) {
     await this.loadExercises();
     event.target.complete();
   }
 
-  onSearchChange(event: any) {
-    this.searchQuery = event.target.value || '';
+  onSearchChange(event: CustomEvent) {
+    this.searchQuery = event.detail.value || '';
     this.applyFilters();
   }
 
