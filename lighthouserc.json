@@ -8,7 +8,7 @@
       "settings": {
         "preset": "desktop",
         "onlyCategories": ["performance", "accessibility", "best-practices", "seo"],
-        "chromeFlags": ["--headless=new", "--no-sandbox", "--disable-gpu"]
+        "chromeFlags": ["--headless=new", "--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage", "--disable-software-rasterizer", "--window-size=1350,940"]
       }
     },
     "assert": {
