@@ -74,7 +74,18 @@
     </script>
   </head>
   <body class="dark">
-    <app-root></app-root>
+    <app-root>
+      <!-- App shell: visible immediately for FCP before Angular bootstraps -->
+      <style>
+        .app-shell{display:flex;align-items:center;justify-content:center;height:100vh;background:#0D0D0D;color:#10B981;font-family:Inter,system-ui,sans-serif;flex-direction:column;gap:16px}
+        .app-shell-spinner{width:40px;height:40px;border:3px solid rgba(16,185,129,.2);border-top-color:#10B981;border-radius:50%;animation:spin .8s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+      </style>
+      <div class="app-shell">
+        <div class="app-shell-spinner"></div>
+        <span>Loading FitOS...</span>
+      </div>
+    </app-root>
     <noscript>Please enable JavaScript to continue using this application.</noscript>
   </body>
 </html>
