@@ -16,7 +16,7 @@ addIcons({
   'time-outline': timeOutline,
 });
 
-interface UpcomingWorkout {
+export interface UpcomingWorkout {
   id: string;
   name: string;
   scheduled_date: string | null;

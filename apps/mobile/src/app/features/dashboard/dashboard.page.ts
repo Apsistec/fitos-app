@@ -34,7 +34,7 @@ import { TrainerOverviewStatsComponent, type TrainerStats } from './components/t
 import { TrainerNeedsAttentionComponent, type ClientAlert } from './components/trainer-needs-attention/trainer-needs-attention.component';
 import { TrainerActivityFeedComponent, type ActivityItem } from './components/trainer-activity-feed/trainer-activity-feed.component';
 import { StatCardComponent } from '../../shared/components/stat-card/stat-card.component';
-import { UpcomingWorkoutsListComponent } from '../../shared/components/upcoming-workouts-list/upcoming-workouts-list.component';
+import { UpcomingWorkoutsListComponent, type UpcomingWorkout } from '../../shared/components/upcoming-workouts-list/upcoming-workouts-list.component';
 import { WearableDataCardComponent } from '../../shared/components/wearable-data-card/wearable-data-card.component';
 import { OwnerFacilityStatsComponent, type FacilityStats } from './components/owner-facility-stats/owner-facility-stats.component';
 import { OwnerTrainerPerformanceComponent, type TrainerPerformance } from './components/owner-trainer-performance/owner-trainer-performance.component';
@@ -330,7 +330,7 @@ export class DashboardPage implements OnInit {
   todayWorkout = signal<WorkoutWithExercises | null>(null);
   weeklyWorkouts = signal(0);
   currentStreak = signal(0);
-  upcomingWorkouts = signal<Record<string, unknown>[]>([]);
+  upcomingWorkouts = signal<UpcomingWorkout[]>([]);
   nutritionSummary = signal<NutritionSummary | null>(null);
 
   // Trainer data signals
@@ -400,7 +400,7 @@ export class DashboardPage implements OnInit {
       this.todayWorkout.set(todayWorkout as unknown as WorkoutWithExercises);
       this.weeklyWorkouts.set(weeklyCount);
       this.currentStreak.set(streak);
-      this.upcomingWorkouts.set(upcoming);
+      this.upcomingWorkouts.set(upcoming as UpcomingWorkout[]);
 
       // Load nutrition summary
       const today = new Date().toISOString().split('T')[0];
