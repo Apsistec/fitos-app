@@ -35,8 +35,8 @@ export const mfaGuard: CanActivateFn = async () => {
       console.error('[MFA Guard] Error listing factors:', {
         message: error.message,
         name: error.name,
-        status: (error as any).status,
-        code: (error as any).code,
+        status: (error as unknown as Record<string, unknown>).status,
+        code: (error as unknown as Record<string, unknown>).code,
         fullError: JSON.stringify(error, null, 2),
       });
 
@@ -91,11 +91,12 @@ export const mfaGuard: CanActivateFn = async () => {
 
     // MFA verified, allow access
     return true;
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errObj = err instanceof Error ? err : null;
     console.error('[MFA Guard] Unexpected error:', {
-      message: err?.message,
-      name: err?.name,
-      stack: err?.stack,
+      message: errObj?.message,
+      name: errObj?.name,
+      stack: errObj?.stack,
     });
     // On unexpected error, allow access to prevent lockout
     return true;
@@ -140,8 +141,8 @@ export const mfaRequiredGuard: CanActivateFn = async () => {
       console.error('[MFA Required Guard] Error listing factors:', {
         message: error.message,
         name: error.name,
-        status: (error as any).status,
-        code: (error as any).code,
+        status: (error as unknown as Record<string, unknown>).status,
+        code: (error as unknown as Record<string, unknown>).code,
         fullError: JSON.stringify(error, null, 2),
       });
 
@@ -179,13 +180,13 @@ export const mfaRequiredGuard: CanActivateFn = async () => {
     // Check for linked OAuth identities (e.g., Google) beyond the primary email identity
     const { identities } = await authService.getLinkedIdentities();
     const hasLinkedOAuth = identities.some(
-      (i: any) => i.provider !== 'email' && i.provider !== 'phone'
+      (i) => i.provider !== 'email' && i.provider !== 'phone'
     );
 
     console.log('[MFA Required Guard] Alternative MFA check:', {
       hasPasskeys,
       hasLinkedOAuth,
-      identityProviders: identities.map((i: any) => i.provider),
+      identityProviders: identities.map((i) => i.provider),
     });
 
     const hasAnyFactor = hasTotp || hasPasskeys || hasLinkedOAuth;
@@ -197,11 +198,12 @@ export const mfaRequiredGuard: CanActivateFn = async () => {
     }
 
     return true;
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errObj = err instanceof Error ? err : null;
     console.error('[MFA Required Guard] Unexpected error:', {
-      message: err?.message,
-      name: err?.name,
-      stack: err?.stack,
+      message: errObj?.message,
+      name: errObj?.name,
+      stack: errObj?.stack,
     });
 
     // On any error, allow access to prevent user lockout

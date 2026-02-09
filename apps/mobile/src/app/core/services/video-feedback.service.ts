@@ -410,7 +410,7 @@ export class VideoFeedbackService {
   async uploadVideo(
     file: File,
     clientId: string,
-    exerciseId?: string
+    _exerciseId?: string
   ): Promise<string | null> {
     try {
       const timestamp = Date.now();

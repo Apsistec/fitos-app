@@ -526,7 +526,7 @@ export class ChatPage implements OnInit {
       const userContext = this.getUserContext();
       await this.aiCoach.sendMessage(message, userContext);
       await this.haptic.success();
-    } catch (err) {
+    } catch (_err) {
       await this.haptic.error();
       await this.showToast('Failed to send message. Please try again.', 'danger');
     }

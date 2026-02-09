@@ -90,7 +90,7 @@ export class HealthKitService {
   /**
    * Get health metrics for date range
    */
-  async getMetrics(startDate: Date, endDate: Date): Promise<HealthKitMetrics> {
+  async getMetrics(startDate: Date, _endDate: Date): Promise<HealthKitMetrics> {
     try {
       if (!this.isAuthorized()) {
         throw new Error('HealthKit not authorized');
@@ -124,7 +124,7 @@ export class HealthKitService {
   /**
    * Get recent workouts from Health app
    */
-  async getWorkouts(limit = 10): Promise<HealthKitWorkout[]> {
+  async getWorkouts(_limit = 10): Promise<HealthKitWorkout[]> {
     try {
       if (!this.isAuthorized()) {
         throw new Error('HealthKit not authorized');
@@ -145,7 +145,7 @@ export class HealthKitService {
   /**
    * Write workout to Health app
    */
-  async saveWorkout(workout: {
+  async saveWorkout(_workout: {
     type: string;
     start_date: Date;
     end_date: Date;

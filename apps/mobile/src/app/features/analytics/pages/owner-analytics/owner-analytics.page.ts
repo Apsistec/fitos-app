@@ -40,8 +40,6 @@ import {
 
 import {
   TrainerPerformanceService,
-  TrainerMetrics,
-  FacilityMetrics,
 } from '../../../../core/services/trainer-performance.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { FormsModule } from '@angular/forms';

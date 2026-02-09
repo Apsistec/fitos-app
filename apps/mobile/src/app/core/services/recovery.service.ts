@@ -26,7 +26,7 @@ export interface RecoveryScore {
   user_acknowledged: boolean;
   acknowledged_at?: string;
   adjustment_applied: boolean;
-  adjustment_details?: any;
+  adjustment_details?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
@@ -60,7 +60,7 @@ export interface RecoveryDataPoint {
   mood?: number;
   // Source
   source: RecoveryDataSource;
-  raw_data?: any;
+  raw_data?: Record<string, unknown>;
 }
 
 export interface RecoveryAdjustmentLog {

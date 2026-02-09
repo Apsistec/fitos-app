@@ -355,9 +355,9 @@ export class LeadFormComponent {
       const data = this.formData;
 
       const input: CreateLeadInput = {
-        first_name: data.first_name!.trim(),
+        first_name: (data.first_name as string).trim(),
         last_name: data.last_name?.trim() || '',
-        email: data.email!.trim(),
+        email: (data.email as string).trim(),
         phone: data.phone?.trim(),
         source: data.source as LeadSource,
         source_details: data.source_details?.trim(),

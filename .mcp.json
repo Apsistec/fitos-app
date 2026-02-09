@@ -1,5 +1,10 @@
 {
   "mcpServers": {
+    "nx-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["nx", "mcp"]
+    },
     "supabase-local": {
       "url": "http://127.0.0.1:54321/mcp",
       "headers": {

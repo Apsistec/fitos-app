@@ -250,7 +250,7 @@ export class SSOConfigPage implements OnInit {
 
       const method = this.hasConfig() ? 'put' : 'post';
       const url = this.hasConfig()
-        ? `${environment.apiUrl}/sso/config/${this.ssoConfig()!.id}`
+        ? `${environment.apiUrl}/sso/config/${this.ssoConfig()?.id}`
         : `${environment.apiUrl}/sso/config`;
 
       const result = await this.http[method]<SSOConfig>(url, payload).toPromise();

@@ -302,7 +302,8 @@ export class WellnessCheckInPage implements OnInit {
   // =====================================================================
 
   async callResource(resource: CrisisResource) {
-    if (!resource.phone) return;
+    const phone = resource.phone;
+    if (!phone) return;
 
     // Log access
     await this.wellnessService.logCrisisResourceAccess(
@@ -315,7 +316,7 @@ export class WellnessCheckInPage implements OnInit {
     // Confirm before calling
     const alert = await this.alertController.create({
       header: `Call ${resource.name}?`,
-      message: resource.phone,
+      message: phone,
       buttons: [
         {
           text: 'Cancel',
@@ -324,7 +325,7 @@ export class WellnessCheckInPage implements OnInit {
         {
           text: 'Call',
           handler: () => {
-            this.wellnessService.callEmergency(resource.phone!);
+            this.wellnessService.callEmergency(phone);
           },
         },
       ],
@@ -333,7 +334,8 @@ export class WellnessCheckInPage implements OnInit {
   }
 
   async textResource(resource: CrisisResource) {
-    if (!resource.text) return;
+    const text = resource.text;
+    if (!text) return;
 
     // Log access
     await this.wellnessService.logCrisisResourceAccess(
@@ -346,7 +348,7 @@ export class WellnessCheckInPage implements OnInit {
     // Confirm before texting
     const alert = await this.alertController.create({
       header: `Text ${resource.name}?`,
-      message: `Send message to ${resource.text}`,
+      message: `Send message to ${text}`,
       buttons: [
         {
           text: 'Cancel',
@@ -355,7 +357,7 @@ export class WellnessCheckInPage implements OnInit {
         {
           text: 'Text',
           handler: () => {
-            this.wellnessService.sendText(resource.text!);
+            this.wellnessService.sendText(text);
           },
         },
       ],

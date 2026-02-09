@@ -85,7 +85,7 @@ export interface ClientGraduation {
   pricing_change_effective_date?: string;
   check_in_frequency: CheckInFrequency;
   next_check_in_at?: string;
-  journey_stats: Record<string, any>;
+  journey_stats: Record<string, unknown>;
   achievements: string[];
   celebration_sent: boolean;
   celebration_sent_at?: string;
@@ -107,7 +107,7 @@ export interface MaintenanceCheckIn {
   trainer_id: string;
   check_in_type: 'scheduled' | 'client_initiated' | 'concern_flagged';
   status: 'pending' | 'completed' | 'skipped' | 'rescheduled';
-  current_performance: Record<string, any>;
+  current_performance: Record<string, unknown>;
   concerns: string[];
   action_items: string[];
   outcome?:
@@ -158,7 +158,7 @@ export interface CreateGraduationInput {
   graduation_type: GraduationType;
   check_in_frequency: CheckInFrequency;
   pricing_reduced_by?: number;
-  journey_stats?: Record<string, any>;
+  journey_stats?: Record<string, unknown>;
   achievements?: string[];
   notes?: string;
 }

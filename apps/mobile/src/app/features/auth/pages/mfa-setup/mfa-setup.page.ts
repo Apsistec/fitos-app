@@ -38,7 +38,7 @@ import { SupabaseService } from '../../../../core/services/supabase.service';
 import { PasskeyService, Passkey } from '../../../../core/services/passkey.service';
 import { OtpVerifyModalComponent } from '../../../../shared/components/otp-verify-modal/otp-verify-modal.component';
 
-interface MfaFactor {
+interface _MfaFactor {
   id: string;
   type: string;
   totp?: {
@@ -1453,19 +1453,20 @@ export class MfaSetupPage implements OnInit {
   }
 
   async verifyTotp(code: string): Promise<void> {
-    if (!this.factorId()) return;
+    const currentFactorId = this.factorId();
+    if (!currentFactorId) return;
 
     try {
       // Challenge to get challenge ID
       const { data: challengeData, error: challengeError } = await this.supabase.auth.mfa.challenge({
-        factorId: this.factorId()!,
+        factorId: currentFactorId,
       });
 
       if (challengeError) throw challengeError;
 
       // Verify the challenge with the TOTP code
       const { error: verifyError } = await this.supabase.auth.mfa.verify({
-        factorId: this.factorId()!,
+        factorId: currentFactorId,
         challengeId: challengeData.id,
         code,
       });
@@ -1506,9 +1507,10 @@ export class MfaSetupPage implements OnInit {
   }
 
   async copySecret(): Promise<void> {
-    if (this.secret()) {
+    const secretValue = this.secret();
+    if (secretValue) {
       try {
-        await navigator.clipboard.writeText(this.secret()!);
+        await navigator.clipboard.writeText(secretValue);
         const toast = await this.toastController.create({
           message: 'Secret key copied to clipboard',
           duration: 2000,
@@ -1817,14 +1819,15 @@ you can use one of these codes to sign in.
   }
 
   private async removeMfa(): Promise<void> {
-    if (!this.existingFactorId()) return;
+    const currentExistingFactorId = this.existingFactorId();
+    if (!currentExistingFactorId) return;
 
     this.isRemovingMfa.set(true);
     this.errorMessage.set(null);
 
     try {
       const { error } = await this.supabase.auth.mfa.unenroll({
-        factorId: this.existingFactorId()!,
+        factorId: currentExistingFactorId,
       });
 
       if (error) throw error;

@@ -24,7 +24,7 @@ import {
   saveOutline,
   closeOutline,
 } from 'ionicons/icons';
-import { LeadService, LeadActivity, ActivityType as ServiceActivityType } from '../../../../core/services/lead.service';
+import { LeadService, ActivityType as ServiceActivityType } from '../../../../core/services/lead.service';
 import { HapticService } from '../../../../core/services/haptic.service';
 import { AuthService } from '../../../../core/services/auth.service';
 

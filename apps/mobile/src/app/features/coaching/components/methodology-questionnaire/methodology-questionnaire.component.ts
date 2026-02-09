@@ -1,4 +1,4 @@
-import { Component, inject, signal, output, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   IonCard,

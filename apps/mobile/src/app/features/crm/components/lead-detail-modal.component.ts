@@ -44,7 +44,6 @@ import {
 import {
   LeadService,
   LeadWithExtras,
-  LeadActivity,
   LeadTask,
   LeadStatus,
   ActivityType,
@@ -842,7 +841,7 @@ export class LeadDetailModalComponent implements OnInit {
   /**
    * Delete task
    */
-  async deleteTask(task: LeadTask) {
+  async deleteTask(_task: LeadTask) {
     await this.haptic.light();
     // TODO: Implement task deletion
     await this.showToast('Delete task coming soon', 'primary');

@@ -9,7 +9,7 @@ export interface SupportTicket {
   category: string;
   subject: string;
   description: string;
-  device_info: any;
+  device_info: Record<string, unknown>;
   screenshot_url: string | null;
   status: 'open' | 'in_progress' | 'resolved' | 'closed';
   created_at: string;
@@ -77,8 +77,8 @@ export class SupportService {
           message: 'Support ticket created successfully. We\'ll respond within 24 hours.',
         };
       }
-    } catch (error: any) {
-      const errorMessage = error.message || 'Failed to submit support ticket';
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to submit support ticket';
       this.errorSignal.set(errorMessage);
       throw new Error(errorMessage);
     } finally {
@@ -154,8 +154,8 @@ export class SupportService {
 
       this.ticketsSignal.set(data || []);
       return data || [];
-    } catch (error: any) {
-      const errorMessage = error.message || 'Failed to fetch support tickets';
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch support tickets';
       this.errorSignal.set(errorMessage);
       throw new Error(errorMessage);
     } finally {
@@ -188,8 +188,8 @@ export class SupportService {
       }
 
       return data;
-    } catch (error: any) {
-      const errorMessage = error.message || 'Failed to fetch support ticket';
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch support ticket';
       this.errorSignal.set(errorMessage);
       throw new Error(errorMessage);
     } finally {

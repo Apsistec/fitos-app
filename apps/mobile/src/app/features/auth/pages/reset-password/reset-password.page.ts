@@ -14,7 +14,7 @@ import {
   ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { checkmarkCircle, closeCircle, lockClosedOutline } from 'ionicons/icons';
+import { checkmarkCircle, closeCircle } from 'ionicons/icons';
 import { AuthService } from '../../../../core/services/auth.service';
 
 // Password complexity validator

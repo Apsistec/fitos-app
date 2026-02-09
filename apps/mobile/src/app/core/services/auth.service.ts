@@ -6,7 +6,8 @@ import {
   AuthChangeEvent,
   AuthSession,
   Provider,
-  User
+  User,
+  UserIdentity,
 } from '@supabase/supabase-js';
 import type { Profile, UserRole } from '@fitos/shared';
 
@@ -582,7 +583,7 @@ export class AuthService {
     });
 
     // Also handle iOS-specific resume events via Capacitor if available
-    if (typeof window !== 'undefined' && (window as any).Capacitor) {
+    if (typeof window !== 'undefined' && (window as unknown as Record<string, unknown>).Capacitor) {
       import('@capacitor/app').then(({ App }) => {
         App.addListener('appStateChange', async ({ isActive }) => {
           if (isActive) {
@@ -870,7 +871,7 @@ export class AuthService {
       if (error) {
         console.error('[AuthService] SignUp error:', error);
         console.error('[AuthService] Error message:', error.message);
-        console.error('[AuthService] Error status:', (error as any).status);
+        console.error('[AuthService] Error status:', (error as Record<string, unknown>).status);
         console.error('[AuthService] Full error:', JSON.stringify(error, null, 2));
         throw error;
       }
@@ -885,7 +886,7 @@ export class AuthService {
         throw new Error('Failed to create account. Please try again.');
       }
 
-      console.log('[AuthService] User created successfully with ID:', data.user!.id);
+      console.log('[AuthService] User created successfully with ID:', data.user?.id);
 
       // Track if we hit rate limiting (for future use if needed)
       const wasRateLimited = false;
@@ -1083,7 +1084,7 @@ export class AuthService {
   /**
    * Get linked identities for the current user
    */
-  async getLinkedIdentities(): Promise<{ identities: any[]; error: Error | null }> {
+  async getLinkedIdentities(): Promise<{ identities: UserIdentity[]; error: Error | null }> {
     try {
       const { data, error } = await this.supabase.auth.getUserIdentities();
 
@@ -1098,7 +1099,7 @@ export class AuthService {
   async unlinkIdentity(identityId: string): Promise<{ error: Error | null }> {
     try {
       const { data } = await this.supabase.auth.getUserIdentities();
-      const identity = data?.identities?.find((i: any) => i.id === identityId);
+      const identity = data?.identities?.find((i: UserIdentity) => i.id === identityId);
       if (!identity) throw new Error('Identity not found');
 
       const { error } = await this.supabase.auth.unlinkIdentity(identity);

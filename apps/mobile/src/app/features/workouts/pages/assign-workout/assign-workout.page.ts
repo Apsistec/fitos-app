@@ -407,6 +407,7 @@ export class AssignWorkoutPage implements OnInit {
   async assignWorkout() {
     if (!this.canAssign() || !this.templateId) return;
 
+    const currentTemplateId = this.templateId;
     this.saving.set(true);
 
     try {
@@ -416,7 +417,7 @@ export class AssignWorkoutPage implements OnInit {
         // Assign to multiple dates
         const assignments: WorkoutAssignment[] = this.selectedDates.map(date => ({
           clientId: this.selectedClientId,
-          templateId: this.templateId!,
+          templateId: currentTemplateId,
           scheduledDate: date,
           trainerNotes: this.trainerNotes || undefined
         }));

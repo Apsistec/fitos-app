@@ -168,22 +168,22 @@ export class PhotoNutritionService {
     };
 
     const response = await firstValueFrom(
-      this.http.post<any>(`${this.PASSIO_API_URL}/recognize`, body, { headers })
+      this.http.post<{ results: Array<Record<string, unknown>> }>(`${this.PASSIO_API_URL}/recognize`, body, { headers })
     );
 
     const processingTime = Date.now() - startTime;
 
     // Parse Passio response into our format
-    const foods: IdentifiedFood[] = response.results.map((result: any) => ({
-      foodName: result.foodName,
-      servingQty: result.servingSize?.quantity || 1,
-      servingUnit: result.servingSize?.unit || 'serving',
-      calories: Math.round(result.nutrition?.calories || 0),
-      protein: Math.round(result.nutrition?.protein || 0),
-      carbs: Math.round(result.nutrition?.carbs || 0),
-      fat: Math.round(result.nutrition?.fat || 0),
-      confidence: result.confidence,
-      photoUrl: result.imageUrl,
+    const foods: IdentifiedFood[] = response.results.map((result) => ({
+      foodName: result.foodName as string,
+      servingQty: (result.servingSize as Record<string, unknown> | undefined)?.quantity as number || 1,
+      servingUnit: (result.servingSize as Record<string, unknown> | undefined)?.unit as string || 'serving',
+      calories: Math.round((result.nutrition as Record<string, unknown> | undefined)?.calories as number || 0),
+      protein: Math.round((result.nutrition as Record<string, unknown> | undefined)?.protein as number || 0),
+      carbs: Math.round((result.nutrition as Record<string, unknown> | undefined)?.carbs as number || 0),
+      fat: Math.round((result.nutrition as Record<string, unknown> | undefined)?.fat as number || 0),
+      confidence: result.confidence as number,
+      photoUrl: result.imageUrl as string | undefined,
     }));
 
     const overallConfidence = foods.length > 0

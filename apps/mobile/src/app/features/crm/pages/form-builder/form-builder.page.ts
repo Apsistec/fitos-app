@@ -434,7 +434,7 @@ export class FormBuilderPage implements OnInit {
     this.formConfig.customFields = this.formConfig.customFields.filter(f => f.id !== fieldId);
   }
 
-  handleReorder(event: any): void {
+  handleReorder(event: CustomEvent<{ from: number; to: number; complete: () => void }>): void {
     this.haptic.light();
 
     const itemMove = this.formConfig.customFields.splice(event.detail.from, 1)[0];

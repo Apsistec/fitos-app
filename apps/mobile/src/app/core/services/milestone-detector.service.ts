@@ -50,7 +50,7 @@ export class MilestoneDetectorService {
 
     const results = await Promise.allSettled(checks);
 
-    results.forEach((result, index) => {
+    results.forEach((result, _index) => {
       if (result.status === 'fulfilled' && result.value) {
         detected.push(result.value);
       }

@@ -3,7 +3,6 @@ import { SupabaseService } from './supabase.service';
 import {
   EmailTemplate,
   EmailSequence,
-  SequenceStep,
   EmailSend,
   EmailMetrics,
   CampaignPerformance,
@@ -353,7 +352,7 @@ export class EmailService {
    */
   async trackClick(emailId: string): Promise<void> {
     try {
-      const updates: any = {
+      const updates: { clicked_at: string; opened_at?: string } = {
         clicked_at: new Date().toISOString(),
       };
 

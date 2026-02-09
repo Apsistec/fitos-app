@@ -51,7 +51,7 @@ export interface Lead {
   do_not_contact: boolean;
   notes?: string;
   tags?: string[];
-  custom_fields?: Record<string, any>;
+  custom_fields?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
   last_contacted_at?: string;
@@ -68,7 +68,7 @@ export interface LeadActivity {
   subject?: string;
   description?: string;
   email_template_id?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   created_at: string;
 }
 
@@ -453,7 +453,7 @@ export class LeadService {
       activity_type: ActivityType;
       subject?: string;
       description?: string;
-      metadata?: Record<string, any>;
+      metadata?: Record<string, unknown>;
     }
   ): Promise<LeadActivity | null> {
     try {

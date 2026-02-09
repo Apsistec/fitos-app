@@ -92,7 +92,7 @@ export class NutritionParserService {
 
     // Check cache first
     if (this.cache.has(cacheKey)) {
-      return this.cache.get(cacheKey)!;
+      return this.cache.get(cacheKey) as ParsedFood[];
     }
 
     this.isProcessing.set(true);
@@ -152,14 +152,15 @@ export class NutritionParserService {
       });
 
       const response = await firstValueFrom(
-        this.http.get<any>(`${this.NUTRITIONIX_API_URL}/search/instant`, {
+        this.http.get<Record<string, unknown>>(`${this.NUTRITIONIX_API_URL}/search/instant`, {
           params: { query: partialText },
           headers,
         })
       );
 
       // Return top 5 common foods
-      return response.common?.slice(0, 5).map((item: any) => item.food_name) || [];
+      const common = response.common as Array<Record<string, unknown>> | undefined;
+      return common?.slice(0, 5).map((item) => item.food_name as string) || [];
     } catch {
       return [];
     }
@@ -246,21 +247,21 @@ export class NutritionParserService {
       };
 
       const response = await firstValueFrom(
-        this.http.post<any>(`${this.NUTRITIONIX_API_URL}/natural/nutrients`, body, { headers })
+        this.http.post<{ foods: Array<Record<string, unknown>> }>(`${this.NUTRITIONIX_API_URL}/natural/nutrients`, body, { headers })
       );
 
       // Parse Nutritionix response into our format
-      return response.foods.map((food: any) => ({
-        foodName: food.food_name,
-        servingQty: food.serving_qty,
-        servingUnit: food.serving_unit,
-        calories: Math.round(food.nf_calories),
-        protein: Math.round(food.nf_protein),
-        carbs: Math.round(food.nf_total_carbohydrate),
-        fat: Math.round(food.nf_total_fat),
+      return response.foods.map((food) => ({
+        foodName: food.food_name as string,
+        servingQty: food.serving_qty as number,
+        servingUnit: food.serving_unit as string,
+        calories: Math.round(food.nf_calories as number),
+        protein: Math.round(food.nf_protein as number),
+        carbs: Math.round(food.nf_total_carbohydrate as number),
+        fat: Math.round(food.nf_total_fat as number),
         confidence: 0.9, // Nutritionix has ~90% accuracy
-        photoUrl: food.photo?.thumb,
-        brandName: food.brand_name,
+        photoUrl: (food.photo as Record<string, unknown> | undefined)?.thumb as string | undefined,
+        brandName: food.brand_name as string | undefined,
       }));
     } catch (err) {
       // Fall back to mock data if API fails

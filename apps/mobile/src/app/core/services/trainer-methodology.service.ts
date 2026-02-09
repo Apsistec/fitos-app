@@ -12,7 +12,7 @@ export interface TrainerMethodology {
   communication_style: string | null;
   key_phrases: string[];
   avoid_phrases: string[];
-  response_examples: Record<string, any>;
+  response_examples: Record<string, unknown>;
   is_active: boolean;
   version: number;
   created_at: string;
@@ -25,7 +25,7 @@ export interface CreateMethodologyInput {
   communication_style?: string;
   key_phrases?: string[];
   avoid_phrases?: string[];
-  response_examples?: Record<string, any>;
+  response_examples?: Record<string, unknown>;
 }
 
 export interface UpdateMethodologyInput extends CreateMethodologyInput {
@@ -110,9 +110,9 @@ export class TrainerMethodologyService {
 
       this.currentMethodology.set(data);
       return data;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching methodology:', err);
-      this.error.set(err.message);
+      this.error.set(err instanceof Error ? err.message : 'Failed to fetch methodology');
       return null;
     } finally {
       this.loading.set(false);
@@ -145,9 +145,9 @@ export class TrainerMethodologyService {
 
       this.currentMethodology.set(data);
       return data;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error creating methodology:', err);
-      this.error.set(err.message);
+      this.error.set(err instanceof Error ? err.message : 'Failed to create methodology');
       return null;
     } finally {
       this.loading.set(false);
@@ -178,9 +178,9 @@ export class TrainerMethodologyService {
 
       this.currentMethodology.set(data);
       return data;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error updating methodology:', err);
-      this.error.set(err.message);
+      this.error.set(err instanceof Error ? err.message : 'Failed to update methodology');
       return null;
     } finally {
       this.loading.set(false);
@@ -216,7 +216,7 @@ export class TrainerMethodologyService {
       if (error) throw error;
 
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error adding training data:', err);
       return false;
     }
@@ -242,7 +242,7 @@ export class TrainerMethodologyService {
       if (error) throw error;
 
       return data || [];
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching response logs:', err);
       return [];
     }
@@ -269,7 +269,7 @@ export class TrainerMethodologyService {
       if (error) throw error;
 
       return data || [];
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching unapproved responses:', err);
       return [];
     }
@@ -298,7 +298,7 @@ export class TrainerMethodologyService {
       if (error) throw error;
 
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error reviewing response:', err);
       return false;
     }

@@ -1,7 +1,6 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
-import { environment } from '../../../environments/environment';
 
 export interface StripeConnectStatus {
   isConnected: boolean;

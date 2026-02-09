@@ -681,10 +681,11 @@ export class EmailTemplateEditorComponent implements OnInit {
         throw new Error('User not authenticated');
       }
 
-      if (this.isEditMode()) {
+      const currentTemplateId = this.templateId();
+      if (this.isEditMode() && currentTemplateId) {
         // Update existing template
         const success = await this.emailTemplateService.updateTemplate(
-          this.templateId()!,
+          currentTemplateId,
           {
             name: formValue.name,
             category: formValue.category || null,

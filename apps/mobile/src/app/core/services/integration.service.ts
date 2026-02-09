@@ -43,7 +43,7 @@ export interface UserIntegration {
   access_token?: string;
   refresh_token?: string;
   token_expires_at?: string;
-  config: any;
+  config: Record<string, unknown>;
   auto_sync: boolean;
   sync_frequency: SyncFrequency;
   last_sync_at?: string;
@@ -69,8 +69,8 @@ export interface IntegrationSyncLog {
   records_failed: number;
   duration_ms?: number;
   error_message?: string;
-  error_details?: any;
-  metadata?: any;
+  error_details?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
   started_at: string;
   completed_at?: string;
 }
@@ -96,7 +96,7 @@ export interface IntegrationSummary {
 
 export interface ConnectIntegrationInput {
   integration_id: string;
-  config?: any;
+  config?: Record<string, unknown>;
   sync_frequency?: SyncFrequency;
 }
 
@@ -357,7 +357,7 @@ export class IntegrationService {
   ): Promise<boolean> {
     try {
       // Schedule next sync
-      const { data: nextSync, error: scheduleError } = await this.supabase.client
+      const { data: _nextSync, error: scheduleError } = await this.supabase.client
         .rpc('schedule_next_sync', {
           p_user_integration_id: userIntegrationId,
           p_frequency: frequency,

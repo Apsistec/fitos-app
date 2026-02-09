@@ -46,7 +46,7 @@ export class SupabaseService {
   }
 
   // RPC calls
-  rpc<T>(fn: string, params?: object) {
+  rpc<_T>(fn: string, params?: object) {
     return this.supabase.rpc(fn, params);
   }
 }

@@ -23,7 +23,6 @@ import {
 import { NutritionService } from '../../../../core/services/nutrition.service';
 import { ClientService, ClientWithProfile } from '../../../../core/services/client.service';
 import type { Tables } from '@fitos/shared';
-import { NUTRITION_COLORS } from '@fitos/shared';
 
 @Component({
   selector: 'app-set-nutrition-targets',

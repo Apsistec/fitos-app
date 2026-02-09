@@ -295,7 +295,8 @@ export class MfaVerifyPage implements OnInit {
   }
 
   async onCodeComplete(code: string): Promise<void> {
-    if (!this.factorId() || this.isVerifying()) return;
+    const currentFactorId = this.factorId();
+    if (!currentFactorId || this.isVerifying()) return;
 
     this.isVerifying.set(true);
     this.hasError.set(false);
@@ -304,14 +305,14 @@ export class MfaVerifyPage implements OnInit {
     try {
       // Challenge to get challenge ID
       const { data: challengeData, error: challengeError } = await this.supabase.auth.mfa.challenge({
-        factorId: this.factorId()!,
+        factorId: currentFactorId,
       });
 
       if (challengeError) throw challengeError;
 
       // Verify the challenge
       const { error: verifyError } = await this.supabase.auth.mfa.verify({
-        factorId: this.factorId()!,
+        factorId: currentFactorId,
         challengeId: challengeData.id,
         code,
       });

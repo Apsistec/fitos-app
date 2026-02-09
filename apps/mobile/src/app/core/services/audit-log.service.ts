@@ -46,8 +46,8 @@ export interface AuditLogEntry {
   http_status_code?: number;
 
   // Data changes
-  before_data?: any;
-  after_data?: any;
+  before_data?: Record<string, unknown>;
+  after_data?: Record<string, unknown>;
 
   // Security
   access_reason?: AccessReason;

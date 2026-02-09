@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { SupabaseService } from './supabase.service';
@@ -21,7 +21,7 @@ export interface ChatMessage {
  */
 export interface BaseUserContext {
   user_id: string;
-  preferences?: Record<string, any>;
+  preferences?: Record<string, unknown>;
 }
 
 /**
@@ -177,7 +177,7 @@ export class AICoachService {
         }
 
         if (msgData && msgData.length > 0) {
-          const messages: ChatMessage[] = msgData.map((m: any) => ({
+          const messages: ChatMessage[] = msgData.map((m: Record<string, unknown>) => ({
             id: m.id,
             role: m.role,
             content: m.content,
@@ -302,7 +302,7 @@ export class AICoachService {
         role: 'assistant',
         content: response.response,
         timestamp: new Date().toISOString(),
-        agent: response.agent as any,
+        agent: response.agent as ChatMessage['agent'],
         confidence: response.confidence,
       };
       this.messages.update(msgs => [...msgs, assistantMessage]);

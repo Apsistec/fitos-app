@@ -248,7 +248,7 @@ export class TrainerPerformanceService {
 
       // Calculate retention rate (clients retained / clients at start)
       const clientsAtStart = allClients?.filter(c =>
-        c.created_at < startDate && (c.status === 'active' || c.ended_at! > startDate)
+        c.created_at < startDate && (c.status === 'active' || (c.ended_at && c.ended_at > startDate))
       ).length || 0;
 
       const retentionRate = clientsAtStart > 0

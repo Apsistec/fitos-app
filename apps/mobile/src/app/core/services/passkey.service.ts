@@ -150,7 +150,7 @@ export class PasskeyService {
           message: optionsError?.message,
           name: optionsError?.name,
           context: optionsError?.context,
-          status: (optionsError as any)?.status,
+          status: (optionsError as unknown as Record<string, unknown>)?.status,
           details: optionsError,
         });
         throw new Error(optionsError?.message || 'Failed to get registration options');

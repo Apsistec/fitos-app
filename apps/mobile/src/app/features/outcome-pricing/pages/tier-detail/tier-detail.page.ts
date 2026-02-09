@@ -148,12 +148,13 @@ export class TierDetailPage implements OnInit {
   }
 
   async deactivateTier() {
-    if (!this.tierId()) return;
+    const currentTierId = this.tierId();
+    if (!currentTierId) return;
 
     const confirmed = confirm('Are you sure you want to deactivate this tier? Existing clients will not be affected.');
     if (!confirmed) return;
 
-    this.outcomePricingService.deactivatePricingTier(this.tierId()!).subscribe({
+    this.outcomePricingService.deactivatePricingTier(currentTierId).subscribe({
       next: () => {
         this.router.navigate(['/outcome-pricing/tiers']);
       },

@@ -452,9 +452,10 @@ export class ExerciseFormPage implements OnInit {
     };
 
     try {
-      if (this.isEditMode()) {
+      const currentExerciseId = this.exerciseId();
+      if (this.isEditMode() && currentExerciseId) {
         const updated = await this.exerciseService.updateExercise(
-          this.exerciseId()!,
+          currentExerciseId,
           exerciseData
         );
         if (!updated) throw new Error('Failed to update exercise');
@@ -474,6 +475,9 @@ export class ExerciseFormPage implements OnInit {
   }
 
   async deleteExercise(): Promise<void> {
+    const exerciseIdToDelete = this.exerciseId();
+    if (!exerciseIdToDelete) return;
+
     const alert = await this.alertController.create({
       header: 'Delete Exercise',
       message: 'Are you sure you want to delete this exercise? This action cannot be undone.',
@@ -487,7 +491,7 @@ export class ExerciseFormPage implements OnInit {
           role: 'destructive',
           handler: async () => {
             this.saving.set(true);
-            const success = await this.exerciseService.deleteExercise(this.exerciseId()!);
+            const success = await this.exerciseService.deleteExercise(exerciseIdToDelete);
             this.saving.set(false);
 
             if (success) {

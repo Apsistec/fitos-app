@@ -510,8 +510,8 @@ export class PipelinePage implements OnInit {
 
   conversionRate = computed(() => {
     const leads = this.leadService.leads();
-    const won = leads.filter((l: any) => l.status === 'won').length;
-    const completed = leads.filter((l: any) => l.status === 'won' || l.status === 'lost').length;
+    const won = leads.filter((l) => l.status === 'won').length;
+    const completed = leads.filter((l) => l.status === 'won' || l.status === 'lost').length;
 
     if (completed === 0) return 0;
     return Math.round((won / completed) * 100);
@@ -597,8 +597,8 @@ export class PipelinePage implements OnInit {
   /**
    * Handle search input
    */
-  onSearchInput(event: any) {
-    const query = event.target.value;
+  onSearchInput(event: Event) {
+    const query = (event.target as HTMLInputElement).value;
     this.searchQuery.set(query);
     // Search is computed in the service
     // In production, you'd filter the displayed leads

@@ -52,7 +52,7 @@ export interface EmailSend {
   bounced_at?: string;
   unsubscribed_at?: string;
   provider_message_id?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export type TriggerEvent =

@@ -119,7 +119,7 @@ export class FoodService {
   async getFoodById(fdcId: string): Promise<Food | null> {
     // Check memory cache first
     if (this.foodCache.has(fdcId)) {
-      return this.foodCache.get(fdcId)!;
+      return this.foodCache.get(fdcId) as Food;
     }
 
     this.loading.set(true);
@@ -127,7 +127,7 @@ export class FoodService {
 
     try {
       // Check database cache
-      const { data, error } = await this.supabase.client
+      const { data, error: _error } = await this.supabase.client
         .from('cached_foods')
         .select('*')
         .eq('fdc_id', fdcId)
@@ -243,7 +243,20 @@ export class FoodService {
   /**
    * Transform cached food data to our Food interface
    */
-  private transformCachedFood(row: any): Food {
+  private transformCachedFood(row: {
+    fdc_id: string;
+    name: string;
+    brand?: string;
+    serving_size?: number;
+    serving_size_unit?: string;
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    fiber?: number;
+    sugar?: number;
+    sodium?: number;
+  }): Food {
     return {
       id: row.fdc_id,
       name: row.name,
@@ -272,7 +285,15 @@ export class FoodService {
     sugar?: number;
     sodium?: number;
   } {
-    const nutrients: any = {
+    const nutrients: {
+      calories: number;
+      protein: number;
+      carbs: number;
+      fat: number;
+      fiber?: number;
+      sugar?: number;
+      sodium?: number;
+    } = {
       calories: 0,
       protein: 0,
       carbs: 0,

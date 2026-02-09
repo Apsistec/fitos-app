@@ -97,7 +97,8 @@ export class HelpCenterPage {
       },
     ];
 
-    return actions.filter((action) => action.roles.includes(role!));
+    if (!role) return [];
+    return actions.filter((action) => action.roles.includes(role));
   });
 
   // Feature guides filtered by role

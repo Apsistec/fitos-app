@@ -21,7 +21,7 @@ export class UpdateService {
 
     // Check for updates when app becomes stable, then every 6 hours
     const appIsStable$ = this.appRef.isStable.pipe(first((isStable) => isStable === true));
-    const everyS6Hours$ = interval(6 * 60 * 60 * 1000); // 6 hours
+    const _everyS6Hours$ = interval(6 * 60 * 60 * 1000); // 6 hours
     const everySixHoursOnceAppIsStable$ = concat(appIsStable$, everySixHours$);
 
     everySixHoursOnceAppIsStable$.subscribe(async () => {

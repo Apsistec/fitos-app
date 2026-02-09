@@ -460,11 +460,13 @@ export class WorkoutDetailPage implements OnInit {
         });
       }
 
-      const group = grouped.get(exerciseId)!;
-      group.sets.push(set);
+      const group = grouped.get(exerciseId);
+      if (group) {
+        group.sets.push(set);
 
-      if (set.weight_used && set.reps_completed) {
-        group.totalVolume += set.weight_used * set.reps_completed;
+        if (set.weight_used && set.reps_completed) {
+          group.totalVolume += set.weight_used * set.reps_completed;
+        }
       }
     });
 

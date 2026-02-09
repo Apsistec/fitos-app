@@ -14,8 +14,8 @@ export interface WorkoutAssignment {
 }
 
 export interface AssignedWorkoutWithDetails extends AssignedWorkout {
-  template?: any;
-  client?: any;
+  template?: Record<string, unknown>;
+  client?: Record<string, unknown>;
 }
 
 export interface RecentActivity {
@@ -141,7 +141,7 @@ export class AssignmentService {
 
       if (error) throw error;
 
-      this.assignmentsSignal.set(data as any || []);
+      this.assignmentsSignal.set((data as unknown as AssignedWorkoutWithDetails[]) || []);
     } catch (error) {
       console.error('Error loading assignments:', error);
       this.errorSignal.set(error instanceof Error ? error.message : 'Failed to load assignments');
@@ -176,7 +176,7 @@ export class AssignmentService {
 
       if (error) throw error;
 
-      this.assignmentsSignal.set(data as any || []);
+      this.assignmentsSignal.set((data as unknown as AssignedWorkoutWithDetails[]) || []);
     } catch (error) {
       console.error('Error loading assignments:', error);
       this.errorSignal.set(error instanceof Error ? error.message : 'Failed to load assignments');
@@ -261,7 +261,7 @@ export class AssignmentService {
 
       if (error) throw error;
 
-      return (data as any) || [];
+      return (data as unknown as AssignedWorkoutWithDetails[]) || [];
     } catch (error) {
       console.error('Error fetching today\'s schedule:', error);
       return [];
@@ -294,7 +294,7 @@ export class AssignmentService {
       if (error) throw error;
 
       // Transform to RecentActivity format
-      const activities: RecentActivity[] = (data || []).map((workout: any) => ({
+      const activities: RecentActivity[] = (data || []).map((workout: AssignedWorkout & { client?: { full_name?: string; avatar_url?: string | null } }) => ({
         workout,
         clientName: workout.client?.full_name || 'Unknown Client',
         clientAvatar: workout.client?.avatar_url || null,

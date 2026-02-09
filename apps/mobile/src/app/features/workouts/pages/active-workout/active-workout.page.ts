@@ -611,10 +611,13 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
     const exercise = this.currentExercise();
     if (!exercise || !this.canLogSet()) return;
 
+    // currentReps is guaranteed non-null after canLogSet() check
+    const reps = this.currentReps as number;
+
     const setLog: SetLog = {
       exerciseId: exercise.exerciseId,
       setNumber: exercise.currentSet,
-      reps: this.currentReps!,
+      reps,
       weight: this.currentWeight || undefined,
       rpe: this.currentRpe || undefined
     };
@@ -637,7 +640,7 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
 
       // Store last set for repeat command
       this.lastSet = {
-        reps: this.currentReps!,
+        reps,
         weight: this.currentWeight || undefined,
         rpe: this.currentRpe || undefined
       };

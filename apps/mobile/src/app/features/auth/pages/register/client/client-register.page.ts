@@ -634,7 +634,7 @@ export class ClientRegisterPage {
         });
         await alert.present();
       }
-    } catch (err) {
+    } catch (_err) {
       this.isSubmitting.set(false);
       this.errorMessage.set('An unexpected error occurred. Please try again.');
     }

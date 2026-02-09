@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 import { Database } from '@fitos/shared';
 
 type WorkoutSession = Database['public']['Tables']['workouts']['Row'];
-type WorkoutSessionInsert = Database['public']['Tables']['workouts']['Insert'];
+type _WorkoutSessionInsert = Database['public']['Tables']['workouts']['Insert'];
 type LoggedSet = Database['public']['Tables']['workout_sets']['Row'];
 type LoggedSetInsert = Database['public']['Tables']['workout_sets']['Insert'];
 
@@ -243,7 +243,7 @@ export class WorkoutSessionService {
     try {
       const completedAt = new Date().toISOString();
       const startedAt = session.session.started_at;
-      const duration = startedAt ? Math.floor(
+      const _duration = startedAt ? Math.floor(
         (new Date(completedAt).getTime() - new Date(startedAt).getTime()) / 1000
       ) : null;
 
@@ -369,7 +369,7 @@ export class WorkoutSessionService {
 
       // Group workouts by date
       const workoutDates = new Set(
-        data.map(w => new Date(w.completed_at!).toISOString().split('T')[0])
+        data.map(w => new Date(w.completed_at as string).toISOString().split('T')[0])
       );
 
       // Calculate streak

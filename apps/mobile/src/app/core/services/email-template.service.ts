@@ -5,7 +5,6 @@ import type {
   EmailSequence,
   SequenceStep,
   CreateSequenceInput,
-  TriggerEvent,
 } from '@fitos/shared';
 
 /**
@@ -151,7 +150,7 @@ export class EmailTemplateService {
         if (!byCategory[category]) {
           byCategory[category] = [];
         }
-        byCategory[category]!.push(template);
+        byCategory[category]?.push(template);
       }
     });
 
@@ -479,7 +478,7 @@ export class EmailTemplateService {
 
       if (!emailSend) return false;
 
-      const updates: any = {
+      const updates: { opened_count: number; opened_at?: string } = {
         opened_count: emailSend.opened_count + 1,
       };
 
@@ -514,7 +513,7 @@ export class EmailTemplateService {
 
       if (!emailSend) return false;
 
-      const updates: any = {
+      const updates: { clicked_count: number; clicked_at?: string } = {
         clicked_count: emailSend.clicked_count + 1,
       };
 

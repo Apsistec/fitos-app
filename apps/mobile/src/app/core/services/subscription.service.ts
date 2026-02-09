@@ -4,8 +4,6 @@ import { AuthService } from './auth.service';
 import { Database } from '@fitos/shared';
 
 type Subscription = Database['public']['Tables']['subscriptions']['Row'];
-type SubscriptionInsert = Database['public']['Tables']['subscriptions']['Insert'];
-type SubscriptionStatus = Database['public']['Enums']['subscription_status'];
 
 export interface TrainerPricing {
   id?: string;
@@ -262,7 +260,7 @@ export class SubscriptionService {
     this._error.set(null);
 
     try {
-      const { data, error } = await this.supabase.functions.invoke('stripe-create-price', {
+      const { data: _data, error } = await this.supabase.functions.invoke('stripe-create-price', {
         body: {
           trainerId,
           ...pricing,

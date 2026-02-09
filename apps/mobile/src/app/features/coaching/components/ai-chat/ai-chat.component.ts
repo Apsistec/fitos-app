@@ -14,7 +14,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { sendOutline, sparklesOutline } from 'ionicons/icons';
-import { AICoachService, ChatMessage, UserContext } from '../../../../core/services/ai-coach.service';
+import { AICoachService, UserContext } from '../../../../core/services/ai-coach.service';
 
 const AGENT_CONFIG = {
   workout: { label: 'Workout', color: 'primary', icon: '💪' },

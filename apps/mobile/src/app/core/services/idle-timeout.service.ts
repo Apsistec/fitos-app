@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { fromEvent, merge, Subject, timer, Observable } from 'rxjs';
-import { debounceTime, takeUntil, switchMap, tap } from 'rxjs/operators';
+import { debounceTime, takeUntil } from 'rxjs/operators';
 import { AuthService } from './auth.service';
 import { AlertController } from '@ionic/angular/standalone';
 
@@ -46,7 +46,7 @@ export class IdleTimeoutService {
 
   private destroy$ = new Subject<void>();
   private warningShown = signal(false);
-  private countdownInterval: any = null;
+  private countdownInterval: ReturnType<typeof setInterval> | null = null;
 
   /**
    * Start idle timeout monitoring
@@ -89,7 +89,7 @@ export class IdleTimeoutService {
   /**
    * Get observable of user activity events
    */
-  private getUserActivityObservable(): Observable<any> {
+  private getUserActivityObservable(): Observable<Event> {
     return merge(
       fromEvent(document, 'mousemove'),
       fromEvent(document, 'mousedown'),
@@ -184,7 +184,7 @@ export class IdleTimeoutService {
   /**
    * Start countdown timer in warning modal
    */
-  private startCountdown(alert: any): void {
+  private startCountdown(alert: HTMLIonAlertElement): void {
     let secondsRemaining = 120; // 2 minutes
 
     this.countdownInterval = setInterval(() => {

@@ -353,7 +353,7 @@ export class ClientListPage implements OnInit {
     await toast.present();
   }
 
-  async onMenuClick({ event, client }: { event: Event; client: ClientWithProfile }) {
+  async onMenuClick({ event: _event, client }: { event: Event; client: ClientWithProfile }) {
     const actionSheet = await this.actionSheetCtrl.create({
       header: client.profile?.full_name || 'Client',
       buttons: [
@@ -389,7 +389,7 @@ export class ClientListPage implements OnInit {
     await actionSheet.present();
   }
 
-  async confirmRemoveClient(client: ClientWithProfile) {
+  async confirmRemoveClient(_client: ClientWithProfile) {
     // TODO: Implement client removal
     const toast = await this.toastCtrl.create({
       message: 'Client removal coming soon...',

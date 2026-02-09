@@ -1,5 +1,4 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { Capacitor } from '@capacitor/core';
 import { SupabaseService } from './supabase.service';
 
 /**

@@ -416,7 +416,8 @@ export class AddLeadModalComponent implements OnInit {
         throw new Error('User not authenticated');
       }
 
-      if (this.isEditMode()) {
+      const currentLeadId = this.leadId();
+      if (this.isEditMode() && currentLeadId) {
         // Update existing lead
         const updates: UpdateLeadInput = {
           first_name: formValue.first_name,
@@ -430,7 +431,7 @@ export class AddLeadModalComponent implements OnInit {
           notes: formValue.notes || null,
         };
 
-        const success = await this.leadService.updateLead(this.leadId()!, updates);
+        const success = await this.leadService.updateLead(currentLeadId, updates);
 
         if (success) {
           await this.showToast('Lead updated successfully', 'success');

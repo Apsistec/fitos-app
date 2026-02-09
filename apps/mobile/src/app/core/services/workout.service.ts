@@ -4,8 +4,8 @@ import { AuthService } from './auth.service';
 import { Database } from '@fitos/shared';
 
 type WorkoutTemplate = Database['public']['Tables']['workout_templates']['Row'];
-type WorkoutTemplateInsert = Database['public']['Tables']['workout_templates']['Insert'];
-type WorkoutTemplateUpdate = Database['public']['Tables']['workout_templates']['Update'];
+type _WorkoutTemplateInsert = Database['public']['Tables']['workout_templates']['Insert'];
+type _WorkoutTemplateUpdate = Database['public']['Tables']['workout_templates']['Update'];
 type TemplateExercise = Database['public']['Tables']['workout_template_exercises']['Row'];
 type TemplateExerciseInsert = Database['public']['Tables']['workout_template_exercises']['Insert'];
 
@@ -73,7 +73,7 @@ export class WorkoutService {
 
       if (error) throw error;
 
-      this.templatesSignal.set(data as any || []);
+      this.templatesSignal.set((data as unknown as WorkoutTemplateWithExercises[]) || []);
     } catch (error) {
       console.error('Error loading templates:', error);
       this.errorSignal.set(error instanceof Error ? error.message : 'Failed to load templates');
@@ -104,7 +104,7 @@ export class WorkoutService {
 
       if (error) throw error;
 
-      const template = data as any as WorkoutTemplateWithExercises;
+      const template = data as unknown as WorkoutTemplateWithExercises;
       this.currentTemplateSignal.set(template);
       return template;
     } catch (error) {

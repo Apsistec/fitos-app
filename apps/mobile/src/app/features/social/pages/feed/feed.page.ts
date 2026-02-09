@@ -6,7 +6,6 @@ import {
   IonHeader,
   IonTitle,
   IonToolbar,
-  IonButtons,
   IonButton,
   IonIcon,
   IonAvatar,
@@ -44,7 +43,7 @@ interface FeedPost {
   user_id: string;
   post_type: 'achievement' | 'pr' | 'workout' | 'milestone' | 'challenge' | 'general';
   content: string | null;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   like_count: number;
   comment_count: number;
   is_public: boolean;
@@ -54,6 +53,17 @@ interface FeedPost {
     avatar_url: string | null;
   };
   isLiked?: boolean;
+}
+
+interface UserFollow {
+  following_id: string;
+}
+
+interface PostComment {
+  content: string;
+  user?: {
+    full_name: string;
+  };
 }
 
 type FeedFilter = 'all' | 'following' | 'achievements';
@@ -69,7 +79,6 @@ type FeedFilter = 'all' | 'following' | 'achievements';
     IonHeader,
     IonTitle,
     IonToolbar,
-    IonButtons,
     IonButton,
     IonIcon,
     IonAvatar,
@@ -81,8 +90,8 @@ type FeedFilter = 'all' | 'following' | 'achievements';
     IonSegmentButton,
     IonLabel,
     IonFab,
-    IonFabButton,
-  ],
+    IonFabButton
+],
   template: `
     <ion-header class="ion-no-border">
       <ion-toolbar>
@@ -131,7 +140,7 @@ type FeedFilter = 'all' | 'following' | 'achievements';
               <div class="post-header">
                 <ion-avatar class="post-avatar">
                   @if (post.user?.avatar_url) {
-                    <img [src]="post.user.avatar_url" alt="Avatar" />
+                    <img [src]="post.user?.avatar_url" alt="Avatar" />
                   } @else {
                     <div class="avatar-placeholder">
                       {{ getInitials(post.user?.full_name || 'U') }}
@@ -150,16 +159,16 @@ type FeedFilter = 'all' | 'following' | 'achievements';
 
               <!-- Post Content -->
               <div class="post-content">
-                @if (post.metadata?.['title']) {
+                @if (post.metadata['title']) {
                   <h4 class="post-title">{{ post.metadata['title'] }}</h4>
                 }
                 @if (post.content) {
                   <p>{{ post.content }}</p>
                 }
-                @if (post.metadata?.['value']) {
+                @if (post.metadata['value']) {
                   <div class="post-metric">
                     <span class="metric-value">{{ post.metadata['value'] }}</span>
-                    @if (post.metadata?.['unit']) {
+                    @if (post.metadata['unit']) {
                       <span class="metric-unit">{{ post.metadata['unit'] }}</span>
                     }
                   </div>
@@ -381,7 +390,7 @@ export class FeedPage implements OnInit {
           .select('following_id')
           .eq('follower_id', userId);
 
-        const followedIds = (follows || []).map((f: any) => f.following_id);
+        const followedIds = (follows || []).map((f: UserFollow) => f.following_id);
         if (followedIds.length > 0) {
           query = query.in('user_id', followedIds);
         } else {
@@ -402,12 +411,12 @@ export class FeedPage implements OnInit {
           .from('post_likes')
           .select('post_id')
           .eq('user_id', userId)
-          .in('post_id', data.map((p: any) => p.id));
+          .in('post_id', data.map((p: FeedPost) => p.id));
 
-        likedPostIds = new Set((likes || []).map((l: any) => l.post_id));
+        likedPostIds = new Set((likes || []).map((l: { post_id: string }) => l.post_id));
       }
 
-      this.posts.set((data || []).map((post: any) => ({
+      this.posts.set((data || []).map((post: FeedPost) => ({
         ...post,
         isLiked: likedPostIds.has(post.id),
       })));
@@ -455,7 +464,7 @@ export class FeedPage implements OnInit {
       .order('created_at', { ascending: true });
 
     const commentLines = (comments || [])
-      .map((c: any) => `${c.user?.full_name || 'User'}: ${c.content}`)
+      .map((c: PostComment) => `${c.user?.full_name || 'User'}: ${c.content}`)
       .join('\n') || 'No comments yet.';
 
     const alert = await this.alertCtrl.create({

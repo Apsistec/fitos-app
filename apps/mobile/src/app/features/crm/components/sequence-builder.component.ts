@@ -658,7 +658,7 @@ export class SequenceBuilderComponent implements OnInit {
     this.steps.set(updatedSteps);
   }
 
-  handleReorder(event: any) {
+  handleReorder(event: CustomEvent<{ from: number; to: number; complete: () => void }>) {
     this.haptic.light();
     const currentSteps = this.steps();
     const itemToMove = currentSteps[event.detail.from];

@@ -62,7 +62,7 @@ export class MessagingService {
           table: 'messages',
           filter: `recipient_id=eq.${userId}`,
         },
-        (payload: any) => {
+        (payload: Record<string, unknown>) => {
           console.log('New message received:', payload);
           this.handleNewMessage(payload.new as Tables<'messages'>);
         }
@@ -154,8 +154,8 @@ export class MessagingService {
 
         // Count unread messages (where user is recipient and not read)
         if (msg.recipient_id === userId && !msg.read_at) {
-          const conv = conversationMap.get(otherUserId)!;
-          conv.unreadCount++;
+          const conv = conversationMap.get(otherUserId);
+          if (conv) conv.unreadCount++;
         }
       }
 
