@@ -14,6 +14,6 @@ export const environment = {
   stripePublishableKey: 'pk_test_51SaoYU8dyNFOBioE9PzoGWPwMCeM7yET0I2mRbkq2LjwLFU0ICxvkTzF3EjwgNYYS72PKvIxjVwTL4HALdeHXFZR00PFVjwXG8', // Using test key for alpha
   terraApiKey: '',
   usdaApiKey: 'whIXShXv6RIuHypBFNTLSdrWNc4ad9kSabiKT9D5',
-  aiBackendUrl: 'http://localhost:8000', // TODO: Deploy AI backend to Cloud Run
+  aiBackendUrl: '', // FIXME: Set to Cloud Run URL after deploying AI backend (localhost won't work in production)
   sentryDsn: 'https://6d219752bc4e086e5f3cb315e6938a1d@o4510852554162176.ingest.us.sentry.io/4510852556128257', // TODO: Add your Sentry DSN from https://sentry.io → Settings → Projects → Client Keys (DSN)
 };

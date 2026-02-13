@@ -5,7 +5,6 @@
     "sourceMap": true,
     "declaration": false,
     "moduleResolution": "bundler",
-    "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "ES2022",
@@ -22,8 +21,6 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "paths": {
-      "@env/*": ["apps/mobile/src/environments/*"],
-      "@app/*": ["apps/mobile/src/app/*"],
       "@fitos/shared": ["libs/shared/src/index.ts"],
       "@fitos/shared/*": ["libs/shared/src/lib/*"],
       "@fitos/libs": ["libs/src/index.ts"],

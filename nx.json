@@ -7,7 +7,6 @@
       "default",
       "!{projectRoot}/**/*.spec.ts",
       "!{projectRoot}/tsconfig.spec.json",
-      "!{projectRoot}/.eslintrc.json",
       "!{projectRoot}/eslint.config.js",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
       "!{projectRoot}/vitest.config.[jt]s",
@@ -26,8 +25,7 @@
     "lint": {
       "inputs": [
         "default",
-        "{workspaceRoot}/.eslintrc.json",
-        "{workspaceRoot}/eslint.config.js"
+        "{workspaceRoot}/eslint.config.mjs"
       ],
       "cache": true
     },
@@ -44,8 +42,6 @@
       "cache": true,
       "inputs": [
         "default",
-        "{workspaceRoot}/.eslintrc.json",
-        "{workspaceRoot}/.eslintignore",
         "{workspaceRoot}/eslint.config.mjs"
       ]
     }

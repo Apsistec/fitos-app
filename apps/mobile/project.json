@@ -30,11 +30,6 @@
             "glob": "manifest.webmanifest",
             "input": "apps/mobile/src",
             "output": "/"
-          },
-          {
-            "glob": "ngsw-config.json",
-            "input": "apps/mobile/src",
-            "output": "/"
           }
         ],
         "styles": [
@@ -51,8 +46,7 @@
           "fonts": true
         },
         "externalDependencies": [
-          "@angular/cdk",
-          "@angular/service-worker"
+          "@angular/cdk"
         ]
       },
       "configurations": {
@@ -117,13 +111,7 @@
       }
     },
     "lint": {
-      "executor": "@angular-eslint/builder:lint",
-      "options": {
-        "lintFilePatterns": [
-          "apps/mobile/src/**/*.ts",
-          "apps/mobile/src/**/*.html"
-        ]
-      }
+      "executor": "@nx/eslint:lint"
     }
   },
   "tags": ["type:app", "platform:mobile"]

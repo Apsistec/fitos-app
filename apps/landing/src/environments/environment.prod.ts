@@ -10,7 +10,7 @@ export const environment = {
     appId: "1:953773965912:web:5bc293de185508b2b8402d",
     measurementId: "G-QEYQNRXS7J"
   },
-  supabaseUrl: 'YOUR_PRODUCTION_SUPABASE_URL',
-  supabaseAnonKey: 'YOUR_PRODUCTION_SUPABASE_ANON_KEY',
-  stripePublishableKey: 'YOUR_PRODUCTION_STRIPE_PUBLISHABLE_KEY',
+  supabaseUrl: 'https://dmcogmopboebqiimzoej.supabase.co',
+  supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtY29nbW9wYm9lYnFpaW16b2VqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjczNDYwMjgsImV4cCI6MjA4MjkyMjAyOH0.PfhMh-erVyqlkkTDFFwkt0g8IzAUuddngIoFReJTYPA',
+  stripePublishableKey: 'pk_test_51SaoYU8dyNFOBioE9PzoGWPwMCeM7yET0I2mRbkq2LjwLFU0ICxvkTzF3EjwgNYYS72PKvIxjVwTL4HALdeHXFZR00PFVjwXG8', // Using test key for alpha
 };

@@ -10,7 +10,7 @@ export const environment = {
     measurementId: "G-KD9MMFVBDY"
   },
   supabaseUrl: 'http://127.0.0.1:54321',
-  supabaseAnonKey: 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH',
+  supabaseAnonKey: 'sb_publishable_WIoAVlkVGjK6XX2ucs1Wsw_zE6og68Y',
   stripePublishableKey: 'pk_test_51SaoYU8dyNFOBioE9PzoGWPwMCeM7yET0I2mRbkq2LjwLFU0ICxvkTzF3EjwgNYYS72PKvIxjVwTL4HALdeHXFZR00PFVjwXG8',
   terraApiKey: '',
   usdaApiKey: 'whIXShXv6RIuHypBFNTLSdrWNc4ad9kSabiKT9D5',

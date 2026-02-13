@@ -3,7 +3,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'com.fitos.app',
   appName: 'FitOS',
-  webDir: 'apps/mobile/www/browser',
+  webDir: 'dist/apps/mobile/browser',
   server: {
     androidScheme: 'https'
   },
@@ -15,7 +15,22 @@ const config: CapacitorConfig = {
     },
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert']
-    }
+    },
+    Camera: {
+      // iOS permissions
+      ios: {
+        cameraUsageDescription: 'FitOS needs camera access to log meals with photos',
+        photoLibraryUsageDescription: 'FitOS needs photo library access to select meal photos',
+      },
+      // Android permissions
+      android: {
+        permissions: [
+          'camera',
+          'read_external_storage',
+          'write_external_storage',
+        ],
+      },
+    },
   }
 };
 

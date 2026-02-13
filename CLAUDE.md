@@ -80,11 +80,13 @@ npm test               # Unit tests
 | `docs/COMPETITIVE_ANALYSIS.md` | Market research, feature gaps |
 | `docs/PHASE1_BACKLOG.md` | MVP features (Sprints 0-8) |
 | `docs/PHASE2_BACKLOG.md` | AI/CRM features (Sprints 7-16) |
+| `docs/PHASE4_BACKLOG.md` | Zero Tracking Friction features (Sprints 46-53) |
 | `docs/AI_INTEGRATION.md` | Voice, photo, coaching architecture |
 | `docs/CRM_MARKETING.md` | Lead pipeline, email automation |
 | `docs/USER_ROLES_ARCHITECTURE.md` | RBAC, dashboards by role |
 | `docs/SETTINGS_PROFILE_UX.md` | Settings page design standards |
 | `docs/OFFLINE_SYNC.md` | Offline-first patterns |
+| `docs/CONFIG_VALIDATION.md` | **CRITICAL** Config file rules, validation checklist, single-source-of-truth registry |
 
 ---
 
@@ -154,6 +156,42 @@ Only display:
 - HRV
 - Sleep duration/quality
 - Steps
+
+### Config Validation (MANDATORY)
+**Read:** `docs/CONFIG_VALIDATION.md`
+
+**EVERY TIME you add, update, or remove any config file**, you MUST run the full validation checklist from `docs/CONFIG_VALIDATION.md`. This is not optional.
+
+**Key rules that prevent the most common failures:**
+
+1. **`.env` is the single source of truth** for all environment variables
+   - `environment.ts` dev values must match `.env` values
+   - `supabase/config.toml` `env()` names must match `.env` variable names exactly
+   - When `.env` changes, update ALL consumers
+
+2. **Root `package.json` owns ALL dependencies**
+   - App `package.json` files contain ONLY `scripts` and `engines`
+   - NEVER add dependencies to `apps/mobile/package.json` or `apps/landing/package.json`
+   - After any dependency change, verify: `npm ls @angular/core` shows single version, all deduped
+   - NEVER allow `apps/*/node_modules/` to exist
+
+3. **One config file per concern — NO duplicates**
+   - ONE `capacitor.config.ts` at root (never `apps/mobile/`)
+   - NO `angular.json` in apps (use `project.json` for NX)
+   - ONE `ngsw-config.json` at `apps/mobile/ngsw-config.json`
+   - Pytest config in `pytest.ini` only (not also in `pyproject.toml`)
+
+4. **TypeScript config chain must be correct**
+   - `tsconfig.app.json` extends `./tsconfig.json` (NOT `../../tsconfig.base.json`)
+   - If app tsconfig has `baseUrl: "."`, shared path aliases must be redeclared relative to app dir
+   - Verify builds actually pick up strict settings (a wrong `extends` silently drops strictness)
+
+5. **Cross-file consistency checks after ANY config change**
+   - `project.json` outputPath ↔ `capacitor.config.ts` webDir ↔ `firebase.json` public
+   - `firebase.json` header sources ↔ actual filenames in build output
+   - `docker-compose.yml` env_file path ↔ actual `.env` location
+   - All lint targets use same executor (`@nx/eslint:lint`)
+   - All apps have `build`, `serve`, `test`, `lint` targets
 
 ### Performance Requirements
 - OnPush change detection on all components
@@ -249,12 +287,19 @@ docs/                   # ALL documentation
 - ❌ Put documentation in root (use `docs/` folder)
 - ❌ Create types in services (use `@fitos/shared`)
 - ❌ Use `apps/` folder in Python backend (use `app/` folder)
+- ❌ Add dependencies to app-level `package.json` (root only)
+- ❌ Create `angular.json` in apps (use `project.json` for NX)
+- ❌ Create `capacitor.config.*` in apps (root only)
+- ❌ Create duplicate config files (check `docs/CONFIG_VALIDATION.md` registry)
 
 **ALWAYS:**
 - ✅ Import types from `@fitos/shared`
 - ✅ Match database column names exactly (`snake_case`)
 - ✅ Put new docs in `docs/` folder
 - ✅ Check `docs/REPOSITORY_STRUCTURE.md` before creating files
+- ✅ Run config validation checklist (`docs/CONFIG_VALIDATION.md`) after ANY config change
+- ✅ Use `.env` as single source of truth for environment variables
+- ✅ Verify `npm ls @angular/core` shows single deduped version after dependency changes
 
 ---
 
@@ -267,7 +312,7 @@ docs/                   # ALL documentation
 - Stripe payments, wearable integration
 - Messaging
 
-### Phase 2: Differentiation (In Progress)
+### Phase 2: Differentiation (Complete)
 - Sprint 7: Dark mode redesign
 - Sprint 8-9: Voice logging (Deepgram)
 - Sprint 10: Photo nutrition AI
@@ -275,6 +320,16 @@ docs/                   # ALL documentation
 - Sprint 13-14: AI coaching + JITAI
 - Sprint 15: Apple Watch
 - Sprint 16: Polish
+
+### Phase 3: Advanced Features (Complete)
+- Sprints 17-26: AI coaching, recovery, gamification, payments
+- Sprints 27-45: Enterprise, HIPAA, A2A, marketplace
+
+### Phase 4: Zero Tracking Friction (Planning)
+- Sprint 46-47: NFC/QR touchpoints, app shortcuts
+- Sprint 48-49: Widgets, health sync, Dynamic Island
+- Sprint 50-51: Barcode scanning, equipment OCR, voice enhancement
+- Sprint 52-53: Context-aware notifications, progressive onboarding
 
 ---
 

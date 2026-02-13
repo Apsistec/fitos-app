@@ -1,12 +1,14 @@
 // @ts-check
 import angular from 'angular-eslint';
 import tseslint from 'typescript-eslint';
+import baseConfig from '../../eslint.config.mjs';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default tseslint.config(
+  ...baseConfig,
   {
     files: ['**/*.ts'],
     extends: [

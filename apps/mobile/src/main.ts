@@ -1,4 +1,4 @@
-import { enableProdMode, ErrorHandler, Injectable, Injector } from '@angular/core';
+import { enableProdMode, ErrorHandler, Injectable, Injector, provideZoneChangeDetection } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import {
@@ -24,39 +24,21 @@ import { analyticsInterceptor } from './app/core/interceptors/analytics.intercep
 import { errorInterceptor } from './app/core/interceptors/error.interceptor';
 import { FirebaseService } from './app/core/services/firebase.service';
 
-// ─── Sentry Initialization (must run before Angular bootstrap) ──────────────
-// Provides: stack traces, breadcrumbs, release tracking, error grouping,
-// session replay, and performance tracing.
+// ─── Sentry Initialization ──────────────────────────────────────────────────
+// Sentry is initialized AFTER Angular bootstrap completes (see .then() below).
+//
+// Why: Sentry's replayIntegration starts recording DOM mutations immediately
+// on init. When Angular bootstraps and renders <ion-app>, the replay observer
+// intercepts the DOM change and triggers Ionic's IonApp factory (inject()) in a
+// context outside Angular's DI — causing NG0203. Deferring Sentry.init() to
+// after bootstrap avoids this conflict entirely.
+//
+// All Sentry features (stack traces, breadcrumbs, release tracking, error
+// grouping, session replay, and performance tracing) work normally — they just
+// start capturing after the app is fully rendered.
 //
 // To activate: Add your DSN in environment.prod.ts from
 // https://sentry.io → Settings → Projects → Client Keys (DSN)
-if (environment.sentryDsn) {
-  Sentry.init({
-    dsn: environment.sentryDsn,
-    environment: environment.production ? 'production' : 'development',
-    enabled: environment.production,
-    // Capture 10% of transactions for performance monitoring
-    tracesSampleRate: 0.1,
-    // Capture 10% of sessions for replay (reduces quota usage)
-    replaysSessionSampleRate: 0.1,
-    // Always capture replay on error for debugging
-    replaysOnErrorSampleRate: 1.0,
-    integrations: [
-      Sentry.browserTracingIntegration(),
-      Sentry.replayIntegration({
-        maskAllText: false,
-        blockAllMedia: false,
-      }),
-    ],
-    // Filter noisy/unhelpful errors
-    ignoreErrors: [
-      'ResizeObserver loop',
-      'Non-Error promise rejection',
-      'Loading chunk',
-      'ChunkLoadError',
-    ],
-  });
-}
 
 /**
  * Idle preloading strategy — waits for the browser to be idle before preloading routes.
@@ -98,7 +80,8 @@ class GlobalErrorHandler implements ErrorHandler {
     console.error('[FitOS Error]', error);
 
     // Send to Sentry (if initialized — captures full stack trace, breadcrumbs, replay)
-    if (environment.sentryDsn) {
+    // Sentry.getClient() returns undefined before Sentry.init() runs (post-bootstrap)
+    if (environment.sentryDsn && Sentry.getClient()) {
       const originalError = error instanceof Error ? error : (error as Record<string, unknown>)?.originalError;
       Sentry.captureException(originalError || error);
     }
@@ -144,6 +127,10 @@ if (environment.production) {
 
 bootstrapApplication(AppComponent, {
   providers: [
+    // Angular 21 defaults to zoneless change detection, but Ionic 8.x requires Zone.js.
+    // See: https://github.com/ionic-team/ionic-framework/issues/30804
+    // See: https://github.com/ionic-team/ionic-framework/issues/30907
+    provideZoneChangeDetection({ eventCoalescing: true }),
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     provideIonicAngular({
@@ -168,4 +155,39 @@ bootstrapApplication(AppComponent, {
       registrationStrategy: 'registerWhenStable:30000',
     }),
   ],
+}).then(() => {
+  console.log('[FitOS Bootstrap] Phase 4: Bootstrap SUCCEEDED');
+
+  // Initialize Sentry AFTER Angular bootstrap completes.
+  // See comment at top of file for explanation of why this must be deferred.
+  if (environment.sentryDsn) {
+    Sentry.init({
+      dsn: environment.sentryDsn,
+      environment: environment.production ? 'production' : 'development',
+      enabled: environment.production,
+      // Capture 10% of transactions for performance monitoring
+      tracesSampleRate: 0.1,
+      // Capture 10% of sessions for replay (reduces quota usage)
+      replaysSessionSampleRate: 0.1,
+      // Always capture replay on error for debugging
+      replaysOnErrorSampleRate: 1.0,
+      integrations: [
+        Sentry.browserTracingIntegration(),
+        Sentry.replayIntegration({
+          maskAllText: false,
+          blockAllMedia: false,
+        }),
+      ],
+      // Filter noisy/unhelpful errors
+      ignoreErrors: [
+        'ResizeObserver loop',
+        'Non-Error promise rejection',
+        'Loading chunk',
+        'ChunkLoadError',
+      ],
+    });
+    console.log('[FitOS Bootstrap] Phase 5: Sentry initialized (post-bootstrap)');
+  }
+}).catch((err) => {
+  console.error('[FitOS Bootstrap] Phase 4: Bootstrap FAILED', err);
 });

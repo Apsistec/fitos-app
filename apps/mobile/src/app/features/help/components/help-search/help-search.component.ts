@@ -84,8 +84,8 @@ export class HelpSearchComponent {
     });
   }
 
-  onSearchInput(event: CustomEvent<{ value: string }>): void {
-    const query = event.detail.value || '';
+  onSearchInput(event: Event): void {
+    const query = (event as CustomEvent).detail?.value || '';
     this.searchQuery.set(query);
   }
 

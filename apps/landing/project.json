@@ -96,9 +96,16 @@
         "port": 4201
       }
     },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "echo 'No tests configured for landing yet'",
+        "cwd": "{workspaceRoot}"
+      }
+    },
     "lint": {
       "executor": "@nx/eslint:lint"
     }
   },
-  "tags": []
+  "tags": ["type:app", "platform:web"]
 }

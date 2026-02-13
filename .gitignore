@@ -61,6 +61,5 @@ temp/
 *.backup
 *.orig
 
-.angular
-.firebase
-.firebase/hosting.*.cache
+# Firebase
+.firebase/
