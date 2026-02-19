@@ -5,6 +5,7 @@ import { filter } from 'rxjs/operators';
 import { AuthService } from './core/services/auth.service';
 import { ThemeService } from './core/services/theme.service';
 import { FirebaseService } from './core/services/firebase.service';
+import { DeepLinkService } from './core/services/deep-link.service';
 import { addIcons } from 'ionicons';
 import {
   // Outline icons (used across the app)
@@ -92,6 +93,7 @@ export class AppComponent implements OnInit {
   private authService = inject(AuthService);
   private themeService = inject(ThemeService); // Initialize theme service
   private firebaseService = inject(FirebaseService); // Initialize Firebase Analytics & Performance
+  private deepLinkService = inject(DeepLinkService); // Central deep-link router (NFC, QR, push)
   private router = inject(Router);
 
   constructor() {
@@ -199,6 +201,9 @@ export class AppComponent implements OnInit {
     // Initialize auth state listener immediately in constructor
     // This ensures auth is initializing before route guards run
     this.authService.initAuthListener();
+
+    // Initialize central deep-link router (handles NFC, QR, push notification deep links)
+    this.deepLinkService.initialize();
   }
 
   ngOnInit(): void {

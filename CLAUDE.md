@@ -81,6 +81,7 @@ npm test               # Unit tests
 | `docs/PHASE1_BACKLOG.md` | MVP features (Sprints 0-8) |
 | `docs/PHASE2_BACKLOG.md` | AI/CRM features (Sprints 7-16) |
 | `docs/PHASE4_BACKLOG.md` | Zero Tracking Friction features (Sprints 46-53) |
+| `docs/PHASE5_SCHEDULING_BACKLOG.md` | Scheduling & Practice Management (Sprints 54-61) |
 | `docs/AI_INTEGRATION.md` | Voice, photo, coaching architecture |
 | `docs/CRM_MARKETING.md` | Lead pipeline, email automation |
 | `docs/USER_ROLES_ARCHITECTURE.md` | RBAC, dashboards by role |
@@ -330,6 +331,12 @@ docs/                   # ALL documentation
 - Sprint 48-49: Widgets, health sync, Dynamic Island
 - Sprint 50-51: Barcode scanning, equipment OCR, voice enhancement
 - Sprint 52-53: Context-aware notifications, progressive onboarding
+
+### Phase 5: Scheduling & Practice Management (Planning)
+- Sprint 54-55: Appointment data model, 15-minute grid calendar, multi-trainer view
+- Sprint 56-57: 8-state appointment FSM, auto no-show, cancellation policies & Stripe fee charging
+- Sprint 58-59: Pricing options (packs/passes/contracts), checkout POS, autopay, client ledger
+- Sprint 60-61: Payroll calculation/reports, RBAC permissions, conflict prevention, schedule optimization
 
 ---
 

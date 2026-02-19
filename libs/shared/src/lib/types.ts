@@ -565,3 +565,41 @@ export interface EmailSend {
   provider_message_id?: string;
   metadata?: Record<string, unknown>;
 }
+
+// ============================================================================
+// NFC / QR Touchpoints (Sprint 46)
+// ============================================================================
+
+export type NfcTagType = 'check_in' | 'equipment' | 'workout_start';
+export type NfcPlatform = 'ios' | 'android' | 'web';
+
+export type DeepLinkType = 'checkin' | 'workout' | 'equipment';
+
+export interface DeepLinkParams {
+  type: DeepLinkType;
+  facilityId?: string;
+  workoutTemplateId?: string;
+  equipmentId?: string;
+}
+
+export interface NfcTouchpoint {
+  id: string;
+  trainer_id: string;
+  facility_id?: string;
+  tag_type: NfcTagType;
+  deep_link_uri: string;
+  label: string;
+  equipment_id?: string;
+  workout_template_id?: string;
+  scan_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NfcScanLog {
+  id: string;
+  touchpoint_id: string;
+  user_id: string;
+  scanned_at: string;
+  platform?: NfcPlatform;
+}

@@ -1,0 +1,142 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/settings"></ion-back-button>
+    </ion-buttons>
+    <ion-title>NFC & QR Tags</ion-title>
+    @if (isTrainer()) {
+      <ion-buttons slot="end">
+        <ion-button (click)="createTouchpoint()" aria-label="Create new touchpoint">
+          <ion-icon name="add-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    }
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page-container">
+
+    <!-- NFC hardware status banner -->
+    @if (!nfcSupported()) {
+      <ion-card class="info-card">
+        <ion-card-content>
+          <div class="info-row">
+            <ion-icon name="wifi-outline" color="warning"></ion-icon>
+            <ion-text>
+              <p>NFC is not available on this device. QR codes work on all devices as an alternative.</p>
+            </ion-text>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    }
+
+    <!-- How it works (shown when no touchpoints yet) -->
+    @if (touchpoints().length === 0 && !isLoading()) {
+      <div class="empty-state">
+        <ion-icon name="qr-code-outline" color="medium" class="empty-icon"></ion-icon>
+        <h2>No Touchpoints Yet</h2>
+        <p>
+          Create NFC tags or QR codes so clients can instantly check in, start a workout,
+          or log equipment with a single tap.
+        </p>
+
+        @if (isTrainer()) {
+          <ion-button expand="block" (click)="createTouchpoint()">
+            <ion-icon name="add-outline" slot="start"></ion-icon>
+            Create Your First Touchpoint
+          </ion-button>
+        }
+
+        <div class="tag-types">
+          @for (opt of tagTypeOptions; track opt.type) {
+            <div class="tag-type-item">
+              <ion-icon [name]="opt.icon" color="primary"></ion-icon>
+              <div>
+                <strong>{{ opt.label }}</strong>
+                <p>{{ opt.description }}</p>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Loading -->
+    @if (isLoading()) {
+      <div class="loading-state">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Loading touchpoints...</p>
+      </div>
+    }
+
+    <!-- Touchpoint list -->
+    @if (!isLoading()) {
+      @for (tp of touchpoints(); track tp.id) {
+        @let typeInfo = getTagTypeInfo(tp.tag_type);
+        @let isExpanded = selectedTouchpointId() === tp.id;
+
+        <ion-card class="touchpoint-card">
+          <ion-card-content>
+            <!-- Header row -->
+            <div class="touchpoint-header">
+              <div class="touchpoint-meta">
+                <ion-icon [name]="typeInfo.icon" color="primary" class="type-icon"></ion-icon>
+                <div>
+                  <h3 class="touchpoint-label">{{ tp.label }}</h3>
+                  <ion-badge [color]="'primary'" class="type-badge">{{ typeInfo.label }}</ion-badge>
+                </div>
+              </div>
+              @if (isTrainer()) {
+                <ion-button fill="clear" color="danger" size="small" (click)="deleteTouchpoint(tp)" aria-label="Delete touchpoint">
+                  <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+                </ion-button>
+              }
+            </div>
+
+            <!-- Scan count -->
+            <p class="scan-count">{{ tp.scan_count }} scan{{ tp.scan_count !== 1 ? 's' : '' }}</p>
+
+            <!-- URI row -->
+            <div class="uri-row">
+              <span class="uri-text">{{ tp.deep_link_uri }}</span>
+              <ion-button fill="clear" size="small" (click)="copyUri(tp.deep_link_uri)" aria-label="Copy link">
+                <ion-icon name="copy-outline" slot="icon-only"></ion-icon>
+              </ion-button>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="touchpoint-actions">
+              <ion-button fill="outline" size="small" (click)="toggleQrCode(tp.id)">
+                <ion-icon name="qr-code-outline" slot="start"></ion-icon>
+                {{ isExpanded ? 'Hide' : 'Show' }} QR
+              </ion-button>
+
+              @if (isTrainer()) {
+                <ion-button fill="outline" size="small" (click)="writeToNfcTag(tp)" [disabled]="isScanning()">
+                  @if (isScanning()) {
+                    <ion-spinner name="crescent" slot="start"></ion-spinner>
+                  } @else {
+                    <ion-icon name="scan-outline" slot="start"></ion-icon>
+                  }
+                  Write NFC
+                </ion-button>
+              }
+            </div>
+
+            <!-- QR Code (expanded) -->
+            @if (isExpanded) {
+              <div class="qr-section">
+                <app-qr-checkin
+                  [deepLinkParams]="getDeepLinkParams(tp)"
+                  [label]="tp.label"
+                ></app-qr-checkin>
+              </div>
+            }
+          </ion-card-content>
+        </ion-card>
+      }
+    }
+
+  </div>
+</ion-content>

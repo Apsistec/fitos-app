@@ -1,11 +1,17 @@
 /**
- * Anthropic API Key Edge Function
+ * Claude Max Configuration Edge Function
  *
- * Securely provides Anthropic API key for AI coaching chat.
- * Uses Claude Haiku (fast) for routine queries and Claude Sonnet for complex questions.
+ * Provides Claude configuration for AI coaching chat using Claude Max subscription.
+ * This function no longer provides an API key - instead it directs clients to use
+ * the Claude Max subscription which provides API access included in the subscription.
+ *
+ * Claude Max provides:
+ * - API access included in subscription (no per-token charges)
+ * - Higher rate limits than pay-as-you-go
+ * - Access to latest models (Claude Sonnet 4.5, Opus 4.5)
  *
  * Environment variables required:
- * - ANTHROPIC_API_KEY: Your Anthropic API key
+ * - None (uses Claude Max subscription instead of API key)
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -61,30 +67,25 @@ serve(async (req) => {
       );
     }
 
-    // Get Anthropic API key
-    const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY');
+    console.log(`Claude Max configuration accessed by user: ${user.id}`);
 
-    if (!anthropicKey) {
-      console.error('ANTHROPIC_API_KEY environment variable not set');
-      return new Response(
-        JSON.stringify({ error: 'Configuration error - Anthropic API key not configured' }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
-    console.log(`Anthropic API key accessed by user: ${user.id}`);
-
+    // Return Claude Max configuration
+    // No API key needed - Claude Max subscription provides API access
     return new Response(
       JSON.stringify({
-        key: anthropicKey,
+        subscription: 'claude-max',
         models: {
-          fast: 'claude-3-haiku-20240307',
-          standard: 'claude-3-5-sonnet-20241022',
+          fast: 'claude-3-5-haiku-20241022', // Latest Haiku for fast responses
+          standard: 'claude-sonnet-4-5-20250514', // Latest Sonnet 4.5 for standard queries
+          advanced: 'claude-opus-4-5-20251101', // Opus 4.5 for complex reasoning
+        },
+        features: {
+          apiAccess: true,
+          rateLimitTier: 'max', // Higher rate limits than pay-as-you-go
+          includedInSubscription: true,
         },
         userId: user.id,
+        message: 'Using Claude Max subscription - no per-token charges',
       }),
       {
         status: 200,
@@ -92,7 +93,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error in anthropic-key function:', error);
+    console.error('Error in claude-max-config function:', error);
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
       {

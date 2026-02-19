@@ -44,6 +44,7 @@ import {
   bulbOutline,
   starOutline,
   bookOutline,
+  qrCodeOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
 import { StripeService } from '../../core/services/stripe.service';
@@ -217,6 +218,14 @@ import { ThemeService, ThemeMode } from '../../core/services/theme.service';
               <ion-label>
                 <h3>Invite New Client</h3>
                 <p>Send invitation codes to prospects</p>
+              </ion-label>
+            </ion-item>
+
+            <ion-item button detail routerLink="/tabs/settings/nfc-tags">
+              <ion-icon name="qr-code-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>NFC & QR Tags</h3>
+                <p>Gym touchpoints for instant client check-in</p>
               </ion-label>
             </ion-item>
           </ion-list>
@@ -519,6 +528,7 @@ export class SettingsPage implements OnInit {
       bulbOutline,
       starOutline,
       bookOutline,
+      qrCodeOutline,
     });
   }
 

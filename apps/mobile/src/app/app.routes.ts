@@ -625,6 +625,15 @@ export const routes: Routes = [
                 (m) => m.IntegrationsPage
               ),
           },
+          {
+            // NFC & QR Touchpoints - trainers/owners only
+            path: 'nfc-tags',
+            canActivate: [trainerOrOwnerGuard],
+            loadComponent: () =>
+              import('./features/settings/pages/nfc-tags/nfc-tags.page').then(
+                (m) => m.NfcTagsPage
+              ),
+          },
         ],
       },
       {

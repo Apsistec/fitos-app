@@ -1,7 +1,4 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
-import { environment } from '../../../environments/environment';
 import { SupabaseService } from './supabase.service';
 
 /**
@@ -49,48 +46,6 @@ export interface TrainerUserContext extends BaseUserContext {
 export type UserContext = ClientUserContext | TrainerUserContext;
 
 /**
- * AI Coach chat request
- */
-interface ChatRequest {
-  message: string;
-  conversationHistory: Array<{ role: string; content: string }>;
-  userContext: UserContext;
-}
-
-/**
- * AI Coach chat response
- */
-interface ChatResponse {
-  response: string;
-  agent: string;
-  confidence: number;
-  shouldEscalate: boolean;
-  escalationReason?: string;
-}
-
-/**
- * Coach Brain request (trainer methodology-based)
- */
-interface CoachBrainRequest {
-  trainer_id: string;
-  client_id?: string;
-  query: string;
-}
-
-/**
- * Coach Brain response
- */
-interface CoachBrainResponse {
-  response: string;
-  context_used: Array<{
-    content: string;
-    input_type: string;
-    similarity: number;
-  }>;
-  error?: string;
-}
-
-/**
  * Conversation metadata from Supabase
  */
 interface ConversationRecord {
@@ -105,19 +60,20 @@ interface ConversationRecord {
 }
 
 /**
- * AICoachService - Multi-agent AI coaching integration
+ * AICoachService - Client-side AI coaching with Claude Max
+ *
+ * Architecture:
+ * - NO separate AI backend required
+ * - Calls Anthropic API directly from client
+ * - API key fetched securely from Supabase Edge Function
+ * - Uses Claude Max subscription (no per-token charges)
+ * - Multi-agent routing done client-side
  *
  * Features:
  * - Chat with specialized AI agents
  * - Workout, nutrition, recovery, motivation coaching
  * - Conversation history management with Supabase persistence
  * - Auto-escalation to trainer with notification
- * - RAG for personalized context
- *
- * Backend:
- * - FastAPI + LangGraph multi-agent system
- * - Deployed on Google Cloud Run
- * - Uses Anthropic Claude or OpenAI GPT-4
  *
  * Usage:
  * ```typescript
@@ -128,11 +84,7 @@ interface ConversationRecord {
   providedIn: 'root',
 })
 export class AICoachService {
-  private http = inject(HttpClient);
   private supabase = inject(SupabaseService);
-
-  // AI Backend URL
-  private readonly AI_BACKEND_URL = environment.aiBackendUrl || 'http://localhost:8000';
 
   // State
   messages = signal<ChatMessage[]>([]);
@@ -140,6 +92,10 @@ export class AICoachService {
   error = signal<string | null>(null);
   currentAgent = signal<string | null>(null);
   conversationId = signal<string | null>(null);
+
+  // Cache API key to avoid repeated Edge Function calls
+  private apiKeyCache: { key: string; timestamp: number } | null = null;
+  private readonly API_KEY_CACHE_TTL = 3600000; // 1 hour
 
   /**
    * Load or create active conversation for user
@@ -247,7 +203,92 @@ export class AICoachService {
   }
 
   /**
-   * Send message to AI coach
+   * Get Anthropic API configuration from Supabase Edge Function
+   * Uses Claude Max subscription
+   */
+  private async getAnthropicConfig(): Promise<{ key: string; models: any } | null> {
+    // Check cache first
+    const now = Date.now();
+    if (this.apiKeyCache && (now - this.apiKeyCache.timestamp) < this.API_KEY_CACHE_TTL) {
+      return { key: this.apiKeyCache.key, models: {} };
+    }
+
+    try {
+      const { data, error } = await this.supabase.client.functions.invoke('anthropic-key');
+
+      if (error) {
+        console.error('Error fetching Anthropic config:', error);
+        return null;
+      }
+
+      // Cache the API key
+      if (data?.key) {
+        this.apiKeyCache = {
+          key: data.key,
+          timestamp: now,
+        };
+      }
+
+      return data;
+    } catch (err) {
+      console.error('Error in getAnthropicConfig:', err);
+      return null;
+    }
+  }
+
+  /**
+   * Route user query to appropriate specialist agent
+   * Simple keyword-based routing (client-side)
+   */
+  private routeQuery(message: string): string {
+    const messageLower = message.toLowerCase();
+
+    // Workout keywords
+    const workoutKeywords = ['workout', 'exercise', 'training', 'set', 'rep', 'weight', 'squat', 'deadlift', 'bench'];
+    if (workoutKeywords.some(keyword => messageLower.includes(keyword))) {
+      return 'workout';
+    }
+
+    // Nutrition keywords
+    const nutritionKeywords = ['food', 'eat', 'protein', 'calorie', 'macro', 'diet', 'meal', 'nutrition'];
+    if (nutritionKeywords.some(keyword => messageLower.includes(keyword))) {
+      return 'nutrition';
+    }
+
+    // Recovery keywords
+    const recoveryKeywords = ['sleep', 'rest', 'sore', 'tired', 'recovery', 'hrv', 'heart rate'];
+    if (recoveryKeywords.some(keyword => messageLower.includes(keyword))) {
+      return 'recovery';
+    }
+
+    // Motivation keywords
+    const motivationKeywords = ['motivation', 'struggle', 'skip', 'quit', 'hard', 'difficult', 'give up'];
+    if (motivationKeywords.some(keyword => messageLower.includes(keyword))) {
+      return 'motivation';
+    }
+
+    return 'general';
+  }
+
+  /**
+   * Get system prompt for specific agent
+   */
+  private getAgentSystemPrompt(agent: string, userContext: UserContext): string {
+    const baseContext = `You are a fitness coaching assistant. User role: ${userContext.role}.`;
+
+    const prompts: Record<string, string> = {
+      workout: `${baseContext} You specialize in workout programming, exercise technique, and training adaptations. Provide evidence-based guidance.`,
+      nutrition: `${baseContext} You specialize in sports nutrition. IMPORTANT: Use adherence-neutral language. Never use red/danger colors for being over target - use purple instead. Focus on sustainable habits.`,
+      recovery: `${baseContext} You specialize in recovery, sleep, and stress management. Help interpret HRV and readiness scores.`,
+      motivation: `${baseContext} You specialize in behavior change and motivation. Use evidence-based techniques from Michie's BCT Taxonomy.`,
+      general: `${baseContext} You are a general fitness coach. Route complex questions to appropriate specialists or suggest escalating to the user's trainer.`,
+    };
+
+    return prompts[agent] || prompts.general;
+  }
+
+  /**
+   * Send message to AI coach (client-side)
    */
   async sendMessage(message: string, userContext: UserContext): Promise<ChatMessage> {
     this.isProcessing.set(true);
@@ -274,7 +315,17 @@ export class AICoachService {
       // Persist user message
       const convId = this.conversationId();
       if (convId) {
-        this.persistMessage(convId, userMessage);
+        await this.persistMessage(convId, userMessage);
+      }
+
+      // Route to appropriate agent
+      const agent = this.routeQuery(message);
+      this.currentAgent.set(agent);
+
+      // Get Anthropic API config
+      const config = await this.getAnthropicConfig();
+      if (!config) {
+        throw new Error('Failed to get AI configuration');
       }
 
       // Prepare conversation history (last 10 messages)
@@ -285,41 +336,51 @@ export class AICoachService {
           content: msg.content,
         }));
 
-      // Call AI backend
-      const request: ChatRequest = {
-        message,
-        conversationHistory: history,
-        userContext,
-      };
+      // Call Anthropic API directly from client
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': config.key,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-5-20250514', // Latest Sonnet 4.5 from Claude Max
+          max_tokens: 2048,
+          system: this.getAgentSystemPrompt(agent, userContext),
+          messages: history,
+        }),
+      });
 
-      const response = await firstValueFrom(
-        this.http.post<ChatResponse>(`${this.AI_BACKEND_URL}/api/v1/coach/chat`, request)
-      );
+      if (!response.ok) {
+        throw new Error(`Anthropic API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const assistantContent = data.content[0]?.text || 'I apologize, but I had trouble processing that. Could you rephrase?';
 
       // Add assistant message to history
       const assistantMessage: ChatMessage = {
         id: this.generateId(),
         role: 'assistant',
-        content: response.response,
+        content: assistantContent,
         timestamp: new Date().toISOString(),
-        agent: response.agent as ChatMessage['agent'],
-        confidence: response.confidence,
+        agent: agent as ChatMessage['agent'],
+        confidence: 0.9, // Client-side routing has fixed confidence
       };
       this.messages.update(msgs => [...msgs, assistantMessage]);
 
-      this.currentAgent.set(response.agent);
-
       // Persist assistant message
       if (convId) {
-        this.persistMessage(convId, assistantMessage);
+        await this.persistMessage(convId, assistantMessage);
       }
 
-      // Handle escalation
-      if (response.shouldEscalate) {
-        console.warn('AI Coach escalating to trainer:', response.escalationReason);
+      // Check if escalation needed
+      const shouldEscalate = this.checkEscalation(message, assistantContent);
+      if (shouldEscalate) {
         await this.createEscalation(
           userContext.user_id,
-          response.escalationReason || 'AI confidence too low',
+          'AI coaching escalation',
           message
         );
       }
@@ -332,6 +393,27 @@ export class AICoachService {
     } finally {
       this.isProcessing.set(false);
     }
+  }
+
+  /**
+   * Check if message should be escalated to trainer
+   */
+  private checkEscalation(userMessage: string, aiResponse: string): boolean {
+    const messageLower = userMessage.toLowerCase();
+
+    // Escalate on pain/injury mentions
+    const injuryKeywords = ['pain', 'hurt', 'injured', 'injury', 'doctor', 'medical'];
+    if (injuryKeywords.some(keyword => messageLower.includes(keyword))) {
+      return true;
+    }
+
+    // Escalate if AI expresses uncertainty
+    const uncertaintyPhrases = ['not sure', 'recommend consulting', 'speak with your trainer', 'I apologize'];
+    if (uncertaintyPhrases.some(phrase => aiResponse.toLowerCase().includes(phrase))) {
+      return true;
+    }
+
+    return false;
   }
 
   /**
@@ -404,90 +486,4 @@ export class AICoachService {
   clearError(): void {
     this.error.set(null);
   }
-
-  /**
-   * Send message using Coach Brain (trainer methodology-based responses)
-   *
-   * This method uses the trainer's specific methodology and voice for responses.
-   * Should be used when responding to client questions on behalf of a trainer.
-   */
-  async sendCoachBrainMessage(
-    trainerId: string,
-    query: string,
-    clientId?: string
-  ): Promise<ChatMessage> {
-    this.isProcessing.set(true);
-    this.error.set(null);
-
-    try {
-      // Add user message to history
-      const userMessage: ChatMessage = {
-        id: this.generateId(),
-        role: 'user',
-        content: query,
-        timestamp: new Date().toISOString(),
-      };
-      this.messages.update(msgs => [...msgs, userMessage]);
-
-      // Call Coach Brain API
-      const request: CoachBrainRequest = {
-        trainer_id: trainerId,
-        client_id: clientId,
-        query: query,
-      };
-
-      const response = await firstValueFrom(
-        this.http.post<CoachBrainResponse>(
-          `${this.AI_BACKEND_URL}/api/v1/coach-brain/respond`,
-          request
-        )
-      );
-
-      // Add assistant message to history
-      const assistantMessage: ChatMessage = {
-        id: this.generateId(),
-        role: 'assistant',
-        content: response.response,
-        timestamp: new Date().toISOString(),
-        agent: 'general',
-        confidence: 0.9, // Coach Brain responses are high confidence
-      };
-      this.messages.update(msgs => [...msgs, assistantMessage]);
-
-      return assistantMessage;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to get Coach Brain response';
-      this.error.set(errorMessage);
-      throw new Error(errorMessage);
-    } finally {
-      this.isProcessing.set(false);
-    }
-  }
-
-  /**
-   * Automatically collect training data from trainer messages
-   * Call this whenever a trainer sends a message to learn from their voice
-   */
-  async collectTrainingData(
-    trainerId: string,
-    content: string,
-    inputType: 'message' | 'program' | 'feedback' | 'note' | 'workout_description',
-    sourceId?: string
-  ): Promise<boolean> {
-    try {
-      await firstValueFrom(
-        this.http.post(`${this.AI_BACKEND_URL}/api/v1/coach-brain/add-training-data`, {
-          trainer_id: trainerId,
-          content,
-          input_type: inputType,
-          source_id: sourceId
-        })
-      );
-      return true;
-    } catch (error) {
-      console.error('Failed to add training data:', error);
-      return false;
-    }
-  }
-
 }
