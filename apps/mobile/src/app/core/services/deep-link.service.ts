@@ -7,7 +7,8 @@ import { AuthService } from './auth.service';
 export type DeepLinkRoute =
   | { type: 'checkin'; facilityId: string }
   | { type: 'workout'; templateId: string }
-  | { type: 'equipment'; equipmentId: string };
+  | { type: 'equipment'; equipmentId: string }
+  | { type: 'water' };
 
 /**
  * Central deep-link router for NFC tags, QR codes, and push notifications.
@@ -17,6 +18,7 @@ export type DeepLinkRoute =
  *   /action/checkin/:facilityId
  *   /action/workout/:templateId
  *   /action/equipment/:equipmentId
+ *   /action/water
  */
 @Injectable({ providedIn: 'root' })
 export class DeepLinkService {
@@ -92,11 +94,22 @@ export class DeepLinkService {
       if (type === 'equipment' && id) {
         return { type: 'equipment', equipmentId: id };
       }
+      if (type === 'water') {
+        return { type: 'water' };
+      }
 
       return null;
     } catch {
       return null;
     }
+  }
+
+  /**
+   * Navigate directly to an app route without URL parsing.
+   * Used by AppShortcutsService for home-screen quick actions.
+   */
+  navigateDirect(commands: string[]): void {
+    this.router.navigate(commands);
   }
 
   private navigate(route: DeepLinkRoute): void {
@@ -113,6 +126,9 @@ export class DeepLinkService {
         this.router.navigate(['/tabs/workouts'], {
           queryParams: { equipment: route.equipmentId },
         });
+        break;
+      case 'water':
+        this.router.navigate(['/tabs/nutrition/water']);
         break;
     }
   }

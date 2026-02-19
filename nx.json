@@ -49,6 +49,7 @@
   "plugins": [
     {
       "plugin": "@nx/angular/plugin",
+      "include": ["apps/**", "libs/**"],
       "options": {
         "targetName": "build"
       }

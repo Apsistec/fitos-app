@@ -15,4 +15,5 @@ export const environment = {
   terraApiKey: '',
   usdaApiKey: 'whIXShXv6RIuHypBFNTLSdrWNc4ad9kSabiKT9D5',
   sentryDsn: '', // Sentry disabled in development
+  aiBackendUrl: 'http://localhost:8000',
 };

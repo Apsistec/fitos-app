@@ -125,7 +125,7 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 ### 47.1 Native App Shortcuts
 **Priority:** P1 (High)
 **Sprint:** 47
-**Status:** Not Started
+**Status:** ✅ Complete
 
 **User Stories:**
 - As a client, I can long-press the app icon and quickly jump to "Log Workout", "Add Food", "Add Water", or "Start Timer"
@@ -147,7 +147,7 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 ### 47.2 Quick Water Logging
 **Priority:** P1 (High)
 **Sprint:** 47
-**Status:** Not Started
+**Status:** ✅ Complete
 
 **User Stories:**
 - As a client, I can log water intake with a single tap from the shortcut
@@ -611,5 +611,6 @@ Sprint 51 (OCR/Voice) ... independent
 
 ---
 
-**Phase Status:** 📋 Planning Complete - Ready for Implementation
-**Next Step:** Sprint 46 - NFC/QR Check-In & Deep Links
+**Phase Status:** 🚧 In Progress
+**Completed:** Sprint 46 (NFC/QR), Sprint 47 (App Shortcuts & Quick Water)
+**Next Step:** Sprint 48 - Home Screen & Lock Screen Widgets

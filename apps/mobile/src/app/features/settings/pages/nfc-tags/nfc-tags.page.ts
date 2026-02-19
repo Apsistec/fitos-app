@@ -18,15 +18,12 @@ import {
   IonButton,
   IonIcon,
   IonCard,
-  IonCardHeader,
-  IonCardTitle,
   IonCardContent,
   IonBadge,
   IonSpinner,
   IonText,
   AlertController,
   ToastController,
-  ModalController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -76,8 +73,6 @@ const TAG_TYPE_OPTIONS: TagTypeOption[] = [
     IonButton,
     IonIcon,
     IonCard,
-    IonCardHeader,
-    IonCardTitle,
     IonCardContent,
     IonBadge,
     IonSpinner,

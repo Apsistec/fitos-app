@@ -289,6 +289,14 @@ export const routes: Routes = [
                 (m) => m.NutritionHistoryPage
               ),
           },
+          {
+            // Quick water logging — launched from app shortcut / deep link
+            path: 'water',
+            loadComponent: () =>
+              import('./features/nutrition/pages/quick-water/quick-water.page').then(
+                (m) => m.QuickWaterPage
+              ),
+          },
         ],
       },
       {

@@ -486,4 +486,31 @@ export class AICoachService {
   clearError(): void {
     this.error.set(null);
   }
+
+  /**
+   * Collect a trainer message as potential training data for Coach Brain.
+   * Stores the message text in trainer_notes with source='message' for
+   * future fine-tuning / methodology learning. Fire-and-forget safe.
+   *
+   * @param trainerId - The trainer's user ID
+   * @param content   - The message text (caller ensures >= 20 chars)
+   * @param source    - Origin of the content ('message' | 'note' | 'session')
+   */
+  async collectTrainingData(
+    trainerId: string,
+    content: string,
+    source: 'message' | 'note' | 'session' = 'message'
+  ): Promise<void> {
+    try {
+      await this.supabase.client.from('trainer_notes').insert({
+        trainer_id: trainerId,
+        content,
+        source,
+        created_at: new Date().toISOString(),
+      });
+    } catch (err) {
+      // Deliberately silent — caller uses .catch() for observability
+      console.warn('[AICoachService] collectTrainingData failed silently:', err);
+    }
+  }
 }

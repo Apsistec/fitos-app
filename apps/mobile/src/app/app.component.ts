@@ -6,6 +6,7 @@ import { AuthService } from './core/services/auth.service';
 import { ThemeService } from './core/services/theme.service';
 import { FirebaseService } from './core/services/firebase.service';
 import { DeepLinkService } from './core/services/deep-link.service';
+import { AppShortcutsService } from './core/services/app-shortcuts.service';
 import { addIcons } from 'ionicons';
 import {
   // Outline icons (used across the app)
@@ -94,6 +95,7 @@ export class AppComponent implements OnInit {
   private themeService = inject(ThemeService); // Initialize theme service
   private firebaseService = inject(FirebaseService); // Initialize Firebase Analytics & Performance
   private deepLinkService = inject(DeepLinkService); // Central deep-link router (NFC, QR, push)
+  private appShortcutsService = inject(AppShortcutsService); // Home-screen quick actions
   private router = inject(Router);
 
   constructor() {
@@ -204,6 +206,10 @@ export class AppComponent implements OnInit {
 
     // Initialize central deep-link router (handles NFC, QR, push notification deep links)
     this.deepLinkService.initialize();
+
+    // Register and listen for home-screen quick action shortcuts (Sprint 47)
+    this.appShortcutsService.registerShortcuts();
+    this.appShortcutsService.startListening();
   }
 
   ngOnInit(): void {
