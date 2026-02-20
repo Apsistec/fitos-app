@@ -99,6 +99,42 @@ export class JITAIService {
   }
 
   /**
+   * Update opportunity score based on geofence state.
+   * Being at the gym dramatically increases opportunity (user can act immediately).
+   * Call this whenever the geofence transitions to 'enter' or 'exit'.
+   *
+   * Sprint 52: Geofencing integration
+   */
+  updateOpportunityFromGeofence(isNearGym: boolean): void {
+    // Boost opportunity signal — passed to the AI backend on next getContext() call
+    // so it can factor gym proximity into real-time opportunity scoring.
+    this._geofenceOpportunityBoost = isNearGym ? 0.5 : 0;
+  }
+
+  /**
+   * Update opportunity score based on Wi-Fi SSID gym detection.
+   * Secondary signal alongside GPS geofencing.
+   *
+   * Sprint 52: Wi-Fi context integration
+   */
+  updateOpportunityFromWifi(ssid: string | null, gymWifiSsids: string[]): void {
+    const onGymWifi = ssid !== null && gymWifiSsids.includes(ssid);
+    this._wifiOpportunityBoost = onGymWifi ? 0.3 : 0;
+  }
+
+  /**
+   * Get the combined opportunity boost from geofence + Wi-Fi signals.
+   * Used when calling getContext() to augment server-side opportunity score.
+   */
+  getLocalOpportunityBoost(): number {
+    return Math.min(1, this._geofenceOpportunityBoost + this._wifiOpportunityBoost);
+  }
+
+  // Local opportunity boosts from geofence / Wi-Fi (do not persist)
+  private _geofenceOpportunityBoost = 0;
+  private _wifiOpportunityBoost = 0;
+
+  /**
    * Generate personalized intervention
    */
   async generateIntervention(userId: string): Promise<JITAIIntervention> {

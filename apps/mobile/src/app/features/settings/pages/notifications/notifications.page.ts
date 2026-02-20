@@ -1,4 +1,11 @@
-import {  Component, OnInit, inject, signal , ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  signal,
+  computed,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   IonContent,
@@ -14,22 +21,27 @@ import {
   IonListHeader,
   IonNote,
   IonSpinner,
+  IonButton,
+  IonIcon,
+  IonRange,
+  IonBadge,
   ToastController,
 } from '@ionic/angular/standalone';
-import { AuthService } from '../../../../core/services/auth.service';
-import { SupabaseService } from '../../../../core/services/supabase.service';
+import { addIcons } from 'ionicons';
+import {
+  notificationsOutline,
+  timeOutline,
+  shieldCheckmarkOutline,
+  flashOutline,
+  locationOutline,
+  checkmarkCircleOutline,
+  alertCircleOutline,
+} from 'ionicons/icons';
 
-interface NotificationPreferences {
-  workoutReminders: boolean;
-  nutritionReminders: boolean;
-  messageNotifications: boolean;
-  weeklyProgress: boolean;
-  trainerUpdates: boolean;
-  clientMilestones: boolean;
-  paymentNotifications: boolean;
-  emailNotifications: boolean;
-  pushNotifications: boolean;
-}
+import { AuthService } from '../../../../core/services/auth.service';
+import { NotificationService } from '../../../../core/services/notification.service';
+import { GeofenceService } from '../../../../core/services/geofence.service';
+import { GymLocationPickerComponent, GymLocationSaved } from '../../components/gym-location-picker/gym-location-picker.component';
 
 @Component({
   selector: 'app-notifications',
@@ -50,6 +62,11 @@ interface NotificationPreferences {
     IonListHeader,
     IonNote,
     IonSpinner,
+    IonButton,
+    IonIcon,
+    IonRange,
+    IonBadge,
+    GymLocationPickerComponent,
   ],
   template: `
     <ion-header>
@@ -66,13 +83,40 @@ interface NotificationPreferences {
         @if (loading()) {
           <div class="loading-state">
             <ion-spinner></ion-spinner>
-            <p>Loading preferences...</p>
+            <p>Loading preferences…</p>
           </div>
         } @else {
-          <!-- Notification Channels -->
+
+          <!-- ── Push permission banner ─────────────────────────────── -->
+          @if (!notifService.permissionGranted()) {
+            <div class="permission-banner">
+              <ion-icon name="notifications-outline"></ion-icon>
+              <div class="banner-text">
+                <strong>Enable Push Notifications</strong>
+                <p>Get real-time alerts for gym arrivals, workout reminders, and more.</p>
+              </div>
+              <ion-button
+                size="small"
+                (click)="requestPushPermission()"
+                [disabled]="requestingPermission()"
+              >
+                @if (requestingPermission()) {
+                  <ion-spinner slot="start" name="crescent"></ion-spinner>
+                }
+                Enable
+              </ion-button>
+            </div>
+          } @else {
+            <div class="permission-granted">
+              <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+              <span>Push notifications enabled</span>
+            </div>
+          }
+
+          <!-- ── Notification channels ──────────────────────────────── -->
           <ion-list>
             <ion-list-header>
-              <ion-label>Notification Channels</ion-label>
+              <ion-label>Channels</ion-label>
             </ion-list-header>
 
             <ion-item>
@@ -82,8 +126,8 @@ interface NotificationPreferences {
               </ion-label>
               <ion-toggle
                 slot="end"
-                [(ngModel)]="preferences().pushNotifications"
-                (ionChange)="savePreferences()"
+                [ngModel]="prefs().pushEnabled"
+                (ngModelChange)="updatePref('pushEnabled', $event)"
               ></ion-toggle>
             </ion-item>
 
@@ -94,14 +138,63 @@ interface NotificationPreferences {
               </ion-label>
               <ion-toggle
                 slot="end"
-                [(ngModel)]="preferences().emailNotifications"
-                (ionChange)="savePreferences()"
+                [ngModel]="prefs().emailEnabled"
+                (ngModelChange)="updatePref('emailEnabled', $event)"
               ></ion-toggle>
             </ion-item>
           </ion-list>
 
+          <!-- ── Smart delivery ─────────────────────────────────────── -->
+          <ion-list>
+            <ion-list-header>
+              <ion-label>Smart Delivery</ion-label>
+            </ion-list-header>
+
+            <ion-item>
+              <ion-icon slot="start" name="flash-outline" class="item-icon"></ion-icon>
+              <ion-label>
+                <h3>JITAI Coaching</h3>
+                <p>AI-timed nudges based on your behaviour patterns</p>
+              </ion-label>
+              <ion-toggle
+                slot="end"
+                [ngModel]="prefs().jitaiEnabled"
+                (ngModelChange)="updatePref('jitaiEnabled', $event)"
+                [disabled]="!prefs().pushEnabled"
+              ></ion-toggle>
+            </ion-item>
+
+            <ion-item>
+              <ion-icon slot="start" name="location-outline" class="item-icon"></ion-icon>
+              <ion-label>
+                <h3>Gym Arrival Alerts</h3>
+                <p>Notify when you arrive at a registered gym location</p>
+              </ion-label>
+              <ion-toggle
+                slot="end"
+                [ngModel]="prefs().geofenceEnabled"
+                (ngModelChange)="updatePref('geofenceEnabled', $event)"
+                [disabled]="!prefs().pushEnabled"
+              ></ion-toggle>
+            </ion-item>
+
+            <ion-item>
+              <ion-icon slot="start" name="flash-outline" class="item-icon streak-icon"></ion-icon>
+              <ion-label>
+                <h3>Streak Risk Alerts</h3>
+                <p>Nudge when you're about to break a streak</p>
+              </ion-label>
+              <ion-toggle
+                slot="end"
+                [ngModel]="prefs().streakRiskEnabled"
+                (ngModelChange)="updatePref('streakRiskEnabled', $event)"
+                [disabled]="!prefs().pushEnabled"
+              ></ion-toggle>
+            </ion-item>
+          </ion-list>
+
+          <!-- ── Workout & Training ─────────────────────────────────── -->
           @if (isClient()) {
-            <!-- Client Notifications -->
             <ion-list>
               <ion-list-header>
                 <ion-label>Workout & Training</ion-label>
@@ -114,9 +207,9 @@ interface NotificationPreferences {
                 </ion-label>
                 <ion-toggle
                   slot="end"
-                  [(ngModel)]="preferences().workoutReminders"
-                  (ionChange)="savePreferences()"
-                  [disabled]="!preferences().pushNotifications"
+                  [ngModel]="prefs().workoutReminders"
+                  (ngModelChange)="updatePref('workoutReminders', $event)"
+                  [disabled]="!prefs().pushEnabled"
                 ></ion-toggle>
               </ion-item>
 
@@ -127,9 +220,9 @@ interface NotificationPreferences {
                 </ion-label>
                 <ion-toggle
                   slot="end"
-                  [(ngModel)]="preferences().nutritionReminders"
-                  (ionChange)="savePreferences()"
-                  [disabled]="!preferences().pushNotifications"
+                  [ngModel]="prefs().nutritionReminders"
+                  (ngModelChange)="updatePref('nutritionReminders', $event)"
+                  [disabled]="!prefs().pushEnabled"
                 ></ion-toggle>
               </ion-item>
 
@@ -140,9 +233,9 @@ interface NotificationPreferences {
                 </ion-label>
                 <ion-toggle
                   slot="end"
-                  [(ngModel)]="preferences().trainerUpdates"
-                  (ionChange)="savePreferences()"
-                  [disabled]="!preferences().pushNotifications"
+                  [ngModel]="prefs().trainerUpdates"
+                  (ngModelChange)="updatePref('trainerUpdates', $event)"
+                  [disabled]="!prefs().pushEnabled"
                 ></ion-toggle>
               </ion-item>
 
@@ -153,16 +246,16 @@ interface NotificationPreferences {
                 </ion-label>
                 <ion-toggle
                   slot="end"
-                  [(ngModel)]="preferences().weeklyProgress"
-                  (ionChange)="savePreferences()"
-                  [disabled]="!preferences().emailNotifications"
+                  [ngModel]="prefs().weeklyProgress"
+                  (ngModelChange)="updatePref('weeklyProgress', $event)"
+                  [disabled]="!prefs().emailEnabled"
                 ></ion-toggle>
               </ion-item>
             </ion-list>
           }
 
+          <!-- ── Client Activity (trainers) ─────────────────────────── -->
           @if (isTrainer()) {
-            <!-- Trainer Notifications -->
             <ion-list>
               <ion-list-header>
                 <ion-label>Client Activity</ion-label>
@@ -175,15 +268,15 @@ interface NotificationPreferences {
                 </ion-label>
                 <ion-toggle
                   slot="end"
-                  [(ngModel)]="preferences().clientMilestones"
-                  (ionChange)="savePreferences()"
-                  [disabled]="!preferences().pushNotifications"
+                  [ngModel]="prefs().clientMilestones"
+                  (ngModelChange)="updatePref('clientMilestones', $event)"
+                  [disabled]="!prefs().pushEnabled"
                 ></ion-toggle>
               </ion-item>
             </ion-list>
           }
 
-          <!-- General Notifications -->
+          <!-- ── General ────────────────────────────────────────────── -->
           <ion-list>
             <ion-list-header>
               <ion-label>General</ion-label>
@@ -196,9 +289,9 @@ interface NotificationPreferences {
               </ion-label>
               <ion-toggle
                 slot="end"
-                [(ngModel)]="preferences().messageNotifications"
-                (ionChange)="savePreferences()"
-                [disabled]="!preferences().pushNotifications"
+                [ngModel]="prefs().messageNotifications"
+                (ngModelChange)="updatePref('messageNotifications', $event)"
+                [disabled]="!prefs().pushEnabled"
               ></ion-toggle>
             </ion-item>
 
@@ -209,40 +302,124 @@ interface NotificationPreferences {
               </ion-label>
               <ion-toggle
                 slot="end"
-                [(ngModel)]="preferences().paymentNotifications"
-                (ionChange)="savePreferences()"
-                [disabled]="!preferences().emailNotifications"
+                [ngModel]="prefs().paymentNotifications"
+                (ngModelChange)="updatePref('paymentNotifications', $event)"
+                [disabled]="!prefs().emailEnabled"
               ></ion-toggle>
             </ion-item>
           </ion-list>
 
-          <div class="notification-note">
-            <ion-note>
-              <p>
-                <strong>Note:</strong> Some notifications are disabled because you've turned off
-                @if (!preferences().pushNotifications && !preferences().emailNotifications) {
-                  both push and email notifications
-                } @else if (!preferences().pushNotifications) {
-                  push notifications
-                } @else {
-                  email notifications
-                }.
-              </p>
+          <!-- ── Quiet hours ─────────────────────────────────────────── -->
+          <ion-list>
+            <ion-list-header>
+              <ion-label>Quiet Hours</ion-label>
+            </ion-list-header>
+
+            <ion-note class="section-hint">
+              No notifications will be sent during this window.
             </ion-note>
+
+            <ion-item>
+              <ion-icon slot="start" name="time-outline" class="item-icon"></ion-icon>
+              <ion-label>
+                <h3>Start</h3>
+              </ion-label>
+              <!-- Native time input for simplicity -->
+              <input
+                type="time"
+                class="time-input"
+                [value]="prefs().quietHoursStart"
+                (change)="onQuietHoursChange('quietHoursStart', $event)"
+              />
+            </ion-item>
+
+            <ion-item>
+              <ion-icon slot="start" name="time-outline" class="item-icon"></ion-icon>
+              <ion-label>
+                <h3>End</h3>
+              </ion-label>
+              <input
+                type="time"
+                class="time-input"
+                [value]="prefs().quietHoursEnd"
+                (change)="onQuietHoursChange('quietHoursEnd', $event)"
+              />
+            </ion-item>
+          </ion-list>
+
+          <!-- ── Daily limit ─────────────────────────────────────────── -->
+          <ion-list>
+            <ion-list-header>
+              <ion-label>Daily Limit</ion-label>
+            </ion-list-header>
+
+            <ion-note class="section-hint">
+              Maximum notifications per day. Effective limit today:
+              <strong>{{ notifService.effectiveMaxDaily() }}</strong>
+              @if (prefs().habitDecayEnabled) {
+                (66-day decay active)
+              }
+            </ion-note>
+
+            <ion-item>
+              <ion-label>
+                <h3>Max per day: {{ prefs().maxDailyNotifications }}</h3>
+              </ion-label>
+              <ion-range
+                slot="end"
+                class="limit-range"
+                [min]="1"
+                [max]="10"
+                [step]="1"
+                [value]="prefs().maxDailyNotifications"
+                (ionChange)="onMaxDailyChange($event)"
+              ></ion-range>
+            </ion-item>
+
+            <ion-item>
+              <ion-label>
+                <h3>66-Day Habit Decay</h3>
+                <p>Reduce nudge frequency as habits form</p>
+              </ion-label>
+              <ion-toggle
+                slot="end"
+                [ngModel]="prefs().habitDecayEnabled"
+                (ngModelChange)="updatePref('habitDecayEnabled', $event)"
+              ></ion-toggle>
+            </ion-item>
+          </ion-list>
+
+          <!-- ── Gym locations ───────────────────────────────────────── -->
+          @if (prefs().geofenceEnabled) {
+            <div class="gym-locations-section">
+              <app-gym-location-picker
+                (gymSaved)="onGymSaved($event)"
+              ></app-gym-location-picker>
+            </div>
+          }
+
+          <!-- ── Delivery stats ──────────────────────────────────────── -->
+          <div class="stats-row">
+            <div class="stat-chip">
+              <ion-icon name="notifications-outline"></ion-icon>
+              <span>{{ notifService.dailyCount() }} sent today</span>
+            </div>
+            <div class="stat-chip" [class.at-limit]="atDailyLimit()">
+              <ion-icon [name]="atDailyLimit() ? 'alert-circle-outline' : 'shield-checkmark-outline'"></ion-icon>
+              <span>{{ notifService.effectiveMaxDaily() - notifService.dailyCount() }} remaining</span>
+            </div>
           </div>
+
         }
       </div>
     </ion-content>
   `,
   styles: [`
     :host {
-      ion-header {
-        ion-toolbar {
-          --background: transparent;
-          --border-width: 0;
-        }
+      ion-header ion-toolbar {
+        --background: transparent;
+        --border-width: 0;
       }
-
       ion-content {
         --background: var(--fitos-bg-primary, #0D0D0D);
       }
@@ -251,8 +428,10 @@ interface NotificationPreferences {
     .notifications-container {
       max-width: 768px;
       margin: 0 auto;
+      padding-bottom: 40px;
     }
 
+    /* ── Loading ──────────────────────────────────────────────── */
     .loading-state {
       display: flex;
       flex-direction: column;
@@ -267,9 +446,60 @@ interface NotificationPreferences {
       }
     }
 
+    /* ── Permission banner ────────────────────────────────────── */
+    .permission-banner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 16px;
+      padding: 14px 16px;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 12px;
+
+      ion-icon {
+        font-size: 24px;
+        color: var(--ion-color-primary, #10B981);
+        flex-shrink: 0;
+      }
+
+      .banner-text {
+        flex: 1;
+
+        strong {
+          display: block;
+          font-size: 14px;
+          font-weight: 700;
+          color: var(--fitos-text-primary, #F5F5F5);
+          margin-bottom: 2px;
+        }
+
+        p {
+          margin: 0;
+          font-size: 12px;
+          color: var(--fitos-text-secondary, #A3A3A3);
+          line-height: 1.4;
+        }
+      }
+    }
+
+    .permission-granted {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 12px 16px 4px;
+      font-size: 13px;
+      color: var(--fitos-text-secondary, #A3A3A3);
+
+      ion-icon {
+        font-size: 16px;
+      }
+    }
+
+    /* ── Lists ────────────────────────────────────────────────── */
     ion-list {
       --background: transparent;
-      margin-bottom: 24px;
+      margin-bottom: 8px;
     }
 
     ion-item {
@@ -290,109 +520,181 @@ interface NotificationPreferences {
       }
     }
 
-    .notification-note {
-      padding: 16px;
-      margin: 16px;
-      background: var(--fitos-bg-tertiary, #262626);
+    .section-hint {
+      display: block;
+      font-size: 12px;
+      color: var(--fitos-text-secondary, #A3A3A3);
+      padding: 0 16px 8px;
+      line-height: 1.5;
+
+      strong {
+        color: var(--ion-color-primary, #10B981);
+      }
+    }
+
+    .item-icon {
+      color: var(--ion-color-primary, #10B981);
+      font-size: 20px;
+    }
+
+    .streak-icon {
+      color: #F59E0B;
+    }
+
+    /* ── Time picker ──────────────────────────────────────────── */
+    .time-input {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 8px;
+      color: var(--fitos-text-primary, #F5F5F5);
+      font-size: 14px;
+      padding: 6px 10px;
+      outline: none;
+      cursor: pointer;
 
-      ion-note {
-        p {
-          margin: 0;
-          line-height: 1.5;
-          font-size: 14px;
-          color: var(--fitos-text-secondary, #A3A3A3);
+      &::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        opacity: 0.6;
+      }
+    }
 
-          strong {
-            color: var(--fitos-text-primary, #F5F5F5);
-          }
+    /* ── Range ────────────────────────────────────────────────── */
+    .limit-range {
+      max-width: 160px;
+    }
+
+    /* ── Gym locations section ────────────────────────────────── */
+    .gym-locations-section {
+      margin: 8px 16px 16px;
+      padding: 16px;
+      background: var(--fitos-bg-secondary, #171717);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    /* ── Daily stats row ──────────────────────────────────────── */
+    .stats-row {
+      display: flex;
+      gap: 8px;
+      margin: 16px;
+    }
+
+    .stat-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background: var(--fitos-bg-tertiary, #262626);
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--fitos-text-secondary, #A3A3A3);
+
+      ion-icon {
+        font-size: 14px;
+        color: var(--ion-color-primary, #10B981);
+      }
+
+      &.at-limit {
+        background: rgba(245, 158, 11, 0.1);
+        color: #F59E0B;
+
+        ion-icon {
+          color: #F59E0B;
         }
       }
     }
   `],
 })
 export class NotificationsPage implements OnInit {
-  private authService = inject(AuthService);
-  private supabase = inject(SupabaseService);
-  private toastController = inject(ToastController);
+  private authService   = inject(AuthService);
+  notifService          = inject(NotificationService);
+  private geofence      = inject(GeofenceService);
+  private toastCtrl     = inject(ToastController);
 
-  loading = signal(true);
+  loading              = signal(true);
+  requestingPermission = signal(false);
+
   isClient = this.authService.isClient;
   isTrainer = this.authService.isTrainer;
 
-  preferences = signal<NotificationPreferences>({
-    workoutReminders: true,
-    nutritionReminders: true,
-    messageNotifications: true,
-    weeklyProgress: true,
-    trainerUpdates: true,
-    clientMilestones: true,
-    paymentNotifications: true,
-    emailNotifications: true,
-    pushNotifications: true,
-  });
+  /** Local mirror of NotificationService preferences for two-way binding */
+  prefs = this.notifService.preferences;
+
+  atDailyLimit = computed(
+    () => this.notifService.dailyCount() >= this.notifService.effectiveMaxDaily()
+  );
 
   async ngOnInit() {
-    await this.loadPreferences();
+    await this.notifService.initialize();
+    this.loading.set(false);
   }
 
-  async loadPreferences() {
+  // ── Push permission ──────────────────────────────────────────────────────
+  async requestPushPermission(): Promise<void> {
+    this.requestingPermission.set(true);
     try {
-      const userId = this.authService.user()?.id;
-      if (!userId) return;
-
-      const { data, error } = await this.supabase.client
-        .from('profiles')
-        .select('notification_preferences')
-        .eq('id', userId)
-        .single();
-
-      if (error) throw error;
-
-      if (data?.notification_preferences) {
-        this.preferences.set({
-          ...this.preferences(),
-          ...data.notification_preferences,
-        });
+      const granted = await this.notifService.requestPermission();
+      if (granted) {
+        await this.showToast('Push notifications enabled!', 'success');
+      } else {
+        await this.showToast(
+          'Permission denied. Enable notifications in device Settings.',
+          'warning',
+          4000
+        );
       }
-    } catch (error) {
-      console.error('Error loading notification preferences:', error);
     } finally {
-      this.loading.set(false);
+      this.requestingPermission.set(false);
     }
   }
 
-  async savePreferences() {
-    try {
-      const userId = this.authService.user()?.id;
-      if (!userId) return;
+  // ── Preference updates ───────────────────────────────────────────────────
+  async updatePref<K extends keyof ReturnType<typeof this.prefs>>(
+    key: K,
+    value: ReturnType<typeof this.prefs>[K]
+  ): Promise<void> {
+    await this.notifService.savePreferences({ [key]: value });
+    await this.showToast('Preferences saved', 'success', 1500);
+  }
 
-      const { error } = await this.supabase.client
-        .from('profiles')
-        .update({
-          notification_preferences: this.preferences(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', userId);
+  onQuietHoursChange(key: 'quietHoursStart' | 'quietHoursEnd', event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.notifService.savePreferences({ [key]: input.value });
+  }
 
-      if (error) throw error;
+  onMaxDailyChange(event: CustomEvent): void {
+    const val = (event.detail as { value: number }).value;
+    this.notifService.savePreferences({ maxDailyNotifications: val });
+  }
 
-      const toast = await this.toastController.create({
-        message: 'Preferences saved',
-        duration: 1500,
-        color: 'success',
-        position: 'bottom',
-      });
-      await toast.present();
-    } catch (error) {
-      console.error('Error saving preferences:', error);
-      const toast = await this.toastController.create({
-        message: 'Failed to save preferences',
-        duration: 3000,
-        color: 'danger',
-        position: 'bottom',
-      });
-      await toast.present();
+  // ── Gym location saved ───────────────────────────────────────────────────
+  async onGymSaved(saved: GymLocationSaved): Promise<void> {
+    await this.showToast(`"${saved.gym.name}" saved as gym location 📍`, 'success');
+    // Start geofence tracking if not already active
+    if (!this.geofence.isTracking()) {
+      await this.geofence.startTracking();
     }
+  }
+
+  // ── Toast helper ─────────────────────────────────────────────────────────
+  private async showToast(
+    message: string,
+    color: 'success' | 'warning' | 'danger' = 'success',
+    duration = 2000
+  ): Promise<void> {
+    const toast = await this.toastCtrl.create({ message, color, duration, position: 'bottom' });
+    await toast.present();
+  }
+
+  constructor() {
+    addIcons({
+      notificationsOutline,
+      timeOutline,
+      shieldCheckmarkOutline,
+      flashOutline,
+      locationOutline,
+      checkmarkCircleOutline,
+      alertCircleOutline,
+    });
   }
 }

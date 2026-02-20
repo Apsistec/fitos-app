@@ -24,10 +24,10 @@ import {
   ToastController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { checkmarkOutline, closeOutline, addCircleOutline, trashOutline } from 'ionicons/icons';
+import { checkmarkOutline, closeOutline, addCircleOutline, trashOutline, scanOutline } from 'ionicons/icons';
 
 // Register icons at file level
-addIcons({ checkmarkOutline, closeOutline, addCircleOutline, trashOutline });
+addIcons({ checkmarkOutline, closeOutline, addCircleOutline, trashOutline, scanOutline });
 import { WorkoutSessionService, SetLog } from '../../../../core/services/workout-session.service';
 import { AssignmentService } from '../../../../core/services/assignment.service';
 import { WorkoutService } from '../../../../core/services/workout.service';
@@ -36,7 +36,8 @@ import { RestTimerComponent } from '../../../../shared/components/rest-timer/res
 import { HapticService } from '../../../../core/services/haptic.service';
 import { CelebrationService } from '../../../../core/services/celebration.service';
 import { VoiceLoggerComponent } from '../../../../shared/components/voice-logger/voice-logger.component';
-import { ParsedWorkoutCommand } from '../../../../core/services/voice.service';
+import { ParsedWorkoutCommand, VoiceService } from '../../../../core/services/voice.service';
+import { EquipmentOcrComponent, OcrLogRequest } from '../../components/equipment-ocr/equipment-ocr.component';
 
 interface TemplateExerciseRow {
   id: string;
@@ -95,7 +96,8 @@ interface ExerciseProgress {
     IonBadge,
     IonSpinner,
     RestTimerComponent,
-    VoiceLoggerComponent
+    VoiceLoggerComponent,
+    EquipmentOcrComponent,
   ],
   template: `
     <ion-header class="ion-no-border">
@@ -216,9 +218,46 @@ interface ExerciseProgress {
 
               <!-- Voice Logger -->
               <div class="voice-logger-container">
+                <!-- Voice context indicator & switcher -->
+                <div class="voice-context-bar">
+                  <span class="voice-context-label">Voice mode:</span>
+                  <div class="voice-context-chips">
+                    <button
+                      class="context-chip"
+                      [class.active]="voice.currentContext() === 'workout'"
+                      (click)="voice.setContext('workout')"
+                    >
+                      💪 Workout
+                    </button>
+                    <button
+                      class="context-chip"
+                      [class.active]="voice.currentContext() === 'nutrition'"
+                      (click)="voice.setContext('nutrition')"
+                    >
+                      🥗 Nutrition
+                    </button>
+                  </div>
+                </div>
+
                 <app-voice-logger
                   (commandParsed)="handleVoiceCommand($event)"
                 ></app-voice-logger>
+              </div>
+
+              <!-- Equipment OCR -->
+              <div class="ocr-section">
+                <button class="ocr-toggle" (click)="toggleEquipmentOcr()">
+                  <ion-icon name="scan-outline"></ion-icon>
+                  <span>{{ showEquipmentOcr() ? 'Hide Scanner' : 'Scan Cardio Equipment' }}</span>
+                </button>
+                @if (showEquipmentOcr()) {
+                  <div class="ocr-container">
+                    <app-equipment-ocr
+                      [sessionId]="assignedWorkoutId"
+                      (logged)="handleOcrLogged($event)"
+                    ></app-equipment-ocr>
+                  </div>
+                }
               </div>
 
               <!-- Logged Sets -->
@@ -454,6 +493,87 @@ interface ExerciseProgress {
       border-radius: 12px;
       border: 1px solid rgba(255, 255, 255, 0.06);
     }
+
+    /* ── Voice context bar ──────────────────────────────────── */
+    .voice-context-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .voice-context-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--fitos-text-tertiary, #737373);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+
+    .voice-context-chips {
+      display: flex;
+      gap: 6px;
+    }
+
+    .context-chip {
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: transparent;
+      color: var(--fitos-text-secondary, #A3A3A3);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 150ms, border-color 150ms, color 150ms;
+    }
+
+    .context-chip.active {
+      background: var(--ion-color-primary, #10B981);
+      border-color: var(--ion-color-primary, #10B981);
+      color: #fff;
+    }
+
+    /* ── Equipment OCR ─────────────────────────────────────── */
+    .ocr-section {
+      margin: 0 0 24px 0;
+    }
+
+    .ocr-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 10px 16px;
+      background: transparent;
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      color: var(--fitos-text-secondary, #A3A3A3);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 150ms, color 150ms;
+    }
+
+    .ocr-toggle ion-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .ocr-toggle:active {
+      border-color: var(--ion-color-primary, #10B981);
+      color: var(--ion-color-primary, #10B981);
+    }
+
+    .ocr-container {
+      margin-top: 12px;
+      padding: 16px;
+      background: var(--fitos-bg-tertiary, #262626);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
   `]
 })
 export class ActiveWorkoutPage implements OnInit, OnDestroy {
@@ -467,6 +587,7 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
   private toastController = inject(ToastController);
   private celebration = inject(CelebrationService);
   haptic = inject(HapticService); // Public for template access
+  voice = inject(VoiceService);  // Public for template access
 
   assignedWorkoutId?: string;
 
@@ -476,6 +597,7 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
   exercises = signal<ExerciseProgress[]>([]);
   currentExerciseIndex = signal(0);
   showRestTimer = signal(false);
+  showEquipmentOcr = signal(false);
   restTime = signal(90);
   elapsedTime = signal(0);
 
@@ -793,6 +915,38 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
       color
     });
     await toast.present();
+  }
+
+  /**
+   * Toggle equipment OCR panel
+   */
+  toggleEquipmentOcr(): void {
+    this.haptic.light();
+    this.showEquipmentOcr.update(v => !v);
+  }
+
+  /**
+   * Handle confirmed OCR result from EquipmentOcrComponent.
+   * Maps parsed cardio data to a workout note and collapses the scanner.
+   */
+  async handleOcrLogged(request: OcrLogRequest): Promise<void> {
+    await this.haptic.success();
+    this.showEquipmentOcr.set(false);
+
+    // Build a human-readable summary to attach as a note on the session
+    const p = request.result.parsed;
+    const parts: string[] = [`[${request.equipmentType}]`];
+    if (p.duration_seconds != null) {
+      const m = Math.floor(p.duration_seconds / 60);
+      const s = p.duration_seconds % 60;
+      parts.push(`${m}:${String(s).padStart(2, '0')}`);
+    }
+    if (p.distance_km != null)   parts.push(`${p.distance_km} km`);
+    if (p.calories != null)      parts.push(`${p.calories} cal`);
+    if (p.heart_rate != null)    parts.push(`${p.heart_rate} bpm`);
+
+    const summary = parts.join(' · ');
+    this.showToast(`Cardio logged: ${summary}`, 'success');
   }
 
   /**

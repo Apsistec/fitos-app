@@ -331,6 +331,66 @@ export class FoodService {
   }
 
   /**
+   * Look up a food item by barcode (UPC/EAN) via the barcode-lookup Edge Function.
+   * Pipeline: local cache → Open Food Facts → USDA → FatSecret → null
+   *
+   * Returns a Food object shaped to match existing search results,
+   * or null if not found in any database.
+   */
+  async lookupBarcode(barcode: string): Promise<Food | null> {
+    this.loading.set(true);
+    this.error.set(null);
+
+    try {
+      const { data, error } = await this.supabase.client.functions.invoke<{
+        barcode: string;
+        food_name: string;
+        brand?: string;
+        serving_size?: number;
+        serving_unit?: string;
+        calories: number;
+        protein: number;
+        carbs: number;
+        fat: number;
+        fiber?: number;
+        sugar?: number;
+        sodium?: number;
+        source: string;
+      }>('barcode-lookup', { body: { barcode } });
+
+      if (error) throw error;
+      if (!data) return null;
+
+      // Map to our standard Food shape
+      const food: Food = {
+        id: `barcode:${data.barcode}`,
+        name: data.food_name,
+        brand: data.brand,
+        servingSize: data.serving_size,
+        servingSizeUnit: data.serving_unit,
+        calories: data.calories,
+        protein: data.protein,
+        carbs: data.carbs,
+        fat: data.fat,
+        fiber: data.fiber,
+        sugar: data.sugar,
+        sodium: data.sodium,
+      };
+
+      // Surface in searchResults signal so the add-food page can show it
+      this.searchResults.set([food]);
+      return food;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Barcode lookup failed';
+      this.error.set(msg);
+      console.error('[FoodService] lookupBarcode error:', err);
+      return null;
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  /**
    * Clear the in-memory cache
    */
   clearCache(): void {

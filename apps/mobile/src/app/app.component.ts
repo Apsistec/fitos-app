@@ -7,6 +7,7 @@ import { ThemeService } from './core/services/theme.service';
 import { FirebaseService } from './core/services/firebase.service';
 import { DeepLinkService } from './core/services/deep-link.service';
 import { AppShortcutsService } from './core/services/app-shortcuts.service';
+import { WidgetService } from './core/services/widget.service';
 import { addIcons } from 'ionicons';
 import {
   // Outline icons (used across the app)
@@ -96,6 +97,7 @@ export class AppComponent implements OnInit {
   private firebaseService = inject(FirebaseService); // Initialize Firebase Analytics & Performance
   private deepLinkService = inject(DeepLinkService); // Central deep-link router (NFC, QR, push)
   private appShortcutsService = inject(AppShortcutsService); // Home-screen quick actions
+  private widgetService = inject(WidgetService); // Native home/lock screen widgets
   private router = inject(Router);
 
   constructor() {

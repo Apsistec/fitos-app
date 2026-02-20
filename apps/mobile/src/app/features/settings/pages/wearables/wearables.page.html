@@ -18,7 +18,78 @@
   </ion-refresher>
 
   <div class="page-container">
-    <!-- Connected Devices Section -->
+
+    <!-- ── Direct Health Sync Section (iOS / Android native) ── -->
+    @if (isNativePlatform()) {
+      <div class="section">
+        <h2 class="section-title">
+          {{ platformHealthLabel() }} Direct Sync
+        </h2>
+        <ion-text color="medium">
+          <p class="description">
+            Sync HRV, sleep, steps, and body composition directly from
+            {{ platformHealthLabel() }} — no third-party account needed.
+          </p>
+        </ion-text>
+
+        <ion-card>
+          <ion-card-content>
+            <div class="device-card">
+              <div class="device-info">
+                <ion-icon
+                  [name]="platformHealthIcon()"
+                  color="success"
+                  class="device-icon"
+                ></ion-icon>
+                <div class="device-details">
+                  <h3>{{ platformHealthLabel() }}</h3>
+                  @if (directSyncAuthorized()) {
+                    <p class="device-status">
+                      <ion-icon name="checkmark-circle" color="success"></ion-icon>
+                      Connected
+                    </p>
+                    @if (lastDirectSync()) {
+                      <p class="last-sync">Last synced: {{ formatLastSync(lastDirectSync()!) }}</p>
+                    }
+                  } @else {
+                    <p class="device-status">
+                      <ion-icon name="close-circle" color="medium"></ion-icon>
+                      Not connected
+                    </p>
+                  }
+                </div>
+              </div>
+
+              @if (directSyncAuthorized()) {
+                <ion-button
+                  fill="clear"
+                  [disabled]="isSyncing()"
+                  (click)="syncDirectHealth()"
+                  aria-label="Sync health data now"
+                >
+                  @if (isSyncing()) {
+                    <ion-spinner name="crescent" slot="icon-only"></ion-spinner>
+                  } @else {
+                    <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+                  }
+                </ion-button>
+              } @else {
+                <ion-button
+                  fill="solid"
+                  size="small"
+                  (click)="connectDirectHealth()"
+                  aria-label="Connect to health platform"
+                >
+                  Connect
+                </ion-button>
+              }
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    }
+
+    <!-- Connected Devices Section (Terra) -->
     @if (connections().length > 0) {
       <div class="section">
         <h2 class="section-title">Connected Devices</h2>

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -39,6 +39,7 @@ import {
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { TerraService, TERRA_PROVIDERS, TerraProvider } from '../../../../core/services/terra.service';
+import { HealthSyncService } from '../../../../core/services/health-sync.service';
 import { Database } from '@fitos/shared';
 
 type WearableConnection = Database['public']['Tables']['wearable_connections']['Row'];
@@ -71,6 +72,7 @@ type WearableConnection = Database['public']['Tables']['wearable_connections']['
 })
 export class WearablesPage implements OnInit, ViewWillEnter {
   private terraService = inject(TerraService);
+  private healthSyncService = inject(HealthSyncService);
   private alertController = inject(AlertController);
   private toastController = inject(ToastController);
   private route = inject(ActivatedRoute);
@@ -79,6 +81,22 @@ export class WearablesPage implements OnInit, ViewWillEnter {
   connections = this.terraService.connections;
   isLoading = this.terraService.isLoading;
   availableProviders = signal<TerraProvider[]>([]);
+
+  // Direct health sync state (Sprint 49)
+  directSyncAuthorized = this.healthSyncService.isAuthorized;
+  isSyncing = this.healthSyncService.isSyncing;
+  lastDirectSync = this.healthSyncService.lastSyncAt;
+  isNativePlatform = signal(Capacitor.isNativePlatform());
+
+  /** Returns 'Apple Health' on iOS, 'Health Connect' on Android */
+  platformHealthLabel = computed(() =>
+    Capacitor.getPlatform() === 'ios' ? 'Apple Health' : 'Health Connect'
+  );
+
+  /** Returns the Ionicons name for the platform health icon */
+  platformHealthIcon = computed(() =>
+    Capacitor.getPlatform() === 'ios' ? 'heart' : 'fitness'
+  );
 
   constructor() {
     addIcons({
@@ -97,6 +115,7 @@ export class WearablesPage implements OnInit, ViewWillEnter {
 
   async ngOnInit() {
     await this.loadConnections();
+    await this.healthSyncService.initialize();
   }
 
   /**
@@ -275,6 +294,50 @@ export class WearablesPage implements OnInit, ViewWillEnter {
 
   getProviderInfo(providerId: string): TerraProvider | undefined {
     return this.terraService.getProviderInfo(providerId);
+  }
+
+  // ─── Direct Health Sync (Sprint 49) ─────────────────────────
+
+  async connectDirectHealth() {
+    try {
+      const authorized = await this.healthSyncService.requestAuthorization();
+      const label = this.platformHealthLabel();
+      const toast = await this.toastController.create({
+        message: authorized
+          ? `${label} connected! Syncing your health data...`
+          : `Could not connect to ${label}. Please try again.`,
+        duration: 3000,
+        position: 'bottom',
+        color: authorized ? 'success' : 'warning',
+      });
+      await toast.present();
+    } catch (error) {
+      console.error('Error connecting direct health:', error);
+      const toast = await this.toastController.create({
+        message: 'Connection failed. Please try again.',
+        duration: 3000,
+        position: 'bottom',
+        color: 'danger',
+      });
+      await toast.present();
+    }
+  }
+
+  async syncDirectHealth() {
+    try {
+      const result = await this.healthSyncService.syncAll();
+      const toast = await this.toastController.create({
+        message: result.success
+          ? `Synced ${result.recordsSynced} day${result.recordsSynced !== 1 ? 's' : ''} of health data`
+          : `Sync incomplete: ${result.errorMessage ?? 'Unknown error'}`,
+        duration: 2500,
+        position: 'bottom',
+        color: result.success ? 'success' : 'warning',
+      });
+      await toast.present();
+    } catch (error) {
+      console.error('Error syncing direct health:', error);
+    }
   }
 
   formatLastSync(date: string | null): string {

@@ -4,14 +4,17 @@ import { SupabaseService } from './supabase.service';
 /**
  * Voice Service for FitOS
  * Handles voice-to-text for workout and nutrition logging
- * Uses Deepgram Nova-3 for speech recognition
+ * Uses Deepgram Nova-3 for speech recognition with keyterm boosting
  */
+
+export type VoiceContext = 'workout' | 'nutrition';
 
 export interface VoiceConfig {
   language?: string;
   model?: string;
   keywords?: string[];
   endpointing?: number;
+  context?: VoiceContext;
 }
 
 export interface VoiceResult {
@@ -41,13 +44,97 @@ export interface ParsedNutritionCommand {
   unit?: string;
 }
 
-// Fitness-specific vocabulary for Deepgram keyword boosting
-const FITNESS_KEYWORDS = [
-  'reps', 'rep', 'sets', 'set',
-  'pounds', 'lbs', 'kilograms', 'kg',
-  'repeat', 'skip', 'next', 'done', 'rest',
-  'bench', 'squat', 'deadlift', 'press', 'curl', 'row',
-  'dumbbell', 'barbell', 'cable', 'machine',
+// ─── Workout context keyterms (Nova-3 boosting) ───────────────────────────────
+// Covers commands, units, common exercises, equipment, and modifiers
+const WORKOUT_KEYTERMS: string[] = [
+  // Commands
+  'rep', 'reps', 'set', 'sets', 'repeat', 'skip', 'next', 'done', 'finish',
+  'rest', 'break', 'pause', 'continue',
+
+  // Units
+  'pound', 'pounds', 'lbs', 'lb',
+  'kilogram', 'kilograms', 'kilo', 'kilos', 'kg',
+  'plate', 'plates', 'bar', 'bodyweight',
+
+  // Compound lifts
+  'bench', 'bench press', 'incline', 'decline',
+  'squat', 'squat rack', 'front squat', 'box squat',
+  'deadlift', 'romanian', 'sumo', 'conventional',
+  'overhead press', 'ohp', 'military press',
+  'row', 'barbell row', 'bent over',
+
+  // Isolation exercises
+  'curl', 'bicep curl', 'hammer curl', 'preacher curl',
+  'tricep', 'tricep extension', 'skullcrusher', 'pushdown',
+  'lateral raise', 'front raise', 'face pull',
+  'leg press', 'leg extension', 'leg curl', 'hamstring curl',
+  'calf raise', 'hip thrust', 'glute bridge',
+  'pulldown', 'lat pulldown', 'pull-up', 'pullup', 'chin-up', 'chinup',
+  'dip', 'dips',
+
+  // Equipment types
+  'dumbbell', 'dumbbells', 'barbell', 'cable', 'machine',
+  'kettlebell', 'resistance band', 'band', 'ez bar',
+  'trap bar', 'hex bar', 'smith machine',
+
+  // Cardio
+  'treadmill', 'elliptical', 'bike', 'rowing', 'rower', 'stairclimber',
+  'minute', 'minutes', 'second', 'seconds', 'hour',
+  'mile', 'miles', 'kilometer', 'kilometers',
+  'sprint', 'walk', 'jog', 'run',
+
+  // Modifiers
+  'tempo', 'slow', 'explosive', 'pause', 'drop', 'superset',
+  'failure', 'max', 'warm up', 'warmup', 'working set',
+  'rpe', 'effort', 'easy', 'hard', 'moderate',
+
+  // Numbers as words (for better recognition)
+  'one', 'two', 'three', 'four', 'five',
+  'six', 'seven', 'eight', 'nine', 'ten',
+  'twelve', 'fifteen', 'twenty', 'thirty',
+  'forty five', 'ninety', 'one hundred', 'one thirty five',
+  'one forty five', 'two twenty five', 'three fifteen',
+  'four hundred', 'four fifty',
+];
+
+// ─── Nutrition context keyterms ───────────────────────────────────────────────
+const NUTRITION_KEYTERMS: string[] = [
+  // Meal logging commands
+  'log', 'add', 'track', 'ate', 'eat', 'eating', 'had', 'drank', 'drink',
+
+  // Meal types
+  'breakfast', 'lunch', 'dinner', 'snack', 'meal', 'pre-workout', 'post-workout',
+
+  // Portion units
+  'cup', 'cups', 'tablespoon', 'tablespoons', 'tbsp',
+  'teaspoon', 'teaspoons', 'tsp',
+  'ounce', 'ounces', 'oz',
+  'gram', 'grams', 'g',
+  'pound', 'pounds', 'lb', 'lbs',
+  'slice', 'slices', 'piece', 'pieces',
+  'serving', 'servings', 'portion', 'handful',
+  'bottle', 'can', 'scoop', 'scoops',
+
+  // Common foods
+  'egg', 'eggs', 'chicken', 'beef', 'steak', 'salmon', 'tuna', 'turkey',
+  'rice', 'brown rice', 'white rice', 'quinoa', 'oats', 'oatmeal',
+  'bread', 'toast', 'bagel', 'tortilla', 'wrap',
+  'potato', 'sweet potato', 'broccoli', 'spinach', 'salad',
+  'banana', 'apple', 'berries', 'strawberry', 'blueberry',
+  'milk', 'water', 'juice', 'coffee', 'protein shake', 'shake',
+  'yogurt', 'cheese', 'butter', 'oil', 'olive oil',
+  'nuts', 'almonds', 'peanut butter', 'almond butter',
+  'protein bar', 'granola bar', 'cracker',
+  'pasta', 'noodle', 'soup', 'salsa', 'hummus',
+
+  // Macros and nutrition terms
+  'protein', 'carb', 'carbs', 'fat', 'calories', 'calorie',
+  'fiber', 'sugar', 'sodium', 'macro', 'macros',
+
+  // Quantities as words
+  'half', 'quarter', 'whole', 'one and a half',
+  'one', 'two', 'three', 'four', 'five',
+  'six', 'seven', 'eight', 'ten', 'twelve',
 ];
 
 @Injectable({
@@ -59,7 +146,7 @@ export class VoiceService {
   private socket: WebSocket | null = null;
   private mediaRecorder: MediaRecorder | null = null;
   private stream: MediaStream | null = null;
-  
+
   // State signals
   private _isListening = signal(false);
   private _isProcessing = signal(false);
@@ -67,7 +154,8 @@ export class VoiceService {
   private _partialTranscript = signal('');
   private _error = signal<string | null>(null);
   private _confidence = signal(0);
-  
+  private _context = signal<VoiceContext>('workout');
+
   // Public readonly signals
   isListening = this._isListening.asReadonly();
   isProcessing = this._isProcessing.asReadonly();
@@ -75,12 +163,25 @@ export class VoiceService {
   partialTranscript = this._partialTranscript.asReadonly();
   error = this._error.asReadonly();
   confidence = this._confidence.asReadonly();
-  
+  currentContext = this._context.asReadonly();
+
   // Computed
   hasError = computed(() => this._error() !== null);
-  displayTranscript = computed(() => 
+  displayTranscript = computed(() =>
     this._partialTranscript() || this._transcript()
   );
+
+  /**
+   * Switch voice context to optimise keyword boosting.
+   * Call before startListening() or mid-session to swap active keyterm set.
+   */
+  setContext(context: VoiceContext): void {
+    this._context.set(context);
+    // If actively listening, reconnect with new keyterms immediately
+    if (this._isListening()) {
+      this.reconnectWithContext();
+    }
+  }
 
   /**
    * Check if voice input is supported
@@ -110,6 +211,11 @@ export class VoiceService {
   async startListening(config?: VoiceConfig): Promise<void> {
     if (this._isListening()) return;
 
+    // Apply context from config if provided
+    if (config?.context) {
+      this._context.set(config.context);
+    }
+
     try {
       this._error.set(null);
       this._transcript.set('');
@@ -131,7 +237,7 @@ export class VoiceService {
 
       // Start recording
       this.startRecording();
-      
+
       this._isListening.set(true);
       this._isProcessing.set(false);
     } catch (err) {
@@ -147,7 +253,7 @@ export class VoiceService {
    */
   stopListening(): void {
     if (!this._isListening()) return;
-    
+
     this._isListening.set(false);
     this.cleanup();
   }
@@ -188,13 +294,13 @@ export class VoiceService {
     const setMatch = text.match(
       /(\d+)\s*(?:reps?|rep)\s*(?:at|with|@)?\s*(\d+(?:\.\d+)?)\s*(lbs?|pounds?|kg|kilograms?)?/i
     );
-    
+
     if (setMatch) {
       const reps = parseInt(setMatch[1], 10);
       const weight = parseFloat(setMatch[2]);
       const unitText = setMatch[3]?.toLowerCase() || 'lbs';
       const unit: 'lbs' | 'kg' = unitText.startsWith('k') ? 'kg' : 'lbs';
-      
+
       return { type: 'log_set', reps, weight, unit };
     }
 
@@ -202,13 +308,13 @@ export class VoiceService {
     const altMatch = text.match(
       /(\d+(?:\.\d+)?)\s*(lbs?|pounds?|kg|kilograms?)?\s*(?:for|x)\s*(\d+)/i
     );
-    
+
     if (altMatch) {
       const weight = parseFloat(altMatch[1]);
       const unitText = altMatch[2]?.toLowerCase() || 'lbs';
       const unit: 'lbs' | 'kg' = unitText.startsWith('k') ? 'kg' : 'lbs';
       const reps = parseInt(altMatch[3], 10);
-      
+
       return { type: 'log_set', reps, weight, unit };
     }
 
@@ -226,12 +332,12 @@ export class VoiceService {
    */
   parseNutritionCommand(transcript: string): ParsedNutritionCommand {
     const text = transcript.trim();
-    
+
     // Try to extract quantity and unit
     const quantityMatch = text.match(
       /^(\d+(?:\.\d+)?)\s*(oz|ounce|g|gram|cup|tbsp|tsp|slice|piece|serving)?s?\s+(?:of\s+)?(.+)$/i
     );
-    
+
     if (quantityMatch) {
       return {
         type: 'log_food',
@@ -257,7 +363,7 @@ export class VoiceService {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 1.1;
     utterance.pitch = 1;
-    
+
     return new Promise((resolve) => {
       utterance.onend = () => resolve();
       speechSynthesis.speak(utterance);
@@ -265,14 +371,13 @@ export class VoiceService {
   }
 
   /**
-   * Connect to Deepgram WebSocket
+   * Connect to Deepgram WebSocket using Nova-3 with keyterm boosting
    */
   private async connectDeepgram(config?: VoiceConfig): Promise<void> {
-    // TODO: Get API key from environment/backend
     const apiKey = await this.getDeepgramApiKey();
-    
+
     const params = new URLSearchParams({
-      model: config?.model || 'nova-2',
+      model: config?.model || 'nova-3',
       language: config?.language || 'en-US',
       punctuate: 'true',
       interim_results: 'true',
@@ -280,14 +385,18 @@ export class VoiceService {
       smart_format: 'true',
     });
 
-    // Add keyword boosting for fitness vocabulary
-    const keywords = [...FITNESS_KEYWORDS, ...(config?.keywords || [])];
-    keywords.forEach(kw => params.append('keywords', kw));
+    // Nova-3 uses `keyterm` (not `keywords`) for boosting
+    const contextKeyterms = this._context() === 'nutrition'
+      ? NUTRITION_KEYTERMS
+      : WORKOUT_KEYTERMS;
+    const extraKeyterms = config?.keywords ?? [];
+    const allKeyterms = [...contextKeyterms, ...extraKeyterms];
+    allKeyterms.forEach(kt => params.append('keyterm', kt));
 
     const wsUrl = `wss://api.deepgram.com/v1/listen?${params.toString()}`;
-    
+
     this.socket = new WebSocket(wsUrl, ['token', apiKey]);
-    
+
     this.socket.onmessage = (event) => this.handleDeepgramMessage(event);
     this.socket.onerror = (err) => {
       console.error('Deepgram WebSocket error:', err);
@@ -309,12 +418,30 @@ export class VoiceService {
   }
 
   /**
+   * Reconnect with updated keyterms when context changes mid-session
+   */
+  private async reconnectWithContext(): Promise<void> {
+    try {
+      // Gracefully close the current socket
+      if (this.socket) {
+        this.socket.onclose = null; // prevent stopListening() trigger
+        this.socket.close();
+        this.socket = null;
+      }
+      // Reconnect with new context keyterms (reuse existing stream)
+      await this.connectDeepgram();
+    } catch (err) {
+      console.error('Error reconnecting with new context:', err);
+    }
+  }
+
+  /**
    * Handle incoming Deepgram messages
    */
   private handleDeepgramMessage(event: MessageEvent): void {
     try {
       const data = JSON.parse(event.data);
-      
+
       if (data.type === 'Results') {
         const result = data.channel?.alternatives?.[0];
         if (!result) return;

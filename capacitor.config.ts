@@ -31,6 +31,17 @@ const config: CapacitorConfig = {
         ],
       },
     },
+    // Sprint 49 — Background health sync
+    // Runs health-sync every 4 hours on iOS, 6 hours on Android.
+    // Entry point: apps/mobile/src/background/health-sync.runner.ts
+    BackgroundRunner: {
+      label: 'com.fitos.healthsync',
+      src: 'background/health-sync.runner.js',  // compiled from health-sync.runner.ts
+      event: 'healthSync',
+      repeat: true,
+      interval: 240,          // minutes — 4 hours (iOS minimum for background fetch)
+      autoStart: true,
+    },
   }
 };
 

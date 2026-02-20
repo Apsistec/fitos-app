@@ -102,6 +102,10 @@ addIcons({
             <ion-icon name="search-outline"></ion-icon>
             <ion-label>Search</ion-label>
           </ion-segment-button>
+          <ion-segment-button value="barcode">
+            <ion-icon name="barcode-outline"></ion-icon>
+            <ion-label>Scan</ion-label>
+          </ion-segment-button>
           <ion-segment-button value="voice">
             <ion-icon name="mic-outline"></ion-icon>
             <ion-label>Voice</ion-label>
@@ -134,6 +138,27 @@ addIcons({
             >
               <ion-icon slot="start" name="search-outline"></ion-icon>
             </ion-searchbar>
+          </div>
+        }
+
+        <!-- Barcode Scan Tab -->
+        @if (inputMethod === 'barcode') {
+          <div class="barcode-container">
+            <div class="barcode-capture">
+              <div class="barcode-icon-ring">
+                <ion-icon name="barcode-outline" class="barcode-hero-icon"></ion-icon>
+              </div>
+              <p class="barcode-desc">Scan a food product barcode to instantly log nutrition info</p>
+              <ion-button
+                expand="block"
+                size="large"
+                (click)="openBarcodeScanner()"
+                class="barcode-open-btn"
+              >
+                <ion-icon slot="start" name="barcode-outline"></ion-icon>
+                Open Barcode Scanner
+              </ion-button>
+            </div>
           </div>
         }
 
@@ -303,10 +328,52 @@ addIcons({
     }
 
     .voice-container,
-    .photo-container {
+    .photo-container,
+    .barcode-container {
       padding: 32px;
       max-width: 600px;
       margin: 0 auto;
+    }
+
+    .barcode-capture {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .barcode-icon-ring {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.1);
+      border: 2px solid rgba(16, 185, 129, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .barcode-hero-icon {
+      font-size: 40px;
+      color: var(--fitos-accent-primary, #10B981);
+    }
+
+    .barcode-desc {
+      font-size: 14px;
+      color: var(--fitos-text-secondary, #A3A3A3);
+      text-align: center;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .barcode-open-btn {
+      width: 100%;
+      max-width: 300px;
+      height: 56px;
+      font-size: 16px;
+      --border-radius: 8px;
+      font-weight: 700;
+      --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
     }
 
     .photo-capture {
@@ -512,7 +579,7 @@ export class AddFoodPage implements OnInit {
   private alertCtrl = inject(AlertController);
 
   // Input method
-  inputMethod: 'search' | 'voice' | 'photo' = 'search';
+  inputMethod: 'search' | 'barcode' | 'voice' | 'photo' = 'search';
 
   // Search
   searchQuery = '';
@@ -541,6 +608,11 @@ export class AddFoodPage implements OnInit {
       this.searchQuery = '';
       this.foodService.searchResults.set([]);
     }
+  }
+
+  openBarcodeScanner(): void {
+    this.haptic.light();
+    this.router.navigate(['/tabs/nutrition/scan']);
   }
 
   async onSearchInput(event: Event) {

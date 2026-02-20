@@ -195,6 +195,70 @@ export class FirebaseService {
     }
   }
 
+  // ─── FCM Push Notification Registration ───────────────────────────
+
+  /**
+   * Register the device FCM token with the backend.
+   * Sprint 52: Called by NotificationService after push permission is granted.
+   *
+   * Delegates to @capacitor/push-notifications for actual FCM token retrieval —
+   * this method provides the analytics tracking hook and token-received event.
+   *
+   * @param token - The FCM registration token from PushNotifications plugin
+   */
+  trackFcmRegistration(token: string): void {
+    if (!this.analytics) return;
+    try {
+      logEvent(this.analytics, 'fcm_token_registered', {
+        token_length: token.length, // avoid logging the actual token
+      });
+    } catch (e) {
+      console.warn('[FirebaseService] trackFcmRegistration failed:', e);
+    }
+  }
+
+  /**
+   * Track when a push notification is received in the foreground.
+   * Sprint 52: Called by NotificationService push listeners.
+   */
+  trackNotificationReceived(type: string): void {
+    if (!this.analytics) return;
+    try {
+      logEvent(this.analytics, 'notification_received', { notification_type: type });
+    } catch (e) {
+      console.warn('[FirebaseService] trackNotificationReceived failed:', e);
+    }
+  }
+
+  /**
+   * Track when a push notification is opened (tapped).
+   * Sprint 52: Called by NotificationService on action performed.
+   */
+  trackNotificationOpened(type: string, actionTaken?: string): void {
+    if (!this.analytics) return;
+    try {
+      logEvent(this.analytics, 'notification_opened', {
+        notification_type: type,
+        action_taken: actionTaken ?? 'tap',
+      });
+    } catch (e) {
+      console.warn('[FirebaseService] trackNotificationOpened failed:', e);
+    }
+  }
+
+  /**
+   * Track geofence arrival at a gym.
+   * Sprint 52: Called by GeofenceService on entry events.
+   */
+  trackGeofenceEntry(gymName: string): void {
+    if (!this.analytics) return;
+    try {
+      logEvent(this.analytics, 'geofence_entry', { gym_name: gymName });
+    } catch (e) {
+      console.warn('[FirebaseService] trackGeofenceEntry failed:', e);
+    }
+  }
+
   // ─── Performance Monitoring Methods ───────────────────────────────
 
   /**

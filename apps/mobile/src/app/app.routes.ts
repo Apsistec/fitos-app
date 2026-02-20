@@ -290,6 +290,13 @@ export const routes: Routes = [
               ),
           },
           {
+            path: 'scan',
+            loadComponent: () =>
+              import('./features/nutrition/pages/barcode-scan/barcode-scan.page').then(
+                (m) => m.BarcodeScanPage
+              ),
+          },
+          {
             // Quick water logging — launched from app shortcut / deep link
             path: 'water',
             loadComponent: () =>

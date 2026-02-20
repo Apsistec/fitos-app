@@ -1,6 +1,7 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
+import { LiveActivityService } from './live-activity.service';
 import { Database } from '@fitos/shared';
 
 type WorkoutSession = Database['public']['Tables']['workouts']['Row'];
@@ -33,9 +34,11 @@ export class WorkoutSessionService {
   private activeSessionSignal = signal<ActiveSession | null>(null);
   private loadingSignal = signal<boolean>(false);
   private errorSignal = signal<string | null>(null);
+  private sessionStartTime = signal<Date | null>(null);
 
   private supabase = inject(SupabaseService);
   private auth = inject(AuthService);
+  private liveActivity = inject(LiveActivityService);
 
   // Computed values
   activeSession = computed(() => this.activeSessionSignal());
@@ -76,6 +79,15 @@ export class WorkoutSessionService {
         session: data,
         loggedSets: []
       });
+      this.sessionStartTime.set(new Date());
+
+      // Sprint 49 — Start Dynamic Island live activity
+      const workoutName = (data as WorkoutSession & { template?: { name?: string } }).template?.name ?? 'Workout';
+      await this.liveActivity.startWorkoutActivity(
+        workoutName,
+        0,          // totalSets unknown at start; updated as sets are logged
+        'Starting…',
+      );
 
       return data;
     } catch (error) {
@@ -160,12 +172,39 @@ export class WorkoutSessionService {
         };
       });
 
+      // Sprint 49 — Update Dynamic Island with current set info
+      const session = this.activeSessionSignal();
+      const elapsedSecs = this.sessionStartTime()
+        ? Math.floor((Date.now() - this.sessionStartTime()!.getTime()) / 1000)
+        : 0;
+      await this.liveActivity.updateActivity(
+        /* exerciseName */ `Set ${setLog.setNumber}`,
+        setLog.setNumber,
+        null,       // not in rest period immediately after logging
+        elapsedSecs,
+      );
+
       return data;
     } catch (error) {
       console.error('Error logging set:', error);
       this.errorSignal.set(error instanceof Error ? error.message : 'Failed to log set');
       return null;
     }
+  }
+
+  /**
+   * Update the Dynamic Island rest timer countdown.
+   * Call from the workout UI every second during rest periods.
+   *
+   * @param exerciseName  Upcoming exercise name
+   * @param setNumber     Upcoming set number
+   * @param restRemainingSec  Countdown in seconds (0 = rest complete)
+   */
+  async updateRestTimer(exerciseName: string, setNumber: number, restRemainingSec: number): Promise<void> {
+    const elapsedSecs = this.sessionStartTime()
+      ? Math.floor((Date.now() - this.sessionStartTime()!.getTime()) / 1000)
+      : 0;
+    await this.liveActivity.updateActivity(exerciseName, setNumber, restRemainingSec, elapsedSecs);
   }
 
   /**
@@ -264,6 +303,10 @@ export class WorkoutSessionService {
 
       // Update assignment status to completed
       this.activeSessionSignal.set(null);
+      this.sessionStartTime.set(null);
+
+      // Sprint 49 — End Dynamic Island live activity
+      await this.liveActivity.endActivity('Workout complete! 💪');
 
       return true;
     } catch (error) {
@@ -290,6 +333,9 @@ export class WorkoutSessionService {
    */
   clearSession(): void {
     this.activeSessionSignal.set(null);
+    this.sessionStartTime.set(null);
+    // End live activity without a "complete" message
+    this.liveActivity.endActivity('Workout ended').catch(() => {});
   }
 
   /**
@@ -299,6 +345,7 @@ export class WorkoutSessionService {
     this.activeSessionSignal.set(null);
     this.loadingSignal.set(false);
     this.errorSignal.set(null);
+    this.sessionStartTime.set(null);
   }
 
   /**

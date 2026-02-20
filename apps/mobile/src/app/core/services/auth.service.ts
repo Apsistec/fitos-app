@@ -998,6 +998,73 @@ export class AuthService {
     }
   }
 
+  // ── Sprint 53: Native social login + Email OTP ─────────────────────────
+
+  /**
+   * Sign in with a native social ID token (Google/Apple).
+   * Used by SocialLoginService on iOS/Android to avoid OAuth browser redirect.
+   * On web, the SocialLoginService falls back to signInWithProvider() instead.
+   *
+   * @param provider  'google' | 'apple'
+   * @param idToken   ID token from native SDK
+   * @param nonce     Required for Apple sign-in (SHA-256 nonce)
+   */
+  async signInWithIdToken(
+    provider: 'google' | 'apple',
+    idToken: string,
+    nonce?: string
+  ): Promise<{ error: Error | null }> {
+    try {
+      const { error } = await this.supabase.auth.signInWithIdToken({
+        provider,
+        token: idToken,
+        nonce,
+      });
+      if (error) throw error;
+      return { error: null };
+    } catch (error) {
+      return { error: error as Error };
+    }
+  }
+
+  /**
+   * Send a 6-digit OTP to the user's email.
+   * User stays in-app — no redirect required.
+   */
+  async signInWithOtp(email: string): Promise<{ error: Error | null }> {
+    try {
+      const { error } = await this.supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: true,
+        },
+      });
+      if (error) throw error;
+      return { error: null };
+    } catch (error) {
+      return { error: error as Error };
+    }
+  }
+
+  /**
+   * Verify the 6-digit OTP code sent to email.
+   */
+  async verifyOtp(email: string, token: string): Promise<{ error: Error | null }> {
+    try {
+      const { error } = await this.supabase.auth.verifyOtp({
+        email,
+        token,
+        type: 'email',
+      });
+      if (error) throw error;
+      return { error: null };
+    } catch (error) {
+      return { error: error as Error };
+    }
+  }
+
+  // ── End Sprint 53 additions ─────────────────────────────────────────────
+
   /**
    * Sign up with OAuth provider (Google, Apple, etc.)
    * Stores the intended role in sessionStorage before OAuth redirect

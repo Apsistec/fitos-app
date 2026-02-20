@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
   IonContent,
@@ -13,17 +13,23 @@ import {
   IonIcon,
   IonBackButton,
   IonButtons,
+  IonSegment,
+  IonSegmentButton,
+  IonLabel,
   ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { logoGoogle, logoApple, peopleOutline } from 'ionicons/icons';
 import { AuthService } from '../../../../../core/services/auth.service';
+import { SocialLoginService } from '../../../../../core/services/social-login.service';
+import { OtpLoginComponent } from '../../../components/otp-login/otp-login.component';
 
 @Component({
   selector: 'app-client-login',
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    FormsModule,
     RouterLink,
     IonContent,
     IonHeader,
@@ -36,6 +42,10 @@ import { AuthService } from '../../../../../core/services/auth.service';
     IonIcon,
     IonBackButton,
     IonButtons,
+    IonSegment,
+    IonSegmentButton,
+    IonLabel,
+    OtpLoginComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -56,77 +66,89 @@ import { AuthService } from '../../../../../core/services/auth.service';
           <span>Client</span>
         </div>
 
-        <!-- Error Message -->
-        @if (errorMessage()) {
-          <div class="message message--error">
-            {{ errorMessage() }}
-            @if (showResendLink()) {
-              <br><br>
-              <a href="#" (click)="resendVerification($event)" class="resend-link">
-                @if (resendingEmail()) {
-                  Sending...
-                } @else {
-                  Resend verification email
-                }
-              </a>
-            }
-          </div>
-        }
+        <!-- Auth Method Segment -->
+        <ion-segment [(ngModel)]="authTab" class="auth-segment">
+          <ion-segment-button value="password">
+            <ion-label>Password</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="otp">
+            <ion-label>Email Code</ion-label>
+          </ion-segment-button>
+        </ion-segment>
 
-        <!-- Success Message -->
-        @if (successMessage()) {
-          <div class="message message--success">
-            {{ successMessage() }}
-          </div>
-        }
+        @if (authTab() === 'password') {
+          <!-- Error Message -->
+          @if (errorMessage()) {
+            <div class="message message--error">
+              {{ errorMessage() }}
+              @if (showResendLink()) {
+                <br><br>
+                <a href="#" (click)="resendVerification($event)" class="resend-link">
+                  @if (resendingEmail()) { Sending... } @else { Resend verification email }
+                </a>
+              }
+            </div>
+          }
 
-        <!-- Login Form -->
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-          <div class="form-group">
-            <ion-input
-              formControlName="email"
-              type="email"
-              label="Email Address"
-              labelPlacement="floating"
-              fill="outline"
-              placeholder="you@example.com"
-              autocomplete="email"
-              [errorText]="emailError()"
-            />
-          </div>
+          <!-- Success Message -->
+          @if (successMessage()) {
+            <div class="message message--success">{{ successMessage() }}</div>
+          }
 
-          <div class="form-group">
-            <ion-input
-              formControlName="password"
-              type="password"
-              label="Password"
-              labelPlacement="floating"
-              fill="outline"
-              placeholder="Enter your password"
-              autocomplete="current-password"
-              [errorText]="passwordError()"
+          <!-- Password Login Form -->
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+            <div class="form-group">
+              <ion-input
+                formControlName="email"
+                type="email"
+                label="Email Address"
+                labelPlacement="floating"
+                fill="outline"
+                placeholder="you@example.com"
+                autocomplete="email"
+                [errorText]="emailError()"
+              />
+            </div>
+
+            <div class="form-group">
+              <ion-input
+                formControlName="password"
+                type="password"
+                label="Password"
+                labelPlacement="floating"
+                fill="outline"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+                [errorText]="passwordError()"
+              >
+                <ion-input-password-toggle slot="end" />
+              </ion-input>
+            </div>
+
+            <div class="forgot-password">
+              <a routerLink="/auth/forgot-password">Forgot password?</a>
+            </div>
+
+            <ion-button
+              expand="block"
+              type="submit"
+              [disabled]="loginForm.invalid || loading()"
+              class="submit-btn"
             >
-              <ion-input-password-toggle slot="end" />
-            </ion-input>
-          </div>
+              @if (loading()) {
+                <ion-spinner name="crescent"></ion-spinner>
+              } @else {
+                Log In
+              }
+            </ion-button>
+          </form>
+        }
 
-          <div class="forgot-password">
-            <a routerLink="/auth/forgot-password">Forgot password?</a>
+        @if (authTab() === 'otp') {
+          <div class="otp-wrapper">
+            <app-otp-login (success)="onOtpSuccess()"></app-otp-login>
           </div>
-
-          <ion-button
-            expand="block"
-            type="submit"
-            [disabled]="loginForm.invalid || loading()"
-            class="submit-btn"
-          >
-            @if (loading()) {
-              <ion-spinner name="crescent"></ion-spinner>
-            } @else {
-              Log In
-            }
-          </ion-button>
-        </form>
+        }
 
         <!-- Divider -->
         <div class="divider">
@@ -142,10 +164,14 @@ import { AuthService } from '../../../../../core/services/auth.service';
             fill="outline"
             color="medium"
             (click)="signInWithGoogle()"
-            [disabled]="loading()"
+            [disabled]="loading() || socialLoading()"
             class="social-btn"
           >
-            <ion-icon name="logo-google" slot="start"></ion-icon>
+            @if (socialLoading() === 'google') {
+              <ion-spinner name="crescent" slot="start"></ion-spinner>
+            } @else {
+              <ion-icon name="logo-google" slot="start"></ion-icon>
+            }
             Continue with Google
           </ion-button>
 
@@ -154,10 +180,14 @@ import { AuthService } from '../../../../../core/services/auth.service';
             fill="outline"
             color="medium"
             (click)="signInWithApple()"
-            [disabled]="loading()"
+            [disabled]="loading() || socialLoading()"
             class="social-btn"
           >
-            <ion-icon name="logo-apple" slot="start"></ion-icon>
+            @if (socialLoading() === 'apple') {
+              <ion-spinner name="crescent" slot="start"></ion-spinner>
+            } @else {
+              <ion-icon name="logo-apple" slot="start"></ion-icon>
+            }
             Continue with Apple
           </ion-button>
         </div>
@@ -308,6 +338,15 @@ import { AuthService } from '../../../../../core/services/auth.service';
       font-weight: 500;
     }
 
+    .auth-segment {
+      margin-bottom: 24px;
+      --background: var(--fitos-bg-tertiary, #262626);
+    }
+
+    .otp-wrapper {
+      margin-bottom: 8px;
+    }
+
     .social-buttons {
       display: flex;
       flex-direction: column;
@@ -360,6 +399,7 @@ import { AuthService } from '../../../../../core/services/auth.service';
 export class ClientLoginPage {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private socialLogin = inject(SocialLoginService);
   private toastController = inject(ToastController);
 
   loading = signal(false);
@@ -367,6 +407,8 @@ export class ClientLoginPage {
   errorMessage = signal<string | null>(null);
   successMessage = signal<string | null>(null);
   showResendLink = signal(false);
+  authTab = signal<'password' | 'otp'>('password');
+  socialLoading = signal<'google' | 'apple' | null>(null);
 
   loginForm: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -465,17 +507,21 @@ export class ClientLoginPage {
 
   async signInWithGoogle(): Promise<void> {
     this.errorMessage.set(null);
-    const { error } = await this.authService.signInWithProvider('google');
-    if (error) {
-      this.errorMessage.set(error.message);
-    }
+    this.socialLoading.set('google');
+    const { error } = await this.socialLogin.signInWithGoogle();
+    this.socialLoading.set(null);
+    if (error) this.errorMessage.set(error.message);
   }
 
   async signInWithApple(): Promise<void> {
     this.errorMessage.set(null);
-    const { error } = await this.authService.signInWithProvider('apple');
-    if (error) {
-      this.errorMessage.set(error.message);
-    }
+    this.socialLoading.set('apple');
+    const { error } = await this.socialLogin.signInWithApple();
+    this.socialLoading.set(null);
+    if (error) this.errorMessage.set(error.message);
+  }
+
+  onOtpSuccess(): void {
+    // Auth state change listener handles navigation
   }
 }
