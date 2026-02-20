@@ -505,24 +505,27 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 - As a new user, I can sign in with Google or Apple in <5 seconds
 
 **Implementation Tasks:**
-- [ ] Install `@capgo/capacitor-social-login`
-- [ ] **ENHANCE** `apps/mobile/src/app/core/services/auth.service.ts`
-  - Add `signInWithOtp(email)`: Call `supabase.auth.signInWithOtp({ email })`
-  - Add `verifyOtp(email, token)`: Call `supabase.auth.verifyOtp()`
-  - Add `signInWithIdToken(provider, idToken, nonce?)`: For native social login
-  - Keep existing magic link as fallback
-- [ ] Create `SocialLoginService` in `apps/mobile/src/app/core/services/social-login.service.ts`
-  - `signInWithGoogle()`: Get Google ID token via plugin, pass to auth.service.signInWithIdToken()
-  - `signInWithApple()`: Get Apple ID token, pass to auth service
-  - Platform detection: Native on iOS/Android, Supabase OAuth fallback on web
-- [ ] Update login page: Add "Continue with Google" / "Continue with Apple" buttons, email OTP flow
-- [ ] Update register page: Same social login additions
-- [ ] Configure Google and Apple OAuth in Supabase for signInWithIdToken() flow
+- [x] Install `@capgo/capacitor-social-login`
+- [x] **ENHANCED** `apps/mobile/src/app/core/services/auth.service.ts`
+  - Added `signInWithOtp(email)`: Call `supabase.auth.signInWithOtp({ email })`
+  - Added `verifyOtp(email, token)`: Call `supabase.auth.verifyOtp()`
+  - Added `signInWithIdToken(provider, idToken, nonce?)`: For native social login
+  - Existing magic link preserved as fallback
+- [x] Created `SocialLoginService` in `apps/mobile/src/app/core/services/social-login.service.ts`
+  - `signInWithGoogle()`: Native ID token via plugin on Capacitor, Supabase OAuth fallback on web
+  - `signInWithApple()`: iOS native flow with SHA-256 nonce; web fallback
+  - Platform detection: Capacitor.isNativePlatform() / Capacitor.getPlatform()
+- [x] Created `OtpLoginComponent` at `features/auth/components/otp-login/otp-login.component.ts`
+  - 2-step: email entry → 6-digit code; 60-second resend cooldown
+- [x] Updated all 3 login pages (client, trainer, gym-owner):
+  - IonSegment Password/Email Code tabs
+  - Native social login via SocialLoginService with per-button spinners
+  - OtpLoginComponent integrated
 
 ### 53.2 7-Stage Progressive Onboarding
 **Priority:** P0 (Critical)
 **Sprint:** 53
-**Status:** Not Started
+**Status:** ✅ Complete
 
 **User Stories:**
 - As a new user, onboarding feels personalized and motivating (not a boring form)
@@ -530,26 +533,37 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 - As a returning user, the app asks me 1-2 preference questions per session to refine my experience
 
 **Implementation Tasks:**
-- [ ] Create migration `20260213050000_progressive_onboarding.sql`
-  - Add to `profiles`: onboarding_stage (int 0-7), last_profiling_step (int), life_context (jsonb), behavioral_assessment (jsonb), imported_health_data (boolean), onboarding_completed_at (timestamp)
-  - `onboarding_analytics` table: id, user_id, stage, step_name, time_spent_seconds, completed, created_at
-  - `progressive_profiling_queue` table: id, user_id, question_key, question_text, answer, asked_at, answered_at, session_number
-- [ ] **ENHANCE** onboarding page at `features/auth/pages/onboarding/onboarding.page.ts`
-  - Expand from basic wizard to 7-stage progressive flow with progress bar
-- [ ] Create 7 onboarding stage components in `features/auth/pages/onboarding/stages/`:
-  - `goal-anchoring/` — Stage 1: Primary fitness goal with motivational framing
-  - `life-context/` — Stage 2: Timeline, events, motivation source
-  - `health-import/` — Stage 3: Import stats from Apple Health/Health Connect
-  - `behavioral-assessment/` — Stage 4: Activity level, exercise preferences, schedule
-  - `social-proof/` — Stage 5: Success stories interstitial (every ~5 screens)
-  - `plan-preview/` — Stage 6: Personalized plan preview
-  - `paywall/` — Stage 7: Subscription options (integrates with existing Stripe)
-- [ ] Create `ProgressiveProfilingService` in `apps/mobile/src/app/core/services/progressive-profiling.service.ts`
-  - `getNextQuestions(count)`: Get 1-2 questions for this session
-  - `submitAnswer(questionKey, answer)`: Save and advance counter
-  - `shouldShowProfiling()`: Check session gap threshold
-  - Limit to 1-2 questions per session, never interrupt core actions
-- [ ] Create profiling prompt component at `features/dashboard/components/profiling-prompt/profiling-prompt.component.ts`
+- [x] Created migration `20260213050000_progressive_onboarding.sql`
+  - Added to `profiles`: onboarding_stage (smallint 0-7), last_profiling_step, life_context (jsonb), behavioral_assessment (jsonb), imported_health_data (boolean), onboarding_completed_at (timestamptz)
+  - `onboarding_analytics` table with RLS (user-owns-own)
+  - `progressive_profiling_queue` table with partial index on unanswered questions
+  - `social_proof_stories` table with RLS (anyone reads active; trainer manages own)
+  - `get_onboarding_completion_rate(p_trainer_id)` analytics function
+- [x] **REWROTE** onboarding page at `features/auth/pages/onboarding/onboarding.page.ts`
+  - Expanded from 3-step wizard to full 7-stage progressive flow with progress bar
+  - Stage 1: Profile (all roles — name, goal, weight/height)
+  - Stage 2: Goal Anchoring (clients) — 2-col goal grid + motivation chips
+  - Stage 3: Life Context — timeline, key event, activity level selects
+  - Stage 4: Health Import — Apple Health (iOS) / Google Fit (Android) with skip
+  - Stage 5: Social Proof interstitial — goal-category-mapped success story
+  - Stage 6: Plan Preview — computed workouts/week, calorie target, timeline
+  - Stage 7: Role-specific setup (trainer bio/specialty or gym owner facility)
+  - Role-aware totalStages: clients=7, trainers/owners=2
+  - Back navigation via prevStage()
+  - markOnboardingComplete() upserts onboarding_completed_at
+- [x] Created `ProgressiveProfilingService` in `apps/mobile/src/app/core/services/progressive-profiling.service.ts`
+  - `shouldShowProfiling()`: Checks onboarding complete + 24h session gap + questions remain
+  - `getNextQuestions(count)`: Fetches unanswered unskipped questions ordered by session_number
+  - `startSession()`: Loads questions + records session timestamp in localStorage
+  - `submitAnswer(questionId, answer)`: Saves answer, updates signal, auto-closes when done
+  - `skipQuestion(questionId)`: Marks skipped permanently
+  - `seedQuestionsForNewUser(userId)`: Inserts 8 seed questions at onboarding completion
+  - 24h SESSION_GAP_MS prevents same-day re-prompting
+- [x] Created `ProfilingPromptComponent` at `features/dashboard/components/profiling-prompt/profiling-prompt.component.ts`
+  - Shows 1-2 structured/free-text questions per session
+  - Progress dots, dismiss button, Skip/Next/Done actions
+  - Wired into client dashboard at top of content area
+  - Pre-built answer configs for all 8 seed question types
 
 **Acceptance Criteria:**
 - Email OTP: User enters email, receives 6-digit code, authenticated without leaving app
@@ -626,6 +640,6 @@ Sprint 51 (OCR/Voice) ... independent
 
 ---
 
-**Phase Status:** 🚧 In Progress
-**Completed:** Sprint 46 (NFC/QR), Sprint 47 (App Shortcuts & Quick Water), Sprint 48 (Widgets), Sprint 49 (Direct Health Sync + Dynamic Island), Sprint 50 (Barcode Scanning & Food Database Pipeline), Sprint 51 (Equipment OCR + Enhanced Voice Logging), Sprint 52 (Context-Aware Notifications + Geofencing)
-**Next Step:** Sprint 53 - Progressive Onboarding & Auth Enhancement
+**Phase Status:** ✅ Complete
+**Completed:** Sprint 46 (NFC/QR), Sprint 47 (App Shortcuts & Quick Water), Sprint 48 (Widgets), Sprint 49 (Direct Health Sync + Dynamic Island), Sprint 50 (Barcode Scanning & Food Database Pipeline), Sprint 51 (Equipment OCR + Enhanced Voice Logging), Sprint 52 (Context-Aware Notifications + Geofencing), Sprint 53 (Progressive Onboarding & Auth Enhancement)
+**Next Step:** Phase 5 - Scheduling & Practice Management (Sprint 54)

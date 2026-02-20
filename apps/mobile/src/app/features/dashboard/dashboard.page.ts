@@ -39,6 +39,7 @@ import { WearableDataCardComponent } from '../../shared/components/wearable-data
 import { OwnerFacilityStatsComponent, type FacilityStats } from './components/owner-facility-stats/owner-facility-stats.component';
 import { OwnerTrainerPerformanceComponent, type TrainerPerformance } from './components/owner-trainer-performance/owner-trainer-performance.component';
 import { CRMDashboardWidgetComponent } from '../crm/components/crm-dashboard-widget.component';
+import { ProfilingPromptComponent } from './components/profiling-prompt/profiling-prompt.component';
 import type { WorkoutWithExercises } from '../../core/services/workout.service';
 
 @Component({
@@ -67,6 +68,7 @@ import type { WorkoutWithExercises } from '../../core/services/workout.service';
     OwnerFacilityStatsComponent,
     OwnerTrainerPerformanceComponent,
     CRMDashboardWidgetComponent,
+    ProfilingPromptComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeInUp, listStagger],
@@ -99,6 +101,9 @@ import type { WorkoutWithExercises } from '../../core/services/workout.service';
         @case ('client') {
         <!-- Client Dashboard -->
         <div class="client-dashboard" @fadeInUp>
+          <!-- Progressive Profiling Prompt (post-onboarding, 1-2 questions/session) -->
+          <app-profiling-prompt />
+
           <!-- Today's Workout -->
           <app-client-today-workout-card [workout]="todayWorkout()" />
 
@@ -234,6 +239,7 @@ import type { WorkoutWithExercises } from '../../core/services/workout.service';
     }
 
     /* Ensure all cards have consistent width */
+    app-profiling-prompt,
     app-client-today-workout-card,
     app-client-nutrition-summary,
     app-wearable-data-card,
