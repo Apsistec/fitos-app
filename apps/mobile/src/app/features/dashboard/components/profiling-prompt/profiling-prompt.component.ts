@@ -14,7 +14,6 @@ import {
   IonSpinner,
   IonTextarea,
   IonItem,
-  IonLabel,
   IonSelect,
   IonSelectOption,
 } from '@ionic/angular/standalone';
@@ -27,7 +26,6 @@ import {
 } from 'ionicons/icons';
 import {
   ProgressiveProfilingService,
-  ProfilingQuestion,
 } from '../../../../core/services/progressive-profiling.service';
 
 /**
@@ -98,10 +96,9 @@ const QUESTION_CONFIGS: Record<string, QuestionConfig> = {
     IonSpinner,
     IonTextarea,
     IonItem,
-    IonLabel,
     IonSelect,
-    IonSelectOption,
-  ],
+    IonSelectOption
+],
   template: `
     @if (profilingService.isShowing() && currentQuestion()) {
       <ion-card class="profiling-card">

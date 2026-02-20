@@ -26,7 +26,7 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 ## Sprint Schedule Overview
 
 | Sprint | Duration | Focus Area | Sub-Phase |
-|--------|----------|------------|-----------|
+| --- | --- | --- | --- |
 | 46 | 2 weeks | NFC/QR Check-In & Deep Links | 4A: Physical Touchpoints |
 | 47 | 1 week | App Shortcuts & Quick Actions | 4A: Physical Touchpoints |
 | 48 | 2 weeks | Home Screen & Lock Screen Widgets | 4B: Native OS Integration |
@@ -43,16 +43,19 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 ## Epic 46: NFC/QR Physical Touchpoints
 
 ### 46.1 NFC Tag Read/Write
+
 **Priority:** P0 (Critical)
 **Sprint:** 46
 **Status:** ✅ Complete
 
 **User Stories:**
+
 - As a client, I can tap my phone on an NFC tag at the gym and land on my workout in <3 seconds
 - As a trainer, I can write deep-link URLs to NFC tags from the app for my clients
 - As a trainer, I can view scan analytics for my NFC tags
 
 **Implementation Tasks:**
+
 - [ ] Install `@capgo/capacitor-nfc` v8.0.10
 - [ ] Create `NfcService` in `apps/mobile/src/app/core/services/nfc.service.ts`
   - `scanTag()`: Start NFC session, parse NDEF URI record
@@ -68,21 +71,25 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 - [ ] Create floating NFC scan button component at `features/dashboard/components/nfc-scanner/nfc-scanner.component.ts`
 
 **Acceptance Criteria:**
+
 - User taps phone on NTAG213 tag, app opens to correct workout
 - Trainer can write deep-link URI to NFC tag from settings
 - Scan events logged for analytics
 - Falls back gracefully to PWA URL when native app not installed
 
 ### 46.2 QR Code Generation
+
 **Priority:** P0 (Critical)
 **Sprint:** 46
 **Status:** ✅ Complete
 
 **User Stories:**
+
 - As a trainer, I can generate QR codes for workout programs to print or display
 - As a client, I can scan a QR code to quickly access my assigned workout
 
 **Implementation Tasks:**
+
 - [ ] Install `angularx-qrcode` v21.0.4
 - [ ] Create QR check-in component at `features/clients/components/qr-checkin/qr-checkin.component.ts`
   - Generate canvas/SVG QR codes with FitOS branding
@@ -91,19 +98,23 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 - [ ] Add QR code display to trainer client management pages
 
 **Acceptance Criteria:**
+
 - QR code links to same deep-link URI as NFC tags
 - QR codes render correctly in dark mode with branded colors
 - QR codes scannable by any phone camera app
 
 ### 46.3 Deep-Link Router
+
 **Priority:** P0 (Critical)
 **Sprint:** 46
 **Status:** ✅ Complete
 
 **User Stories:**
+
 - As a user, deep links from NFC/QR/notifications all route to the correct in-app screen
 
 **Implementation Tasks:**
+
 - [ ] Create `DeepLinkService` in `apps/mobile/src/app/core/services/deep-link.service.ts`
   - Central router replacing fragmented listeners in auth.service.ts and sso.service.ts
   - Parse `/action/checkin/:facilityId`, `/action/workout/:templateId`, `/action/equipment/:equipmentId`
@@ -114,6 +125,7 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 - [ ] Register DeepLinkService in app initialization
 
 **Acceptance Criteria:**
+
 - Deep links work from NFC tags, QR codes, and push notifications
 - `apple-app-site-association` and `assetlinks.json` validated
 - Unauthenticated users redirect to login, then to deep-link target after auth
@@ -123,14 +135,17 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 ## Epic 47: App Shortcuts & Quick Actions
 
 ### 47.1 Native App Shortcuts
+
 **Priority:** P1 (High)
 **Sprint:** 47
 **Status:** ✅ Complete
 
 **User Stories:**
+
 - As a client, I can long-press the app icon and quickly jump to "Log Workout", "Add Food", "Add Water", or "Start Timer"
 
 **Implementation Tasks:**
+
 - [ ] Install `@capawesome/capacitor-app-shortcuts` v8.0.0
 - [ ] Create `AppShortcutsService` in `apps/mobile/src/app/core/services/app-shortcuts.service.ts`
   - `registerShortcuts()`: Called on app init
@@ -140,25 +155,30 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 - [ ] Register shortcuts in `app.component.ts` `initializeApp()`
 
 **Acceptance Criteria:**
+
 - Long-press app icon shows 3-4 Quick Actions on iOS and Android
 - Each shortcut navigates to correct page/action
 - Shortcuts registered on app launch
 
 ### 47.2 Quick Water Logging
+
 **Priority:** P1 (High)
 **Sprint:** 47
 **Status:** ✅ Complete
 
 **User Stories:**
+
 - As a client, I can log water intake with a single tap from the shortcut
 
 **Implementation Tasks:**
+
 - [ ] Create quick water modal at `features/nutrition/components/quick-water/quick-water.component.ts`
   - 250ml / 500ml / 750ml / custom quick buttons
   - One-tap logging, auto-dismiss
   - Haptic feedback on log
 
 **Acceptance Criteria:**
+
 - Water logged with single tap from shortcut
 - Modal auto-dismisses after logging
 - Nutrition totals update immediately
@@ -168,14 +188,17 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 ## Epic 48: Home Screen & Lock Screen Widgets
 
 ### 48.1 Widget Data Bridge
+
 **Priority:** P1 (High)
 **Sprint:** 48
 **Status:** ✅ Complete
 
 **User Stories:**
+
 - As a client, I can see my daily calorie ring, next workout, and streak on my home screen without opening the app
 
 **Implementation Tasks:**
+
 - [ ] Install `capacitor-widget-bridge` v8.0.0
 - [ ] Create `WidgetService` in `apps/mobile/src/app/core/services/widget.service.ts`
   - `updateWidgetData()`: Push latest data to native widget via bridge
@@ -184,11 +207,13 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 - [ ] Integrate calls from `nutrition.service.ts`, `workout-session.service.ts`, `streak.service.ts`
 
 ### 48.2 iOS Widgets (SwiftUI)
+
 **Priority:** P1 (High)
 **Sprint:** 48
 **Status:** ✅ Complete
 
 **Implementation Tasks:**
+
 - [ ] Create WidgetKit extension in `apps/mobile/ios/App/FitOSWidget/`
 - [ ] `CalorieRingWidget.swift`: Circular progress for daily calories/protein
 - [ ] `NextWorkoutWidget.swift`: Next scheduled workout name + time
@@ -198,11 +223,13 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 - [ ] Configure App Groups for shared UserDefaults
 
 ### 48.3 Android Widgets (Glance)
+
 **Priority:** P1 (High)
 **Sprint:** 48
 **Status:** ✅ Complete
 
 **Implementation Tasks:**
+
 - [ ] Create widget classes in `apps/mobile/android/app/src/main/java/com/fitos/app/widgets/`
 - [ ] `CalorieRingWidget.kt`: RemoteViews calorie ring
 - [ ] `NextWorkoutWidget.kt`: Next workout info
@@ -210,6 +237,7 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 - [ ] Configure SharedPreferences for data bridge
 
 **Acceptance Criteria (All 48.x):**
+
 - iOS home screen widget shows calorie ring with current/target
 - iOS lock screen widget shows streak count
 - Android home screen widget shows calorie ring and next workout
@@ -222,15 +250,18 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 ## Epic 49: Direct Health Sync + Dynamic Island
 
 ### 49.1 HealthKit/Health Connect Direct Integration
+
 **Priority:** P0 (Critical)
 **Sprint:** 49
 **Status:** ✅ Complete
 
 **User Stories:**
+
 - As a client, I can sync health data directly from Apple Health or Health Connect without a third-party service
 - As a client, my smart scale data (weight, body fat %) syncs automatically
 
 **Implementation Tasks:**
+
 - [ ] Install `@capgo/capacitor-health` (free, SPM-ready, Capacitor 8 compatible)
 - [ ] Install `@capacitor/background-runner`
 - [ ] Create migration `20260213010000_health_sync_expanded.sql`
@@ -255,14 +286,17 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 **Note:** Terra kept for Garmin/Whoop/Oura users. NEVER display calorie burn from wearables.
 
 ### 49.2 Dynamic Island Workout Timer
+
 **Priority:** P2 (Medium)
 **Sprint:** 49
 **Status:** ✅ Complete
 
 **User Stories:**
+
 - As a client on iPhone 14+, I can see my active workout and rest timer on the Dynamic Island
 
 **Implementation Tasks:**
+
 - [ ] Install `capacitor-live-activities` (ludufre)
 - [ ] Create `LiveActivityService` in `apps/mobile/src/app/core/services/live-activity.service.ts`
   - `startWorkoutActivity(workout)`: Start Dynamic Island live activity
@@ -275,6 +309,7 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 - [ ] Integrate with `workout-session.service.ts`: start/update/end activity lifecycle
 
 **Acceptance Criteria (All 49.x):**
+
 - HealthKit authorization prompts for all data types on iOS
 - Health Connect authorization on Android
 - HRV, body fat %, lean body mass, sleep stages sync to Supabase
@@ -289,15 +324,18 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 ## Epic 50: Barcode Scanning & Food Database Pipeline
 
 ### 50.1 On-Device Barcode Scanner
+
 **Priority:** P0 (Critical)
 **Sprint:** 50
 **Status:** ✅ Complete
 
 **User Stories:**
+
 - As a client, I can scan a food barcode and instantly see nutrition information
 - As a client, I can quickly re-log previously scanned items
 
 **Implementation Tasks:**
+
 - [ ] Install `@capacitor-mlkit/barcode-scanning`
 - [ ] Create `BarcodeScannerService` in `apps/mobile/src/app/core/services/barcode-scanner.service.ts`
   - `scan()`: Open ML Kit scanner, return UPC/EAN string
@@ -315,14 +353,17 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 - [ ] Add "Scan Barcode" button to add-food page
 
 ### 50.2 Multi-Source Food Database Pipeline
+
 **Priority:** P0 (Critical)
 **Sprint:** 50
 **Status:** ✅ Complete
 
 **User Stories:**
+
 - As a client, barcode lookups find results >95% of the time via multiple databases
 
 **Implementation Tasks:**
+
 - [ ] Create migration `20260213020000_barcode_food_cache.sql`
   - `barcode_food_cache` table: barcode (PK), food_name, brand, serving_size, serving_unit, calories, protein, carbs, fat, fiber, sugar, sodium, source (openfoodfacts/usda/fatsecret/manual), verified, last_fetched_at
   - `barcode_scan_history` table: id, user_id, barcode, food_name, scanned_at
@@ -336,6 +377,7 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
   - Integrate with existing `searchResults` signal
 
 **Acceptance Criteria:**
+
 - Camera opens barcode scanner with viewfinder overlay
 - UPC/EAN detected on-device in <500ms
 - Nutrition resolved from cache or remote APIs in <2 seconds
@@ -349,14 +391,17 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 ## Epic 51: Equipment OCR + Enhanced Voice Logging
 
 ### 51.1 Gym Equipment Display OCR
+
 **Priority:** P2 (Medium)
 **Sprint:** 51
 **Status:** ✅ Complete
 
 **User Stories:**
+
 - As a client, I can photograph my treadmill display and auto-log cardio data
 
 **Implementation Tasks:**
+
 - [x] Install `@pantrist/capacitor-plugin-ml-kit-text-recognition@8.0.0` (Capacitor 8 compatible)
 - [x] Create migration `20260213030000_equipment_ocr_logs.sql`
   - `equipment_ocr_logs` table: id, user_id, equipment_type (treadmill/elliptical/bike/rower/stairclimber/other), recognized_text, parsed_data (jsonb), confidence, photo_url, session_id (FK), created_at
@@ -372,20 +417,24 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 - [x] Added collapsible "Scan Cardio Equipment" panel to active workout page
 
 **Acceptance Criteria:**
+
 - Equipment OCR captures displays with >85% accuracy in gym lighting
 - Parsed data shown for confirmation before logging
 - Works offline (ML Kit on-device)
 
 ### 51.2 Enhanced Voice Logging
+
 **Priority:** P1 (High)
 **Sprint:** 51
 **Status:** ✅ Complete
 
 **User Stories:**
+
 - As a client, voice recognition accurately understands fitness terms like "deadlift", "superset", "RPE"
 - As a client, voice commands work better in both workout and nutrition contexts
 
 **Implementation Tasks:**
+
 - [x] **ENHANCED** `apps/mobile/src/app/core/services/voice.service.ts`
   - Expanded keywords from ~15 to 100+ terms split into two context sets:
     - `WORKOUT_KEYTERMS`: 90+ terms covering commands, units, compound lifts, isolation exercises, equipment, cardio, modifiers
@@ -403,6 +452,7 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 - [x] Added voice context indicator (Workout / Nutrition chip toggle) to active workout page
 
 **Acceptance Criteria:**
+
 - Voice recognition accuracy improves measurably for fitness terms
 - Deepgram model upgraded to nova-3
 - Context switches automatically between workout and nutrition modes
@@ -413,15 +463,18 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 ## Epic 52: Context-Aware Notifications + Geofencing
 
 ### 52.1 Geofencing & Gym Proximity Detection
+
 **Priority:** P1 (High)
 **Sprint:** 52
 **Status:** ✅ Complete
 
 **User Stories:**
+
 - As a client, I receive a workout reminder when I arrive at the gym
 - As a trainer, I can set up gym locations for my clients' geofencing
 
 **Implementation Tasks:**
+
 - [x] Install `@capacitor/geolocation` (free alternative to $399 TransistorSoft plugin — Haversine formula handles geofencing natively)
 - [x] Install `@capgo/capacitor-wifi` for secondary Wi-Fi SSID gym detection
 - [x] Install `@capacitor/push-notifications`
@@ -441,16 +494,19 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
   - Signal state: `isNearGym`, `nearestGym`, `isTracking`, `gymLocations`, `lastPosition`, `error`
 
 ### 52.2 Smart Notification Orchestrator
+
 **Priority:** P1 (High)
 **Sprint:** 52
 **Status:** ✅ Complete
 
 **User Stories:**
+
 - As a client, I receive max 2-3 notifications per day, always positively framed
 - As a client, notification frequency decreases as my habits form over 66 days
 - As a client, I control which notification types I receive
 
 **Implementation Tasks:**
+
 - [x] Create `NotificationService` in `apps/mobile/src/app/core/services/notification.service.ts`
   - Central orchestrator for push + local notifications
   - `initialize()`: Loads prefs, checks push permission, refreshes daily count
@@ -482,6 +538,7 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 - Route `tabs/settings/notifications` already existed — no new route needed
 
 **Acceptance Criteria:**
+
 - Geofence triggers notification within 30 seconds of gym arrival
 - Wi-Fi SSID provides secondary gym confirmation
 - Max 2-3 notifications per day enforced
@@ -496,15 +553,18 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 ## Epic 53: Progressive Onboarding & Auth Enhancement
 
 ### 53.1 Email OTP & Native Social Login
+
 **Priority:** P0 (Critical)
 **Sprint:** 53
 **Status:** ✅ Complete
 
 **User Stories:**
+
 - As a new user, I can sign up with a 6-digit email code without leaving the app
 - As a new user, I can sign in with Google or Apple in <5 seconds
 
 **Implementation Tasks:**
+
 - [x] Install `@capgo/capacitor-social-login`
 - [x] **ENHANCED** `apps/mobile/src/app/core/services/auth.service.ts`
   - Added `signInWithOtp(email)`: Call `supabase.auth.signInWithOtp({ email })`
@@ -523,16 +583,19 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
   - OtpLoginComponent integrated
 
 ### 53.2 7-Stage Progressive Onboarding
+
 **Priority:** P0 (Critical)
 **Sprint:** 53
 **Status:** ✅ Complete
 
 **User Stories:**
+
 - As a new user, onboarding feels personalized and motivating (not a boring form)
 - As a new user, I see a personalized plan preview before committing
 - As a returning user, the app asks me 1-2 preference questions per session to refine my experience
 
 **Implementation Tasks:**
+
 - [x] Created migration `20260213050000_progressive_onboarding.sql`
   - Added to `profiles`: onboarding_stage (smallint 0-7), last_profiling_step, life_context (jsonb), behavioral_assessment (jsonb), imported_health_data (boolean), onboarding_completed_at (timestamptz)
   - `onboarding_analytics` table with RLS (user-owns-own)
@@ -566,6 +629,7 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
   - Pre-built answer configs for all 8 seed question types
 
 **Acceptance Criteria:**
+
 - Email OTP: User enters email, receives 6-digit code, authenticated without leaving app
 - Google sign-in completes in <5 seconds via native flow
 - Apple sign-in completes in <5 seconds on iOS
@@ -582,7 +646,7 @@ Phase 4 eliminates tracking friction through six interconnected feature areas:
 ## Cost Summary
 
 | Category | 100 users/mo | 1,000 users/mo | 10,000 users/mo |
-|----------|-------------|----------------|-----------------|
+| ---------- | ------------- | ---------------- | ----------------- |
 | Voice (Deepgram Nova-3 batch) | $16 | $161 | $1,613 |
 | Food photos (Passio AI) | $63 | $625 | $6,250 |
 | Barcode + OCR (on-device) | $0 | $0 | $0 |
@@ -600,7 +664,7 @@ Budget alternative: GPT-4o Mini for voice drops total to $74 / $738 / $7,375.
 
 ## Sprint Dependency Graph
 
-```
+``` general
 Sprint 46 (NFC/QR) ─── Sprint 47 (Shortcuts)
                    └── Sprint 52 (Notifications, uses deep-link service)
 

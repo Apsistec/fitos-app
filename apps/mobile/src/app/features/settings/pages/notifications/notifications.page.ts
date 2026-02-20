@@ -24,7 +24,6 @@ import {
   IonButton,
   IonIcon,
   IonRange,
-  IonBadge,
   ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -65,9 +64,8 @@ import { GymLocationPickerComponent, GymLocationSaved } from '../../components/g
     IonButton,
     IonIcon,
     IonRange,
-    IonBadge,
-    GymLocationPickerComponent,
-  ],
+    GymLocationPickerComponent
+],
   template: `
     <ion-header>
       <ion-toolbar>

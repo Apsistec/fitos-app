@@ -603,3 +603,163 @@ export interface NfcScanLog {
   scanned_at: string;
   platform?: NfcPlatform;
 }
+
+// ============================================================================
+// Scheduling — Phase 5 (Sprints 54-61)
+// ============================================================================
+
+export type AppointmentStatus =
+  | 'requested'
+  | 'booked'
+  | 'confirmed'
+  | 'arrived'
+  | 'completed'
+  | 'no_show'
+  | 'early_cancel'
+  | 'late_cancel';
+
+/** Terminal states — no further transitions possible */
+export const APPOINTMENT_TERMINAL_STATES: AppointmentStatus[] = [
+  'completed', 'no_show', 'early_cancel', 'late_cancel',
+];
+
+/** Valid FSM transitions map */
+export const APPOINTMENT_TRANSITIONS: Record<AppointmentStatus, AppointmentStatus[]> = {
+  requested:     ['booked'],
+  booked:        ['confirmed', 'arrived', 'early_cancel', 'late_cancel'],
+  confirmed:     ['arrived', 'early_cancel', 'late_cancel'],
+  arrived:       ['completed', 'no_show'],
+  completed:     [],
+  no_show:       [],
+  early_cancel:  [],
+  late_cancel:   [],
+};
+
+export interface ServiceType {
+  id: string;
+  trainer_id: string;
+  facility_id?: string;
+  name: string;
+  description?: string;
+  duration_minutes: number;
+  base_price: number;
+  cancel_window_minutes: number;
+  num_sessions_deducted: number;
+  buffer_after_minutes: number;
+  travel_buffer_minutes: number;
+  sell_online: boolean;
+  color: string;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AppointmentResource {
+  id: string;
+  facility_id?: string;
+  trainer_id: string;
+  name: string;
+  resource_type: 'room' | 'equipment' | 'other';
+  capacity: number;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface StaffAvailability {
+  id: string;
+  trainer_id: string;
+  day_of_week: number;  // 0=Sun, 6=Sat
+  start_time: string;   // HH:MM
+  end_time: string;     // HH:MM
+  facility_id?: string;
+  effective_from?: string;
+  effective_until?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StaffServiceRate {
+  id: string;
+  trainer_id: string;
+  service_type_id: string;
+  price_override: number;
+  created_at: string;
+}
+
+export interface Appointment {
+  id: string;
+  trainer_id: string;
+  client_id: string;
+  service_type_id: string;
+  facility_id?: string;
+  resource_id?: string;
+  status: AppointmentStatus;
+  start_at: string;        // ISO timestamp
+  end_at: string;          // ISO timestamp
+  duration_minutes: number;
+  notes?: string;
+  client_service_id?: string;
+  is_first_appointment: boolean;
+  staff_requested: boolean;
+  gender_preference: 'none' | 'female' | 'male';
+  is_recurring: boolean;
+  recurring_group_id?: string;
+  auto_noshow_minutes?: number;
+  created_at: string;
+  updated_at: string;
+  cancelled_at?: string;
+  cancel_reason?: string;
+  arrived_at?: string;
+  completed_at?: string;
+  // Joined fields (present when fetched with select)
+  service_type?: ServiceType;
+  trainer?: Pick<Profile, 'id' | 'full_name' | 'avatar_url'>;
+  client?: Pick<Profile, 'id' | 'full_name' | 'avatar_url'>;
+}
+
+export interface Visit {
+  id: string;
+  appointment_id: string;
+  client_id: string;
+  trainer_id: string;
+  service_type_id: string;
+  visit_status: AppointmentStatus;
+  sessions_deducted: number;
+  service_price: number;
+  trainer_pay_amount?: number;
+  client_service_id?: string;
+  payroll_processed: boolean;
+  payroll_period_id?: string;
+  created_at: string;
+}
+
+/** Slot returned by get-bookable-slots Edge Function */
+export interface BookableSlot {
+  time: string;       // ISO timestamp
+  available: boolean;
+  blocked_reason?: 'outside_availability' | 'existing_appointment' | 'buffer' | 'travel_buffer';
+}
+
+/** DTO for creating a new appointment */
+export interface CreateAppointmentDto {
+  trainer_id: string;
+  client_id: string;
+  service_type_id: string;
+  start_at: string;
+  facility_id?: string;
+  resource_id?: string;
+  notes?: string;
+  client_service_id?: string;
+  is_recurring?: boolean;
+  recurring_group_id?: string;
+  gender_preference?: 'none' | 'female' | 'male';
+}
+
+/** DTO for availability engine input */
+export interface AvailabilityQueryDto {
+  trainer_id: string;
+  service_type_id: string;
+  date: string;  // YYYY-MM-DD
+}

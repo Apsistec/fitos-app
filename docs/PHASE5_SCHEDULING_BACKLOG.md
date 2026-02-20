@@ -21,6 +21,7 @@ The six subsystems to build, mirroring Mindbody's architecture but improving on 
 6. **Multi-Trainer RBAC & Conflict Prevention** — Double-booking guards, travel buffers, permissions
 
 **Competitive differentiators shipped from day one:**
+
 - Auto no-show marking (Mindbody requires manual action; third-party tools exist solely for this)
 - Travel buffer time for mobile trainers (Mindbody has no concept of this)
 - Intelligent schedule clustering (suggest grouped slots to reduce dead time)
@@ -32,7 +33,7 @@ The six subsystems to build, mirroring Mindbody's architecture but improving on 
 ## Sprint Schedule Overview
 
 | Sprint | Duration | Focus Area | Sub-Phase |
-|--------|----------|------------|-----------|
+| -------- | ---------- | ------------ | ----------- |
 | 54 | 2 weeks | Appointment Data Model & Database Foundation | 5A: Core Data Layer |
 | 55 | 2 weeks | Calendar UI — Daily Grid & Multi-Trainer View | 5A: Core Data Layer |
 | 56 | 2 weeks | 8-State Appointment Lifecycle & FSM | 5B: Appointment Logic |
@@ -49,19 +50,27 @@ The six subsystems to build, mirroring Mindbody's architecture but improving on 
 ## Epic 54: Appointment Data Model & Database Foundation
 
 ### 54.1 Core Appointment Schema
+
 **Priority:** P0 (Critical)
 **Sprint:** 54
-**Status:** Not Started
+**Status:** ✅ Complete
 
 **User Stories:**
+
 - As a trainer, my appointment data is stored with all fields needed to drive billing, payroll, and reporting
 - As a developer, the schema enforces the 8-state lifecycle at the database level
 
 **Implementation Tasks:**
-- [ ] Create migration `20260300000000_scheduling_foundation.sql`
+
+- [x] Created migration `20260300000000_scheduling_foundation.sql`
+  - `appointment_status` ENUM (8 states); `service_types`, `appointment_resources`, `staff_availability`, `staff_service_rates`, `appointments`, `visits` tables with full RLS
+  - Extended `profiles` with `auto_noshow_minutes`, `scheduling_enabled`, `booking_lead_time_hours`, `booking_horizon_days`
+  - `check_appointment_conflict()` DB function (accounts for buffer + travel buffer)
+  - `get_appointment_counts()` helper function
+  - Note: `facilities` table already existed from Phase 3 (migration 00005) — referenced directly
 
 ```sql
--- Appointment status enum (8-state FSM)
+-- Appointment status enum (8-state FSM) — for reference
 CREATE TYPE appointment_status AS ENUM (
   'requested',
   'booked',
@@ -201,7 +210,8 @@ CREATE POLICY "trainer_owns_visits" ON visits
   USING (trainer_id = auth.uid());
 ```
 
-- [ ] Add types to `libs/shared/src/lib/types.ts`:
+- [x] Added types to `libs/shared/src/lib/types.ts`:
+
   ```typescript
   export type AppointmentStatus =
     | 'requested' | 'booked' | 'confirmed' | 'arrived'
@@ -273,26 +283,30 @@ CREATE POLICY "trainer_owns_visits" ON visits
   }
   ```
 
-- [ ] Create `AppointmentService` at `apps/mobile/src/app/core/services/appointment.service.ts`
-  - `getAppointments(trainerId, dateRange)`: Fetch appointments for calendar
-  - `getAvailableSlots(trainerId, serviceTypeId, date)`: Return open 15-minute slots
-  - `createAppointment(dto)`: POST new appointment, validate against availability
-  - `updateAppointment(id, dto)`: Reschedule/modify (creates new, cancels old)
+- [x] Created `AppointmentService` at `apps/mobile/src/app/core/services/appointment.service.ts`
+  - `loadAppointments(trainerId, dateRange)`: Fetch + realtime subscribe
+  - `getAvailableSlots(trainerId, serviceTypeId, date)`: Calls Edge Function
+  - `createAppointment(dto)`: Validates conflict via DB RPC, inserts, optimistic update
+  - `updateAppointment(id, dto)`: Notes/resource updates (status changes via AppointmentFsmService in Sprint 56)
   - `getClientAppointments(clientId)`: Upcoming appointments for client view
-  - Signal state: `appointments`, `selectedDate`, `isLoading`, `error`
-  - Realtime subscription on `appointments` table changes
+  - `getVisitsForAppointment(appointmentId)`: Visit history
+  - Signal state: `appointments`, `selectedDate`, `isLoading`, `error`, `todayAppointments`, `pendingRequestCount`
+  - Realtime subscription on `appointments` table (INSERT/UPDATE/DELETE handlers)
 
-- [ ] Create `ServiceTypeService` at `apps/mobile/src/app/core/services/service-type.service.ts`
-  - Full CRUD for trainer's service types
-  - Signal state: `serviceTypes`, `isLoading`
+- [x] Created `ServiceTypeService` at `apps/mobile/src/app/core/services/service-type.service.ts`
+  - Full CRUD + archive/restore + reorder + seed defaults
+  - Signal state: `serviceTypes`, `isLoading`, `activeServiceTypes`
 
-- [ ] Create `AvailabilityService` at `apps/mobile/src/app/core/services/availability.service.ts`
-  - `setAvailability(trainerId, blocks)`: Upsert availability windows
-  - `getAvailability(trainerId)`: Get weekly template
-  - `checkConflict(trainerId, start, end, excludeId?)`: Double-booking guard
-    - Cross-references: existing appointments + availability windows + buffer time + travel time
+- [x] Created `AvailabilityService` at `apps/mobile/src/app/core/services/availability.service.ts`
+  - `setAvailability(trainerId, blocks)`: Soft-delete + re-insert (atomic replacement)
+  - `addBlock()` / `removeBlock()`: Single-block management
+  - `loadAvailability(trainerId)`: Get weekly template
+  - `checkConflict(trainerId, start, end, excludeId?)`: Delegates to DB RPC `check_appointment_conflict()`
+  - `isWithinAvailability(date, duration)`: Client-side pre-check
+  - `seedDefaultAvailability()`: Mon–Fri 7am–7pm for new trainers
 
 **Acceptance Criteria:**
+
 - All 8 appointment statuses enforced at DB level via enum
 - RLS prevents clients from seeing other clients' appointments
 - Conflict check accounts for session duration + buffer + travel buffer
@@ -301,15 +315,18 @@ CREATE POLICY "trainer_owns_visits" ON visits
 ---
 
 ### 54.2 Availability Engine (Bookable Slots)
+
 **Priority:** P0 (Critical)
 **Sprint:** 54
 **Status:** Not Started
 
 **User Stories:**
+
 - As a client, I only see genuinely open time slots when booking
 - As a trainer, my travel time and buffer time automatically block adjacent slots
 
 **Implementation Tasks:**
+
 - [ ] Create Edge Function `supabase/functions/get-bookable-slots/index.ts`
   - Inputs: `trainer_id`, `service_type_id`, `date`
   - Logic:
@@ -321,6 +338,7 @@ CREATE POLICY "trainer_owns_visits" ON visits
   - Optimize: single DB call with CTEs; target <200ms response
 
 **Acceptance Criteria:**
+
 - Open slots respect trainer availability, existing bookings, session buffers, and travel buffers
 - Response time <200ms
 - Edge case: no double-booking even when two requests arrive simultaneously (use Postgres advisory lock or `FOR UPDATE SKIP LOCKED`)
@@ -330,15 +348,18 @@ CREATE POLICY "trainer_owns_visits" ON visits
 ## Epic 55: Calendar UI — Daily Grid & Multi-Trainer View
 
 ### 55.1 15-Minute Grid Calendar Component
+
 **Priority:** P0 (Critical)
 **Sprint:** 55
 **Status:** Not Started
 
 **User Stories:**
+
 - As a trainer, I can see my full day as a vertical time grid with appointments as colored blocks
 - As a trainer, I can click an empty slot to open a pre-filled booking form
 
 **Implementation Tasks:**
+
 - [ ] Create `ScheduleCalendarComponent` at `apps/mobile/src/app/features/scheduling/components/schedule-calendar/schedule-calendar.component.ts`
   - Vertical timeline: 15-minute rows from configurable start/end hours (default 6am–9pm)
   - Appointment blocks: height = `(duration_minutes / 15) * rowHeight`; display client name + service name
@@ -372,6 +393,7 @@ CREATE POLICY "trainer_owns_visits" ON visits
   - Route: `tabs/schedule`
 
 **Acceptance Criteria:**
+
 - 15-minute grid renders correctly for a full day (6am–9pm = 60 rows)
 - Appointment block height is proportional to duration (60-min = 4 rows)
 - Status colors applied per spec above
@@ -382,15 +404,18 @@ CREATE POLICY "trainer_owns_visits" ON visits
 ---
 
 ### 55.2 Multi-Trainer Side-by-Side View
+
 **Priority:** P1 (High)
 **Sprint:** 55
 **Status:** Not Started
 
 **User Stories:**
+
 - As a gym owner/manager, I can see all trainers' schedules side-by-side in one view
 - As an owner, I can spot scheduling gaps and over-loaded trainers at a glance
 
 **Implementation Tasks:**
+
 - [ ] Extend `ScheduleCalendarComponent` with multi-trainer mode
   - When `viewMode = 'all-trainers'`: render one vertical column per trainer
   - Trainer name header at top of each column
@@ -409,6 +434,7 @@ CREATE POLICY "trainer_owns_visits" ON visits
   - Tap slot → opens booking form
 
 **Acceptance Criteria:**
+
 - Multi-trainer view shows ≥4 trainers side-by-side with horizontal scroll
 - Column order respects trainer sort_order
 - Staff role can only see own column unless granted permission
@@ -419,18 +445,22 @@ CREATE POLICY "trainer_owns_visits" ON visits
 ## Epic 56: 8-State Appointment Lifecycle & FSM
 
 ### 56.1 Appointment State Machine Service
+
 **Priority:** P0 (Critical)
 **Sprint:** 56
 **Status:** Not Started
 
 **User Stories:**
+
 - As a trainer, status transitions are enforced — I cannot accidentally skip states
 - As a client, booking confirmation triggers an email/SMS acknowledgment
 
 **Implementation Tasks:**
+
 - [ ] Create `AppointmentFsmService` at `apps/mobile/src/app/core/services/appointment-fsm.service.ts`
   - Enforce valid transitions:
-    ```
+
+    ``` g
     requested  → booked (approve) | deleted (deny)
     booked     → confirmed | arrived | early_cancel | late_cancel
     confirmed  → arrived | early_cancel | late_cancel
@@ -440,6 +470,7 @@ CREATE POLICY "trainer_owns_visits" ON visits
     early_cancel → (terminal)
     late_cancel  → (terminal)
     ```
+
   - `transition(appointmentId, toStatus, metadata?)`: Validates allowed transition, applies business rules, writes DB, creates visit record on terminal state
   - `isLateCancel(appointment)`: Returns true if `now >= start_at - cancel_window_minutes`
   - `canTransition(from, to)`: Pure function for UI guard checks
@@ -466,6 +497,7 @@ CREATE POLICY "trainer_owns_visits" ON visits
   - No-show auto-triggered → push to trainer
 
 **Acceptance Criteria:**
+
 - Invalid status transitions rejected with descriptive error
 - Auto no-show triggers within 15 minutes of appointment start if no arrival recorded
 - Auto no-show window is configurable per trainer (5–60 minutes)
@@ -475,15 +507,18 @@ CREATE POLICY "trainer_owns_visits" ON visits
 ---
 
 ### 56.2 Check-In Kiosk Mode
+
 **Priority:** P2 (Medium)
 **Sprint:** 56
 **Status:** Not Started
 
 **User Stories:**
+
 - As a trainer, I can set up a tablet at the gym entrance for client self-check-in
 - As a client, I can tap my name on the kiosk to mark myself arrived
 
 **Implementation Tasks:**
+
 - [ ] Create `KioskPage` at `features/scheduling/pages/kiosk/kiosk.page.ts`
   - Shows upcoming appointments for the day (next 2 hours)
   - Client taps their name → confirms identity (last 4 of phone or DOB) → status transitions to `arrived`
@@ -492,6 +527,7 @@ CREATE POLICY "trainer_owns_visits" ON visits
   - PIN-protected exit (trainer sets PIN in settings)
 
 **Acceptance Criteria:**
+
 - Kiosk page accessible from trainer settings
 - Arriving client check-in updates appointment status to `arrived` within 2 seconds
 - Kiosk auto-returns to waiting screen after 30 seconds of inactivity
@@ -501,15 +537,18 @@ CREATE POLICY "trainer_owns_visits" ON visits
 ## Epic 57: Cancellation Policies & Late-Cancel Enforcement
 
 ### 57.1 Cancellation Policy Configuration
+
 **Priority:** P0 (Critical)
 **Sprint:** 57
 **Status:** Not Started
 
 **User Stories:**
+
 - As a trainer, I can set different cancellation windows and fees per service type
 - As a client, I am clearly shown the cancellation deadline before booking
 
 **Implementation Tasks:**
+
 - [ ] Create migration `20260300010000_cancellation_policies.sql`
 
 ```sql
@@ -530,6 +569,7 @@ CREATE POLICY "trainer_owns_policies" ON cancellation_policies USING (trainer_id
 ```
 
 - [ ] Add types to `@fitos/shared`:
+
   ```typescript
   export interface CancellationPolicy {
     id: string;
@@ -556,6 +596,7 @@ CREATE POLICY "trainer_owns_policies" ON cancellation_policies USING (trainer_id
 - [ ] Show cancellation deadline on booking confirmation and appointment detail screens
 
 **Acceptance Criteria:**
+
 - Policy resolves service-specific before global fallback
 - Cancellation deadline shown on every appointment detail view
 - `isLateCancel()` uses server timestamp (not client device time) for accuracy
@@ -563,15 +604,18 @@ CREATE POLICY "trainer_owns_policies" ON cancellation_policies USING (trainer_id
 ---
 
 ### 57.2 Fee Charging via Stripe
+
 **Priority:** P0 (Critical)
 **Sprint:** 57
 **Status:** Not Started
 
 **User Stories:**
+
 - As a trainer, late-cancel and no-show fees are automatically charged to the client's card on file
 - As a trainer, if the charge fails, the amount posts to the client's account balance as a debt
 
 **Implementation Tasks:**
+
 - [ ] Create Edge Function `supabase/functions/charge-cancellation-fee/index.ts`
   - Inputs: `appointment_id`, `fee_type` (late_cancel | no_show)
   - Logic:
@@ -595,6 +639,7 @@ CREATE POLICY "trainer_owns_policies" ON cancellation_policies USING (trainer_id
   - Remove card option
 
 - [ ] Create `client_ledger` migration if not already present from Phase billing work:
+
 ```sql
 CREATE TABLE IF NOT EXISTS client_ledger (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -613,6 +658,7 @@ CREATE POLICY "client_views_own_ledger" ON client_ledger FOR SELECT USING (clien
 ```
 
 **Acceptance Criteria:**
+
 - Card on file saved via Stripe SetupIntent (no PCI data in Supabase)
 - Late-cancel fee charged automatically when `AppointmentFsmService` transitions to `late_cancel`
 - No-show fee charged automatically when auto-no-show triggers
@@ -625,15 +671,18 @@ CREATE POLICY "client_views_own_ledger" ON client_ledger FOR SELECT USING (clien
 ## Epic 58: Pricing Options — Packs, Passes & Checkout POS
 
 ### 58.1 Pricing Options Data Model
+
 **Priority:** P0 (Critical)
 **Sprint:** 58
 **Status:** Not Started
 
 **User Stories:**
+
 - As a trainer, I can create session packs, time-based passes, and drop-in rates for my services
 - As a client, I can purchase a session pack and see my remaining sessions
 
 **Implementation Tasks:**
+
 - [ ] Create migration `20260300020000_pricing_options.sql`
 
 ```sql
@@ -687,6 +736,7 @@ CREATE POLICY "client_views_own_services" ON client_services FOR SELECT USING (c
 ```
 
 - [ ] Add types to `@fitos/shared`:
+
   ```typescript
   export type PricingOptionType = 'session_pack' | 'time_pass' | 'drop_in' | 'contract';
 
@@ -732,6 +782,7 @@ CREATE POLICY "client_views_own_services" ON client_services FOR SELECT USING (c
   - Create/edit form: name, type, price, session count, expiry window, applicable services, autopay settings
 
 **Acceptance Criteria:**
+
 - FIFO session selection: soonest-expiring package consumed first
 - Decrements use DB transactions to prevent race conditions
 - Trainer can have unlimited pricing options
@@ -740,15 +791,18 @@ CREATE POLICY "client_views_own_services" ON client_services FOR SELECT USING (c
 ---
 
 ### 58.2 Checkout POS Side Panel
+
 **Priority:** P0 (Critical)
 **Sprint:** 58
 **Status:** Not Started
 
 **User Stories:**
+
 - As a trainer, I can check out an appointment from the calendar without leaving the schedule view
 - As a trainer, the system auto-selects the client's applicable pricing option at checkout
 
 **Implementation Tasks:**
+
 - [ ] Create `CheckoutPanelComponent` at `features/scheduling/components/checkout-panel/checkout-panel.component.ts`
   - Opens as slide-out bottom sheet from appointment block (no page navigation)
   - Displays: client name, service rendered, effective price
@@ -777,6 +831,7 @@ CREATE POLICY "client_views_own_services" ON client_services FOR SELECT USING (c
   - `getDailyReport(trainerId, date)`: Daily revenue summary
 
 - [ ] Add `sale_transactions` migration:
+
 ```sql
 CREATE TABLE sale_transactions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -797,6 +852,7 @@ CREATE POLICY "trainer_owns_sales" ON sale_transactions USING (trainer_id = auth
 ```
 
 **Acceptance Criteria:**
+
 - Checkout panel opens in <150ms from appointment block tap
 - FIFO package auto-selection applies correct client_service
 - Session decremented atomically (no double-deduction under concurrent requests)
@@ -809,15 +865,18 @@ CREATE POLICY "trainer_owns_sales" ON sale_transactions USING (trainer_id = auth
 ## Epic 59: Contracts, Autopay & Client Account Ledger
 
 ### 59.1 Autopay Contracts via Stripe Subscriptions
+
 **Priority:** P1 (High)
 **Sprint:** 59
 **Status:** Not Started
 
 **User Stories:**
+
 - As a trainer, I can enroll a client in a monthly autopay plan that automatically bills and refreshes sessions
 - As a client, I receive a receipt when autopay charges
 
 **Implementation Tasks:**
+
 - [ ] Create Edge Function `supabase/functions/create-subscription/index.ts`
   - Creates Stripe `Product` + `Price` for the contract pricing option
   - Creates Stripe `Subscription` with the client's saved payment method
@@ -837,6 +896,7 @@ CREATE POLICY "trainer_owns_sales" ON sale_transactions USING (trainer_id = auth
 - [ ] Add contract status badge to client profile: "Active Contract", "Payment Failed", "Cancelled"
 
 **Acceptance Criteria:**
+
 - Autopay charges via Stripe on the correct interval (weekly/biweekly/monthly)
 - Sessions refresh automatically on successful payment
 - Failed payment: trainer notified, session access paused
@@ -845,15 +905,18 @@ CREATE POLICY "trainer_owns_sales" ON sale_transactions USING (trainer_id = auth
 ---
 
 ### 59.2 Client Account Ledger & Balance Display
+
 **Priority:** P1 (High)
 **Sprint:** 59
 **Status:** Not Started
 
 **User Stories:**
+
 - As a trainer, I can see a client's running account balance (credits and debts)
 - As a client, I can see my transaction history and balance
 
 **Implementation Tasks:**
+
 - [ ] Create `ClientLedgerService` at `apps/mobile/src/app/core/services/client-ledger.service.ts`
   - `getBalance(clientId)`: Computed from sum of debits/credits
   - `getHistory(clientId)`: Ordered ledger entries
@@ -870,6 +933,7 @@ CREATE POLICY "trainer_owns_sales" ON sale_transactions USING (trainer_id = auth
 - [ ] Add balance display to client profile header
 
 **Acceptance Criteria:**
+
 - Balance computes correctly from all ledger entries (sum of credits minus sum of debits)
 - Debt displayed in amber (adherence-neutral — not red)
 - Manual adjustments require trainer role; logged with reason for audit
@@ -880,15 +944,18 @@ CREATE POLICY "trainer_owns_sales" ON sale_transactions USING (trainer_id = auth
 ## Epic 60: Payroll Calculation & Reports
 
 ### 60.1 Trainer Pay Rate Configuration
+
 **Priority:** P0 (Critical)
 **Sprint:** 60
 **Status:** Not Started
 
 **User Stories:**
+
 - As a trainer/gym owner, I can configure how each trainer earns per session type
 - As a trainer, I understand what I'll earn per appointment
 
 **Implementation Tasks:**
+
 - [ ] Create migration `20260300030000_payroll.sql`
 
 ```sql
@@ -927,6 +994,7 @@ CREATE POLICY "trainer_owns_pay_policies" ON trainer_pay_policies USING (trainer
 ```
 
 - [ ] Add types to `@fitos/shared`:
+
   ```typescript
   export type PayRateType = 'flat_per_session' | 'percentage_of_revenue' | 'hourly' | 'commission_on_sale';
 
@@ -966,6 +1034,7 @@ CREATE POLICY "trainer_owns_pay_policies" ON trainer_pay_policies USING (trainer
   - Configure no-show/cancel pay policies
 
 **Acceptance Criteria:**
+
 - Pay calculated correctly for all four rate types
 - No-show/cancel multipliers applied per policy
 - Pay amount stored on `visits.trainer_pay_amount` at checkout time
@@ -973,15 +1042,18 @@ CREATE POLICY "trainer_owns_pay_policies" ON trainer_pay_policies USING (trainer
 ---
 
 ### 60.2 Payroll Report & CSV Export
+
 **Priority:** P1 (High)
 **Sprint:** 60
 **Status:** Not Started
 
 **User Stories:**
+
 - As a trainer/owner, I can generate a payroll report for any date range
 - As a trainer, I can export earnings data to CSV for my accountant
 
 **Implementation Tasks:**
+
 - [ ] Create `PayrollReportPage` at `features/reports/pages/payroll-report/payroll-report.page.ts`
   - Date range picker (preset: this week, last week, this month, last month, custom)
   - Summary cards: total sessions, total gross revenue, total trainer pay, total tips, total commissions
@@ -998,6 +1070,7 @@ CREATE POLICY "trainer_owns_pay_policies" ON trainer_pay_policies USING (trainer
   - Outstanding balances (client ledger debts) summary
 
 **Acceptance Criteria:**
+
 - Report generates for any 90-day window in <2 seconds
 - CSV exports to device files/share sheet
 - Revenue report shows accurate totals matching sale_transactions
@@ -1007,15 +1080,18 @@ CREATE POLICY "trainer_owns_pay_policies" ON trainer_pay_policies USING (trainer
 ## Epic 61: Multi-Trainer RBAC, Conflict Prevention & Schedule Optimization
 
 ### 61.1 Enhanced RBAC for Scheduling
+
 **Priority:** P0 (Critical)
 **Sprint:** 61
 **Status:** Not Started
 
 **User Stories:**
+
 - As a gym owner, I control exactly what each trainer can see and do in the schedule
 - As a trainer, I can only see my own clients' data unless granted access
 
 **Implementation Tasks:**
+
 - [ ] Extend existing RBAC (from Phase 1 `USER_ROLES_ARCHITECTURE.md`) with scheduling permissions:
   - Add `scheduling_permissions` jsonb column to `profiles` or create separate table:
 
@@ -1046,6 +1122,7 @@ CREATE POLICY "owner_manages_permissions" ON scheduling_permissions
   - Changes take effect immediately (no app restart required)
 
 **Acceptance Criteria:**
+
 - Trainer without `can_view_all_schedules` cannot see other trainers' appointment details via RLS
 - Owner can grant/revoke permissions in real-time
 - Payroll report access gated by `can_access_payroll_reports`
@@ -1054,15 +1131,18 @@ CREATE POLICY "owner_manages_permissions" ON scheduling_permissions
 ---
 
 ### 61.2 Double-Booking Prevention & Travel Buffer
+
 **Priority:** P0 (Critical)
 **Sprint:** 61
 **Status:** Not Started
 
 **User Stories:**
+
 - As a trainer, the system prevents me from being double-booked unless I explicitly allow it
 - As a mobile trainer, my travel time between clients is automatically blocked
 
 **Implementation Tasks:**
+
 - [ ] Enhance `AvailabilityService.checkConflict()` (from Sprint 54):
   - Check: new appointment time + duration + `buffer_after_minutes` does not overlap existing
   - Check: travel buffer — if trainer has appointment at different facility ending within `travel_buffer_minutes`, block slot
@@ -1078,6 +1158,7 @@ CREATE POLICY "owner_manages_permissions" ON scheduling_permissions
   - Suggested: 15, 30, 45, 60 minutes for mobile trainers
 
 **Acceptance Criteria:**
+
 - Double-booking attempt blocked with clear error message naming the conflict
 - Travel buffer blocks slots at the DB query level (not just UI)
 - `allow_double_booking = true` shows warning but allows override
@@ -1086,15 +1167,18 @@ CREATE POLICY "owner_manages_permissions" ON scheduling_permissions
 ---
 
 ### 61.3 Intelligent Schedule Optimization
+
 **Priority:** P1 (High)
 **Sprint:** 61
 **Status:** Not Started
 
 **User Stories:**
+
 - As a trainer, when clients book online I want clustered, back-to-back appointments rather than scattered gaps
 - As a client booking online, I see time slots ranked by how they minimize my trainer's dead time
 
 **Implementation Tasks:**
+
 - [ ] Create `ScheduleOptimizationService` at `apps/mobile/src/app/core/services/schedule-optimization.service.ts`
   - `rankSlots(slots, existingAppointments)`: Score each open slot
     - Score = 0 if completely isolated (large gaps on both sides)
@@ -1113,6 +1197,7 @@ CREATE POLICY "owner_manages_permissions" ON scheduling_permissions
   - Quick-add availability slot button
 
 **Acceptance Criteria:**
+
 - Slot ranking tested: adjacent-to-existing slots score higher than isolated slots
 - Client booking view shows "Recommended" slots at top
 - Utilization metric accurate (booked minutes / available minutes)
@@ -1123,7 +1208,7 @@ CREATE POLICY "owner_manages_permissions" ON scheduling_permissions
 ## Cost Summary
 
 | Category | Per Trainer/mo | Notes |
-|----------|---------------|-------|
+| ---------- | --------------- | ------- |
 | Supabase (DB + Edge Functions) | $0–$25 | Included in existing plan up to ~10k edge calls |
 | Stripe (payment processing) | ~2.9% + $0.30 | Pass-through; no additional SaaS fee |
 | pg_cron (auto no-show) | $0 | Included in Supabase Pro |
@@ -1136,7 +1221,7 @@ CREATE POLICY "owner_manages_permissions" ON scheduling_permissions
 
 ## Sprint Dependency Graph
 
-```
+``` g
 Sprint 54 (Data Model) ──► Sprint 55 (Calendar UI)
                       └──► Sprint 56 (FSM)
                       └──► Sprint 57 (Cancellation)
@@ -1157,7 +1242,7 @@ Sprint 54 is the hard prerequisite for everything. Sprints 60 and 61 can run in 
 ## Competitive Differentiators vs. Mindbody
 
 | Pain Point (Mindbody) | FitOS Solution | Sprint |
-|-----------------------|---------------|--------|
+| ----------------------- | --------------- | -------- |
 | No auto no-show marking | Auto-transition after configurable window (default 10 min) via pg_cron | 56 |
 | No travel buffer for mobile trainers | `travel_buffer_minutes` on service types + conflict engine | 54, 61 |
 | Scattered scheduling, dead gaps | Slot scoring algorithm clusters bookings | 61 |
@@ -1196,5 +1281,6 @@ Sprint 54 is the hard prerequisite for everything. Sprints 60 and 61 can run in 
 
 ---
 
-**Phase Status:** 📋 Planning Complete — Ready for Sprint 54
-**Next Step:** Sprint 54 — Appointment Data Model & Database Foundation
+**Phase Status:** 🚧 In Progress
+**Completed:** Sprint 54 — Appointment Data Model & Database Foundation (migration, types, AppointmentService, ServiceTypeService, AvailabilityService, get-bookable-slots Edge Function)
+**Next Step:** Sprint 55 — Calendar UI (Daily Grid & Multi-Trainer View)
