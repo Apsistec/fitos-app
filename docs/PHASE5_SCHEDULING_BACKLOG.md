@@ -780,7 +780,7 @@ CREATE POLICY "client_views_own_ledger" ON client_ledger FOR SELECT USING (clien
 
 **Priority:** P1 (High)
 **Sprint:** 59
-**Status:** Not Started
+**Status:** ✅ Complete
 
 **User Stories:**
 
@@ -789,30 +789,39 @@ CREATE POLICY "client_views_own_ledger" ON client_ledger FOR SELECT USING (clien
 
 **Implementation Tasks:**
 
-- [ ] Create Edge Function `supabase/functions/create-subscription/index.ts`
-  - Creates Stripe `Product` + `Price` for the contract pricing option
-  - Creates Stripe `Subscription` with the client's saved payment method
-  - On success: insert `client_services` row with `stripe_subscription_id`
-  - Returns `{ clientServiceId, stripeSubscriptionId }`
+- [x] Create Edge Function `supabase/functions/create-subscription/index.ts`
+  - Ensures Stripe Customer exists (creates if missing, persists `stripe_customer_id` to profile)
+  - Attaches payment method + sets as default; upserts Stripe Product keyed to `pricing_option_id`
+  - Creates recurring Stripe Price (weekly / every-2-weeks via `interval_count: 2` / monthly) and Stripe Subscription
+  - On success: inserts `client_services` row with `stripe_subscription_id` + initial sessions
+  - Orphan prevention: cancels subscription if DB insert fails
+  - Returns `{ clientServiceId, stripeSubscriptionId, stripeCustomerId }`
 
-- [ ] Create Edge Function `supabase/functions/stripe-subscription-webhook/index.ts`
-  - Handles `invoice.payment_succeeded`: refresh `sessions_remaining` to `autopay_session_count`
-  - Handles `invoice.payment_failed`: mark `client_services.is_active = false`, notify trainer
-  - Handles `customer.subscription.deleted`: deactivate `client_services`, notify trainer
+- [x] Create Edge Function `supabase/functions/stripe-subscription-webhook/index.ts`
+  - Verifies webhook signature via `stripe.webhooks.constructEventAsync`
+  - Handles `invoice.payment_succeeded`: refreshes `sessions_remaining` to `autopay_session_count`, re-activates `is_active`, creates ledger credit entry
+  - Handles `invoice.payment_failed`: marks `client_services.is_active = false`, creates ledger debit, notifies trainer via notifications table
+  - Handles `customer.subscription.deleted`: deactivates `client_services`, notifies trainer
+  - Returns 200 for all events (logs errors internally to prevent Stripe retry storms)
 
-- [ ] Create `ContractEnrollmentComponent` at `features/clients/components/contract-enrollment/contract-enrollment.component.ts`
-  - Select autopay pricing option from list
-  - Confirm billing amount and start date
-  - Requires card on file (or add card inline)
+- [x] Create `ContractEnrollmentComponent` at `features/clients/components/contract-enrollment/contract-enrollment.component.ts`
+  - Modal sheet listing all active contract pricing options
+  - Shows billing amount, interval chip, and sessions-per-cycle chip for each option
+  - Warning banner when client has no card on file; enroll button disabled accordingly
+  - Billing summary before confirm; calls `create-subscription` Edge Function on enroll
+  - Success toast; emits `enrolled` output with `{ clientServiceId, subscriptionId }`
 
-- [ ] Add contract status badge to client profile: "Active Contract", "Payment Failed", "Cancelled"
+- [x] Add contract status badge + balance chip to client profile toolbar:
+  - "Active Contract" (green), "Payment Failed" (amber), "Contract Cancelled" (grey)
+  - Account balance chip (green = credit, amber = outstanding debt); hidden when balance = 0
+  - Both chips visible on all tabs via `chips-toolbar` below segment bar
 
 **Acceptance Criteria:**
 
-- Autopay charges via Stripe on the correct interval (weekly/biweekly/monthly)
-- Sessions refresh automatically on successful payment
-- Failed payment: trainer notified, session access paused
-- Client receives Stripe receipt email on every successful charge
+- Autopay charges via Stripe on the correct interval (weekly/biweekly/monthly) ✅
+- Sessions refresh automatically on successful payment ✅
+- Failed payment: trainer notified, session access paused ✅
+- Client receives Stripe receipt email on every successful charge ✅
 
 ---
 
@@ -820,36 +829,46 @@ CREATE POLICY "client_views_own_ledger" ON client_ledger FOR SELECT USING (clien
 
 **Priority:** P1 (High)
 **Sprint:** 59
-**Status:** Not Started
+**Status:** ✅ Complete
 
 **User Stories:**
 
-- As a trainer, I can see a client's running account balance (credits and debts)
+- As a trainer, I can see a client's running account balance (credits and debits)
 - As a client, I can see my transaction history and balance
 
 **Implementation Tasks:**
 
-- [ ] Create `ClientLedgerService` at `apps/mobile/src/app/core/services/client-ledger.service.ts`
-  - `getBalance(clientId)`: Computed from sum of debits/credits
-  - `getHistory(clientId)`: Ordered ledger entries
-  - `addCredit(clientId, amount, reason)`: Manual credit (overpayment, goodwill)
-  - `addDebit(clientId, amount, reason, appointmentId?)`: Manual debit
-  - Signal state: `balance`, `ledgerEntries`, `isLoading`
+- [x] Create `ClientLedgerService` at `apps/mobile/src/app/core/services/client-ledger.service.ts`
+  - `getBalance(clientId)`: Direct DB aggregate (credits − debits); does not alter signal state
+  - `getHistory(clientId, limit?)`: Ordered ledger entries, populates `entries` signal
+  - `addCredit(dto)` / `addDebit(dto)`: Typed wrappers over `addEntry(dto)`, prepend to signal
+  - Signal state: `entries`, `balance` (computed), `isLoading`, `error`
+  - `formatReason(reason)`: Human-readable labels for all `LedgerReason` values
+  - `clear()`: Resets state when navigating away from client detail
 
-- [ ] Create `ClientLedgerComponent` at `features/clients/components/client-ledger/client-ledger.component.ts`
-  - Running balance shown prominently (green = credit, amber = debt — never red)
-  - Scrollable transaction list: date, description, amount, running balance
-  - Manual adjustment button (trainer only)
-  - "Apply balance to checkout" option in CheckoutPanel
+- [x] Create `ClientLedgerComponent` at `features/clients/components/client-ledger/client-ledger.component.ts`
+  - Large running balance display (green = credit, amber = debt — never red)
+  - `trending-up` / `trending-down` icon + status label ("Credit on account" / "Outstanding balance owed")
+  - Scrollable transaction list: circular icon, reason label, notes, date, signed amount
+  - "Adjust" button → `AlertController` with amount + notes inputs; "Add Credit" / "Add Debit" buttons
+  - Implements `OnDestroy` to call `ledgerService.clear()` when unmounted
 
-- [ ] Add balance display to client profile header
+- [x] Add balance display to client detail page header
+  - `IonChip` in `chips-toolbar` beneath segment: shows ±$x.xx with wallet icon
+  - Chip only rendered when balance ≠ 0
+
+- [x] Add "Billing" tab to client detail page
+  - Active contract card (plan name, status badge, sessions remaining, start date)
+  - "Enroll in Contract" CTA when no active contract found
+  - `<app-client-ledger>` embedded below contract section
+  - `loadBillingData(clientId)` loads latest contract + balance on `ngOnInit`
 
 **Acceptance Criteria:**
 
-- Balance computes correctly from all ledger entries (sum of credits minus sum of debits)
-- Debt displayed in amber (adherence-neutral — not red)
-- Manual adjustments require trainer role; logged with reason for audit
-- Balance can be applied as a payment method at checkout
+- Balance computes correctly from all ledger entries (sum of credits minus sum of debits) ✅
+- Debt displayed in amber (adherence-neutral — not red) ✅
+- Manual adjustments require trainer role; logged with reason for audit ✅
+- Balance can be applied as a payment method at checkout ✅ (account_balance payment method already in CheckoutPanel)
 
 ---
 
@@ -1194,5 +1213,5 @@ Sprint 54 is the hard prerequisite for everything. Sprints 60 and 61 can run in 
 ---
 
 **Phase Status:** 🚧 In Progress
-**Completed:** Sprint 54 — Appointment Data Model · Sprint 55 — Calendar UI · Sprint 56 — 8-State FSM (AppointmentFsmService, auto-noshow-check Edge Function + pg_cron, AppointmentRequestQueueComponent, KioskPage) · Sprint 57 — Cancellation Policies & Late-Cancel Enforcement (CancellationPolicyService, cancellation_policies migration, client_ledger, charge-cancellation-fee Edge Function, setup-payment-method Edge Function, CancellationPoliciesPage settings, BookingForm deadline label, FSM fee wiring) · Sprint 58 — Pricing Options & Checkout POS (pricing_options/client_services/sale_transactions migration, PricingOption+ClientService+SaleTransaction types, PricingOptionService with FIFO selection + atomic decrement RPC, PricingOptionsPage settings, CheckoutPanelComponent modal, process-checkout Edge Function, SaleTransactionsService)
-**Next Step:** Sprint 59 — Contracts, Autopay & Client Account Ledger
+**Completed:** Sprint 54 — Appointment Data Model · Sprint 55 — Calendar UI · Sprint 56 — 8-State FSM (AppointmentFsmService, auto-noshow-check Edge Function + pg_cron, AppointmentRequestQueueComponent, KioskPage) · Sprint 57 — Cancellation Policies & Late-Cancel Enforcement (CancellationPolicyService, cancellation_policies migration, client_ledger, charge-cancellation-fee Edge Function, setup-payment-method Edge Function, CancellationPoliciesPage settings, BookingForm deadline label, FSM fee wiring) · Sprint 58 — Pricing Options & Checkout POS (pricing_options/client_services/sale_transactions migration, PricingOption+ClientService+SaleTransaction types, PricingOptionService with FIFO selection + atomic decrement RPC, PricingOptionsPage settings, CheckoutPanelComponent modal, process-checkout Edge Function, SaleTransactionsService) · Sprint 59 — Contracts, Autopay & Client Account Ledger (create-subscription Edge Function with Stripe orphan prevention, stripe-subscription-webhook Edge Function handling payment_succeeded/failed/subscription.deleted, ContractEnrollmentComponent modal, ClientLedgerService with computed balance signal, ClientLedgerComponent with manual adjustment, Billing tab + contract status chips + balance chip in client-detail page)
+**Next Step:** Sprint 60 — Payroll Calculation & Reports

@@ -1,4 +1,4 @@
-import {  Component, OnInit, inject, signal, computed , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
@@ -25,6 +25,7 @@ import {
   IonRefresherContent,
   IonSegment,
   IonSegmentButton,
+  IonChip,
   ToastController,
   ActionSheetController,
   ModalController,
@@ -44,15 +45,25 @@ import {
   trashOutline,
   checkmarkCircle,
   closeCircle,
+  walletOutline,
+  repeatOutline,
+  cardOutline,
+  checkmarkCircleOutline,
+  closeCircleOutline,
+  pauseCircleOutline,
 } from 'ionicons/icons';
 import { ClientService, ClientWithProfile } from '../../../../core/services/client.service';
 import { WorkoutSessionService } from '../../../../core/services/workout-session.service';
 import { AutonomyService, AutonomyAssessment } from '../../../../core/services/autonomy.service';
 import { SupabaseService } from '../../../../core/services/supabase.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ClientLedgerService } from '../../../../core/services/client-ledger.service';
 import { AutonomyIndicatorComponent } from '../../components/autonomy-indicator/autonomy-indicator.component';
 import { GraduationAlertComponent } from '../../components/graduation-alert/graduation-alert.component';
 import { AssessmentFormComponent } from '../../components/assessment-form/assessment-form.component';
+import { ClientLedgerComponent } from '../../components/client-ledger/client-ledger.component';
+import { ContractEnrollmentComponent } from '../../components/contract-enrollment/contract-enrollment.component';
+import { ClientService as ClientServiceType } from '@fitos/shared';
 
 addIcons({
   personOutline,
@@ -68,6 +79,12 @@ addIcons({
   trashOutline,
   checkmarkCircle,
   closeCircle,
+  walletOutline,
+  repeatOutline,
+  cardOutline,
+  checkmarkCircleOutline,
+  closeCircleOutline,
+  pauseCircleOutline,
 });
 
 interface TrainerNote {
@@ -115,8 +132,11 @@ interface RecentWorkout {
     IonRefresherContent,
     IonSegment,
     IonSegmentButton,
+    IonChip,
     AutonomyIndicatorComponent,
     GraduationAlertComponent,
+    ClientLedgerComponent,
+    ContractEnrollmentComponent,
   ],
   template: `
     <ion-header class="ion-no-border">
@@ -143,8 +163,29 @@ interface RecentWorkout {
           <ion-segment-button value="notes">
             <ion-label>Notes</ion-label>
           </ion-segment-button>
+          <ion-segment-button value="billing">
+            <ion-label>Billing</ion-label>
+          </ion-segment-button>
         </ion-segment>
       </ion-toolbar>
+
+      <!-- Balance + Contract status chips under toolbar -->
+      @if (client()) {
+        <ion-toolbar class="chips-toolbar">
+          @if (activeContract()) {
+            <ion-chip [color]="contractChipColor()" class="status-chip">
+              <ion-icon [name]="contractChipIcon()"></ion-icon>
+              {{ contractChipLabel() }}
+            </ion-chip>
+          }
+          @if (accountBalance() !== 0) {
+            <ion-chip [color]="accountBalance() > 0 ? 'success' : 'warning'" class="status-chip">
+              <ion-icon name="wallet-outline"></ion-icon>
+              {{ accountBalance() > 0 ? '+' : '' }}${{ accountBalance() | number:'1.2-2' }}
+            </ion-chip>
+          }
+        </ion-toolbar>
+      }
     </ion-header>
 
     <ion-content>
@@ -429,6 +470,68 @@ interface RecentWorkout {
           }
         </div>
       }
+
+          <!-- Billing Tab -->
+          @if (selectedTab === 'billing') {
+            <!-- Active contract card -->
+            @if (activeContract()) {
+              <ion-card>
+                <ion-card-header>
+                  <ion-card-title>
+                    <ion-icon name="repeat-outline"></ion-icon>
+                    Active Contract
+                  </ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <div class="info-grid">
+                    <div class="info-item">
+                      <ion-label class="info-label">Plan</ion-label>
+                      <ion-note>{{ activeContract()!.pricing_option?.name ?? '—' }}</ion-note>
+                    </div>
+                    <div class="info-item">
+                      <ion-label class="info-label">Status</ion-label>
+                      <ion-badge [color]="contractChipColor()">{{ contractChipLabel() }}</ion-badge>
+                    </div>
+                    <div class="info-item">
+                      <ion-label class="info-label">Sessions Remaining</ion-label>
+                      <ion-note>{{ activeContract()!.sessions_remaining ?? 'Unlimited' }}</ion-note>
+                    </div>
+                    <div class="info-item">
+                      <ion-label class="info-label">Started</ion-label>
+                      <ion-note>{{ activeContract()!.activated_at ? formatDate(activeContract()!.activated_at!) : '—' }}</ion-note>
+                    </div>
+                  </div>
+                </ion-card-content>
+              </ion-card>
+            }
+
+            <!-- No contract — enroll button -->
+            @else {
+              <ion-card>
+                <ion-card-content>
+                  <div class="no-contract">
+                    <ion-icon name="repeat-outline"></ion-icon>
+                    <h3>No Active Contract</h3>
+                    <p>Enroll this client in an autopay contract to automate billing.</p>
+                    <ion-button expand="block" (click)="openContractEnrollment()">
+                      <ion-icon slot="start" name="card-outline"></ion-icon>
+                      Enroll in Contract
+                    </ion-button>
+                  </div>
+                </ion-card-content>
+              </ion-card>
+            }
+
+            <!-- Client ledger -->
+            @if (client() && trainerId()) {
+              <app-client-ledger
+                [clientId]="client()!.id"
+                [trainerId]="trainerId()!"
+              />
+            }
+          }
+        </div>
+      }
     </ion-content>
   `,
   styles: [`
@@ -649,6 +752,54 @@ interface RecentWorkout {
       line-height: 1.6;
       color: var(--fitos-text-primary, #F5F5F5);
     }
+
+    /* ── Chips toolbar ── */
+    .chips-toolbar {
+      --background: transparent;
+      --border-width: 0;
+      --min-height: 40px;
+      padding: 4px 8px 8px;
+    }
+
+    .status-chip {
+      font-size: 12px;
+      font-weight: 600;
+      height: 28px;
+      margin: 0 4px 0 0;
+    }
+
+    /* ── No-contract empty state ── */
+    .no-contract {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 0;
+      text-align: center;
+    }
+
+    .no-contract ion-icon {
+      font-size: 40px;
+      color: var(--fitos-text-tertiary, #737373);
+    }
+
+    .no-contract h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
+    }
+
+    .no-contract p {
+      margin: 0 0 12px;
+      font-size: 14px;
+      color: var(--fitos-text-secondary, #A3A3A3);
+      line-height: 1.5;
+    }
+
+    app-client-ledger {
+      display: block;
+    }
   `]
 })
 export class ClientDetailPage implements OnInit {
@@ -657,6 +808,7 @@ export class ClientDetailPage implements OnInit {
   private autonomyService = inject(AutonomyService);
   private supabase = inject(SupabaseService);
   private auth = inject(AuthService);
+  private ledgerService = inject(ClientLedgerService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private toastCtrl = inject(ToastController);
@@ -671,6 +823,36 @@ export class ClientDetailPage implements OnInit {
   error = signal<string | null>(null);
   selectedTab = 'overview';
   autonomyAssessment = signal<AutonomyAssessment | null>(null);
+
+  // Billing tab state
+  activeContract = signal<ClientServiceType | null>(null);
+  accountBalance = signal<number>(0);
+  trainerId = computed(() => this.auth.user()?.id ?? null);
+
+  // Contract status computed properties
+  contractChipColor = computed<string>(() => {
+    const cs = this.activeContract();
+    if (!cs) return 'medium';
+    if (cs.is_active) return 'success';
+    // Check if it has a stripe subscription (payment failed state)
+    if (cs.stripe_subscription_id) return 'warning';
+    return 'medium';
+  });
+
+  contractChipIcon = computed<string>(() => {
+    const cs = this.activeContract();
+    if (!cs) return 'close-circle-outline';
+    if (cs.is_active) return 'checkmark-circle-outline';
+    return 'pause-circle-outline';
+  });
+
+  contractChipLabel = computed<string>(() => {
+    const cs = this.activeContract();
+    if (!cs) return 'No Contract';
+    if (cs.is_active) return 'Active Contract';
+    if (cs.stripe_subscription_id) return 'Payment Failed';
+    return 'Contract Cancelled';
+  });
 
   // Workouts tab
   recentWorkouts = signal<RecentWorkout[]>([]);
@@ -706,6 +888,7 @@ export class ClientDetailPage implements OnInit {
       this.clientId.set(clientId);
       this.loadClientProfile(clientId);
       this.loadAutonomyAssessment(clientId);
+      this.loadBillingData(clientId);
     } else {
       this.error.set('Client ID not provided');
     }
@@ -988,6 +1171,51 @@ export class ClientDetailPage implements OnInit {
     } catch (err) {
       console.error('Error loading autonomy assessment:', err);
       // Don't show error to user - autonomy data is optional
+    }
+  }
+
+  // ── Billing ──────────────────────────────────────────────────────────────────
+
+  async loadBillingData(clientId: string): Promise<void> {
+    // Load active autopay contract (most recent active one with a stripe subscription)
+    const { data: contracts } = await this.supabase.client
+      .from('client_services')
+      .select('*, pricing_option:pricing_options(name, autopay_interval, autopay_session_count)')
+      .eq('client_id', clientId)
+      .not('stripe_subscription_id', 'is', null)
+      .order('activated_at', { ascending: false })
+      .limit(1);
+
+    this.activeContract.set(
+      contracts && contracts.length > 0 ? (contracts[0] as ClientServiceType) : null,
+    );
+
+    // Load balance
+    const balance = await this.ledgerService.getBalance(clientId);
+    this.accountBalance.set(balance);
+  }
+
+  async openContractEnrollment(): Promise<void> {
+    const clientProfile = this.client();
+    const hasCard = !!(clientProfile as { stripe_payment_method_id?: string })?.stripe_payment_method_id;
+
+    const modal = await this.modalCtrl.create({
+      component:      ContractEnrollmentComponent,
+      componentProps: {
+        clientId:       this.clientId(),
+        clientHasCard:  hasCard,
+      },
+      breakpoints:     [0, 0.85, 1],
+      initialBreakpoint: 0.85,
+      handleBehavior:  'cycle',
+    });
+
+    await modal.present();
+
+    const { role } = await modal.onDidDismiss();
+    if (role !== 'cancel') {
+      // Reload billing data after enrollment
+      await this.loadBillingData(this.clientId());
     }
   }
 
