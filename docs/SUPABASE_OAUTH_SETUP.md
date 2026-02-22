@@ -1,4 +1,4 @@
-# Supabase OAuth Configuration Guide
+pp[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[p[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[p[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[pp# Supabase OAuth Configuration Guide
 
 This guide walks you through configuring Google OAuth (and later Apple Sign In) for FitOS authentication via Supabase.
 

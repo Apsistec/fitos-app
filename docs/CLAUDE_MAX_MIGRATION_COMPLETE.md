@@ -57,10 +57,10 @@ ANTHROPIC_API_KEY=sk-ant-api03-YOUR-KEY-HERE
 OPENAI_API_KEY=sk-YOUR-OPENAI-KEY-HERE
 
 # Deepgram (voice logging) — Get from: https://console.deepgram.com/
-DEEPGRAM_API_KEY=355c6d9f596ed734905a105362d43a85ffda0e78
+DEEPGRAM_API_KEY=YOUR-DEEPGRAM-KEY-HERE
 
 # Resend (email) — Get from: https://resend.com/api-keys
-RESEND_API_KEY=re_g4J2GNa7_KVDNbkpNQ63mfywrovCUPdb9
+RESSEND_API_KEY=YOUR-RESEND-KEY-HERE
 
 # ============================================================================
 # AI Backend Configuration (apps/ai-backend)

@@ -38,7 +38,7 @@ export class TabConfigService {
   private readonly trainerTabs: TabConfig[] = [
     { label: 'Home', icon: 'home-outline', iconFilled: 'home', route: 'dashboard' },
     { label: 'Clients', icon: 'people-outline', iconFilled: 'people', route: 'clients' },
-    { label: 'Workouts', icon: 'barbell-outline', iconFilled: 'barbell', route: 'workouts' },
+    { label: 'Schedule', icon: 'calendar-outline', iconFilled: 'calendar', route: 'schedule' },
     { label: 'Business', icon: 'briefcase-outline', iconFilled: 'briefcase', route: 'business' },
     { label: 'More', icon: 'ellipsis-horizontal-outline', iconFilled: 'ellipsis-horizontal', route: 'more' },
   ];
@@ -46,7 +46,7 @@ export class TabConfigService {
   private readonly ownerTabs: TabConfig[] = [
     { label: 'Home', icon: 'home-outline', iconFilled: 'home', route: 'dashboard' },
     { label: 'Trainers', icon: 'people-outline', iconFilled: 'people', route: 'trainers' },
-    { label: 'Members', icon: 'person-outline', iconFilled: 'person', route: 'clients' },
+    { label: 'Schedule', icon: 'calendar-outline', iconFilled: 'calendar', route: 'schedule' },
     { label: 'Business', icon: 'briefcase-outline', iconFilled: 'briefcase', route: 'business' },
     { label: 'More', icon: 'ellipsis-horizontal-outline', iconFilled: 'ellipsis-horizontal', route: 'more' },
   ];

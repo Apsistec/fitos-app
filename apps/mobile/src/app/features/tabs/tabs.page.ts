@@ -19,6 +19,7 @@ import {
   sparklesOutline, sparkles,
   briefcaseOutline, briefcase,
   ellipsisHorizontalOutline, ellipsisHorizontal,
+  calendarOutline, calendar,
 } from 'ionicons/icons';
 import { TabConfigService } from '../../core/services/tab-config.service';
 import { MessagingService } from '../../core/services/messaging.service';
@@ -107,6 +108,7 @@ export class TabsPage {
       sparklesOutline, sparkles,
       briefcaseOutline, briefcase,
       ellipsisHorizontalOutline, ellipsisHorizontal,
+      calendarOutline, calendar,
     });
 
     // Load conversations for unread count

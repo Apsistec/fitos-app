@@ -25,9 +25,11 @@ export class AvailabilityService {
   private supabase = inject(SupabaseService);
   private auth     = inject(AuthService);
 
-  availability = signal<StaffAvailability[]>([]);
-  isLoading    = signal(false);
-  error        = signal<string | null>(null);
+  availability        = signal<StaffAvailability[]>([]);
+  isLoading           = signal(false);
+  error               = signal<string | null>(null);
+  /** The trainer ID for which availability is currently loaded — used by FindAppointmentComponent */
+  readonly currentTrainerId = signal<string | null>(null);
 
   // ── Load ─────────────────────────────────────────────────────
 
@@ -35,6 +37,7 @@ export class AvailabilityService {
     const tid = trainerId ?? this.auth.currentUser()?.id;
     if (!tid) return;
 
+    this.currentTrainerId.set(tid);
     this.isLoading.set(true);
     this.error.set(null);
 

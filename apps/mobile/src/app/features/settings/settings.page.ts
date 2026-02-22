@@ -45,6 +45,8 @@ import {
   starOutline,
   bookOutline,
   qrCodeOutline,
+  banOutline,
+  layersOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
 import { StripeService } from '../../core/services/stripe.service';
@@ -226,6 +228,22 @@ import { ThemeService, ThemeMode } from '../../core/services/theme.service';
               <ion-label>
                 <h3>NFC & QR Tags</h3>
                 <p>Gym touchpoints for instant client check-in</p>
+              </ion-label>
+            </ion-item>
+
+            <ion-item button detail routerLink="/tabs/settings/cancellation-policies">
+              <ion-icon name="ban-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Cancellation Policies</h3>
+                <p>Late-cancel fees, no-show fees, and auto no-show window</p>
+              </ion-label>
+            </ion-item>
+
+            <ion-item button detail routerLink="/tabs/settings/pricing-options">
+              <ion-icon name="layers-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Pricing Options</h3>
+                <p>Session packs, time passes, drop-ins, and autopay contracts</p>
               </ion-label>
             </ion-item>
           </ion-list>
@@ -529,6 +547,8 @@ export class SettingsPage implements OnInit {
       starOutline,
       bookOutline,
       qrCodeOutline,
+      banOutline,
+      layersOutline,
     });
   }
 

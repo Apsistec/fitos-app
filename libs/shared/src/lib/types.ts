@@ -763,3 +763,165 @@ export interface AvailabilityQueryDto {
   service_type_id: string;
   date: string;  // YYYY-MM-DD
 }
+
+// ── Cancellation Policies & Billing — Phase 5B (Sprint 57) ───────────────────
+
+/**
+ * Trainer-defined rule for late-cancel/no-show windows and fees.
+ * service_type_id = null → global policy (fallback for all service types).
+ * Service-type-specific policy takes precedence over global.
+ */
+export interface CancellationPolicy {
+  id: string;
+  trainer_id: string;
+  service_type_id?: string;          // null = global policy
+  late_cancel_window_minutes: number; // default 1440 (24h)
+  late_cancel_fee_amount: number;
+  no_show_fee_amount: number;
+  forfeit_session: boolean;           // deduct session from pack on late-cancel
+  applies_to_memberships: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Penalty calculation result from CancellationPolicyService.calculatePenalty().
+ * Drives both the Stripe charge and session-deduction logic.
+ */
+export interface CancellationPenalty {
+  forfeitSession: boolean;
+  feeAmount: number;        // 0 = no charge needed
+  policy: CancellationPolicy | null;
+}
+
+/**
+ * Double-entry ledger row for tracking client financial obligations.
+ * debit  = client owes trainer (failed fee charge, accumulates as debt)
+ * credit = trainer owes client (overpayment, refund)
+ */
+export interface ClientLedgerEntry {
+  id: string;
+  client_id: string;
+  trainer_id: string;
+  entry_type: 'credit' | 'debit';
+  amount: number;
+  reason: 'no_show_fee' | 'late_cancel_fee' | 'overpayment' | 'adjustment' | 'refund' | 'session_credit';
+  appointment_id?: string;
+  sale_transaction_id?: string;
+  stripe_payment_intent_id?: string;
+  notes?: string;
+  created_at: string;
+}
+
+/** Stripe card-on-file summary (stored on profiles, no raw card data) */
+export interface SavedPaymentMethod {
+  stripe_payment_method_id: string;
+  last4: string;
+  brand: string;
+  exp_month: number;
+  exp_year: number;
+}
+
+/** DTO for charge-cancellation-fee Edge Function */
+export interface ChargeCancellationFeeDto {
+  appointment_id: string;
+  fee_type: 'late_cancel' | 'no_show';
+}
+
+// ── Pricing Options — Phase 5C (Sprint 58) ───────────────────────────────────
+
+export type PricingOptionType = 'session_pack' | 'time_pass' | 'drop_in' | 'contract';
+
+export type AutopayInterval = 'weekly' | 'biweekly' | 'monthly';
+
+/**
+ * Trainer-defined pricing package (pack, pass, drop-in, or contract).
+ * session_count = null for time_pass/contract unlimited modes.
+ */
+export interface PricingOption {
+  id: string;
+  trainer_id: string;
+  name: string;
+  option_type: PricingOptionType;
+  price: number;
+  session_count?: number;           // null for time_pass
+  expiration_days?: number;         // null = no expiry
+  service_type_ids: string[];       // which service types this covers
+  autopay_interval?: AutopayInterval;
+  autopay_session_count?: number;   // sessions refreshed per autopay cycle
+  revenue_category: string;
+  sell_online: boolean;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Purchased pricing option owned by a specific client.
+ * sessions_remaining = null for time_pass (unlimited).
+ */
+export interface ClientService {
+  id: string;
+  client_id: string;
+  trainer_id: string;
+  pricing_option_id: string;
+  stripe_subscription_id?: string;
+  stripe_payment_intent_id?: string;
+  sessions_remaining?: number;      // null = unlimited (time_pass)
+  sessions_total?: number;
+  purchased_at: string;
+  activated_at?: string;
+  expires_at?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  // Joined fields
+  pricing_option?: PricingOption;
+}
+
+/** Payment method types supported at checkout POS */
+export type CheckoutPaymentMethod =
+  | 'session_pack'
+  | 'card'
+  | 'cash'
+  | 'account_balance'
+  | 'split'
+  | 'comp';
+
+/** POS checkout record created for every completed appointment */
+export interface SaleTransaction {
+  id: string;
+  trainer_id: string;
+  client_id: string;
+  appointment_id?: string;
+  client_service_id?: string;
+  stripe_payment_intent_id?: string;
+  payment_method: CheckoutPaymentMethod;
+  subtotal: number;
+  tip_amount: number;
+  discount_amount: number;
+  total: number;
+  status: 'pending' | 'completed' | 'refunded' | 'failed';
+  notes?: string;
+  created_at: string;
+}
+
+/** DTO sent to process-checkout Edge Function */
+export interface ProcessCheckoutDto {
+  appointment_id: string;
+  payment_method: CheckoutPaymentMethod;
+  client_service_id?: string;      // which package to deduct from
+  tip_amount?: number;
+  discount_amount?: number;
+  notes?: string;
+}
+
+/** Response from process-checkout Edge Function */
+export interface CheckoutResult {
+  success: boolean;
+  sale_transaction_id: string;
+  sessions_remaining?: number;
+  stripe_payment_intent_id?: string;
+  error?: string;
+}

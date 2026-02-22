@@ -649,6 +649,24 @@ export const routes: Routes = [
                 (m) => m.NfcTagsPage
               ),
           },
+          {
+            // Cancellation Policies — trainers/owners only
+            path: 'cancellation-policies',
+            canActivate: [trainerOrOwnerGuard],
+            loadComponent: () =>
+              import('./features/settings/pages/cancellation-policies/cancellation-policies.page').then(
+                (m) => m.CancellationPoliciesPage
+              ),
+          },
+          {
+            // Pricing Options (session packs, passes, contracts) — trainers/owners only
+            path: 'pricing-options',
+            canActivate: [trainerOrOwnerGuard],
+            loadComponent: () =>
+              import('./features/settings/pages/pricing-options/pricing-options.page').then(
+                (m) => m.PricingOptionsPage
+              ),
+          },
         ],
       },
       {
@@ -672,6 +690,28 @@ export const routes: Routes = [
             loadComponent: () =>
               import('./features/social/pages/feed/feed.page').then(
                 (m) => m.FeedPage
+              ),
+          },
+        ],
+      },
+      {
+        // Schedule — trainers and gym owners
+        path: 'schedule',
+        canActivate: [trainerOrOwnerGuard],
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/scheduling/pages/schedule/schedule.page').then(
+                (m) => m.SchedulePage
+              ),
+          },
+          {
+            // Kiosk check-in mode — tablet at gym entrance, PIN-protected exit
+            path: 'kiosk',
+            loadComponent: () =>
+              import('./features/scheduling/pages/kiosk/kiosk.page').then(
+                (m) => m.KioskPage
               ),
           },
         ],
