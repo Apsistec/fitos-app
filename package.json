@@ -118,7 +118,7 @@
     "@capgo/capacitor-wifi": "^8.1.8",
     "@ionic/angular": "^8.7.17",
     "@pantrist/capacitor-plugin-ml-kit-text-recognition": "^8.0.0",
-    "@sentry/angular": "^10.38.0",
+    "@sentry/angular": "^10.39.0",
     "@simplewebauthn/browser": "^13.2.2",
     "@supabase/supabase-js": "^2.80.0",
     "canvas-confetti": "^1.9.4",
