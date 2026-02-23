@@ -29,15 +29,12 @@ import {
   IonToolbar,
   IonButtons,
   IonBackButton,
-  IonButton,
   IonIcon,
   IonSpinner,
   IonCard,
   IonCardContent,
   IonAvatar,
   IonBadge,
-  IonItem,
-  IonLabel,
   IonToggle,
   IonNote,
   IonSelect,
@@ -80,20 +77,17 @@ addIcons({
     IonToolbar,
     IonButtons,
     IonBackButton,
-    IonButton,
     IonIcon,
     IonSpinner,
     IonCard,
     IonCardContent,
     IonAvatar,
     IonBadge,
-    IonItem,
-    IonLabel,
     IonToggle,
     IonNote,
     IonSelect,
-    IonSelectOption,
-  ],
+    IonSelectOption
+],
   template: `
     <ion-header class="ion-no-border">
       <ion-toolbar>
@@ -399,7 +393,7 @@ export class StaffPermissionsPage implements OnInit {
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
   async ngOnInit(): Promise<void> {
-    const user = this.auth.currentUser();
+    const user = this.auth.user();
     if (!user) return;
 
     // The owner's user id acts as gym_owner_id for staff profiles

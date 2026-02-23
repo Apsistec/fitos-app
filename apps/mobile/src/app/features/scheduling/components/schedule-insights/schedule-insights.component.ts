@@ -26,7 +26,7 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonIcon, IonNote, IonButton } from '@ionic/angular/standalone';
+import { IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   timeOutline,
@@ -50,7 +50,7 @@ addIcons({
   selector: 'app-schedule-insights',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, IonIcon, IonNote, IonButton],
+  imports: [CommonModule, IonIcon],
   template: `
     @if (insight()) {
       <div class="insights-card">
