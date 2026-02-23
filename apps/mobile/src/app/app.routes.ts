@@ -667,6 +667,33 @@ export const routes: Routes = [
                 (m) => m.PricingOptionsPage
               ),
           },
+          {
+            // Payroll Settings (pay rates & no-show/cancel policy) — trainers/owners only
+            path: 'payroll-settings',
+            canActivate: [trainerOrOwnerGuard],
+            loadComponent: () =>
+              import('./features/settings/pages/payroll-settings/payroll-settings.page').then(
+                (m) => m.PayrollSettingsPage
+              ),
+          },
+          {
+            // Payroll Report — trainers/owners only
+            path: 'payroll-report',
+            canActivate: [trainerOrOwnerGuard],
+            loadComponent: () =>
+              import('./features/reports/pages/payroll-report/payroll-report.page').then(
+                (m) => m.PayrollReportPage
+              ),
+          },
+          {
+            // Revenue Report — trainers/owners only
+            path: 'revenue-report',
+            canActivate: [trainerOrOwnerGuard],
+            loadComponent: () =>
+              import('./features/reports/pages/revenue-report/revenue-report.page').then(
+                (m) => m.RevenueReportPage
+              ),
+          },
         ],
       },
       {

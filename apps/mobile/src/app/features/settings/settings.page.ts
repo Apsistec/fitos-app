@@ -47,6 +47,9 @@ import {
   qrCodeOutline,
   banOutline,
   layersOutline,
+  cashOutline,
+  barChartOutline,
+  receiptOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
 import { StripeService } from '../../core/services/stripe.service';
@@ -244,6 +247,30 @@ import { ThemeService, ThemeMode } from '../../core/services/theme.service';
               <ion-label>
                 <h3>Pricing Options</h3>
                 <p>Session packs, time passes, drop-ins, and autopay contracts</p>
+              </ion-label>
+            </ion-item>
+
+            <ion-item button detail routerLink="/tabs/settings/payroll-settings">
+              <ion-icon name="cash-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Payroll Settings</h3>
+                <p>Pay rates, no-show policy, and cancellation pay rules</p>
+              </ion-label>
+            </ion-item>
+
+            <ion-item button detail routerLink="/tabs/settings/payroll-report">
+              <ion-icon name="receipt-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Payroll Report</h3>
+                <p>View earnings, export CSV, and mark sessions processed</p>
+              </ion-label>
+            </ion-item>
+
+            <ion-item button detail routerLink="/tabs/settings/revenue-report">
+              <ion-icon name="bar-chart-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Revenue Report</h3>
+                <p>Daily, weekly, or monthly revenue breakdown and trends</p>
               </ion-label>
             </ion-item>
           </ion-list>
@@ -549,6 +576,9 @@ export class SettingsPage implements OnInit {
       qrCodeOutline,
       banOutline,
       layersOutline,
+      cashOutline,
+      barChartOutline,
+      receiptOutline,
     });
   }
 

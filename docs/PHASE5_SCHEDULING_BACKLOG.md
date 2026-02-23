@@ -878,7 +878,7 @@ CREATE POLICY "client_views_own_ledger" ON client_ledger FOR SELECT USING (clien
 
 **Priority:** P0 (Critical)
 **Sprint:** 60
-**Status:** Not Started
+**Status:** ✅ Complete
 
 **User Stories:**
 
@@ -887,7 +887,7 @@ CREATE POLICY "client_views_own_ledger" ON client_ledger FOR SELECT USING (clien
 
 **Implementation Tasks:**
 
-- [ ] Create migration `20260300030000_payroll.sql`
+- [x] Create migration `20260300030000_payroll.sql`
 
 ```sql
 CREATE TYPE pay_rate_type AS ENUM ('flat_per_session', 'percentage_of_revenue', 'hourly', 'commission_on_sale');
@@ -924,7 +924,7 @@ CREATE POLICY "trainer_owns_pay_rates" ON trainer_pay_rates USING (trainer_id = 
 CREATE POLICY "trainer_owns_pay_policies" ON trainer_pay_policies USING (trainer_id = auth.uid());
 ```
 
-- [ ] Add types to `@fitos/shared`:
+- [x] Add types to `@fitos/shared`:
 
   ```typescript
   export type PayRateType = 'flat_per_session' | 'percentage_of_revenue' | 'hourly' | 'commission_on_sale';
@@ -952,7 +952,7 @@ CREATE POLICY "trainer_owns_pay_policies" ON trainer_pay_policies USING (trainer
   }
   ```
 
-- [ ] Create `PayrollService` at `apps/mobile/src/app/core/services/payroll.service.ts`
+- [x] Create `PayrollService` at `apps/mobile/src/app/core/services/payroll.service.ts`
   - `calculateSessionPay(visit, payRate, payPolicy)`: Returns pay amount for a single visit
     - `flat_per_session`: returns `flat_amount` (or 0 if no_show and `pay_for_no_show = false`)
     - `percentage_of_revenue`: returns `(service_price * percentage / 100)` × no_show multiplier
@@ -960,7 +960,7 @@ CREATE POLICY "trainer_owns_pay_policies" ON trainer_pay_policies USING (trainer
   - `getPayrollSummary(trainerId, dateFrom, dateTo)`: Aggregate earnings report
   - Signal state: `payrollSummary`, `isLoading`
 
-- [ ] Create payroll settings page at `features/settings/pages/payroll-settings/payroll-settings.page.ts`
+- [x] Create payroll settings page at `features/settings/pages/payroll-settings/payroll-settings.page.ts`
   - List pay rates per service type
   - Configure no-show/cancel pay policies
 
@@ -976,7 +976,7 @@ CREATE POLICY "trainer_owns_pay_policies" ON trainer_pay_policies USING (trainer
 
 **Priority:** P1 (High)
 **Sprint:** 60
-**Status:** Not Started
+**Status:** ✅ Complete
 
 **User Stories:**
 
@@ -985,17 +985,17 @@ CREATE POLICY "trainer_owns_pay_policies" ON trainer_pay_policies USING (trainer
 
 **Implementation Tasks:**
 
-- [ ] Create `PayrollReportPage` at `features/reports/pages/payroll-report/payroll-report.page.ts`
+- [x] Create `PayrollReportPage` at `features/reports/pages/payroll-report/payroll-report.page.ts`
   - Date range picker (preset: this week, last week, this month, last month, custom)
   - Summary cards: total sessions, total gross revenue, total trainer pay, total tips, total commissions
   - Line-item table: date, client, service, status, service price, pay rate, pay amount, tip
   - Filterable by trainer (owner view), service type, status
 
-- [ ] Add CSV export via `@capacitor/filesystem`
+- [x] Add CSV export via `@capacitor/filesystem`
   - Format mirrors ADP/Gusto import structure for future integration
   - Columns: date, trainer_name, client_name, service, status, service_price, pay_amount, tip, commission
 
-- [ ] Create `RevenueReportPage` at `features/reports/pages/revenue-report/revenue-report.page.ts`
+- [x] Create `RevenueReportPage` at `features/reports/pages/revenue-report/revenue-report.page.ts`
   - Daily/weekly/monthly revenue charts
   - Package sales vs drop-in breakdown
   - Outstanding balances (client ledger debts) summary
@@ -1213,5 +1213,5 @@ Sprint 54 is the hard prerequisite for everything. Sprints 60 and 61 can run in 
 ---
 
 **Phase Status:** 🚧 In Progress
-**Completed:** Sprint 54 — Appointment Data Model · Sprint 55 — Calendar UI · Sprint 56 — 8-State FSM (AppointmentFsmService, auto-noshow-check Edge Function + pg_cron, AppointmentRequestQueueComponent, KioskPage) · Sprint 57 — Cancellation Policies & Late-Cancel Enforcement (CancellationPolicyService, cancellation_policies migration, client_ledger, charge-cancellation-fee Edge Function, setup-payment-method Edge Function, CancellationPoliciesPage settings, BookingForm deadline label, FSM fee wiring) · Sprint 58 — Pricing Options & Checkout POS (pricing_options/client_services/sale_transactions migration, PricingOption+ClientService+SaleTransaction types, PricingOptionService with FIFO selection + atomic decrement RPC, PricingOptionsPage settings, CheckoutPanelComponent modal, process-checkout Edge Function, SaleTransactionsService) · Sprint 59 — Contracts, Autopay & Client Account Ledger (create-subscription Edge Function with Stripe orphan prevention, stripe-subscription-webhook Edge Function handling payment_succeeded/failed/subscription.deleted, ContractEnrollmentComponent modal, ClientLedgerService with computed balance signal, ClientLedgerComponent with manual adjustment, Billing tab + contract status chips + balance chip in client-detail page)
-**Next Step:** Sprint 60 — Payroll Calculation & Reports
+**Completed:** Sprint 54 — Appointment Data Model · Sprint 55 — Calendar UI · Sprint 56 — 8-State FSM (AppointmentFsmService, auto-noshow-check Edge Function + pg_cron, AppointmentRequestQueueComponent, KioskPage) · Sprint 57 — Cancellation Policies & Late-Cancel Enforcement (CancellationPolicyService, cancellation_policies migration, client_ledger, charge-cancellation-fee Edge Function, setup-payment-method Edge Function, CancellationPoliciesPage settings, BookingForm deadline label, FSM fee wiring) · Sprint 58 — Pricing Options & Checkout POS (pricing_options/client_services/sale_transactions migration, PricingOption+ClientService+SaleTransaction types, PricingOptionService with FIFO selection + atomic decrement RPC, PricingOptionsPage settings, CheckoutPanelComponent modal, process-checkout Edge Function, SaleTransactionsService) · Sprint 59 — Contracts, Autopay & Client Account Ledger (create-subscription Edge Function with Stripe orphan prevention, stripe-subscription-webhook Edge Function handling payment_succeeded/failed/subscription.deleted, ContractEnrollmentComponent modal, ClientLedgerService with computed balance signal, ClientLedgerComponent with manual adjustment, Billing tab + contract status chips + balance chip in client-detail page) · Sprint 60 — Payroll Calculation & Reports (20260300030000_payroll.sql migration with pay_rate_type ENUM + trainer_pay_rates + trainer_pay_policies tables + calculate_trainer_pay/get_payroll_report/mark_payroll_processed RPCs + RLS; PayRateType+TrainerPayRate+TrainerPayPolicy+PayrollReportRow+PayrollSummary+RevenueReportRow types in @fitos/shared; PayrollService with CRUD, report generation, client-side preview, CSV export; PayrollSettingsPage with rate CRUD + no-show/cancel policy toggles; PayrollReportPage with date presets, summary cards, line-item table, CSV export, bulk mark processed; RevenueReportPage with granularity segments, KPI cards, payment breakdown bars, outstanding balances; routes + settings menu entries under Business Tools)
+**Next Step:** Sprint 61 — Multi-Trainer RBAC, Conflict Prevention & Schedule Optimization

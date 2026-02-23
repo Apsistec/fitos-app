@@ -925,3 +925,83 @@ export interface CheckoutResult {
   stripe_payment_intent_id?: string;
   error?: string;
 }
+
+// ============================================================================
+// Sprint 60 — Payroll Types
+// ============================================================================
+
+export type PayRateType =
+  | 'flat_per_session'
+  | 'percentage_of_revenue'
+  | 'hourly'
+  | 'commission_on_sale';
+
+export interface TrainerPayRate {
+  id: string;
+  trainer_id: string;
+  /** NULL = applies to all service types (default rate) */
+  service_type_id?: string;
+  pay_rate_type: PayRateType;
+  /** Used when pay_rate_type = 'flat_per_session' */
+  flat_amount?: number;
+  /** Used when pay_rate_type = 'percentage_of_revenue' (0–100) */
+  percentage?: number;
+  /** Used when pay_rate_type = 'hourly' */
+  hourly_rate?: number;
+  /** Used when pay_rate_type = 'commission_on_sale' (0–100) */
+  commission_percentage?: number;
+  created_at: string;
+  updated_at: string;
+  /** Joined service type name for display */
+  service_type?: { name: string };
+}
+
+export interface TrainerPayPolicy {
+  id: string;
+  trainer_id: string;
+  pay_for_no_show: boolean;
+  /** 0–100: percentage of normal rate paid for a no-show */
+  no_show_pay_percentage: number;
+  pay_for_late_cancel: boolean;
+  late_cancel_pay_percentage: number;
+  pay_for_early_cancel: boolean;
+  early_cancel_pay_percentage: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PayrollReportRow {
+  visit_id: string;
+  visit_date: string;
+  client_name: string;
+  service_name: string;
+  appointment_status: string;
+  service_price: number;
+  trainer_pay_amount: number;
+  tip_amount: number;
+  commission_amount: number;
+  payroll_processed: boolean;
+}
+
+export interface PayrollSummary {
+  date_from: string;
+  date_to: string;
+  total_sessions: number;
+  total_completed: number;
+  total_no_shows: number;
+  total_cancellations: number;
+  total_gross_revenue: number;
+  total_trainer_pay: number;
+  total_tips: number;
+  total_commissions: number;
+  rows: PayrollReportRow[];
+}
+
+export interface RevenueReportRow {
+  date: string;
+  gross_revenue: number;
+  session_pack_revenue: number;
+  drop_in_revenue: number;
+  total_sessions: number;
+  total_tips: number;
+}

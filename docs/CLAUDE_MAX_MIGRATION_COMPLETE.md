@@ -61,7 +61,7 @@ DEEPGRAM_API_KEY=YOUR-DEEPGRAM-KEY-HERE
 
 # Resend (email) — Get from: https://resend.com/api-keys
 RESEND_API_KEY=YOUR-RESEND-KEY-HERE
-
+ 
 # ============================================================================
 # AI Backend Configuration (apps/ai-backend)
 # ============================================================================
