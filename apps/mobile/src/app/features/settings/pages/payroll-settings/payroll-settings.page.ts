@@ -41,7 +41,6 @@ import {
   IonToggle,
   IonNote,
   IonBadge,
-  IonList,
   ToastController,
   AlertController,
 } from '@ionic/angular/standalone';
@@ -58,7 +57,7 @@ import {
 import { PayrollService } from '../../../../core/services/payroll.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SupabaseService } from '../../../../core/services/supabase.service';
-import { TrainerPayRate, TrainerPayPolicy, PayRateType } from '@fitos/shared';
+import { TrainerPayRate, PayRateType } from '@fitos/shared';
 
 addIcons({
   addOutline,
@@ -111,9 +110,8 @@ interface PayRateForm {
     IonSelectOption,
     IonToggle,
     IonNote,
-    IonBadge,
-    IonList,
-  ],
+    IonBadge
+],
   template: `
     <ion-header class="ion-no-border">
       <ion-toolbar>

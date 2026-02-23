@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
+import { SchedulingPermissionsService } from './scheduling-permissions.service';
 import type { StaffAvailability } from '@fitos/shared';
 
 /**
@@ -24,6 +25,7 @@ export const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'
 export class AvailabilityService {
   private supabase = inject(SupabaseService);
   private auth     = inject(AuthService);
+  private schedPerms = inject(SchedulingPermissionsService);
 
   availability        = signal<StaffAvailability[]>([]);
   isLoading           = signal(false);
@@ -168,24 +170,64 @@ export class AvailabilityService {
 
   /**
    * Client-side double-booking guard.
-   * Delegates to DB function for authoritative check.
-   * Returns true if the given window conflicts with an existing appointment.
+   * Delegates to DB function for authoritative check, passing travel buffer
+   * and respecting the allow_double_booking permission flag.
+   *
+   * Returns:
+   *   { conflict: false }               — slot is clear
+   *   { conflict: true, details }       — hard block (double-booking not allowed)
+   *   { conflict: true, softWarn: true, details } — warning only (allow_double_booking=true)
    */
   async checkConflict(
     trainerId: string,
     startAt: Date,
     endAt: Date,
     excludeAppointmentId?: string,
-  ): Promise<boolean> {
-    const { data } = await this.supabase.client
+    facilityId?: string,
+  ): Promise<ConflictResult> {
+    const allowDouble   = this.schedPerms.allowDoubleBooking();
+    const travelMinutes = this.schedPerms.travelBufferMinutes();
+
+    const { data, error } = await this.supabase.client
       .rpc('check_appointment_conflict', {
-        p_trainer_id: trainerId,
-        p_start_at:   startAt.toISOString(),
-        p_end_at:     endAt.toISOString(),
-        p_exclude_id: excludeAppointmentId ?? null,
+        p_trainer_id:         trainerId,
+        p_start_at:           startAt.toISOString(),
+        p_end_at:             endAt.toISOString(),
+        p_exclude_id:         excludeAppointmentId ?? null,
+        p_travel_buffer_min:  travelMinutes,
+        p_facility_id:        facilityId ?? null,
       });
 
-    return !!data;
+    if (error || !data) {
+      return { conflict: false };
+    }
+
+    const conflictData = data as ConflictRpcResult;
+
+    if (!conflictData.has_conflict) {
+      return { conflict: false };
+    }
+
+    return {
+      conflict: true,
+      softWarn: allowDouble,
+      details: conflictData.conflict_details ?? undefined,
+    };
+  }
+
+  /**
+   * Convenience method: returns true if there's a hard conflict
+   * (i.e. double-booking not allowed). Used by BookingFormComponent.
+   */
+  async hasHardConflict(
+    trainerId: string,
+    startAt: Date,
+    endAt: Date,
+    excludeAppointmentId?: string,
+    facilityId?: string,
+  ): Promise<boolean> {
+    const result = await this.checkConflict(trainerId, startAt, endAt, excludeAppointmentId, facilityId);
+    return result.conflict && !result.softWarn;
   }
 
   /**
@@ -231,4 +273,21 @@ export class AvailabilityService {
     const m = date.getMinutes().toString().padStart(2, '0');
     return `${h}:${m}`;
   }
+}
+
+// ── Supporting types ──────────────────────────────────────────
+
+/** Result of conflict check — distinguishes hard block from soft warning */
+export interface ConflictResult {
+  conflict: boolean;
+  /** When true, trainer allows double-booking — show warning but permit booking */
+  softWarn?: boolean;
+  /** Human-readable description of the conflicting appointment */
+  details?: string;
+}
+
+/** Shape returned by the check_appointment_conflict DB RPC (Sprint 61.2) */
+interface ConflictRpcResult {
+  has_conflict: boolean;
+  conflict_details?: string; // e.g. "John Smith at 2:00 PM"
 }

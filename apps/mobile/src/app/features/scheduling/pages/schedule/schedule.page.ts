@@ -45,6 +45,8 @@ import { BookingFormComponent, BookingFormInput } from '../../components/booking
 import { FindAppointmentComponent } from '../../components/find-appointment/find-appointment.component';
 import { AppointmentRequestQueueComponent } from '../../components/request-queue/request-queue.component';
 import { AppointmentFsmService } from '../../../../core/services/appointment-fsm.service';
+import { AvailabilityService } from '../../../../core/services/availability.service';
+import { ScheduleInsightsComponent } from '../../components/schedule-insights/schedule-insights.component';
 
 addIcons({
   chevronBackOutline, chevronForwardOutline, addOutline, searchOutline,
@@ -60,8 +62,9 @@ addIcons({
     IonHeader, IonToolbar, IonTitle, IonContent,
     IonButton, IonButtons, IonIcon, IonBadge,
     IonFab, IonFabButton,
-    ScheduleCalendarComponent
-],
+    ScheduleCalendarComponent,
+    ScheduleInsightsComponent,
+  ],
   template: `
     <ion-header>
       <ion-toolbar>
@@ -133,6 +136,19 @@ addIcons({
     </ion-header>
 
     <ion-content [fullscreen]="true">
+
+      <!-- Schedule insights widget (utilization bar + gap alert) -->
+      @if (viewMode() === 'single') {
+        <div class="insights-wrapper">
+          <app-schedule-insights
+            [appointments]="appointmentService.appointments()"
+            [availability]="availabilitySvc.availability()"
+            [selectedDate]="selectedDate()"
+            (addSlotClicked)="openBookingForm()"
+          />
+        </div>
+      }
+
       <app-schedule-calendar
         [date]="selectedDate()"
         [appointments]="todayAppointments()"
@@ -290,6 +306,10 @@ addIcons({
       flex-direction: column;
     }
 
+    .insights-wrapper {
+      padding: 12px 16px 0;
+    }
+
     app-schedule-calendar {
       flex: 1;
       overflow: hidden;
@@ -305,11 +325,12 @@ export class SchedulePage implements OnInit {
   private readonly modal = inject(ModalController);
   private readonly actionSheet = inject(ActionSheetController);
   private readonly toast = inject(ToastController);
-  private readonly appointmentService = inject(AppointmentService);
+  readonly appointmentService = inject(AppointmentService);
   private readonly fsm = inject(AppointmentFsmService);
   readonly serviceTypes = inject(ServiceTypeService);
   private readonly auth = inject(AuthService);
   private readonly clientService = inject(ClientService);
+  readonly availabilitySvc = inject(AvailabilityService);
 
   readonly selectedDate = signal(new Date().toISOString().split('T')[0]);
   readonly viewMode = signal<'single' | 'all-trainers'>('single');
@@ -378,6 +399,7 @@ export class SchedulePage implements OnInit {
       });
       this.serviceTypes.loadServiceTypes();
       this.clientService.loadClients();
+      this.availabilitySvc.loadAvailability(tid);
     }
   }
 

@@ -1005,3 +1005,52 @@ export interface RevenueReportRow {
   total_sessions: number;
   total_tips: number;
 }
+
+// ============================================================================
+// Scheduling Permissions — Sprint 61.1 (Phase 5D)
+// ============================================================================
+
+/** Per-user scheduling permission flags managed by gym owners/managers */
+export interface SchedulingPermissions {
+  user_id: string;
+  /** Can see all trainers' appointment details (not just own) */
+  can_view_all_schedules: boolean;
+  /** Can update/cancel appointments belonging to other trainers */
+  can_edit_other_trainer_appts: boolean;
+  /** Can see pay rate configuration for other trainers */
+  can_view_other_trainer_pay_rates: boolean;
+  /** Can create/edit/archive pricing options (packs, passes, contracts) */
+  can_manage_pricing_options: boolean;
+  /** Can view payroll reports and visit financial data */
+  can_access_payroll_reports: boolean;
+  /** Can create/edit cancellation policies */
+  can_manage_cancellation_policies: boolean;
+  /** Can manage facility resources (rooms, equipment) */
+  can_configure_resources: boolean;
+  /** When true, double-booking produces a warning but is allowed */
+  allow_double_booking: boolean;
+  /** Minutes of travel buffer between appointments at different facilities */
+  travel_buffer_minutes: number;
+  updated_at: string;
+}
+
+/** DTO for upserting scheduling permissions */
+export type UpsertSchedulingPermissionsDto = Omit<SchedulingPermissions, 'updated_at'>;
+
+/** Slot scored by schedule optimization algorithm */
+export interface ScoredSlot {
+  time: string;           // ISO timestamp
+  available: boolean;
+  score: number;          // 0–100; higher = better cluster fit
+  isRecommended: boolean; // top 3 slots get this badge
+}
+
+/** Schedule utilization insight for a given day */
+export interface ScheduleInsight {
+  date: string;
+  bookedMinutes: number;
+  availableMinutes: number;
+  utilizationPct: number;   // 0–100
+  gapCount: number;         // number of gaps > 30 min
+  largestGapMinutes: number;
+}

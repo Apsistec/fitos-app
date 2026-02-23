@@ -694,6 +694,15 @@ export const routes: Routes = [
                 (m) => m.RevenueReportPage
               ),
           },
+          {
+            // Staff Scheduling Permissions — gym owners only
+            path: 'staff-permissions',
+            canActivate: [trainerOrOwnerGuard],
+            loadComponent: () =>
+              import('./features/settings/pages/staff-permissions/staff-permissions.page').then(
+                (m) => m.StaffPermissionsPage
+              ),
+          },
         ],
       },
       {

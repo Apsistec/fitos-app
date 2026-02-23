@@ -5,7 +5,8 @@
 ✅ **Your FitOS app is well-architected!** The mobile app doesn't directly call Anthropic API - it goes through your AI Backend, which is the right approach.
 
 ### Architecture Flow
-```
+
+```g
 Mobile App (port 4200)
     ↓ HTTP Request
 AI Backend (port 8000 / Cloud Run)
@@ -16,19 +17,25 @@ Anthropic API
 ## Anthropic API Key Locations Found
 
 ### 1. ✅ **Edge Function** (UPDATED)
+
 **File**: `supabase/functions/anthropic-key/index.ts`
+
 - **Status**: ✅ Already updated to Claude Max configuration
 - **Note**: This function is NOT currently called by the mobile app
 - **Action**: None needed (already done)
 
 ### 2. ⚠️ **AI Backend Configuration**
+
 **File**: `apps/ai-backend/app/core/config.py`
+
 - **Current**: Looks for `ANTHROPIC_API_KEY` environment variable
 - **Used by**: `apps/ai-backend/app/core/llm.py` via `langchain-anthropic`
 - **Action**: Update `.env` with your Claude Max API key
 
 ### 3. ⚠️ **Root Environment File**
+
 **File**: `.env` (root level)
+
 - **Current**: Comment about Anthropic key, but variable appears to be removed/commented
 - **Action**: Add your Claude Max API key here
 
@@ -36,7 +43,7 @@ Anthropic API
 
 ### Step 1: Get Your Claude Max API Key
 
-1. Go to: https://console.anthropic.com/settings/keys
+1. Go to: <https://console.anthropic.com/settings/keys>
 2. Click "Create Key" or use an existing key
 3. Copy your API key (format: `sk-ant-api03-...`)
 4. **Important**: This key will be associated with your Claude Max subscription
@@ -111,11 +118,13 @@ DEFAULT_MODEL=claude-sonnet-4-5-20250514
 ### Step 5: Test Locally
 
 1. **Start Supabase**:
+
    ```bash
    npm run db:start
    ```
 
 2. **Start AI Backend**:
+
    ```bash
    cd apps/ai-backend
    poetry install  # If you haven't already
@@ -123,12 +132,13 @@ DEFAULT_MODEL=claude-sonnet-4-5-20250514
    ```
 
 3. **Start Mobile App** (in another terminal):
+
    ```bash
    npm start
    ```
 
 4. **Test AI Coach**:
-   - Open http://localhost:4200
+   - Open <http://localhost:4200>
    - Navigate to AI Coach chat
    - Send a message: "How much protein should I eat?"
    - Verify you get a response
@@ -146,16 +156,18 @@ When you deploy your AI Backend to Google Cloud Run:
 3. Click "Edit & Deploy New Revision"
 4. Under "Variables & Secrets" → "Environment Variables"
 5. Add or update:
-   ```
+
+   ```f
    ANTHROPIC_API_KEY=sk-ant-api03-YOUR-KEY-HERE
    DEFAULT_MODEL=claude-sonnet-4-5-20250514
    DEFAULT_LLM_PROVIDER=anthropic
    ```
+
 6. Deploy
 
 ### Step 7: Verify in Anthropic Console
 
-1. Go to: https://console.anthropic.com/
+1. Go to: <https://console.anthropic.com/>
 2. Navigate to "Usage" or "API" section
 3. Send a few test messages through your app
 4. Verify API calls are appearing
@@ -164,6 +176,7 @@ When you deploy your AI Backend to Google Cloud Run:
 ## What You Get with Claude Max
 
 ### Benefits
+
 - ✅ **Fixed monthly cost** - No surprises from token usage
 - ✅ **Higher rate limits** - Priority tier with better limits
 - ✅ **Latest models** - Access to Sonnet 4.5, Haiku, Opus 4.5
@@ -186,6 +199,7 @@ model="claude-opus-4-5-20251101"
 ```
 
 Current usage in your backend:
+
 - `get_fast_llm()` → Used for routing/classification
 - `get_llm()` → Used by specialist agents (workout, nutrition, recovery, motivation)
 - `get_smart_llm()` → Not currently used, but available for complex tasks
@@ -195,42 +209,50 @@ Current usage in your backend:
 Your AI Backend at `apps/ai-backend/` uses:
 
 **Packages**:
+
 - `langchain-anthropic` v0.2.5
 - `anthropic` v0.39.0
 - `langgraph` v1.0.0
 
 **Config** (`app/core/config.py`):
+
 - Loads from root `.env` file (correct!)
 - Default provider: `anthropic`
 - Default model: `claude-sonnet-4.5` (older name, should update to `claude-sonnet-4-5-20250514`)
 
 **LLM Usage** (`app/core/llm.py`):
+
 - `ChatAnthropic` from `langchain-anthropic`
 - Uses `settings.ANTHROPIC_API_KEY`
 - Good error handling if key is missing
 
 **Agent Flow** (`app/agents/coach_graph.py`):
+
 - Router → Specialist Agent → Escalation Check
 - Specialist agents use `get_llm()` which respects your DEFAULT_MODEL setting
 
 ## Troubleshooting
 
 ### Error: "ANTHROPIC_API_KEY not set in environment"
+
 - **Cause**: `.env` file doesn't have the key or AI Backend isn't loading it
 - **Fix**: Verify `.env` exists at root level and has `ANTHROPIC_API_KEY=...`
 - **Test**: `cd apps/ai-backend && poetry run python -c "from app.core.config import settings; print(settings.ANTHROPIC_API_KEY)"`
 
 ### Error: "Could not authenticate with Anthropic API"
+
 - **Cause**: Invalid API key or key not associated with Max subscription
-- **Fix**: Verify your key at https://console.anthropic.com/settings/keys
+- **Fix**: Verify your key at <https://console.anthropic.com/settings/keys>
 - **Note**: Make sure you're using a key from YOUR account, not the example key
 
 ### Error: "Failed to get AI response"
+
 - **Cause**: AI Backend is down or not reachable
 - **Fix**: Check AI Backend is running on port 8000
 - **Test**: `curl http://localhost:8000/health`
 
 ### API calls not showing in Anthropic Console
+
 - **Cause**: Using wrong API key or calls not reaching Anthropic
 - **Fix**: Check logs in AI Backend terminal
 - **Debug**: Add logging in `llm.py` to confirm API key being used
@@ -254,6 +276,7 @@ Your AI Backend at `apps/ai-backend/` uses:
 ## Questions?
 
 If you run into issues:
+
 1. Check AI Backend logs: Look for errors in the terminal where uvicorn is running
 2. Check browser console: Network tab should show successful calls to `/api/v1/coach/chat`
 3. Check Anthropic Console: Verify API calls are showing up under your account

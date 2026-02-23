@@ -273,6 +273,14 @@ import { ThemeService, ThemeMode } from '../../core/services/theme.service';
                 <p>Daily, weekly, or monthly revenue breakdown and trends</p>
               </ion-label>
             </ion-item>
+
+            <ion-item button detail routerLink="/tabs/settings/staff-permissions">
+              <ion-icon name="shield-checkmark-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Staff Permissions</h3>
+                <p>Control what each trainer can view and manage</p>
+              </ion-label>
+            </ion-item>
           </ion-list>
 
           <ion-list class="settings-list">
