@@ -52,6 +52,7 @@ import {
   receiptOutline,
   alarmOutline,
   imagesOutline,
+  globeOutline,     // Sprint 67: Public Profile link
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
 import { StripeService } from '../../core/services/stripe.service';
@@ -225,6 +226,15 @@ import { ThemeService, ThemeMode } from '../../core/services/theme.service';
               <ion-label>
                 <h3>Invite New Client</h3>
                 <p>Send invitation codes to prospects</p>
+              </ion-label>
+            </ion-item>
+
+            <!-- Sprint 67: Public Profile & SEO Storefront -->
+            <ion-item button detail routerLink="/tabs/settings/public-profile">
+              <ion-icon name="globe-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Public Profile</h3>
+                <p>Your SEO-indexed booking page at nutrifitos.com/t/yourname</p>
               </ion-label>
             </ion-item>
 
@@ -608,6 +618,7 @@ export class SettingsPage implements OnInit {
       receiptOutline,
       alarmOutline,
       imagesOutline,
+      globeOutline,
     });
   }
 

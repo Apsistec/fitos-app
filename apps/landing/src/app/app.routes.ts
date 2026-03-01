@@ -45,6 +45,13 @@ export const routes: Routes = [
     path: 'cookies',
     loadComponent: () => import('./pages/cookies/cookies.component').then(m => m.CookiesComponent),
   },
+  // ── Sprint 67: SEO-indexed trainer public profiles ──────────────────────────
+  // Route: /t/:username  →  SSR-rendered for Google indexing
+  // Render mode: Server (dynamic per-username, see app.routes.server.ts)
+  {
+    path: 't/:username',
+    loadComponent: () => import('./pages/trainer-profile/trainer-profile.component').then(m => m.TrainerProfileComponent),
+  },
   {
     path: '**',
     redirectTo: '',
