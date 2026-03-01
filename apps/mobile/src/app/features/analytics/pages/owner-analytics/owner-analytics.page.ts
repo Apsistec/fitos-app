@@ -26,6 +26,7 @@ import {
   IonSpinner,
   IonRefresher,
   IonRefresherContent,
+  IonButton,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -43,6 +44,7 @@ import {
 } from '../../../../core/services/trainer-performance.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 /**
  * OwnerAnalyticsPage - Facility-wide business analytics
@@ -82,6 +84,7 @@ import { FormsModule } from '@angular/forms';
     IonSpinner,
     IonRefresher,
     IonRefresherContent,
+    IonButton,
     FormsModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -89,6 +92,10 @@ import { FormsModule } from '@angular/forms';
     <ion-header>
       <ion-toolbar>
         <ion-title>Business Analytics</ion-title>
+        <ion-button slot="end" fill="clear" size="small" (click)="goToGrowthAnalytics()">
+          <ion-icon name="trending-up-outline" slot="start"></ion-icon>
+          Growth
+        </ion-button>
       </ion-toolbar>
 
       <ion-toolbar>
@@ -592,6 +599,7 @@ import { FormsModule } from '@angular/forms';
 export class OwnerAnalyticsPage implements OnInit {
   service = inject(TrainerPerformanceService);
   private authService = inject(AuthService);
+  private router = inject(Router);
 
   // State
   selectedPeriod = signal<'month' | 'quarter' | 'year'>('month');
@@ -647,6 +655,10 @@ export class OwnerAnalyticsPage implements OnInit {
   async handleRefresh(event: CustomEvent): Promise<void> {
     await this.loadAnalytics();
     (event.target as HTMLIonRefresherElement).complete();
+  }
+
+  goToGrowthAnalytics(): void {
+    this.router.navigate(['/tabs/analytics/growth']);
   }
 
   private getDateRange(): { startDate: string; endDate: string } {

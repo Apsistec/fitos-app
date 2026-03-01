@@ -168,14 +168,8 @@ export class MorePage {
           {
             title: 'Analytics',
             items: [
-              { label: 'Client Analytics', icon: 'analytics-outline', route: '/tabs/analytics', subtitle: 'Client progress & insights' },
+              { label: 'Growth Analytics', icon: 'trending-up-outline', route: '/tabs/analytics/growth', subtitle: 'Cohort retention & KPIs' },
               { label: 'CRM Pipeline', icon: 'funnel-outline', route: '/tabs/crm', subtitle: 'Lead management' },
-            ],
-          },
-          {
-            title: 'Sessions',
-            items: [
-              { label: 'Session Schedule', icon: 'timer-outline', route: '/tabs/sessions', subtitle: 'Clock in/out & scheduling' },
             ],
           },
           ...settingsSections,
@@ -188,15 +182,16 @@ export class MorePage {
             title: 'Analytics & Reports',
             items: [
               { label: 'Facility Analytics', icon: 'analytics-outline', route: '/tabs/analytics', subtitle: 'Utilization & KPIs' },
+              { label: 'Growth Analytics', icon: 'trending-up-outline', route: '/tabs/analytics/growth', subtitle: 'Cohort retention & referrals' },
               { label: 'CRM Pipeline', icon: 'funnel-outline', route: '/tabs/crm', subtitle: 'Lead management' },
-              { label: 'Marketing', icon: 'megaphone-outline', route: '/tabs/marketing', subtitle: 'Campaigns & outreach' },
+              { label: 'Email Campaigns', icon: 'megaphone-outline', route: '/tabs/crm/campaigns', subtitle: 'Campaigns & outreach' },
             ],
           },
           {
             title: 'Administration',
             items: [
-              { label: 'Audit Logs', icon: 'shield-checkmark-outline', route: '/tabs/admin/audit', subtitle: 'HIPAA compliance logs' },
-              { label: 'Staff Management', icon: 'people-outline', route: '/tabs/admin/staff', subtitle: 'Manage staff accounts' },
+              { label: 'Staff Permissions', icon: 'shield-checkmark-outline', route: '/tabs/settings/staff-permissions', subtitle: 'Manage staff access' },
+              { label: 'Payroll Report', icon: 'document-text-outline', route: '/tabs/settings/payroll-report', subtitle: 'Staff pay & compensation' },
             ],
           },
           ...settingsSections,

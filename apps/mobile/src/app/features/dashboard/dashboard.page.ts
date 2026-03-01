@@ -28,10 +28,15 @@ import {
   flameOutline,
   nutritionOutline,
   chatbubbleOutline,
+  chatbubblesOutline,
   sendOutline,
   chevronForwardOutline,
   trophyOutline,
   checkmarkCircleOutline,
+  trendingUpOutline,
+  storefrontOutline,
+  starOutline,
+  megaphoneOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
 import { SupabaseService } from '../../core/services/supabase.service';
@@ -54,6 +59,7 @@ import { WearableDataCardComponent } from '../../shared/components/wearable-data
 import { OwnerFacilityStatsComponent, type FacilityStats } from './components/owner-facility-stats/owner-facility-stats.component';
 import { OwnerTrainerPerformanceComponent, type TrainerPerformance } from './components/owner-trainer-performance/owner-trainer-performance.component';
 import { CRMDashboardWidgetComponent } from '../crm/components/crm-dashboard-widget.component';
+import { NpsDashboardWidgetComponent } from '../analytics/components/nps-dashboard-widget/nps-dashboard-widget.component';
 import { ProfilingPromptComponent } from './components/profiling-prompt/profiling-prompt.component';
 import type { WorkoutWithExercises } from '../../core/services/workout.service';
 
@@ -88,6 +94,7 @@ import type { WorkoutWithExercises } from '../../core/services/workout.service';
     OwnerFacilityStatsComponent,
     OwnerTrainerPerformanceComponent,
     CRMDashboardWidgetComponent,
+    NpsDashboardWidgetComponent,
     ProfilingPromptComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -131,7 +138,7 @@ import type { WorkoutWithExercises } from '../../core/services/workout.service';
               <ion-skeleton-text animated style="width:90%;height:20px;border-radius:6px"></ion-skeleton-text>
             </div>
           } @else if (clientDashboard.nextSession()) {
-            <div class="dash-card next-session-card" [routerLink]="['/tabs/schedule/client-appointment', clientDashboard.nextSession()!.appointment.id]">
+            <div class="dash-card next-session-card" [routerLink]="['/tabs/workouts/appointment', clientDashboard.nextSession()!.appointment.id]">
               <div class="card-header-row">
                 <div class="card-icon teal"><ion-icon name="calendar-outline"></ion-icon></div>
                 <span class="card-title">Next Session</span>
@@ -155,12 +162,12 @@ import type { WorkoutWithExercises } from '../../core/services/workout.service';
               </div>
             </div>
           } @else {
-            <div class="dash-card next-session-card empty" routerLink="/tabs/schedule">
+            <div class="dash-card next-session-card empty" routerLink="/tabs/marketplace">
               <div class="card-header-row">
                 <div class="card-icon teal"><ion-icon name="calendar-outline"></ion-icon></div>
                 <span class="card-title">Next Session</span>
               </div>
-              <p class="empty-label">No upcoming sessions — tap to book one.</p>
+              <p class="empty-label">No upcoming sessions — tap to browse available sessions.</p>
             </div>
           }
 
@@ -259,6 +266,42 @@ import type { WorkoutWithExercises } from '../../core/services/workout.service';
             </div>
           }
 
+          <!-- Messages fallback — only shown when there is NO message preview -->
+          @if (!clientDashboard.isLoading() && !clientDashboard.messagePreview()) {
+            <div class="dash-card messages-fallback-card" routerLink="/tabs/messages">
+              <div class="card-header-row">
+                <div class="card-icon blue"><ion-icon name="chatbubbles-outline"></ion-icon></div>
+                <span class="card-title">Messages</span>
+                <ion-icon name="chevron-forward-outline" class="chevron"></ion-icon>
+              </div>
+              <p class="empty-label">Chat with your trainer.</p>
+            </div>
+          }
+
+          <!-- Community shortcuts: Leaderboard + Pod Feed -->
+          <div class="community-row">
+            <div class="dash-card community-card" routerLink="/tabs/social/leaderboard">
+              <ion-icon name="trophy-outline" class="community-icon yellow"></ion-icon>
+              <span class="community-label">Leaderboard</span>
+            </div>
+            <div class="dash-card community-card" routerLink="/tabs/social/pods">
+              <ion-icon name="people-outline" class="community-icon teal"></ion-icon>
+              <span class="community-label">My Pod</span>
+            </div>
+          </div>
+
+          <!-- Refer a Friend -->
+          <div class="dash-card referral-card" routerLink="/tabs/workouts/referral">
+            <div class="card-header-row">
+              <div class="card-icon" style="background:rgba(139,92,246,0.15)">
+                <ion-icon name="megaphone-outline" style="color:#8B5CF6"></ion-icon>
+              </div>
+              <span class="card-title">Refer a Friend</span>
+              <ion-icon name="chevron-forward-outline" class="chevron"></ion-icon>
+            </div>
+            <p class="empty-label">Earn rewards when friends join FitOS.</p>
+          </div>
+
           <!-- Wearable Data -->
           <app-wearable-data-card />
 
@@ -294,13 +337,21 @@ import type { WorkoutWithExercises } from '../../core/services/workout.service';
                 <ion-icon name="funnel-outline" slot="start"></ion-icon>
                 View CRM
               </ion-button>
-              <ion-button expand="block" fill="outline" routerLink="/tabs/workouts/create">
+              <ion-button expand="block" fill="outline" routerLink="/tabs/workouts/builder">
                 <ion-icon name="barbell-outline" slot="start"></ion-icon>
                 Create Workout
               </ion-button>
               <ion-button expand="block" fill="outline" routerLink="/tabs/clients">
                 <ion-icon name="people-outline" slot="start"></ion-icon>
                 My Clients
+              </ion-button>
+              <ion-button expand="block" fill="outline" routerLink="/tabs/messages">
+                <ion-icon name="chatbubbles-outline" slot="start"></ion-icon>
+                Messages
+              </ion-button>
+              <ion-button expand="block" fill="outline" routerLink="/tabs/analytics/growth">
+                <ion-icon name="trending-up-outline" slot="start"></ion-icon>
+                Growth Analytics
               </ion-button>
             </div>
           </div>
@@ -310,6 +361,9 @@ import type { WorkoutWithExercises } from '../../core/services/workout.service';
 
           <!-- CRM Dashboard Widget -->
           <app-crm-dashboard-widget />
+
+          <!-- NPS Score Widget -->
+          <app-nps-dashboard-widget />
 
           <!-- Needs Attention -->
           <app-trainer-needs-attention [alerts]="clientAlerts()" />
@@ -569,6 +623,37 @@ import type { WorkoutWithExercises } from '../../core/services/workout.service';
       }
     }
 
+    /* Messages fallback */
+    .messages-fallback-card .empty-label { margin: 0; }
+
+    /* Community row */
+    .community-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .community-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 20px 12px;
+    }
+    .community-icon {
+      font-size: 28px;
+      &.yellow { color: #EAB308; }
+      &.teal   { color: #10B981; }
+    }
+    .community-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--fitos-text-primary, #F5F5F5);
+    }
+
+    /* Referral card */
+    .referral-card .empty-label { margin: 0; }
+
     /* Ensure all cards have consistent width */
     app-profiling-prompt,
     app-client-today-workout-card,
@@ -580,7 +665,8 @@ import type { WorkoutWithExercises } from '../../core/services/workout.service';
     app-trainer-activity-feed,
     app-owner-facility-stats,
     app-owner-trainer-performance,
-    app-crm-dashboard-widget {
+    app-crm-dashboard-widget,
+    app-nps-dashboard-widget {
       width: 100%;
       max-width: 100%;
     }
@@ -710,10 +796,15 @@ export class DashboardPage implements OnInit {
       flameOutline,
       nutritionOutline,
       chatbubbleOutline,
+      chatbubblesOutline,
       sendOutline,
       chevronForwardOutline,
       trophyOutline,
       checkmarkCircleOutline,
+      trendingUpOutline,
+      storefrontOutline,
+      starOutline,
+      megaphoneOutline,
     });
   }
 

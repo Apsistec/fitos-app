@@ -297,6 +297,15 @@ export const routes: Routes = [
                 (m) => m.ReferralPage
               ),
           },
+          {
+            // Client appointment detail — accessible by all authenticated users (no trainer guard)
+            // Linked from the client dashboard "Next Session" card
+            path: 'appointment/:id',
+            loadComponent: () =>
+              import('./features/scheduling/pages/client-appointment/client-appointment.page').then(
+                (m) => m.ClientAppointmentPage
+              ),
+          },
         ],
       },
       {

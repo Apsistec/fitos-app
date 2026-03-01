@@ -212,7 +212,7 @@ export class BusinessPage implements OnInit {
     return [
       ...commonCards,
       { title: 'Email', subtitle: 'Templates & sequences', icon: 'mail-outline', route: '/tabs/crm/templates', color: '#EC4899' },
-      { title: 'Analytics', subtitle: 'Client insights', icon: 'trending-up-outline', route: '/tabs/analytics', color: '#14B8A6' },
+      { title: 'Growth Analytics', subtitle: 'Cohort retention & KPIs', icon: 'trending-up-outline', route: '/tabs/analytics/growth', color: '#14B8A6' },
     ];
   });
 

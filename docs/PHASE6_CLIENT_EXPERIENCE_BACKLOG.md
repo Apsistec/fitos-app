@@ -875,3 +875,31 @@ The six client-facing subsystems to build:
 | 69 | Referral Program & Growth Mechanics | ✅ Complete |
 
 **Overall Phase Status:** ✅ Complete (8/8 Sprints Complete)
+
+---
+
+## Post-Phase 6: Dashboard Navigation Audit
+
+**Completed:** Sprint 69 + (post-phase audit)
+
+Following Phase 6 completion, a full dashboard navigation audit was performed across all three user roles. The following issues were identified and fixed:
+
+### 🔴 Critical Bugs Fixed
+| # | Issue | Fix Applied |
+|---|-------|-------------|
+| 1 | Client "Next Session" **empty state** linked to `/tabs/schedule` (trainer-guarded — clients blocked) | Changed to `/tabs/marketplace` |
+| 2 | Client "Next Session" **populated state** linked to `/tabs/schedule/client-appointment/:id` (guarded + route non-existent) | Created `ClientAppointmentPage`; new unguarded route `/tabs/workouts/appointment/:id` |
+| 3 | **Trainers had zero navigation path to Messages** (no Messages tab, no More tab, no dashboard link) | Added Messages + Growth Analytics to trainer Quick Actions |
+| 4 | Business page **trainer "Analytics" card** linked to `OwnerAnalyticsPage` which immediately bails for non-owners | Changed to `/tabs/analytics/growth` (GrowthAnalyticsPage) |
+| 5 | Owner **More page** had 3 dead routes: `/tabs/marketing`, `/tabs/admin/audit`, `/tabs/admin/staff` | Fixed: → `/tabs/crm/campaigns`, `/tabs/settings/staff-permissions`, `/tabs/settings/payroll-report` |
+
+### 🟡 Navigation Gaps Filled
+| # | Gap | Solution |
+|---|-----|---------|
+| 6 | No Growth Analytics entry for owners | Added "Growth" button to `OwnerAnalyticsPage` header; added Growth Analytics to owner More page |
+| 7 | Growth Analytics entry for trainers | Added via Quick Actions on trainer dashboard + fixed Business page link |
+| 8 | NPS Dashboard Widget built in Sprint 68 but never surfaced | Added `<app-nps-dashboard-widget>` to trainer dashboard after CRM widget |
+| 9 | Clients had no Social/Leaderboard navigation | Added Community row (Leaderboard + My Pod) to client dashboard |
+| 10 | Clients had no Referral page entry point | Added "Refer a Friend" card to client dashboard → `/tabs/workouts/referral` |
+| 11 | Clients with no existing messages had no way to initiate chat | Added fallback "Messages" card (shown only when no message preview exists) |
+| 12 | Trainer More page had dead route `/tabs/sessions` | Removed; Analytics entry updated to Growth Analytics |
