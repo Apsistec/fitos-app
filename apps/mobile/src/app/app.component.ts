@@ -1,6 +1,8 @@
 import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
+import { MilestoneCardComponent } from './features/clients/components/milestone-card/milestone-card.component';
+import { MilestoneService } from './core/services/milestone.service';
 import { filter } from 'rxjs/operators';
 import { AuthService } from './core/services/auth.service';
 import { ThemeService } from './core/services/theme.service';
@@ -64,12 +66,17 @@ import {
 @Component({
   standalone: true,
   selector: 'app-root',
-  imports: [IonApp, IonRouterOutlet],
+  imports: [IonApp, IonRouterOutlet, MilestoneCardComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ion-app>
       <a href="#main-content" class="skip-link">Skip to main content</a>
       <ion-router-outlet id="main-content"></ion-router-outlet>
+
+      <!-- Global milestone achievement overlay (Sprint 64.2) -->
+      @if (milestoneService.pendingCard()) {
+        <app-milestone-card />
+      }
     </ion-app>
   `,
   styles: [`
@@ -94,6 +101,7 @@ import {
 export class AppComponent implements OnInit {
   private authService = inject(AuthService);
   private themeService = inject(ThemeService); // Initialize theme service
+  milestoneService = inject(MilestoneService); // Exposes pendingCard for global overlay
   private firebaseService = inject(FirebaseService); // Initialize Firebase Analytics & Performance
   private deepLinkService = inject(DeepLinkService); // Central deep-link router (NFC, QR, push)
   private appShortcutsService = inject(AppShortcutsService); // Home-screen quick actions

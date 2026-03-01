@@ -50,6 +50,8 @@ import {
   cashOutline,
   barChartOutline,
   receiptOutline,
+  alarmOutline,
+  imagesOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
 import { StripeService } from '../../core/services/stripe.service';
@@ -323,6 +325,23 @@ import { ThemeService, ThemeMode } from '../../core/services/theme.service';
             <ion-label>Notifications</ion-label>
           </ion-item>
 
+          @if (!isTrainer()) {
+            <ion-item button detail routerLink="/tabs/settings/client-notifications">
+              <ion-icon name="alarm-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Session & Workout Alerts</h3>
+                <p>Reminders, PR celebrations, weekly recap</p>
+              </ion-label>
+            </ion-item>
+            <ion-item button detail routerLink="/tabs/workouts/progress-photos">
+              <ion-icon name="images-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Progress Photos</h3>
+                <p>Before & after photos, transformation tracking</p>
+              </ion-label>
+            </ion-item>
+          }
+
           <ion-item button detail routerLink="/tabs/settings/wearables">
             <ion-icon name="watch-outline" slot="start"></ion-icon>
             <ion-label>
@@ -587,6 +606,8 @@ export class SettingsPage implements OnInit {
       cashOutline,
       barChartOutline,
       receiptOutline,
+      alarmOutline,
+      imagesOutline,
     });
   }
 

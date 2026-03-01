@@ -40,6 +40,9 @@ class Settings(BaseSettings):
     TERRA_API_KEY: str | None = None
     TERRA_DEV_ID: str | None = None
 
+    # Error Tracking
+    SENTRY_DSN: str | None = None
+
     # JITAI Configuration
     MAX_DAILY_INTERVENTIONS: int = 3
     INTERVENTION_THRESHOLD: float = 0.7

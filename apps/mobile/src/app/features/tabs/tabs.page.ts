@@ -20,6 +20,7 @@ import {
   briefcaseOutline, briefcase,
   ellipsisHorizontalOutline, ellipsisHorizontal,
   calendarOutline, calendar,
+  storefrontOutline, storefront,
 } from 'ionicons/icons';
 import { TabConfigService } from '../../core/services/tab-config.service';
 import { MessagingService } from '../../core/services/messaging.service';
@@ -43,7 +44,8 @@ import { MessagingService } from '../../core/services/messaging.service';
           <ion-tab-button [tab]="tab.route">
             <ion-icon [name]="tab.icon"></ion-icon>
             <ion-label>{{ tab.label }}</ion-label>
-            @if (tab.route === 'more' && unreadCount() > 0) {
+            <!-- Sprint 65: badge moved from 'more' to 'dashboard' since Shop replaced More -->
+            @if (tab.route === 'dashboard' && unreadCount() > 0) {
               <ion-badge color="danger">{{ unreadCount() > 99 ? '99+' : unreadCount() }}</ion-badge>
             }
           </ion-tab-button>
@@ -109,6 +111,7 @@ export class TabsPage {
       briefcaseOutline, briefcase,
       ellipsisHorizontalOutline, ellipsisHorizontal,
       calendarOutline, calendar,
+      storefrontOutline, storefront,   // Sprint 65: Shop tab
     });
 
     // Load conversations for unread count

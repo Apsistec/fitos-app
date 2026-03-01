@@ -3,6 +3,7 @@ FitOS AI Backend - FastAPI + LangGraph
 Multi-agent coaching system with voice, photo, and JITAI features
 """
 
+import sentry_sdk
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -14,6 +15,16 @@ from app.routes import coach, nutrition, voice, jitai, health, coach_brain, work
 
 # Setup logging
 logger = setup_logging()
+
+# Initialize Sentry before the app starts so all exceptions are captured
+if settings.SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=settings.SENTRY_DSN,
+        environment=settings.ENVIRONMENT,
+        send_default_pii=True,
+        traces_sample_rate=0.1,
+        # FastAPI integration is auto-discovered by sentry-sdk[fastapi]
+    )
 
 # Create FastAPI app
 app = FastAPI(

@@ -14,6 +14,6 @@ export const environment = {
   stripePublishableKey: 'pk_test_51SaoYU8dyNFOBioE9PzoGWPwMCeM7yET0I2mRbkq2LjwLFU0ICxvkTzF3EjwgNYYS72PKvIxjVwTL4HALdeHXFZR00PFVjwXG8', // Using test key for alpha
   terraApiKey: '',
   usdaApiKey: 'whIXShXv6RIuHypBFNTLSdrWNc4ad9kSabiKT9D5',
-  sentryDsn: 'https://6d219752bc4e086e5f3cb315e6938a1d@o4510852554162176.ingest.us.sentry.io/4510852556128257',
+  sentryDsn: 'https://eb265628f974fedf8f99730a231d69c4@o239736.ingest.us.sentry.io/4510933185069056',
   aiBackendUrl: 'https://ai-backend-953773965912.us-central1.run.app',
 };

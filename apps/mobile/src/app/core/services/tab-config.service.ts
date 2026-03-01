@@ -32,7 +32,8 @@ export class TabConfigService {
     { label: 'Workouts', icon: 'barbell-outline', iconFilled: 'barbell', route: 'workouts' },
     { label: 'Nutrition', icon: 'nutrition-outline', iconFilled: 'nutrition', route: 'nutrition' },
     { label: 'AI Coach', icon: 'sparkles-outline', iconFilled: 'sparkles', route: 'coaching' },
-    { label: 'More', icon: 'ellipsis-horizontal-outline', iconFilled: 'ellipsis-horizontal', route: 'more' },
+    // Sprint 65: Shop tab replaces More for clients — trainer products are the primary CTA
+    { label: 'Shop', icon: 'storefront-outline', iconFilled: 'storefront', route: 'marketplace' },
   ];
 
   private readonly trainerTabs: TabConfig[] = [
@@ -40,7 +41,8 @@ export class TabConfigService {
     { label: 'Clients', icon: 'people-outline', iconFilled: 'people', route: 'clients' },
     { label: 'Schedule', icon: 'calendar-outline', iconFilled: 'calendar', route: 'schedule' },
     { label: 'Business', icon: 'briefcase-outline', iconFilled: 'briefcase', route: 'business' },
-    { label: 'More', icon: 'ellipsis-horizontal-outline', iconFilled: 'ellipsis-horizontal', route: 'more' },
+    // Sprint 65: Shop tab — trainers manage their product catalogue
+    { label: 'Shop', icon: 'storefront-outline', iconFilled: 'storefront', route: 'marketplace' },
   ];
 
   private readonly ownerTabs: TabConfig[] = [

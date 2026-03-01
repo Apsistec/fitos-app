@@ -63,6 +63,9 @@ import { GraduationAlertComponent } from '../../components/graduation-alert/grad
 import { AssessmentFormComponent } from '../../components/assessment-form/assessment-form.component';
 import { ClientLedgerComponent } from '../../components/client-ledger/client-ledger.component';
 import { ContractEnrollmentComponent } from '../../components/contract-enrollment/contract-enrollment.component';
+import { ProgressTimelineComponent } from '../../components/progress-timeline/progress-timeline.component';
+import { ProgressPhotosComponent } from '../../components/progress-photos/progress-photos.component';
+import { CheckinDashboardComponent } from '../../components/checkin-dashboard/checkin-dashboard.component';
 import { ClientService as ClientServiceType } from '@fitos/shared';
 
 addIcons({
@@ -137,6 +140,9 @@ interface RecentWorkout {
     GraduationAlertComponent,
     ClientLedgerComponent,
     ContractEnrollmentComponent,
+    ProgressTimelineComponent,
+    ProgressPhotosComponent,
+    CheckinDashboardComponent,
   ],
   template: `
     <ion-header class="ion-no-border">
@@ -165,6 +171,15 @@ interface RecentWorkout {
           </ion-segment-button>
           <ion-segment-button value="billing">
             <ion-label>Billing</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="timeline">
+            <ion-label>Timeline</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="photos">
+            <ion-label>Photos</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="checkins">
+            <ion-label>Check-Ins</ion-label>
           </ion-segment-button>
         </ion-segment>
       </ion-toolbar>
@@ -530,6 +545,32 @@ interface RecentWorkout {
               />
             }
           }
+
+          <!-- Timeline Tab -->
+          @if (selectedTab === 'timeline') {
+            @if (client()) {
+              <app-progress-timeline [clientId]="client()!.id" />
+            }
+          }
+
+          <!-- Photos Tab -->
+          @if (selectedTab === 'photos') {
+            @if (client()) {
+              <app-progress-photos
+                [clientId]="client()!.id"
+                [isTrainerView]="trainerPhotosSignal()"
+              />
+            }
+          }
+
+          <!-- Check-Ins Tab (Sprint 66.1) -->
+          @if (selectedTab === 'checkins') {
+            @if (client()) {
+              <div class="checkins-tab-pad">
+                <app-checkin-dashboard [clientId]="client()!.id" />
+              </div>
+            }
+          }
         </div>
       }
     </ion-content>
@@ -828,6 +869,9 @@ export class ClientDetailPage implements OnInit {
   activeContract = signal<ClientServiceType | null>(null);
   accountBalance = signal<number>(0);
   trainerId = computed(() => this.auth.user()?.id ?? null);
+
+  // Photos tab: always trainer view in client-detail context (this is the trainer's page)
+  trainerPhotosSignal = signal(true);
 
   // Contract status computed properties
   contractChipColor = computed<string>(() => {

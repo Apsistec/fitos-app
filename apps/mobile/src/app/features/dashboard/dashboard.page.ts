@@ -1,5 +1,7 @@
 import { Component, inject, computed, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { DatePipe, DecimalPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import {
   IonContent,
   IonHeader,
@@ -11,6 +13,9 @@ import {
   IonButtons,
   IonRefresher,
   IonRefresherContent,
+  IonSkeletonText,
+  IonInput,
+  ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -19,6 +24,14 @@ import {
   funnelOutline,
   barbellOutline,
   peopleOutline,
+  calendarOutline,
+  flameOutline,
+  nutritionOutline,
+  chatbubbleOutline,
+  sendOutline,
+  chevronForwardOutline,
+  trophyOutline,
+  checkmarkCircleOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
 import { SupabaseService } from '../../core/services/supabase.service';
@@ -28,6 +41,8 @@ import { AssignmentService } from '../../core/services/assignment.service';
 import { ClientService } from '../../core/services/client.service';
 import { WorkoutSessionService } from '../../core/services/workout-session.service';
 import { NutritionService } from '../../core/services/nutrition.service';
+import { MessagingService } from '../../core/services/messaging.service';
+import { ClientDashboardService } from '../../core/services/client-dashboard.service';
 import { ClientTodayWorkoutCardComponent } from './components/client-today-workout-card/client-today-workout-card.component';
 import { ClientNutritionSummaryComponent, type NutritionSummary } from './components/client-nutrition-summary/client-nutrition-summary.component';
 import { TrainerOverviewStatsComponent, type TrainerStats } from './components/trainer-overview-stats/trainer-overview-stats.component';
@@ -47,6 +62,9 @@ import type { WorkoutWithExercises } from '../../core/services/workout.service';
   standalone: true,
   imports: [
     RouterLink,
+    DatePipe,
+    DecimalPipe,
+    FormsModule,
     IonContent,
     IonHeader,
     IonTitle,
@@ -57,6 +75,8 @@ import type { WorkoutWithExercises } from '../../core/services/workout.service';
     IonButtons,
     IonRefresher,
     IonRefresherContent,
+    IonSkeletonText,
+    IonInput,
     ClientTodayWorkoutCardComponent,
     ClientNutritionSummaryComponent,
     TrainerOverviewStatsComponent,
@@ -99,31 +119,145 @@ import type { WorkoutWithExercises } from '../../core/services/workout.service';
 
       @switch (userRole()) {
         @case ('client') {
-        <!-- Client Dashboard -->
+        <!-- Client Dashboard (Sprint 63 redesign) -->
         <div class="client-dashboard" @fadeInUp>
-          <!-- Progressive Profiling Prompt (post-onboarding, 1-2 questions/session) -->
+          <!-- Progressive Profiling Prompt -->
           <app-profiling-prompt />
 
-          <!-- Today's Workout -->
-          <app-client-today-workout-card [workout]="todayWorkout()" />
+          <!-- 1. Next Session Card -->
+          @if (clientDashboard.isLoading()) {
+            <div class="dash-card skeleton-card">
+              <ion-skeleton-text animated style="width:60%;height:14px;margin-bottom:8px;border-radius:6px"></ion-skeleton-text>
+              <ion-skeleton-text animated style="width:90%;height:20px;border-radius:6px"></ion-skeleton-text>
+            </div>
+          } @else if (clientDashboard.nextSession()) {
+            <div class="dash-card next-session-card" [routerLink]="['/tabs/schedule/client-appointment', clientDashboard.nextSession()!.appointment.id]">
+              <div class="card-header-row">
+                <div class="card-icon teal"><ion-icon name="calendar-outline"></ion-icon></div>
+                <span class="card-title">Next Session</span>
+                <span class="countdown-badge">{{ clientDashboard.nextSession()!.countdownLabel }}</span>
+              </div>
+              <div class="session-body">
+                <div class="trainer-info">
+                  <div class="trainer-avatar">
+                    @if (clientDashboard.nextSession()!.trainerAvatarUrl) {
+                      <img [src]="clientDashboard.nextSession()!.trainerAvatarUrl" alt="Trainer" />
+                    } @else {
+                      <ion-icon name="person-outline"></ion-icon>
+                    }
+                  </div>
+                  <div class="session-details">
+                    <p class="service-name">{{ clientDashboard.nextSession()!.serviceName }}</p>
+                    <p class="session-time">{{ clientDashboard.nextSession()!.appointment.start_at | date:'EEE, MMM d · h:mm a' }}</p>
+                  </div>
+                </div>
+                <ion-icon name="chevron-forward-outline" class="chevron"></ion-icon>
+              </div>
+            </div>
+          } @else {
+            <div class="dash-card next-session-card empty" routerLink="/tabs/schedule">
+              <div class="card-header-row">
+                <div class="card-icon teal"><ion-icon name="calendar-outline"></ion-icon></div>
+                <span class="card-title">Next Session</span>
+              </div>
+              <p class="empty-label">No upcoming sessions — tap to book one.</p>
+            </div>
+          }
 
-          <!-- Quick Stats -->
-          <div class="stats-row">
-            <app-stat-card
-              label="This Week"
-              [value]="weeklyWorkouts()"
-              icon="barbell"
-            />
-            <app-stat-card
-              label="Streak"
-              [value]="currentStreak()"
-              icon="flame-outline"
-              [suffix]="currentStreak() > 0 ? '🔥' : ''"
-            />
-          </div>
+          <!-- 2. This Week Card -->
+          @if (clientDashboard.isLoading()) {
+            <div class="stats-row">
+              <div class="dash-card stat-mini skeleton-card">
+                <ion-skeleton-text animated style="width:80%;height:14px;border-radius:6px"></ion-skeleton-text>
+              </div>
+              <div class="dash-card stat-mini skeleton-card">
+                <ion-skeleton-text animated style="width:80%;height:14px;border-radius:6px"></ion-skeleton-text>
+              </div>
+            </div>
+          } @else {
+            <div class="stats-row">
+              <div class="dash-card stat-mini" routerLink="/tabs/workouts">
+                <div class="stat-icon"><ion-icon name="barbell-outline"></ion-icon></div>
+                <div class="stat-text">
+                  <span class="stat-value">{{ clientDashboard.weeklyProgress().workoutsCompleted }}<span class="stat-denom">/{{ clientDashboard.weeklyProgress().workoutsPlanned }}</span></span>
+                  <span class="stat-label">This Week</span>
+                </div>
+              </div>
+              <div class="dash-card stat-mini">
+                <div class="stat-icon flame"><ion-icon name="flame-outline"></ion-icon></div>
+                <div class="stat-text">
+                  <span class="stat-value">{{ clientDashboard.weeklyProgress().streak }}</span>
+                  <span class="stat-label">Day Streak</span>
+                </div>
+              </div>
+            </div>
+          }
 
-          <!-- Nutrition Summary -->
-          <app-client-nutrition-summary [summary]="nutritionSummary()" />
+          <!-- 3. Nutrition Snapshot Card -->
+          @if (clientDashboard.isLoading()) {
+            <div class="dash-card skeleton-card">
+              <ion-skeleton-text animated style="width:50%;height:14px;margin-bottom:8px;border-radius:6px"></ion-skeleton-text>
+              <ion-skeleton-text animated style="width:100%;height:12px;border-radius:6px"></ion-skeleton-text>
+            </div>
+          } @else if (clientDashboard.nutritionSnapshot()) {
+            <div class="dash-card nutrition-card" routerLink="/tabs/nutrition">
+              <div class="card-header-row">
+                <div class="card-icon purple"><ion-icon name="nutrition-outline"></ion-icon></div>
+                <span class="card-title">Nutrition Today</span>
+                <span class="nutrition-cal">{{ clientDashboard.nutritionSnapshot()!.caloriesConsumed | number:'1.0-0' }} / {{ clientDashboard.nutritionSnapshot()!.caloriesTarget | number:'1.0-0' }} kcal</span>
+              </div>
+              <div class="macro-bar-row">
+                <div class="macro-bar">
+                  <div class="macro-fill protein"
+                    [style.width.%]="macroPercent(clientDashboard.nutritionSnapshot()!.proteinConsumed, clientDashboard.nutritionSnapshot()!.proteinTarget)">
+                  </div>
+                </div>
+                <div class="macro-bar">
+                  <div class="macro-fill carbs"
+                    [style.width.%]="macroPercent(clientDashboard.nutritionSnapshot()!.carbsConsumed, clientDashboard.nutritionSnapshot()!.carbsTarget)">
+                  </div>
+                </div>
+                <div class="macro-bar">
+                  <div class="macro-fill fat"
+                    [style.width.%]="macroPercent(clientDashboard.nutritionSnapshot()!.fatConsumed, clientDashboard.nutritionSnapshot()!.fatTarget)">
+                  </div>
+                </div>
+              </div>
+              <div class="macro-labels">
+                <span class="macro-lbl protein">P {{ clientDashboard.nutritionSnapshot()!.proteinConsumed | number:'1.0-0' }}g</span>
+                <span class="macro-lbl carbs">C {{ clientDashboard.nutritionSnapshot()!.carbsConsumed | number:'1.0-0' }}g</span>
+                <span class="macro-lbl fat">F {{ clientDashboard.nutritionSnapshot()!.fatConsumed | number:'1.0-0' }}g</span>
+              </div>
+            </div>
+          }
+
+          <!-- 4. Message Preview Card -->
+          @if (clientDashboard.isLoading()) {
+            <div class="dash-card skeleton-card">
+              <ion-skeleton-text animated style="width:40%;height:14px;margin-bottom:8px;border-radius:6px"></ion-skeleton-text>
+              <ion-skeleton-text animated style="width:85%;height:14px;border-radius:6px"></ion-skeleton-text>
+            </div>
+          } @else if (clientDashboard.messagePreview()) {
+            <div class="dash-card message-card">
+              <div class="card-header-row">
+                <div class="card-icon blue"><ion-icon name="chatbubble-outline"></ion-icon></div>
+                <span class="card-title">{{ clientDashboard.messagePreview()!.conversation.otherUserName }}</span>
+                <button class="see-all-btn" [routerLink]="['/tabs/messages']">See all</button>
+              </div>
+              <p class="message-preview-text">{{ clientDashboard.messagePreview()!.lastMessage.content }}</p>
+              <div class="quick-reply-row">
+                <input
+                  class="quick-reply-input"
+                  placeholder="Quick reply…"
+                  [(ngModel)]="quickReplyText"
+                  (keydown.enter)="sendQuickReply()"
+                />
+                <button class="send-btn" (click)="sendQuickReply()" [disabled]="!quickReplyText.trim()">
+                  <ion-icon name="send-outline"></ion-icon>
+                </button>
+              </div>
+            </div>
+          }
 
           <!-- Wearable Data -->
           <app-wearable-data-card />
@@ -238,6 +372,203 @@ import type { WorkoutWithExercises } from '../../core/services/workout.service';
       width: 100%;
     }
 
+    /* Sprint 63: Client dashboard cards */
+    .dash-card {
+      background: var(--fitos-bg-secondary, #1A1A1A);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      padding: 16px;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.15s ease;
+      &:active { transform: scale(0.98); background: rgba(255,255,255,0.03); }
+    }
+
+    .skeleton-card { cursor: default; &:active { transform: none; } }
+
+    .card-header-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .card-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      ion-icon { font-size: 16px; color: #fff; }
+      &.teal { background: rgba(16, 185, 129, 0.2); ion-icon { color: #10B981; } }
+      &.purple { background: rgba(139, 92, 246, 0.2); ion-icon { color: #8B5CF6; } }
+      &.blue { background: rgba(59, 130, 246, 0.2); ion-icon { color: #3B82F6; } }
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--fitos-text-primary, #F5F5F5);
+      flex: 1;
+    }
+
+    /* Next Session */
+    .countdown-badge {
+      font-size: 12px;
+      font-weight: 700;
+      color: #10B981;
+      background: rgba(16, 185, 129, 0.12);
+      border-radius: 20px;
+      padding: 3px 10px;
+    }
+    .session-body {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .trainer-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+    .trainer-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+      img { width: 100%; height: 100%; object-fit: cover; }
+      ion-icon { font-size: 20px; color: var(--fitos-text-secondary, #A3A3A3); }
+    }
+    .session-details {
+      .service-name { margin: 0 0 2px; font-size: 15px; font-weight: 600; color: var(--fitos-text-primary, #F5F5F5); }
+      .session-time { margin: 0; font-size: 13px; color: var(--fitos-text-secondary, #A3A3A3); }
+    }
+    .chevron { font-size: 18px; color: var(--fitos-text-tertiary, #6B6B6B); flex-shrink: 0; }
+    .empty-label { margin: 0; font-size: 14px; color: var(--fitos-text-secondary, #A3A3A3); }
+
+    /* Stat mini cards */
+    .stat-mini {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      .stat-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: rgba(16, 185, 129, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        ion-icon { font-size: 18px; color: #10B981; }
+        &.flame { background: rgba(245, 158, 11, 0.15); ion-icon { color: #F59E0B; } }
+      }
+      .stat-text {
+        display: flex;
+        flex-direction: column;
+        .stat-value {
+          font-size: 22px;
+          font-weight: 800;
+          color: var(--fitos-text-primary, #F5F5F5);
+          line-height: 1;
+          .stat-denom { font-size: 14px; font-weight: 500; color: var(--fitos-text-secondary, #A3A3A3); }
+        }
+        .stat-label { font-size: 12px; color: var(--fitos-text-secondary, #A3A3A3); margin-top: 2px; }
+      }
+    }
+
+    /* Nutrition card */
+    .nutrition-cal {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--fitos-text-secondary, #A3A3A3);
+    }
+    .macro-bar-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .macro-bar {
+      flex: 1;
+      height: 6px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 3px;
+      overflow: hidden;
+      .macro-fill {
+        height: 100%;
+        border-radius: 3px;
+        max-width: 100%;
+        transition: width 0.4s ease;
+        &.protein { background: #10B981; }
+        &.carbs { background: #3B82F6; }
+        &.fat { background: #F59E0B; }
+      }
+    }
+    .macro-labels {
+      display: flex;
+      gap: 16px;
+      .macro-lbl {
+        font-size: 11px;
+        font-weight: 600;
+        &.protein { color: #10B981; }
+        &.carbs { color: #3B82F6; }
+        &.fat { color: #F59E0B; }
+      }
+    }
+
+    /* Message card */
+    .message-preview-text {
+      margin: 0 0 12px;
+      font-size: 14px;
+      color: var(--fitos-text-secondary, #A3A3A3);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .see-all-btn {
+      background: none;
+      border: none;
+      font-size: 13px;
+      color: #10B981;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0;
+    }
+    .quick-reply-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      .quick-reply-input {
+        flex: 1;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 20px;
+        color: var(--fitos-text-primary, #F5F5F5);
+        font-size: 14px;
+        padding: 8px 14px;
+        outline: none;
+        &::placeholder { color: var(--fitos-text-tertiary, #6B6B6B); }
+      }
+      .send-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #10B981;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+        &:disabled { opacity: 0.4; cursor: not-allowed; }
+        ion-icon { font-size: 16px; color: #fff; }
+      }
+    }
+
     /* Ensure all cards have consistent width */
     app-profiling-prompt,
     app-client-today-workout-card,
@@ -313,6 +644,12 @@ export class DashboardPage implements OnInit {
   private sessionService = inject(WorkoutSessionService);
   private nutritionService = inject(NutritionService);
   private subscriptionService = inject(SubscriptionService);
+  private messagingService = inject(MessagingService);
+  private toastCtrl = inject(ToastController);
+
+  // Sprint 63: Client dashboard service
+  clientDashboard = inject(ClientDashboardService);
+  quickReplyText = '';
 
   // User info
   userRole = computed(() => this.authService.profile()?.role ?? 'client');
@@ -369,11 +706,40 @@ export class DashboardPage implements OnInit {
       funnelOutline,
       barbellOutline,
       peopleOutline,
+      calendarOutline,
+      flameOutline,
+      nutritionOutline,
+      chatbubbleOutline,
+      sendOutline,
+      chevronForwardOutline,
+      trophyOutline,
+      checkmarkCircleOutline,
     });
   }
 
   ngOnInit(): void {
     this.loadDashboardData();
+  }
+
+  macroPercent(consumed: number, target: number): number {
+    if (!target) return 0;
+    return Math.min(100, Math.round((consumed / target) * 100));
+  }
+
+  async sendQuickReply(): Promise<void> {
+    const text = this.quickReplyText.trim();
+    if (!text) return;
+    const preview = this.clientDashboard.messagePreview();
+    if (!preview) return;
+    try {
+      await this.messagingService.sendMessage(preview.conversation.otherUserId, text);
+      this.quickReplyText = '';
+      const toast = await this.toastCtrl.create({ message: 'Message sent', duration: 1500, position: 'bottom', color: 'success' });
+      await toast.present();
+    } catch {
+      const toast = await this.toastCtrl.create({ message: 'Failed to send', duration: 2000, position: 'bottom', color: 'danger' });
+      await toast.present();
+    }
   }
 
   async loadDashboardData(): Promise<void> {
@@ -393,6 +759,9 @@ export class DashboardPage implements OnInit {
   private async loadClientDashboard(): Promise<void> {
     const userId = this.authService.user()?.id;
     if (!userId) return;
+
+    // Sprint 63: Load new client dashboard service
+    this.clientDashboard.load();
 
     try {
       // Load all client dashboard data in parallel

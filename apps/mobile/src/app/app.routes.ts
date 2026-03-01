@@ -248,6 +248,31 @@ export const routes: Routes = [
                 (m) => m.MeasurementsPage
               ),
           },
+          {
+            // Progress photos - client self-view (Sprint 64.1)
+            path: 'progress-photos',
+            loadComponent: () =>
+              import('./features/clients/pages/progress-photos/progress-photos.page').then(
+                (m) => m.ProgressPhotosPage
+              ),
+          },
+          {
+            // Sprint 66.1: Checkin response — client responds to a pending check-in
+            // Deep-linked from push notification with ?id=<response_id>
+            path: 'checkin',
+            loadComponent: () =>
+              import('./features/clients/pages/checkin-response/checkin-response.page').then(
+                (m) => m.CheckinResponsePage
+              ),
+          },
+          {
+            // Sprint 66.1: Direct link to specific response
+            path: 'checkin/:id',
+            loadComponent: () =>
+              import('./features/clients/pages/checkin-response/checkin-response.page').then(
+                (m) => m.CheckinResponsePage
+              ),
+          },
         ],
       },
       {
@@ -417,6 +442,30 @@ export const routes: Routes = [
             loadComponent: () =>
               import('./features/clients/pages/video-review/video-review.page').then(
                 (m) => m.VideoReviewPage
+              ),
+          },
+          {
+            // Sprint 66.1: Checkin template builder
+            path: 'checkin-builder',
+            loadComponent: () =>
+              import('./features/clients/pages/checkin-builder/checkin-builder.page').then(
+                (m) => m.CheckinBuilderPage
+              ),
+          },
+          {
+            // Sprint 66.1: Edit existing checkin template
+            path: 'checkin-builder/:id',
+            loadComponent: () =>
+              import('./features/clients/pages/checkin-builder/checkin-builder.page').then(
+                (m) => m.CheckinBuilderPage
+              ),
+          },
+          {
+            // Sprint 66.2: Accountability pod manager
+            path: 'pods',
+            loadComponent: () =>
+              import('./features/clients/pages/accountability-group-manager/accountability-group-manager.page').then(
+                (m) => m.AccountabilityGroupManagerPage
               ),
           },
         ],
@@ -703,6 +752,23 @@ export const routes: Routes = [
                 (m) => m.StaffPermissionsPage
               ),
           },
+          {
+            // Client notification preferences — all roles (clients primarily)
+            path: 'client-notifications',
+            loadComponent: () =>
+              import('./features/settings/pages/client-notifications/client-notifications.page').then(
+                (m) => m.ClientNotificationsPage
+              ),
+          },
+          {
+            // Sprint 67: Public profile editor — trainers/owners only
+            path: 'public-profile',
+            canActivate: [trainerOrOwnerGuard],
+            loadComponent: () =>
+              import('./features/settings/pages/public-profile/public-profile.page').then(
+                (m) => m.PublicProfilePage
+              ),
+          },
         ],
       },
       {
@@ -726,6 +792,14 @@ export const routes: Routes = [
             loadComponent: () =>
               import('./features/social/pages/feed/feed.page').then(
                 (m) => m.FeedPage
+              ),
+          },
+          {
+            // Sprint 66.2: Accountability pod activity feed (client-facing)
+            path: 'pods',
+            loadComponent: () =>
+              import('./features/social/pages/pod-feed/pod-feed.page').then(
+                (m) => m.PodFeedPage
               ),
           },
         ],
@@ -760,6 +834,52 @@ export const routes: Routes = [
         path: 'business',
         canActivate: [trainerOrOwnerGuard],
         loadComponent: () => import('./features/business/business.page').then(m => m.BusinessPage),
+      },
+      {
+        // ── Marketplace — Sprint 65 ──────────────────────────────────────────
+        // Clients browse & purchase trainer digital products.
+        // Trainers manage their own product catalogue.
+        path: 'marketplace',
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/marketplace/pages/marketplace/marketplace.page').then(
+                (m) => m.MarketplacePage
+              ),
+          },
+          {
+            path: 'product/:id',
+            loadComponent: () =>
+              import('./features/marketplace/pages/product-detail/product-detail.page').then(
+                (m) => m.ProductDetailPage
+              ),
+          },
+          {
+            // Trainer product manager (published / drafts list)
+            path: 'manage',
+            loadComponent: () =>
+              import('./features/marketplace/pages/product-manager/product-manager.page').then(
+                (m) => m.ProductManagerPage
+              ),
+          },
+          {
+            // Create new product
+            path: 'manage/new',
+            loadComponent: () =>
+              import('./features/marketplace/pages/product-form/product-form.page').then(
+                (m) => m.ProductFormPage
+              ),
+          },
+          {
+            // Edit existing product
+            path: 'manage/:id/edit',
+            loadComponent: () =>
+              import('./features/marketplace/pages/product-form/product-form.page').then(
+                (m) => m.ProductFormPage
+              ),
+          },
+        ],
       },
     ],
   },
