@@ -273,6 +273,30 @@ export const routes: Routes = [
                 (m) => m.CheckinResponsePage
               ),
           },
+          {
+            // Sprint 68: NPS response — client rates their trainer (deep-linked from push)
+            path: 'nps',
+            loadComponent: () =>
+              import('./features/clients/pages/nps-response/nps-response.page').then(
+                (m) => m.NpsResponsePage
+              ),
+          },
+          {
+            // Sprint 68: Deep-link to a specific NPS response by ID
+            path: 'nps/:id',
+            loadComponent: () =>
+              import('./features/clients/pages/nps-response/nps-response.page').then(
+                (m) => m.NpsResponsePage
+              ),
+          },
+          {
+            // Sprint 69: Client referral page — share personal referral link
+            path: 'referral',
+            loadComponent: () =>
+              import('./features/clients/pages/referral/referral.page').then(
+                (m) => m.ReferralPage
+              ),
+          },
         ],
       },
       {
@@ -543,6 +567,14 @@ export const routes: Routes = [
                 (m) => m.OwnerAnalyticsPage
               ),
           },
+          {
+            // Sprint 69: Trainer growth analytics (cohort retention, referral funnel, KPIs)
+            path: 'growth',
+            loadComponent: () =>
+              import('./features/analytics/pages/growth-analytics/growth-analytics.page').then(
+                (m) => m.GrowthAnalyticsPage
+              ),
+          },
         ],
       },
       {
@@ -767,6 +799,24 @@ export const routes: Routes = [
             loadComponent: () =>
               import('./features/settings/pages/public-profile/public-profile.page').then(
                 (m) => m.PublicProfilePage
+              ),
+          },
+          {
+            // Sprint 68: Testimonial approval queue — trainers/owners only
+            path: 'testimonials',
+            canActivate: [trainerOrOwnerGuard],
+            loadComponent: () =>
+              import('./features/settings/pages/testimonials/testimonials.page').then(
+                (m) => m.TestimonialsPage
+              ),
+          },
+          {
+            // Sprint 69: Referral program configuration — trainers/owners only
+            path: 'referral-program',
+            canActivate: [trainerOrOwnerGuard],
+            loadComponent: () =>
+              import('./features/settings/pages/referral-program/referral-program.page').then(
+                (m) => m.ReferralProgramPage
               ),
           },
         ],

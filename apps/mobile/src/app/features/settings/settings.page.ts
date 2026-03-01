@@ -52,7 +52,9 @@ import {
   receiptOutline,
   alarmOutline,
   imagesOutline,
-  globeOutline,     // Sprint 67: Public Profile link
+  globeOutline,                   // Sprint 67: Public Profile link
+  chatbubbleEllipsesOutline,      // Sprint 68: Testimonials
+  megaphoneOutline,               // Sprint 69: Referral Program
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
 import { StripeService } from '../../core/services/stripe.service';
@@ -235,6 +237,24 @@ import { ThemeService, ThemeMode } from '../../core/services/theme.service';
               <ion-label>
                 <h3>Public Profile</h3>
                 <p>Your SEO-indexed booking page at nutrifitos.com/t/yourname</p>
+              </ion-label>
+            </ion-item>
+
+            <!-- Sprint 68: Testimonial approval queue -->
+            <ion-item button detail routerLink="/tabs/settings/testimonials">
+              <ion-icon name="chatbubble-ellipses-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Testimonials</h3>
+                <p>Approve high-rated reviews to show on your public profile</p>
+              </ion-label>
+            </ion-item>
+
+            <!-- Sprint 69: Referral program configuration -->
+            <ion-item button detail routerLink="/tabs/settings/referral-program">
+              <ion-icon name="megaphone-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Referral Program</h3>
+                <p>Configure rewards when clients refer new members</p>
               </ion-label>
             </ion-item>
 
@@ -619,6 +639,8 @@ export class SettingsPage implements OnInit {
       alarmOutline,
       imagesOutline,
       globeOutline,
+      chatbubbleEllipsesOutline,
+      megaphoneOutline,
     });
   }
 
