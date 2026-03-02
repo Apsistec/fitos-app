@@ -13,6 +13,7 @@ import {
   personCircleOutline, shieldCheckmarkOutline,
   documentTextOutline, peopleOutline, logOutOutline,
   clipboardOutline, timerOutline, megaphoneOutline,
+  trendingUpOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
 import { MessagingService } from '../../core/services/messaging.service';
@@ -210,6 +211,7 @@ export class MorePage {
       personCircleOutline, shieldCheckmarkOutline,
       documentTextOutline, peopleOutline, logOutOutline,
       clipboardOutline, timerOutline, megaphoneOutline,
+      trendingUpOutline,
     });
   }
 

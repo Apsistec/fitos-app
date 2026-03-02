@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, noAuthGuard, trainerOrOwnerGuard, clientGuard, onboardingCompleteGuard, mfaRequiredGuard } from './core/guards';
+import { authGuard, noAuthGuard, trainerOrOwnerGuard, clientGuard, ownerGuard, onboardingCompleteGuard, mfaRequiredGuard } from './core/guards';
 
 export const routes: Routes = [
   {
@@ -257,41 +257,46 @@ export const routes: Routes = [
               ),
           },
           {
-            // Sprint 66.1: Checkin response — client responds to a pending check-in
+            // Sprint 66.1: Checkin response — clients only (trainers create via /tabs/clients/checkin-builder)
             // Deep-linked from push notification with ?id=<response_id>
             path: 'checkin',
+            canActivate: [clientGuard],
             loadComponent: () =>
               import('./features/clients/pages/checkin-response/checkin-response.page').then(
                 (m) => m.CheckinResponsePage
               ),
           },
           {
-            // Sprint 66.1: Direct link to specific response
+            // Sprint 66.1: Direct link to specific response — clients only
             path: 'checkin/:id',
+            canActivate: [clientGuard],
             loadComponent: () =>
               import('./features/clients/pages/checkin-response/checkin-response.page').then(
                 (m) => m.CheckinResponsePage
               ),
           },
           {
-            // Sprint 68: NPS response — client rates their trainer (deep-linked from push)
+            // Sprint 68: NPS response — clients only (clients rate their trainer; trainers/owners view results via NPS dashboard widget)
             path: 'nps',
+            canActivate: [clientGuard],
             loadComponent: () =>
               import('./features/clients/pages/nps-response/nps-response.page').then(
                 (m) => m.NpsResponsePage
               ),
           },
           {
-            // Sprint 68: Deep-link to a specific NPS response by ID
+            // Sprint 68: Deep-link to a specific NPS response by ID — clients only
             path: 'nps/:id',
+            canActivate: [clientGuard],
             loadComponent: () =>
               import('./features/clients/pages/nps-response/nps-response.page').then(
                 (m) => m.NpsResponsePage
               ),
           },
           {
-            // Sprint 69: Client referral page — share personal referral link
+            // Sprint 69: Client referral link page — clients only (trainers configure rewards via /tabs/settings/referral-program)
             path: 'referral',
+            canActivate: [clientGuard],
             loadComponent: () =>
               import('./features/clients/pages/referral/referral.page').then(
                 (m) => m.ReferralPage
@@ -570,7 +575,9 @@ export const routes: Routes = [
         canActivate: [trainerOrOwnerGuard],
         children: [
           {
+            // Facility analytics — gym owners only; trainers are directed to /growth instead
             path: '',
+            canActivate: [ownerGuard],
             loadComponent: () =>
               import('./features/analytics/pages/owner-analytics/owner-analytics.page').then(
                 (m) => m.OwnerAnalyticsPage
@@ -785,9 +792,9 @@ export const routes: Routes = [
               ),
           },
           {
-            // Staff Scheduling Permissions — gym owners only
+            // Staff Scheduling Permissions — gym owners only (individual trainers cannot manage staff access)
             path: 'staff-permissions',
-            canActivate: [trainerOrOwnerGuard],
+            canActivate: [ownerGuard],
             loadComponent: () =>
               import('./features/settings/pages/staff-permissions/staff-permissions.page').then(
                 (m) => m.StaffPermissionsPage
@@ -915,24 +922,27 @@ export const routes: Routes = [
               ),
           },
           {
-            // Trainer product manager (published / drafts list)
+            // Trainer product manager (published / drafts list) — trainers/owners only; clients browse via marketplace root
             path: 'manage',
+            canActivate: [trainerOrOwnerGuard],
             loadComponent: () =>
               import('./features/marketplace/pages/product-manager/product-manager.page').then(
                 (m) => m.ProductManagerPage
               ),
           },
           {
-            // Create new product
+            // Create new product — trainers/owners only
             path: 'manage/new',
+            canActivate: [trainerOrOwnerGuard],
             loadComponent: () =>
               import('./features/marketplace/pages/product-form/product-form.page').then(
                 (m) => m.ProductFormPage
               ),
           },
           {
-            // Edit existing product
+            // Edit existing product — trainers/owners only
             path: 'manage/:id/edit',
+            canActivate: [trainerOrOwnerGuard],
             loadComponent: () =>
               import('./features/marketplace/pages/product-form/product-form.page').then(
                 (m) => m.ProductFormPage
