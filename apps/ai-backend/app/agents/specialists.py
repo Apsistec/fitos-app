@@ -1,8 +1,12 @@
 """Specialist agent implementations for different coaching domains"""
 
+import logging
+
 from langchain_core.messages import HumanMessage, SystemMessage
 from app.agents.state import AgentState, ChatAction
-from app.core.llm import get_smart_llm
+from app.core.llm import get_smart_llm, get_routine_llm
+
+logger = logging.getLogger("fitos-ai")
 
 
 def workout_agent(state: AgentState) -> AgentState:
@@ -10,8 +14,9 @@ def workout_agent(state: AgentState) -> AgentState:
     Workout programming specialist.
     Handles exercise selection, form advice, progression strategies.
     """
-
-    llm = get_smart_llm()
+    complexity = state.get("complexity", "moderate")
+    llm = get_smart_llm() if complexity == "complex" else get_routine_llm()
+    logger.info(f"[workout_agent] complexity={complexity}, model={llm.model}")
 
     # Build context-aware system prompt
     user_context = state["user_context"]
@@ -71,8 +76,9 @@ def nutrition_agent(state: AgentState) -> AgentState:
     Nutrition coaching specialist.
     Handles macro tracking, meal planning, adherence-neutral guidance.
     """
-
-    llm = get_smart_llm()
+    complexity = state.get("complexity", "moderate")
+    llm = get_smart_llm() if complexity == "complex" else get_routine_llm()
+    logger.info(f"[nutrition_agent] complexity={complexity}, model={llm.model}")
 
     user_context = state["user_context"]
     system_prompt = f"""You are a supportive nutrition coach within the FitOS app.
@@ -122,8 +128,9 @@ def recovery_agent(state: AgentState) -> AgentState:
     Recovery and wellness specialist.
     Handles sleep, HRV, rest days, deload strategies.
     """
-
-    llm = get_smart_llm()
+    complexity = state.get("complexity", "moderate")
+    llm = get_smart_llm() if complexity == "complex" else get_routine_llm()
+    logger.info(f"[recovery_agent] complexity={complexity}, model={llm.model}")
 
     user_context = state["user_context"]
 
@@ -178,8 +185,9 @@ def motivation_agent(state: AgentState) -> AgentState:
     Motivation and accountability specialist.
     Handles struggles, setbacks, mindset coaching.
     """
-
-    llm = get_smart_llm()
+    complexity = state.get("complexity", "moderate")
+    llm = get_smart_llm() if complexity == "complex" else get_routine_llm()
+    logger.info(f"[motivation_agent] complexity={complexity}, model={llm.model}")
 
     user_context = state["user_context"]
     system_prompt = f"""You are an empathetic and motivating coach within the FitOS app.
@@ -229,8 +237,9 @@ def general_agent(state: AgentState) -> AgentState:
     General assistant for questions that don't fit specialist categories.
     Handles app navigation, features, scheduling, etc.
     """
-
-    llm = get_smart_llm()
+    complexity = state.get("complexity", "moderate")
+    llm = get_smart_llm() if complexity == "complex" else get_routine_llm()
+    logger.info(f"[general_agent] complexity={complexity}, model={llm.model}")
 
     system_prompt = """You are a helpful general assistant for the FitOS fitness app.
 

@@ -59,5 +59,8 @@ class AgentState(TypedDict):
     suggested_actions: List[ChatAction] | None
     confidence: float
 
+    # Cost optimization
+    complexity: str  # "simple", "moderate", "complex"
+
     # Internal
     iterations: int

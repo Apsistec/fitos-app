@@ -59,7 +59,16 @@ def get_llm(
 def get_fast_llm(**kwargs: Any):
     """Get a fast, cheap LLM for simple tasks"""
     return get_llm(
-        model="claude-haiku-4.0" if settings.DEFAULT_LLM_PROVIDER == "anthropic" else "gpt-4o-mini",
+        model="claude-3-5-haiku-20241022" if settings.DEFAULT_LLM_PROVIDER == "anthropic" else "gpt-4o-mini",
+        **kwargs
+    )
+
+
+def get_routine_llm(**kwargs: Any):
+    """Get LLM for routine/simple coaching responses (Haiku-class)"""
+    return get_llm(
+        model="claude-3-5-haiku-20241022" if settings.DEFAULT_LLM_PROVIDER == "anthropic" else "gpt-4o-mini",
+        temperature=0.6,
         **kwargs
     )
 
@@ -67,6 +76,6 @@ def get_fast_llm(**kwargs: Any):
 def get_smart_llm(**kwargs: Any):
     """Get the most capable LLM for complex reasoning"""
     return get_llm(
-        model="claude-sonnet-4.5" if settings.DEFAULT_LLM_PROVIDER == "anthropic" else "gpt-4o",
+        model="claude-sonnet-4-5-20250514" if settings.DEFAULT_LLM_PROVIDER == "anthropic" else "gpt-4o",
         **kwargs
     )

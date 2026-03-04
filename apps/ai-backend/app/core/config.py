@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str | None = None
     ANTHROPIC_API_KEY: str | None = None
     DEFAULT_LLM_PROVIDER: str = "anthropic"  # or 'openai'
-    DEFAULT_MODEL: str = "claude-sonnet-4.5"
+    DEFAULT_MODEL: str = "claude-sonnet-4-5-20250514"
     MAX_TOKENS: int = 2048
     TEMPERATURE: float = 0.7
 

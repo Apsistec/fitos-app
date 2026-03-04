@@ -23,6 +23,39 @@ from app.agents.specialists import (
 from app.core.llm import get_fast_llm
 
 
+def classify_complexity(message: str) -> Literal["simple", "moderate", "complex"]:
+    """
+    Classify query complexity to determine which model tier to use.
+    This is keyword/heuristic-based (free, no API calls).
+
+    Simple (Haiku): Factual lookups, confirmations, basic questions
+    Moderate (Haiku): Most coaching questions with straightforward answers
+    Complex (Sonnet): Program design, multi-factor analysis, nuanced advice
+    """
+    message_lower = message.lower()
+
+    complex_keywords = [
+        "design", "program", "plan", "periodiz", "create a",
+        "build me", "generate", "compare", "analyze", "why does",
+        "explain how", "what if", "injury", "pain", "medical",
+        "plateau", "stall", "not progressing", "customize",
+        "adjust my", "review my", "optimize"
+    ]
+    if any(keyword in message_lower for keyword in complex_keywords):
+        return "complex"
+
+    simple_keywords = [
+        "how many calories", "how much protein", "what is",
+        "when should i", "how long", "is it ok", "can i",
+        "log", "record", "track", "yes", "no", "thanks",
+        "repeat", "same", "ok", "got it"
+    ]
+    if any(keyword in message_lower for keyword in simple_keywords):
+        return "simple"
+
+    return "moderate"
+
+
 def route_query(state: AgentState) -> Literal["workout", "nutrition", "recovery", "motivation", "general"]:
     """
     Route user query to appropriate specialist agent.
@@ -114,21 +147,29 @@ def escalation_handler(state: AgentState) -> AgentState:
     return state
 
 
+def classify_and_route(state: AgentState) -> AgentState:
+    """Add complexity classification to state before routing to specialists"""
+    state["complexity"] = classify_complexity(state["message"])
+    return state
+
+
 def build_coach_graph() -> StateGraph:
     """
     Build the multi-agent coaching graph.
 
     Flow:
     1. User message comes in
-    2. Router classifies intent
-    3. Specialist agent processes
-    4. Escalation check
-    5. Return response or escalate
+    2. Complexity classification (free, keyword-based)
+    3. Router classifies intent
+    4. Specialist agent processes (model chosen by complexity)
+    5. Escalation check
+    6. Return response or escalate
     """
 
     graph = StateGraph(AgentState)
 
     # Add nodes
+    graph.add_node("classify", classify_and_route)
     graph.add_node("workout", workout_agent)
     graph.add_node("nutrition", nutrition_agent)
     graph.add_node("recovery", recovery_agent)
@@ -136,8 +177,12 @@ def build_coach_graph() -> StateGraph:
     graph.add_node("general", general_agent)
     graph.add_node("escalation_handler", escalation_handler)
 
-    # Set entry point with routing
-    graph.set_conditional_entry_point(
+    # Entry point: classify complexity first
+    graph.set_entry_point("classify")
+
+    # After classification, route to specialist
+    graph.add_conditional_edges(
+        "classify",
         route_query,
         {
             "workout": "workout",

@@ -69,6 +69,7 @@ async def chat(request: ChatRequest):
             "agent_source": None,
             "suggested_actions": [],
             "confidence": 0.0,
+            "complexity": "moderate",
             "iterations": 0,
         }
 
