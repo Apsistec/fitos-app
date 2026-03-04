@@ -56,6 +56,28 @@ export interface NotificationPreferences {
   quietHoursEnd: string;   // "HH:MM"
   habitDecayEnabled: boolean;
   daysSinceOnboarding: number;
+  /** US-242: Snooze all notifications until this ISO timestamp (null = not snoozed) */
+  snoozeUntil: string | null;
+}
+
+/** US-242 snooze duration presets */
+export type SnoozeDuration = '1h' | '4h' | 'today' | 'week';
+
+/**
+ * EP-23 US-242: Notification template from the notification_templates table.
+ * Templates are resolved server-side or in the Edge Function; this type is
+ * used by the settings UI to display available template types.
+ */
+export interface NotificationTemplate {
+  id: string;
+  notificationType: NotificationType;
+  label: string;
+  titleTemplate: string;
+  bodyTemplate: string;
+  variables: string[];
+  targetRoles: string[] | null;
+  isDefault: boolean;
+  trainerId: string | null;
 }
 
 const DEFAULT_PREFS: NotificationPreferences = {
@@ -76,6 +98,7 @@ const DEFAULT_PREFS: NotificationPreferences = {
   quietHoursEnd: '07:00',
   habitDecayEnabled: true,
   daysSinceOnboarding: 0,
+  snoozeUntil: null,
 };
 
 // 66-day habit decay: after 66 days max drops to 1/day
@@ -95,6 +118,7 @@ export class NotificationService {
   private _permissionGranted = signal(false);
   private _initialized = signal(false);
   private _error = signal<string | null>(null);
+  private _templates = signal<NotificationTemplate[]>([]);
 
   // Public readonly
   fcmToken           = this._fcmToken.asReadonly();
@@ -103,6 +127,22 @@ export class NotificationService {
   permissionGranted  = this._permissionGranted.asReadonly();
   initialized        = this._initialized.asReadonly();
   error              = this._error.asReadonly();
+  templates          = this._templates.asReadonly();
+
+  // US-242: Computed snooze state
+  isSnoozed = computed(() => {
+    const snoozeUntil = this._preferences().snoozeUntil;
+    if (!snoozeUntil) return false;
+    return new Date(snoozeUntil) > new Date();
+  });
+
+  snoozeUntilLabel = computed(() => {
+    const snoozeUntil = this._preferences().snoozeUntil;
+    if (!snoozeUntil) return null;
+    const until = new Date(snoozeUntil);
+    if (until <= new Date()) return null;
+    return until.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  });
 
   // Computed: effective max based on 66-day habit decay
   effectiveMaxDaily = computed(() => {
@@ -248,6 +288,11 @@ export class NotificationService {
   async send(payload: NotificationPayload): Promise<boolean> {
     const user = this.auth.user();
     if (!user) return false;
+
+    // US-242: Snooze check — if snoozed and notification is not scheduled for future
+    if (this.isSnoozed() && !payload.scheduledAt) {
+      return false;
+    }
 
     // Check if type is enabled in prefs
     if (!this.isTypeEnabled(payload.type)) {
@@ -397,6 +442,7 @@ export class NotificationService {
         quietHoursEnd: data.quiet_hours_end,
         habitDecayEnabled: data.habit_decay_enabled,
         daysSinceOnboarding: data.days_since_onboarding,
+        snoozeUntil: (data as any).snooze_until ?? null,
       };
 
       this._preferences.set(prefs);
@@ -437,11 +483,97 @@ export class NotificationService {
           quiet_hours_end: merged.quietHoursEnd,
           habit_decay_enabled: merged.habitDecayEnabled,
           days_since_onboarding: merged.daysSinceOnboarding,
+          snooze_until: merged.snoozeUntil ?? null,
           updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id' });
     } catch (err) {
       console.error('[NotificationService] savePreferences error:', err);
     }
+  }
+
+  // ── US-242: Snooze / clear snooze ─────────────────────────────────────────
+
+  /**
+   * Snooze all notifications for the given duration.
+   * Duration presets: '1h', '4h', 'today', 'week'
+   */
+  async snoozeNotifications(duration: SnoozeDuration): Promise<void> {
+    const now = new Date();
+    let until: Date;
+
+    switch (duration) {
+      case '1h':
+        until = new Date(now.getTime() + 60 * 60_000);
+        break;
+      case '4h':
+        until = new Date(now.getTime() + 4 * 60 * 60_000);
+        break;
+      case 'today':
+        until = new Date(now);
+        until.setHours(23, 59, 59, 999);
+        break;
+      case 'week':
+        until = new Date(now.getTime() + 7 * 24 * 60 * 60_000);
+        break;
+    }
+
+    await this.savePreferences({ snoozeUntil: until.toISOString() });
+  }
+
+  /**
+   * Clear snooze and resume notifications immediately.
+   */
+  async clearSnooze(): Promise<void> {
+    await this.savePreferences({ snoozeUntil: null });
+  }
+
+  // ── EP-23: Load notification templates ────────────────────────────────────
+
+  /**
+   * Load system + trainer-specific notification templates from the DB.
+   * Trainers can customise the wording of notifications; all roles can read defaults.
+   */
+  async loadTemplates(): Promise<NotificationTemplate[]> {
+    try {
+      const { data, error } = await this.supabase.client
+        .from('notification_templates')
+        .select('*')
+        .order('notification_type');
+
+      if (error) throw error;
+
+      const templates: NotificationTemplate[] = (data ?? []).map((row: any) => ({
+        id: row.id,
+        notificationType: row.notification_type as NotificationType,
+        label: row.label,
+        titleTemplate: row.title_template,
+        bodyTemplate: row.body_template,
+        variables: row.variables ?? [],
+        targetRoles: row.target_roles ?? null,
+        isDefault: row.is_default,
+        trainerId: row.trainer_id ?? null,
+      }));
+
+      this._templates.set(templates);
+      return templates;
+    } catch (err) {
+      console.error('[NotificationService] loadTemplates error:', err);
+      return [];
+    }
+  }
+
+  /**
+   * Get the best matching template for a notification type.
+   * Trainer-specific override takes precedence over system default.
+   */
+  getTemplate(type: NotificationType): NotificationTemplate | null {
+    const all = this._templates();
+    const userId = this.auth.user()?.id ?? null;
+    // Prefer trainer-specific override
+    const trainerOverride = all.find(t => t.notificationType === type && t.trainerId === userId);
+    if (trainerOverride) return trainerOverride;
+    // Fall back to system default
+    return all.find(t => t.notificationType === type && t.isDefault) ?? null;
   }
 
   // ── Track notification opened ──────────────────────────────────────────────

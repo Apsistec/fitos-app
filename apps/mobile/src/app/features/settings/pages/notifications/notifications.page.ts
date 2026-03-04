@@ -24,6 +24,8 @@ import {
   IonButton,
   IonIcon,
   IonRange,
+  IonSelect,
+  IonSelectOption,
   ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -35,6 +37,8 @@ import {
   locationOutline,
   checkmarkCircleOutline,
   alertCircleOutline,
+  pauseCircleOutline,
+  playCircleOutline,
 } from 'ionicons/icons';
 
 import { AuthService } from '../../../../core/services/auth.service';
@@ -64,7 +68,9 @@ import { GymLocationPickerComponent, GymLocationSaved } from '../../components/g
     IonButton,
     IonIcon,
     IonRange,
-    GymLocationPickerComponent
+    IonSelect,
+    IonSelectOption,
+    GymLocationPickerComponent,
 ],
   template: `
     <ion-header>
@@ -387,6 +393,47 @@ import { GymLocationPickerComponent, GymLocationSaved } from '../../components/g
             </ion-item>
           </ion-list>
 
+          <!-- ── US-242: Snooze ─────────────────────────────────────── -->
+          @if (notifService.isSnoozed()) {
+            <div class="snooze-banner">
+              <ion-icon name="pause-circle-outline"></ion-icon>
+              <div class="banner-text">
+                <strong>Notifications paused</strong>
+                <p>Resuming at {{ notifService.snoozeUntilLabel() }}</p>
+              </div>
+              <ion-button size="small" fill="outline" color="medium" (click)="clearSnooze()">
+                Resume
+              </ion-button>
+            </div>
+          }
+
+          <ion-list>
+            <ion-list-header>
+              <ion-label>Do Not Disturb</ion-label>
+            </ion-list-header>
+            <ion-note class="section-hint">
+              Pause all notifications temporarily without changing your settings.
+            </ion-note>
+            <ion-item>
+              <ion-icon slot="start" name="pause-circle-outline" class="item-icon"></ion-icon>
+              <ion-label>
+                <h3>{{ notifService.isSnoozed() ? 'Snoozed until ' + notifService.snoozeUntilLabel() : 'Snooze Notifications' }}</h3>
+                <p>Pause all alerts for a set period</p>
+              </ion-label>
+              <ion-select
+                slot="end"
+                interface="action-sheet"
+                placeholder="Choose…"
+                (ionChange)="onSnoozeChange($event)"
+              >
+                <ion-select-option value="1h">1 Hour</ion-select-option>
+                <ion-select-option value="4h">4 Hours</ion-select-option>
+                <ion-select-option value="today">Rest of Today</ion-select-option>
+                <ion-select-option value="week">This Week</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </ion-list>
+
           <!-- ── Gym locations ───────────────────────────────────────── -->
           @if (prefs().geofenceEnabled) {
             <div class="gym-locations-section">
@@ -561,6 +608,43 @@ import { GymLocationPickerComponent, GymLocationSaved } from '../../components/g
       max-width: 160px;
     }
 
+    /* ── Snooze banner ────────────────────────────────────────── */
+    .snooze-banner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 16px;
+      padding: 14px 16px;
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-radius: 12px;
+
+      ion-icon {
+        font-size: 24px;
+        color: #F59E0B;
+        flex-shrink: 0;
+      }
+
+      .banner-text {
+        flex: 1;
+
+        strong {
+          display: block;
+          font-size: 14px;
+          font-weight: 700;
+          color: var(--fitos-text-primary, #F5F5F5);
+          margin-bottom: 2px;
+        }
+
+        p {
+          margin: 0;
+          font-size: 12px;
+          color: var(--fitos-text-secondary, #A3A3A3);
+          line-height: 1.4;
+        }
+      }
+    }
+
     /* ── Gym locations section ────────────────────────────────── */
     .gym-locations-section {
       margin: 8px 16px 16px;
@@ -665,6 +749,20 @@ export class NotificationsPage implements OnInit {
     this.notifService.savePreferences({ maxDailyNotifications: val });
   }
 
+  // ── US-242: Snooze ───────────────────────────────────────────────────────
+  async onSnoozeChange(event: CustomEvent): Promise<void> {
+    const duration = (event.detail as { value: string }).value as import('../../../../core/services/notification.service').SnoozeDuration;
+    if (!duration) return;
+    await this.notifService.snoozeNotifications(duration);
+    const label = this.notifService.snoozeUntilLabel();
+    await this.showToast(`Notifications paused until ${label ?? 'the selected time'}`, 'success');
+  }
+
+  async clearSnooze(): Promise<void> {
+    await this.notifService.clearSnooze();
+    await this.showToast('Notifications resumed', 'success');
+  }
+
   // ── Gym location saved ───────────────────────────────────────────────────
   async onGymSaved(saved: GymLocationSaved): Promise<void> {
     await this.showToast(`"${saved.gym.name}" saved as gym location 📍`, 'success');
@@ -693,6 +791,8 @@ export class NotificationsPage implements OnInit {
       locationOutline,
       checkmarkCircleOutline,
       alertCircleOutline,
+      pauseCircleOutline,
+      playCircleOutline,
     });
   }
 }

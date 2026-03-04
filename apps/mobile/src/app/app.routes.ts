@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, noAuthGuard, trainerOrOwnerGuard, clientGuard, ownerGuard, staffGuard, onboardingCompleteGuard, mfaRequiredGuard } from './core/guards';
+import { authGuard, noAuthGuard, trainerOrOwnerGuard, clientGuard, ownerGuard, staffGuard, onboardingCompleteGuard, mfaRequiredGuard, waiverGuard } from './core/guards';
 
 export const routes: Routes = [
   {
@@ -131,8 +131,18 @@ export const routes: Routes = [
       import('./features/auth/pages/onboarding/onboarding.page').then((m) => m.OnboardingPage),
   },
   {
+    // Sprint 64: Client waiver signing flow (EP-26)
+    // Loaded when waiverGuard detects unsigned required waivers on the tabs route.
+    // Intentionally outside /tabs so the waiverGuard on the tabs route re-evaluates
+    // on return (after signing, is_waiver_signed() returns true and access is granted).
+    path: 'sign-waivers',
+    canActivate: [authGuard, clientGuard],
+    loadComponent: () =>
+      import('./features/waivers/waiver-sign.page').then((m) => m.WaiverSignPage),
+  },
+  {
     path: 'tabs',
-    canActivate: [authGuard, mfaRequiredGuard, onboardingCompleteGuard],
+    canActivate: [authGuard, mfaRequiredGuard, onboardingCompleteGuard, waiverGuard],
     loadComponent: () => import('./features/tabs/tabs.page').then((m) => m.TabsPage),
     children: [
       {
