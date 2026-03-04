@@ -21,8 +21,9 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { send, personCircleOutline, checkmarkDoneOutline, checkmarkOutline, trashOutline } from 'ionicons/icons';
-import { MessagingService, type Message } from '../../../../core/services/messaging.service';
+import { MessagingService, type Message, type ConversationType } from '../../../../core/services/messaging.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { SupabaseService } from '../../../../core/services/supabase.service';
 import { ClientService } from '../../../../core/services/client.service';
 import { AICoachService } from '../../../../core/services/ai-coach.service';
 import { ActionSheetController, ToastController } from '@ionic/angular/standalone';
@@ -320,6 +321,7 @@ export class ChatPage implements OnInit, AfterViewChecked {
   private fb = inject(FormBuilder);
   private messagingService = inject(MessagingService);
   private authService = inject(AuthService);
+  private supabase = inject(SupabaseService);
   private clientService = inject(ClientService);
   private aiCoachService = inject(AICoachService);
   private route = inject(ActivatedRoute);
@@ -334,6 +336,7 @@ export class ChatPage implements OnInit, AfterViewChecked {
   otherUserName = signal<string>('Unknown');
   otherUserAvatar = signal<string | null>(null);
   currentUserId = signal<string>('');
+  conversationType = signal<ConversationType>('client_coaching');
   sending = signal(false);
   shouldScrollToBottom = false;
 
@@ -357,6 +360,12 @@ export class ChatPage implements OnInit, AfterViewChecked {
       this.currentUserId.set(userId);
     }
 
+    // EP-07: read conversation type from query param (?type=team)
+    const type = this.route.snapshot.queryParamMap.get('type') as ConversationType | null;
+    if (type === 'team' || type === 'group_announcement') {
+      this.conversationType.set(type);
+    }
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.otherUserId.set(id);
@@ -372,8 +381,8 @@ export class ChatPage implements OnInit, AfterViewChecked {
   }
 
   async loadChat(): Promise<void> {
-    // Load messages
-    await this.messagingService.loadMessages(this.otherUserId());
+    // Load messages filtered by conversation type (EP-07)
+    await this.messagingService.loadMessages(this.otherUserId(), this.conversationType());
 
     // Load other user info
     await this.loadOtherUserInfo();
@@ -384,13 +393,33 @@ export class ChatPage implements OnInit, AfterViewChecked {
 
   async loadOtherUserInfo(): Promise<void> {
     try {
-      await this.clientService.loadClients();
-      const clients = this.clientService.clients();
-      const client = clients.find((c) => c.id === this.otherUserId());
-
-      if (client) {
-        this.otherUserName.set(client.full_name || 'Unknown');
-        this.otherUserAvatar.set(client.avatar_url || null);
+      if (this.conversationType() === 'team') {
+        // For team chats, look up the contact from team contacts signal or fetch profile
+        const teamContacts = this.messagingService.teamContactsSignal();
+        const contact = teamContacts.find(c => c.user_id === this.otherUserId());
+        if (contact) {
+          this.otherUserName.set(contact.full_name || 'Unknown');
+          this.otherUserAvatar.set(contact.avatar_url || null);
+          return;
+        }
+        // Fallback: fetch profile directly
+        const { data } = await this.supabase
+          .from('profiles')
+          .select('full_name, avatar_url')
+          .eq('id', this.otherUserId())
+          .single();
+        if (data) {
+          this.otherUserName.set((data as any).full_name || 'Unknown');
+          this.otherUserAvatar.set((data as any).avatar_url || null);
+        }
+      } else {
+        await this.clientService.loadClients();
+        const clients = this.clientService.clients();
+        const client = clients.find((c) => c.id === this.otherUserId());
+        if (client) {
+          this.otherUserName.set(client.full_name || 'Unknown');
+          this.otherUserAvatar.set(client.avatar_url || null);
+        }
       }
     } catch (error) {
       console.error('Error loading other user info:', error);
@@ -405,22 +434,28 @@ export class ChatPage implements OnInit, AfterViewChecked {
       const content = this.messageForm.value.content.trim();
       if (!content) return;
 
-      await this.messagingService.sendMessage(this.otherUserId(), content);
+      if (this.conversationType() === 'team') {
+        // EP-07: Team messages require facility_id for RLS scoping
+        const facilityId = await this.resolveFacilityId();
+        await this.messagingService.sendTeamMessage(this.otherUserId(), content, facilityId);
+      } else {
+        await this.messagingService.sendMessage(this.otherUserId(), content);
 
-      // Auto-collect training data for Coach Brain if sender is a trainer
-      const isTrainer = this.authService.isTrainer() || this.authService.isOwner();
-      if (isTrainer && content.length >= 20) { // Only collect substantial messages (20+ chars)
-        const trainerId = this.authService.user()?.id;
-        if (trainerId) {
-          // Fire and forget - don't block message sending if collection fails
-          this.aiCoachService.collectTrainingData(
-            trainerId,
-            content,
-            'message'
-          ).catch((err: unknown) => {
-            console.warn('Failed to collect training data:', err);
-            // Silent fail - don't disrupt user experience
-          });
+        // Auto-collect training data for Coach Brain if sender is a trainer
+        const isTrainer = this.authService.isTrainer() || this.authService.isOwner();
+        if (isTrainer && content.length >= 20) { // Only collect substantial messages (20+ chars)
+          const trainerId = this.authService.user()?.id;
+          if (trainerId) {
+            // Fire and forget - don't block message sending if collection fails
+            this.aiCoachService.collectTrainingData(
+              trainerId,
+              content,
+              'message'
+            ).catch((err: unknown) => {
+              console.warn('Failed to collect training data:', err);
+              // Silent fail - don't disrupt user experience
+            });
+          }
         }
       }
 
@@ -434,6 +469,32 @@ export class ChatPage implements OnInit, AfterViewChecked {
     } finally {
       this.sending.set(false);
     }
+  }
+
+  /**
+   * Resolve the facility ID for the current user.
+   * Trainers/owners have facility_id on their profile.
+   * Admin assistants have it in the admin_assistants table.
+   */
+  private async resolveFacilityId(): Promise<string> {
+    const profile = this.authService.profile();
+    // Most roles have facility_id on the profile
+    if ((profile as any)?.facility_id) {
+      return (profile as any).facility_id as string;
+    }
+    // Admin assistants — look it up from the admin_assistants table
+    const userId = this.authService.user()?.id;
+    if (userId) {
+      const { data } = await this.supabase
+        .from('admin_assistants')
+        .select('facility_id')
+        .eq('user_id', userId)
+        .single();
+      if (data && (data as any).facility_id) {
+        return (data as any).facility_id as string;
+      }
+    }
+    return '';
   }
 
   async onMessagePress(message: Message): Promise<void> {

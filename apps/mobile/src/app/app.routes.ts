@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, noAuthGuard, trainerOrOwnerGuard, clientGuard, ownerGuard, onboardingCompleteGuard, mfaRequiredGuard } from './core/guards';
+import { authGuard, noAuthGuard, trainerOrOwnerGuard, clientGuard, ownerGuard, staffGuard, onboardingCompleteGuard, mfaRequiredGuard } from './core/guards';
 
 export const routes: Routes = [
   {
@@ -73,6 +73,15 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/auth/pages/register/gym-owner/gym-owner-register.page').then(
             (m) => m.GymOwnerRegisterPage
+          ),
+      },
+      {
+        // Sprint 62: Admin Assistant accepts Owner's invitation (EP-01 US-004)
+        // Must come with valid invite_token param; no noAuthGuard (token is the auth mechanism)
+        path: 'register/admin-assistant',
+        loadComponent: () =>
+          import('./features/auth/pages/register/admin-assistant/admin-assistant-register.page').then(
+            (m) => m.AdminAssistantRegisterPage
           ),
       },
       {
@@ -429,9 +438,9 @@ export const routes: Routes = [
         ],
       },
       {
-        // Clients - trainers and gym owners only
+        // Clients - trainers, gym owners, and admin assistants (read access for AAs)
         path: 'clients',
-        canActivate: [trainerOrOwnerGuard],
+        canActivate: [staffGuard],
         children: [
           {
             path: '',
@@ -801,6 +810,25 @@ export const routes: Routes = [
               ),
           },
           {
+            // Sprint 61/62: Admin Assistant RBAC — Team Management hub (EP-25)
+            // Covers: invite AA, configure per-user permissions, view audit log
+            path: 'team-management',
+            canActivate: [ownerGuard],
+            loadComponent: () =>
+              import('./features/settings/pages/team-management/team-management.page').then(
+                (m) => m.TeamManagementPage
+              ),
+          },
+          {
+            // Sprint 64: Waiver management (EP-26) — Owner creates and manages waivers
+            path: 'waivers',
+            canActivate: [ownerGuard],
+            loadComponent: () =>
+              import('./features/settings/pages/waivers/waivers.page').then(
+                (m) => m.WaiversPage
+              ),
+          },
+          {
             // Client notification preferences — all roles (clients primarily)
             path: 'client-notifications',
             loadComponent: () =>
@@ -871,9 +899,9 @@ export const routes: Routes = [
         ],
       },
       {
-        // Schedule — trainers and gym owners
+        // Schedule — trainers, gym owners, and admin assistants (EP-07)
         path: 'schedule',
-        canActivate: [trainerOrOwnerGuard],
+        canActivate: [staffGuard],
         children: [
           {
             path: '',

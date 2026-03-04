@@ -37,6 +37,7 @@ import {
   storefrontOutline,
   starOutline,
   megaphoneOutline,
+  scanOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
 import { SupabaseService } from '../../core/services/supabase.service';
@@ -372,6 +373,70 @@ import type { WorkoutWithExercises } from '../../core/services/workout.service';
           <app-trainer-activity-feed [activities]="recentActivity()" />
         </div>
         }
+        @case ('admin_assistant') {
+        <!-- ── Admin Assistant Dashboard (Sprint 62 — EP-01 US-008) ── -->
+        <div class="aa-dashboard" @fadeInUp>
+
+          <!-- Today's Schedule Snapshot -->
+          <div class="dash-card aa-schedule-card" routerLink="/tabs/schedule">
+            <div class="card-header-row">
+              <div class="card-icon teal"><ion-icon name="calendar-outline"></ion-icon></div>
+              <span class="card-title">Today's Schedule</span>
+              <span class="schedule-count-badge">
+                {{ aaTodayCount() }} sessions
+              </span>
+            </div>
+            @if (aaNextAppointment()) {
+              <div class="aa-next-appt">
+                <div class="appt-time">{{ aaNextAppointment()!.start_at | date:'h:mm a' }}</div>
+                <div class="appt-detail">
+                  <span class="appt-client">{{ aaNextAppointment()!.client_name }}</span>
+                  <span class="appt-sep"> · </span>
+                  <span class="appt-trainer">{{ aaNextAppointment()!.trainer_name }}</span>
+                </div>
+              </div>
+            } @else {
+              <p class="empty-label">No more sessions today.</p>
+            }
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="dash-card aa-actions-card">
+            <h3 class="actions-label">Quick Actions</h3>
+            <div class="aa-actions-grid">
+              <ion-button expand="block" fill="solid" routerLink="/tabs/schedule">
+                <ion-icon name="calendar-outline" slot="start"></ion-icon>
+                View Schedule
+              </ion-button>
+              <ion-button expand="block" fill="outline" routerLink="/tabs/clients">
+                <ion-icon name="people-outline" slot="start"></ion-icon>
+                Clients
+              </ion-button>
+              <ion-button expand="block" fill="outline" routerLink="/tabs/messages">
+                <ion-icon name="chatbubbles-outline" slot="start"></ion-icon>
+                Team Chat
+              </ion-button>
+              <ion-button expand="block" fill="outline" routerLink="/tabs/schedule/kiosk">
+                <ion-icon name="scan-outline" slot="start"></ion-icon>
+                Check-in Kiosk
+              </ion-button>
+            </div>
+          </div>
+
+          <!-- Unread Team Messages -->
+          @if (aaUnreadTeamCount() > 0) {
+            <div class="dash-card aa-messages-card" routerLink="/tabs/messages">
+              <div class="card-header-row">
+                <div class="card-icon purple"><ion-icon name="chatbubbles-outline"></ion-icon></div>
+                <span class="card-title">Team Messages</span>
+                <span class="unread-badge">{{ aaUnreadTeamCount() }}</span>
+              </div>
+              <p class="empty-label">You have {{ aaUnreadTeamCount() }} unread team message{{ aaUnreadTeamCount() === 1 ? '' : 's' }}.</p>
+            </div>
+          }
+
+        </div>
+        }
       }
     </ion-content>
   `,
@@ -410,13 +475,97 @@ import type { WorkoutWithExercises } from '../../core/services/workout.service';
 
     .client-dashboard,
     .trainer-dashboard,
-    .owner-dashboard {
+    .owner-dashboard,
+    .aa-dashboard {
       max-width: 800px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
       gap: 14px;
       width: 100%;
+    }
+
+    /* ── Admin Assistant Dashboard ───────────────────────────── */
+    .aa-schedule-card {
+      .schedule-count-badge {
+        font-size: 12px;
+        font-weight: 700;
+        color: #10B981;
+        background: rgba(16, 185, 129, 0.12);
+        border-radius: 20px;
+        padding: 3px 10px;
+      }
+
+      .aa-next-appt {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        margin-top: 4px;
+
+        .appt-time {
+          font-size: 22px;
+          font-weight: 800;
+          color: var(--fitos-text-primary, #F5F5F5);
+          flex-shrink: 0;
+        }
+
+        .appt-detail {
+          font-size: 14px;
+          color: var(--fitos-text-secondary, #A3A3A3);
+
+          .appt-client { font-weight: 600; color: var(--fitos-text-primary, #F5F5F5); }
+          .appt-sep    { color: var(--fitos-text-tertiary, #737373); }
+        }
+      }
+    }
+
+    .aa-actions-card {
+      .actions-label {
+        margin: 0 0 14px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--fitos-text-secondary, #A3A3A3);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .aa-actions-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+
+        ion-button {
+          margin: 0;
+          font-size: 13px;
+          font-weight: 600;
+          --border-radius: 8px;
+          height: 44px;
+          --padding-start: 10px;
+          --padding-end: 10px;
+        }
+
+        ion-button[fill="outline"] {
+          --border-color: rgba(255, 255, 255, 0.1);
+          --color: var(--fitos-text-primary, #F5F5F5);
+          --background: transparent;
+        }
+      }
+    }
+
+    .aa-messages-card {
+      .unread-badge {
+        min-width: 24px;
+        height: 24px;
+        border-radius: 12px;
+        background: #EF4444;
+        color: white;
+        font-size: 12px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 6px;
+      }
     }
 
     .stats-row {
@@ -785,6 +934,13 @@ export class DashboardPage implements OnInit {
   });
   trainerPerformance = signal<TrainerPerformance[]>([]);
 
+  // ── Admin Assistant dashboard signals ─────────────────────────
+  // Today's appointment count + next upcoming appointment
+  aaTodayCount    = signal(0);
+  aaNextAppointment = signal<{ start_at: string; client_name: string; trainer_name: string } | null>(null);
+  // Unread team message count (loaded from messaging service)
+  aaUnreadTeamCount = computed(() => this.messagingService.totalUnreadSignal());
+
   constructor() {
     addIcons({
       personOutline,
@@ -805,6 +961,7 @@ export class DashboardPage implements OnInit {
       storefrontOutline,
       starOutline,
       megaphoneOutline,
+      scanOutline,
     });
   }
 
@@ -835,7 +992,10 @@ export class DashboardPage implements OnInit {
 
   async loadDashboardData(): Promise<void> {
     try {
-      if (this.isOwner()) {
+      const role = this.authService.profile()?.role;
+      if (role === 'admin_assistant') {
+        await this.loadAdminAssistantDashboard();
+      } else if (this.isOwner()) {
         await this.loadOwnerDashboard();
       } else if (this.isTrainer()) {
         await this.loadTrainerDashboard();
@@ -845,6 +1005,65 @@ export class DashboardPage implements OnInit {
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     }
+  }
+
+  // ── Admin Assistant dashboard loader ──────────────────────────
+  private async loadAdminAssistantDashboard(): Promise<void> {
+    const userId = this.authService.user()?.id;
+    if (!userId) return;
+
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+
+    const now = new Date().toISOString();
+
+    // Get facility_id from admin_assistants table
+    const { data: aaRow } = await this.supabase.client
+      .from('admin_assistants')
+      .select('facility_id')
+      .eq('user_id', userId)
+      .single();
+
+    if (!aaRow?.facility_id) return;
+
+    // Count today's appointments at this facility
+    const { count } = await this.supabase.client
+      .from('appointments')
+      .select('*', { count: 'exact', head: true })
+      .eq('facility_id', aaRow.facility_id)
+      .gte('start_at', todayStart.toISOString())
+      .lte('start_at', todayEnd.toISOString())
+      .not('status', 'eq', 'cancelled');
+
+    this.aaTodayCount.set(count ?? 0);
+
+    // Get next upcoming appointment
+    const { data: upcoming } = await this.supabase.client
+      .from('appointments')
+      .select(`
+        start_at,
+        client:profiles!appointments_client_id_fkey(full_name),
+        trainer:profiles!appointments_trainer_id_fkey(full_name)
+      `)
+      .eq('facility_id', aaRow.facility_id)
+      .gte('start_at', now)
+      .not('status', 'eq', 'cancelled')
+      .order('start_at', { ascending: true })
+      .limit(1)
+      .single();
+
+    if (upcoming) {
+      this.aaNextAppointment.set({
+        start_at: upcoming.start_at,
+        client_name: (upcoming.client as any)?.full_name ?? 'Unknown',
+        trainer_name: (upcoming.trainer as any)?.full_name ?? 'Unknown',
+      });
+    }
+
+    // Load conversations so unread count is populated
+    this.messagingService.loadConversations();
   }
 
   private async loadClientDashboard(): Promise<void> {

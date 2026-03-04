@@ -59,4 +59,7 @@ export function roleGuard(...allowedRoles: UserRole[]): CanActivateFn {
 export const trainerGuard = roleGuard('trainer');
 export const clientGuard = roleGuard('client');
 export const ownerGuard = roleGuard('gym_owner');
+export const adminAssistantGuard = roleGuard('admin_assistant');
 export const trainerOrOwnerGuard = roleGuard('trainer', 'gym_owner');
+// Staff guard: trainer + owner + admin_assistant (schedule, clients, messages)
+export const staffGuard = roleGuard('trainer', 'gym_owner', 'admin_assistant');

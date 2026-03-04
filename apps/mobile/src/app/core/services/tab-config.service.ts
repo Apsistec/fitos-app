@@ -22,6 +22,8 @@ export class TabConfigService {
         return this.trainerTabs;
       case 'gym_owner':
         return this.ownerTabs;
+      case 'admin_assistant':
+        return this.adminAssistantTabs;
       default:
         return this.defaultTabs;
     }
@@ -51,6 +53,15 @@ export class TabConfigService {
     { label: 'Schedule', icon: 'calendar-outline', iconFilled: 'calendar', route: 'schedule' },
     { label: 'Business', icon: 'briefcase-outline', iconFilled: 'briefcase', route: 'business' },
     { label: 'More', icon: 'ellipsis-horizontal-outline', iconFilled: 'ellipsis-horizontal', route: 'more' },
+  ];
+
+  // Sprint 62: Admin Assistant tab set (EP-01 US-008)
+  // 4 tabs: Dashboard, Schedule, Clients, Messages
+  private readonly adminAssistantTabs: TabConfig[] = [
+    { label: 'Dashboard', icon: 'home-outline', iconFilled: 'home', route: 'dashboard' },
+    { label: 'Schedule',  icon: 'calendar-outline', iconFilled: 'calendar', route: 'schedule' },
+    { label: 'Clients',   icon: 'people-outline', iconFilled: 'people', route: 'clients' },
+    { label: 'Messages',  icon: 'chatbubbles-outline', iconFilled: 'chatbubbles', route: 'messages' },
   ];
 
   private readonly defaultTabs: TabConfig[] = [

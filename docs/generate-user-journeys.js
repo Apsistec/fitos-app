@@ -74,30 +74,71 @@ function createBulletPoint(text, level = 0) {
 }
 
 function createTableOfContents() {
+  // Issue 14: Manual text-based TOC as fallback (field-based TOC requires Word to refresh)
   const toc = [
     createHeader('Table of Contents', 1),
+    new Paragraph({
+      text: '(Open in Microsoft Word and press Ctrl+A, F9 to update page numbers)',
+      spacing: { line: 200, lineRule: 'auto', after: 80 },
+      run: {
+        size: 18 * 2,
+        italic: true,
+        color: '888888',
+        font: 'Arial',
+      },
+    }),
+    new Paragraph({ text: '', spacing: { after: 80 } }),
   ];
 
   const contents = [
-    '1. Executive Summary',
-    '2. Current State Analysis - Issues Found',
-    '3. Client User Journeys (15+ journeys)',
-    '4. Trainer User Journeys (25+ journeys)',
-    '5. Gym Owner User Journeys (20+ journeys)',
-    '6. Tab Navigation Architecture per Role',
-    '7. Feature Matrix',
-    '8. Permission Enforcement Strategy',
+    { text: '1. Executive Summary', indent: false },
+    { text: '2. Current State Analysis & Architecture Issues', indent: false },
+    { text: '3. Client User Journeys (28 journeys)', indent: false },
+    { text: '   3.1 Onboarding (4)', indent: true },
+    { text: '   3.2 Workouts (5)', indent: true },
+    { text: '   3.3 Nutrition (5)', indent: true },
+    { text: '   3.4 Communication (3)', indent: true },
+    { text: '   3.5 Recovery & Wellness (3)', indent: true },
+    { text: '   3.6 Gamification & Social (3)', indent: true },
+    { text: '   3.7 Account & Settings (5)', indent: true },
+    { text: '4. Trainer User Journeys (36 journeys)', indent: false },
+    { text: '   4.1 Onboarding (4)', indent: true },
+    { text: '   4.2 Client Management (6)', indent: true },
+    { text: '   4.3 Workout Management (5)', indent: true },
+    { text: '   4.4 Video & Form Review (2)', indent: true },
+    { text: '   4.5 Communication (3)', indent: true },
+    { text: '   4.6 CRM & Business (5)', indent: true },
+    { text: '   4.7 Analytics & Revenue (4)', indent: true },
+    { text: '   4.8 Time & Session Management (3)', indent: true },
+    { text: '   4.9 Account & Settings (4)', indent: true },
+    { text: '5. Gym Owner User Journeys (26 journeys)', indent: false },
+    { text: '   5.1 Onboarding (4)', indent: true },
+    { text: '   5.2 Trainer Management (4)', indent: true },
+    { text: '   5.3 Client/Member Oversight (3)', indent: true },
+    { text: '   5.4 Business & Revenue (5)', indent: true },
+    { text: '   5.5 Analytics & Reporting (3)', indent: true },
+    { text: '   5.6 CRM & Marketing (3)', indent: true },
+    { text: '   5.7 Settings & Administration (4)', indent: true },
+    { text: '6. Admin Assistant User Journeys (10 journeys) — NEW', indent: false },
+    { text: '   6.1 Onboarding (3)', indent: true },
+    { text: '   6.2 Scheduling & Check-In (3)', indent: true },
+    { text: '   6.3 Communication (2)', indent: true },
+    { text: '   6.4 Account & Settings (2)', indent: true },
+    { text: '7. Tab Navigation Architecture per Role', indent: false },
+    { text: '8. Feature Matrix (5 roles)', indent: false },
+    { text: '9. Permission Enforcement Strategy', indent: false },
   ];
 
   contents.forEach(item => {
     toc.push(new Paragraph({
-      text: item,
-      spacing: { line: 200, lineRule: 'auto', after: 100 },
-      level: item.startsWith('  ') ? 1 : 0,
+      text: item.text,
+      spacing: { line: 200, lineRule: 'auto', after: 60 },
+      indent: item.indent ? { left: 480 } : undefined,
       run: {
-        size: 22 * 2,
-        color: accentColor,
+        size: (item.indent ? 20 : 22) * 2,
+        color: item.indent ? darkGray : accentColor,
         font: 'Arial',
+        bold: !item.indent,
       },
     }));
   });
@@ -106,28 +147,39 @@ function createTableOfContents() {
 }
 
 function createFeatureMatrix() {
+  // Issue 16: Sequential epic numbering; Issue 1: Admin Assistant added as 4th role
+  // Admin Assistant column shows default permissions (Owner can override any)
   const features = [
-    ['Feature', 'Client', 'Trainer', 'Owner'],
-    ['Register / Onboarding', '✓', '✓', '✓'],
-    ['View Dashboard', '✓', '✓', '✓'],
-    ['Manage Profile', '✓', '✓', '✓'],
-    ['View Workouts', '✓', '✓', '✓'],
-    ['Execute Workouts', '✓', '', ''],
-    ['Create Workouts', '', '✓', ''],
-    ['Log Nutrition', '✓', '', ''],
-    ['Set Nutrition Targets', '', '✓', ''],
-    ['Message Users', '✓', '✓', ''],
-    ['Invite Users', '', '✓', '✓'],
-    ['View Client List', '', '✓', '✓'],
-    ['View Analytics', '✓', '✓', '✓'],
-    ['Manage Payments', '', '✓', '✓'],
-    ['View Revenue', '', '✓', '✓'],
-    ['Manage Trainers', '', '', '✓'],
-    ['View All Members', '', '', '✓'],
-    ['Access Help Center', '✓', '✓', '✓'],
-    ['Manage Settings', '✓', '✓', '✓'],
-    ['Set Permissions', '', '', '✓'],
-    ['View Audit Logs', '', '', '✓'],
+    ['Feature', 'Client', 'Trainer', 'Owner*', 'Admin Asst†'],
+    ['Register / Onboarding', '✓', '✓', '✓', 'Invite only'],
+    ['View Dashboard', '✓', '✓', '✓', '✓'],
+    ['Manage Profile', '✓', '✓', '✓', '✓ (own)'],
+    ['View Workouts', '✓', '✓', '✓', '—'],
+    ['Execute Workouts', '✓', '—', '✓', '—'],
+    ['Create Workouts (5 modes)', '—', '✓', '✓', '—'],
+    ['Log Nutrition', '✓', '—', '✓', '—'],
+    ['Set Nutrition + Hydration Targets', '—', '✓', '✓', '—'],
+    ['Message Trainer / Clients', '✓', '✓', '✓', '✓'],
+    ['Team Messaging (Staff↔Staff)', '—', '✓', '✓', '✓'],
+    ['Bulk/Marketing Messages', '—', '✓', '✓', '⚙'],
+    ['Invite Clients', '—', '✓', '✓', '—'],
+    ['Invite Admin Assistants', '—', '—', '✓', '—'],
+    ['View Client List', '—', '✓', '✓', '✓ (contact only)'],
+    ['Manage Schedule (all trainers)', '—', '—', '✓', '✓'],
+    ['Client Check-In', '—', '✓', '✓', '✓'],
+    ['Process Checkout / POS', '—', '✓', '✓', '⚙'],
+    ['View Analytics', '✓ (own)', '✓ (own clients)', '✓ (facility)', '—'],
+    ['Manage Payments', '—', '✓', '✓', '—'],
+    ['View Revenue Dashboard', '—', '✓', '✓', '⚙'],
+    ['Export Financial Data', '—', '—', '✓', '⚙'],
+    ['Manage Trainers', '—', '—', '✓', '—'],
+    ['View All Members', '—', '—', '✓', '✓ (contact only)'],
+    ['Waivers — Manage Templates', '—', '—', '✓', '—'],
+    ['Waivers — View Signed', '—', '✓ (own clients)', '✓', '—'],
+    ['RBAC — Configure Permissions', '—', '—', '✓', '—'],
+    ['View Audit Logs', '—', '—', '✓', '—'],
+    ['Access Help Center', '✓', '✓', '✓', '✓'],
+    ['Manage Settings', '✓ (own)', '✓ (own)', '✓ (all)', '✓ (own only)'],
   ];
 
   const rows = features.map((row, rowIndex) => {
@@ -140,21 +192,21 @@ function createFeatureMatrix() {
         children: [
           new Paragraph({
             text: cell,
-            alignment: AlignmentType.CENTER,
+            alignment: cellIndex === 0 ? AlignmentType.LEFT : AlignmentType.CENTER,
             run: {
               bold: isHeader,
-              size: 20 * 2,
-              color: isHeader ? '#FFFFFF' : darkGray,
+              size: 19 * 2,
+              color: isHeader ? 'FFFFFF' : darkGray,
               font: 'Arial',
             },
           }),
         ],
         shading: {
           type: ShadingType.CLEAR,
-          color: isHeader ? primaryColor : (isFeatureCol ? lightGray : '#FFFFFF'),
+          color: isHeader ? primaryColor : (isFeatureCol ? lightGray : 'FFFFFF'),
         },
         width: {
-          size: cellIndex === 0 ? 3000 : 2000,
+          size: cellIndex === 0 ? 3200 : 1500,
           type: WidthType.DXA,
         },
         borders: {
@@ -362,6 +414,27 @@ const ownerJourneys = [
   { code: 'J-O26', category: 'Settings & Administration', title: 'View Audit Logs', description: 'HIPAA-compliant logs: who accessed what member data, when, from what IP. Trainer access logs, member data downloads. Compliance reports for audits.' },
 ];
 
+// Issue 17: Admin Assistant journeys (invitation-only role)
+const adminAssistantJourneys = [
+  // Onboarding
+  { code: 'J-A01', category: 'Onboarding', title: 'Accept Invitation & Create Account', description: 'Admin Assistant receives email invitation from gym owner. Clicks unique one-time setup link (valid 72 hours). Creates password. Account automatically linked to owner\'s facility. No role selection — role is pre-assigned as admin_assistant. Redirects to Admin Assistant onboarding.' },
+  { code: 'J-A02', category: 'Onboarding', title: 'Complete Admin Assistant Onboarding', description: 'Brief 3-step onboarding: (1) View granted permissions screen — shows what they can access based on owner\'s configuration; (2) Schedule overview — learn how to view and manage the 15-minute grid calendar; (3) Check-in walkthrough — how to check in clients for appointments. No fitness goal setup, no Stripe connection — these are not Admin Assistant responsibilities.' },
+  { code: 'J-A03', category: 'Onboarding', title: 'Set Up Own Profile', description: 'Admin Assistant completes their own profile: display name, profile photo, phone number (for internal communications). Cannot modify facility settings, branding, or other users\' profiles. Profile used in team messaging and check-in signatures.' },
+
+  // Scheduling & Check-In
+  { code: 'J-A04', category: 'Scheduling & Check-In', title: 'View Multi-Trainer Schedule', description: 'Access the 15-minute grid calendar showing all trainers\' appointments side-by-side. Filter by trainer using the left sidebar. Navigate day/week view. See appointment status colors (booked/confirmed/arrived/completed/no-show). Cannot modify trainer availability blocks (requires Owner permission).' },
+  { code: 'J-A05', category: 'Scheduling & Check-In', title: 'Book / Modify Appointment on Behalf of Trainer', description: 'Click empty time slot on trainer\'s column → booking form opens pre-populated with that trainer and time. Select client from dropdown, choose service type, set duration, add notes. Alternatively modify existing appointment: reschedule (creates new, cancels old with early/late cancel logic), change service type, update notes. All changes logged with "modified by admin_assistant" in appointment history.' },
+  { code: 'J-A06', category: 'Scheduling & Check-In', title: 'Check In Client for Appointment', description: 'From schedule view, click appointment block → side panel shows client name, service type, pricing option on file. Click "Mark Arrived" to transition status: Booked → Arrived. If client is late, system shows time elapsed since appointment start. If no-show window exceeded, system prompts: "Mark as No-Show?" If checkout permission granted by Owner, Admin Assistant can proceed to POS checkout.' },
+
+  // Communication
+  { code: 'J-A07', category: 'Communication', title: 'Message Team Members', description: 'Send and receive messages with owners and trainers at the facility. Conversations list shows Team tab (facility staff only) and Clients tab (if message-clients permission granted). Cannot initiate messages with clients unless Owner grants messaging permission. Can receive and reply to client messages forwarded by trainer.' },
+  { code: 'J-A08', category: 'Communication', title: 'Receive Task Assignments from Owner', description: 'Owner can send task-style messages tagged as "Action Required." Admin Assistant sees these highlighted in Team inbox with a task indicator. Can mark tasks complete with a reply. Supports: call client X about reschedule, process refund for Y, update Z\'s package. No formal task management system — handled via messaging.' },
+
+  // Account & Settings
+  { code: 'J-A09', category: 'Account & Settings', title: 'View Own Permissions', description: 'Settings > My Permissions shows a read-only list of all capabilities granted by the owner, organized by category (Scheduling, Clients, Financial, Marketing). Cannot modify permissions — must request changes from owner. If a feature is locked, tapping it shows: "Contact your facility owner to enable this feature."' },
+  { code: 'J-A10', category: 'Account & Settings', title: 'Set Notification Preferences', description: 'Control push notifications: schedule changes (new/modified/cancelled appointments), new team messages, client check-in reminders (15 min before each session), no-show alerts. Quiet hours (do not disturb scheduling). All preferences scope to Admin Assistant role — no client-side notification types shown.' },
+];
+
 // Build document
 async function generateDocument() {
   const doc = new Document({
@@ -437,7 +510,7 @@ async function generateDocument() {
           new Paragraph({
             text: 'Comprehensive Role Definition & User Flow Documentation',
             alignment: AlignmentType.CENTER,
-            spacing: { line: 360, after: 1440 },
+            spacing: { line: 360, after: 800 },
             run: {
               size: 22 * 2,
               color: darkGray,
@@ -445,7 +518,18 @@ async function generateDocument() {
             },
           }),
           new Paragraph({
-            text: 'Document Version: 1.0',
+            text: '4 Roles: Client · Trainer · Gym Owner · Admin Assistant',
+            alignment: AlignmentType.CENTER,
+            spacing: { line: 360, after: 640 },
+            run: {
+              size: 20 * 2,
+              color: accentColor,
+              font: 'Arial',
+              bold: true,
+            },
+          }),
+          new Paragraph({
+            text: 'Document Version: 2.0 — All 21 PRD Issues Resolved',
             alignment: AlignmentType.CENTER,
             spacing: { line: 360, after: 100 },
             run: {
@@ -521,8 +605,14 @@ async function generateDocument() {
 
           new PageBreak(),
 
+          // Admin Assistant Journeys (Issue 1, 17)
+          ...createJourneySection('6. Admin Assistant User Journeys (10 Journeys) — New in v2.0', adminAssistantJourneys),
+          createBodyText('Note: Admin Assistants are created by Gym Owners via invitation only — no public registration. Permissions shown above reflect defaults; Owners can grant or restrict any capability per-user via the RBAC settings screen (EP-25).', false, true, 18),
+
+          new PageBreak(),
+
           // Tab Navigation
-          createHeader('6. Tab Navigation Architecture per Role', 1),
+          createHeader('7. Tab Navigation Architecture per Role', 1),
 
           createHeader('Client Tabs (5 Primary Tabs)', 2),
           createBulletPoint('Home (Dashboard): Today\'s overview - assigned workouts, nutrition summary, wearable metrics, messages from trainer, quick actions'),
@@ -531,25 +621,32 @@ async function generateDocument() {
           createBulletPoint('AI Coach: Chat interface with AI trained on trainer\'s methodology and cues'),
           createBulletPoint('More: Messages, Settings, Help Center, Leaderboard, Streaks, Account Management'),
 
-          createHeader('Trainer Tabs (5 Primary Tabs)', 2),
+          createHeader('Trainer Tabs (5 Primary Tabs) — Owner inherits these + Owner-exclusive tabs', 2),
           createBulletPoint('Home (Dashboard): Client overview, low-engagement alerts, revenue summary, incoming form checks, pending messages'),
           createBulletPoint('Clients: Client list with status/activity, client detail with full profile, progress tracking, client notes'),
           createBulletPoint('Workouts: Exercise library with custom exercises, workout template builder, assign workouts to clients, review client workout history'),
           createBulletPoint('Business: CRM pipeline, lead management, email sequences, analytics dashboard, revenue tracking, pricing management'),
           createBulletPoint('More: Messages, Session schedule, Settings, Coach Brain configuration, Email templates, Help Center'),
 
-          createHeader('Owner Tabs (5 Primary Tabs)', 2),
+          createHeader('Owner Tabs (5 Primary Tabs) — Superset of Trainer tabs (Issue 13)', 2),
           createBulletPoint('Home (Dashboard): Facility overview, KPIs (revenue, member growth, utilization), trainer performance summary, alerts (low engagement members, payment issues)'),
           createBulletPoint('Trainers: Trainer list, trainer performance details, manage permissions and commission, invite new trainers'),
           createBulletPoint('Members: All members across all trainers, member detail, retention dashboard, at-risk member identification'),
           createBulletPoint('Business: Revenue dashboard, financial reports, pricing management, payment history, CRM pipeline, marketing campaigns, acquisition analytics'),
           createBulletPoint('More: Facility Settings, Staff Management, Audit Logs, Help Center, Integrations, Account Management'),
 
+          createHeader('Admin Assistant Tabs (4 Primary Tabs)', 2),
+          createBulletPoint('Home (Dashboard): Today\'s appointments across all trainers, pending check-ins, unread team messages, tasks from Owner. Shows date and quick summary of day\'s schedule.'),
+          createBulletPoint('Schedule: 15-minute grid calendar with all trainer columns. Check in clients. Book/modify appointments if permitted. Filter by trainer.'),
+          createBulletPoint('Clients: Contact information and membership status for all facility clients. No health data, workout history, or nutrition data visible by default.'),
+          createBulletPoint('Messages: Team tab (Owner, Trainers, other Admin Assistants) and Clients tab (if messaging permission granted). Task assignments highlighted.'),
+
           new PageBreak(),
 
           // Feature Matrix
-          createHeader('7. Feature Matrix', 1),
-          createBodyText('The following table shows which features each user role can access:', false, false, 22),
+          createHeader('8. Feature Matrix (4 Roles)', 1),
+          createBodyText('The following table shows which features each role can access. * Owner = Trainer superset (inherits all trainer capabilities). † Admin Assistant = defaults shown; Owner configures per-user via RBAC settings. ⚙ = Requires Owner to explicitly grant permission.', false, true, 18),
+          new Paragraph({ text: '' }),
           new Paragraph({ text: '' }),
           createFeatureMatrix(),
           new Paragraph({ text: '' }),
@@ -557,14 +654,16 @@ async function generateDocument() {
           new PageBreak(),
 
           // Permission Enforcement
-          createHeader('8. Permission Enforcement Strategy', 1),
+          createHeader('9. Permission Enforcement Strategy', 1),
 
           createHeader('1. Route Guards (Application Level)', 2),
-          createBodyText('Implement middleware that checks user role before allowing access to role-specific pages:', false, false, 22),
-          createBulletPoint('Client routes: /app/home, /app/workouts, /app/nutrition, /app/coach, /app/profile'),
-          createBulletPoint('Trainer routes: /app/clients, /app/templates, /app/business, /app/crmm, /app/analytics'),
-          createBulletPoint('Owner routes: /app/trainers, /app/members, /app/facility, /app/reporting'),
-          createBulletPoint('Shared routes: /app/settings, /app/help, /app/messages'),
+          createBodyText('Implement middleware that checks user role before allowing access to role-specific pages. Use hasTrainerAccess(role) for trainer-capability routes — returns true for both trainer and gym_owner (Issue 13).', false, false, 22),
+          createBulletPoint('Client routes: /client/dashboard, /client/workouts, /client/nutrition, /client/coach, /client/profile'),
+          createBulletPoint('Trainer routes: /trainer/clients, /trainer/workouts, /trainer/exercises, /trainer/business'),
+          createBulletPoint('Owner routes: /owner/dashboard, /owner/trainers, /owner/members, /owner/reports, /owner/permissions, /owner/waivers, /owner/team'),
+          createBulletPoint('Owner also has access to all /trainer/* routes (composite role — Issue 13)'),
+          createBulletPoint('Admin Assistant routes: /admin-assistant/dashboard, /admin-assistant/schedule, /admin-assistant/clients, /admin-assistant/messages'),
+          createBulletPoint('Shared routes: /auth/*, /onboarding/*, /shared/settings, /shared/help, /shared/messages'),
 
           createHeader('2. Tab Visibility (UI Level)', 2),
           createBodyText('Control which tabs are visible based on user role:', false, false, 22),
@@ -593,11 +692,13 @@ async function generateDocument() {
           createBulletPoint('Return 403 Forbidden if permission check fails'),
 
           createHeader('6. Token-Based Authorization', 2),
-          createBodyText('Use JWT tokens to communicate role and permissions:', false, false, 22),
-          createBulletPoint('Include role in JWT: { sub, email, role, gym_id, trainer_id }'),
-          createBulletPoint('Validate token signature on every request'),
-          createBulletPoint('Refresh tokens on schedule (24 hour expiration)'),
-          createBulletPoint('Revoke tokens on logout and role change'),
+          createBodyText('Use JWT tokens to communicate role and permissions. Admin Assistant tokens include permission_overrides for server-side enforcement (Issue 9).', false, false, 22),
+          createBulletPoint('Trainer JWT: { sub, email, role: "trainer", facility_id?, trainer_id }'),
+          createBulletPoint('Owner JWT: { sub, email, role: "gym_owner", facility_id, trainer_id } — same trainer_id used for own coaching'),
+          createBulletPoint('Admin Assistant JWT: { sub, email, role: "admin_assistant", facility_id, permission_overrides: {...} }'),
+          createBulletPoint('permission_overrides object included in JWT for Admin Assistants so Edge Functions can validate without DB lookup on every request'),
+          createBulletPoint('Validate token signature on every request; refresh on schedule (24 hour expiration)'),
+          createBulletPoint('Revoke tokens on logout, role change, or Owner modifies Admin Assistant permissions'),
 
           createHeader('7. Data Isolation Strategy', 2),
           createBodyText('Ensure data is properly partitioned by role:', false, false, 22),
@@ -623,11 +724,14 @@ async function generateDocument() {
   });
 
   const buffer = await Packer.toBuffer(doc);
-  const outputPath = '/sessions/pensive-clever-heisenberg/mnt/fitos-app/docs/FitOS_User_Journeys_and_Role_Architecture.docx';
+  // Output to local docs directory (no session path dependency)
+  const outputPath = path.join(__dirname, 'FitOS_User_Journeys_and_Role_Architecture_v2.docx');
 
   fs.writeFileSync(outputPath, buffer);
   console.log(`✓ Document generated successfully: ${outputPath}`);
   console.log(`✓ File size: ${(buffer.length / 1024 / 1024).toFixed(2)} MB`);
+  console.log(`✓ Roles: Client (28) · Trainer (36) · Owner (26) · Admin Assistant (10) = 100 journeys`);
+  console.log(`✓ All 21 PRD issues addressed in this document`);
 }
 
 generateDocument().catch(err => {

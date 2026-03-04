@@ -2,7 +2,17 @@
 // User Types
 // ============================================================================
 
-export type UserRole = 'trainer' | 'client' | 'gym_owner' | 'gym_staff' | 'admin';
+export type UserRole = 'trainer' | 'client' | 'gym_owner' | 'gym_staff' | 'admin_assistant' | 'admin';
+
+/** Returns true if the role has all Trainer permissions (trainer or owner) */
+export function hasTrainerAccess(role: UserRole): boolean {
+  return role === 'trainer' || role === 'gym_owner';
+}
+
+/** Returns true if the role has Owner-level permissions */
+export function hasOwnerAccess(role: UserRole): boolean {
+  return role === 'gym_owner';
+}
 export type SubscriptionStatus = 'active' | 'past_due' | 'canceled' | 'trialing';
 
 export interface Profile {
@@ -66,6 +76,133 @@ export interface GymStaffProfile extends Profile {
   position?: string;
   permissions: string[];
   hireDate?: Date;
+}
+
+// ============================================================================
+// Admin Assistant Types (Sprint 61 — EP-25)
+// ============================================================================
+
+/**
+ * Granular permission flags for an Admin Assistant.
+ * All default to false (most restrictive); Owner grants specific capabilities.
+ * These are server-authoritative — enforced in DB via admin_assistants.permission_overrides.
+ */
+export interface AdminAssistantPermissions {
+  // Scheduling
+  canManageAllSchedules:   boolean; // See + edit all trainers' schedules
+  canManageOwnSchedule:    boolean; // Only manage appointments they created
+  canCheckInClients:       boolean; // Mark clients as arrived at appointments
+  canProcessCheckout:      boolean; // Run POS checkout for completed appointments
+  // Client data
+  canViewClientList:       boolean; // See client roster
+  canViewWorkoutHistory:   boolean; // See client workout logs
+  canViewNutritionData:    boolean; // See client nutrition logs
+  canViewHealthData:       boolean; // See wearable / health metrics
+  // Financial
+  canViewRevenueDashboard: boolean; // See revenue charts
+  canExportFinancialData:  boolean; // Download CSV/PDF financial exports
+  canProcessRefunds:       boolean; // Issue refunds through POS
+  // Marketing / CRM
+  canViewCrmPipeline:      boolean; // See lead pipeline
+  canSendBulkMessages:     boolean; // Send email campaigns
+  canAccessEmailTemplates: boolean; // Create/edit email templates
+  // Internal
+  canMessageTeam:          boolean; // Access team messaging tab
+}
+
+/** Built-in RBAC permission templates (stored as JSONB presets) */
+export type AdminAssistantPermissionTemplate =
+  | 'scheduling_focus'  // calendar, check-in, messaging only
+  | 'front_desk_full'   // scheduling + checkout + CRM view
+  | 'operations_manager'; // all except financials and RBAC config
+
+export const ADMIN_ASSISTANT_PERMISSION_TEMPLATES: Record<AdminAssistantPermissionTemplate, AdminAssistantPermissions> = {
+  scheduling_focus: {
+    canManageAllSchedules:   true,
+    canManageOwnSchedule:    true,
+    canCheckInClients:       true,
+    canProcessCheckout:      false,
+    canViewClientList:       true,
+    canViewWorkoutHistory:   false,
+    canViewNutritionData:    false,
+    canViewHealthData:       false,
+    canViewRevenueDashboard: false,
+    canExportFinancialData:  false,
+    canProcessRefunds:       false,
+    canViewCrmPipeline:      false,
+    canSendBulkMessages:     false,
+    canAccessEmailTemplates: false,
+    canMessageTeam:          true,
+  },
+  front_desk_full: {
+    canManageAllSchedules:   true,
+    canManageOwnSchedule:    true,
+    canCheckInClients:       true,
+    canProcessCheckout:      true,
+    canViewClientList:       true,
+    canViewWorkoutHistory:   false,
+    canViewNutritionData:    false,
+    canViewHealthData:       false,
+    canViewRevenueDashboard: false,
+    canExportFinancialData:  false,
+    canProcessRefunds:       false,
+    canViewCrmPipeline:      true,
+    canSendBulkMessages:     false,
+    canAccessEmailTemplates: false,
+    canMessageTeam:          true,
+  },
+  operations_manager: {
+    canManageAllSchedules:   true,
+    canManageOwnSchedule:    true,
+    canCheckInClients:       true,
+    canProcessCheckout:      true,
+    canViewClientList:       true,
+    canViewWorkoutHistory:   true,
+    canViewNutritionData:    false,
+    canViewHealthData:       false,
+    canViewRevenueDashboard: true,
+    canExportFinancialData:  false,
+    canProcessRefunds:       true,
+    canViewCrmPipeline:      true,
+    canSendBulkMessages:     true,
+    canAccessEmailTemplates: true,
+    canMessageTeam:          true,
+  },
+};
+
+export interface AdminAssistantProfile extends Profile {
+  role: 'admin_assistant';
+  owner_id: string;        // The gym owner who manages them
+  facility_id?: string;    // Their primary facility
+  status: 'invited' | 'active' | 'suspended';
+  permission_overrides: AdminAssistantPermissions;
+  invited_at?: string;
+  activated_at?: string;
+}
+
+export interface AdminInvitation {
+  id: string;
+  owner_id: string;
+  facility_id?: string;
+  email: string;
+  invite_token: string;
+  status: 'pending' | 'accepted' | 'expired' | 'cancelled';
+  expires_at: string;
+  accepted_at?: string;
+  accepted_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RbacAuditLogEntry {
+  id: string;
+  changed_by: string;
+  target_user_id: string;
+  permission_key: string;
+  old_value?: string;
+  new_value?: string;
+  notes?: string;
+  created_at: string;
 }
 
 // ============================================================================

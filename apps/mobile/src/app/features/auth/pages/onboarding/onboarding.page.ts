@@ -36,6 +36,9 @@ import {
   trophyOutline,
   starOutline,
   flashOutline,
+  shieldCheckmarkOutline,
+  chatbubblesOutline,
+  peopleOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SupabaseService } from '../../../../core/services/supabase.service';
@@ -487,6 +490,47 @@ const DEFAULT_STORIES: SocialProofStory[] = [
           </form>
         }
 
+        <!-- ── Stage 2: Admin Assistant welcome + permissions overview ── -->
+        @if (currentStage() === 2 && isAdminAssistant()) {
+          <div class="stage-header">
+            <div class="icon-wrap teal">
+              <ion-icon name="shield-checkmark-outline"></ion-icon>
+            </div>
+            <h2>Welcome to FitOS</h2>
+            <p>Your owner has configured your access. Here's what you can do.</p>
+          </div>
+
+          <div class="plan-preview">
+            <div class="plan-card">
+              <div class="plan-icon">📅</div>
+              <div class="plan-text">
+                <strong>Schedule Management</strong>
+                <span>View and manage client appointments across trainers</span>
+              </div>
+            </div>
+
+            <div class="plan-card">
+              <div class="plan-icon">👥</div>
+              <div class="plan-text">
+                <strong>Client Access</strong>
+                <span>View client lists and check in arriving members</span>
+              </div>
+            </div>
+
+            <div class="plan-card">
+              <div class="plan-icon">💬</div>
+              <div class="plan-text">
+                <strong>Team Messaging</strong>
+                <span>Message trainers and coordinate with the team</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="plan-note">
+            <p>Your owner can adjust your permissions at any time from Team Management settings.</p>
+          </div>
+        }
+
         <!-- ── Stage 8: Complete ─────────────────────────────── -->
         @if (currentStage() === totalStages() + 1) {
           <div class="complete-step">
@@ -495,7 +539,9 @@ const DEFAULT_STORIES: SocialProofStory[] = [
             </div>
             <h2>You're all set! 🎉</h2>
             <p>
-              @if (isOwner()) {
+              @if (isAdminAssistant()) {
+                Help trainers and clients with scheduling, check-ins, and support.
+              } @else if (isOwner()) {
                 Manage your facility and grow your training team.
               } @else if (isTrainer()) {
                 Start creating workouts and inviting clients.
@@ -982,10 +1028,11 @@ export class OnboardingPage implements OnInit {
   selectedMotivation = signal<string | null>(null);
 
   // ── Role signals ─────────────────────────────────────────────
-  isTrainer = computed(() => this.authService.isTrainer());
-  isOwner   = computed(() => this.authService.isOwner());
-  isClient  = computed(() => this.authService.isClient());
-  isIos     = signal(false); // Set in ngOnInit based on Capacitor.getPlatform()
+  isTrainer         = computed(() => this.authService.isTrainer());
+  isOwner           = computed(() => this.authService.isOwner());
+  isClient          = computed(() => this.authService.isClient());
+  isAdminAssistant  = computed(() => this.authService.profile()?.role === 'admin_assistant');
+  isIos             = signal(false); // Set in ngOnInit based on Capacitor.getPlatform()
 
   // ── Story for social proof stage ─────────────────────────────
   story = computed<SocialProofStory>(() => {
@@ -1000,12 +1047,17 @@ export class OnboardingPage implements OnInit {
 
   // ── Total stages (role-dependent) ────────────────────────────
   totalStages = computed(() => {
-    // Trainers/owners: 1 (profile) + 1 (role setup) = 2 stages + complete = 3
-    // Clients: 7 stages
-    return this.isClient() ? 7 : 2;
+    if (this.isClient()) return 7;
+    // Trainers/owners: 1 (profile) + 1 (role setup) = 2 stages
+    // Admin Assistants: 1 (profile) + 1 (permissions welcome) = 2 stages
+    return 2;
   });
 
   stageLabel = computed(() => {
+    if (this.isAdminAssistant()) {
+      const labels = ['Profile', 'Welcome'];
+      return labels[this.currentStage() - 1] ?? 'Done';
+    }
     if (!this.isClient()) {
       return this.currentStage() === 1 ? 'Profile' : 'Your Business';
     }
@@ -1115,7 +1167,8 @@ export class OnboardingPage implements OnInit {
     addIcons({
       arrowForward, arrowBack, checkmarkCircle, rocketOutline,
       calendarOutline, heartOutline, bodyOutline, trophyOutline,
-      starOutline, flashOutline,
+      starOutline, flashOutline, shieldCheckmarkOutline,
+      chatbubblesOutline, peopleOutline,
     });
   }
 
@@ -1165,7 +1218,14 @@ export class OnboardingPage implements OnInit {
         break;
 
       case 2:
-        if (this.isClient()) await this.saveGoalAnchoring();
+        if (this.isClient()) {
+          await this.saveGoalAnchoring();
+        } else if (this.isAdminAssistant()) {
+          // AA stage 2 is the permissions welcome — just mark onboarding complete
+          await this.markOnboardingComplete(userId, stage);
+        }
+        // Trainer/owner role-setup is handled in case 7 (client flow)
+        // or default (trainer/owner 2-stage flow — markOnboardingComplete called there)
         break;
 
       case 3:
