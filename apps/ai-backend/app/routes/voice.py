@@ -1,8 +1,11 @@
 """Voice AI endpoints - Deepgram STT/TTS integration"""
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException, Depends, Request
 from pydantic import BaseModel
 import logging
+
+from app.core.auth import get_current_user_id
+from app.core.rate_limit import limiter
 import asyncio
 import json
 
@@ -86,7 +89,8 @@ async def voice_stream(websocket: WebSocket):
 
 
 @router.post("/speak")
-async def text_to_speech(request: SpeakRequest):
+@limiter.limit("30/minute")
+async def text_to_speech(request: Request, body: SpeakRequest, user_id: str = Depends(get_current_user_id)):
     """
     Convert text to speech using Deepgram Aura.
 
@@ -103,7 +107,7 @@ async def text_to_speech(request: SpeakRequest):
     Response: Audio binary data
     """
     try:
-        logger.info(f"TTS request: {request.text[:50]}...")
+        logger.info(f"TTS request: {body.text[:50]}...")
 
         # In production, this would:
         # 1. Call Deepgram TTS API
@@ -113,7 +117,7 @@ async def text_to_speech(request: SpeakRequest):
         return {
             "success": True,
             "message": "TTS endpoint - integrate with Deepgram Aura",
-            "text": request.text
+            "text": body.text
         }
 
     except Exception as e:

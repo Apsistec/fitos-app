@@ -1,6 +1,9 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
+import { environment } from '../../../environments/environment';
 
 export type InvitationStatus = 'pending' | 'accepted' | 'expired' | 'cancelled';
 
@@ -18,12 +21,20 @@ export interface Invitation {
   updated_at: string;
 }
 
+export interface InviteCodeValidation {
+  valid: boolean;
+  trainerName?: string;
+  gymName?: string | null;
+  reason?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class InvitationService {
   private supabase = inject(SupabaseService);
   private auth = inject(AuthService);
+  private http = inject(HttpClient);
 
   // State
   private invitationsSignal = signal<Invitation[]>([]);
@@ -161,23 +172,42 @@ export class InvitationService {
   }
 
   /**
-   * Get invitation by code (for acceptance flow)
+   * Validate an invite code via Edge Function (public — no auth required).
+   * Returns limited metadata (trainer name, gym name) without exposing the full record.
+   */
+  async validateInviteCode(code: string): Promise<InviteCodeValidation> {
+    try {
+      const url = `${environment.supabaseUrl}/functions/v1/validate-invite-code`;
+      return await firstValueFrom(
+        this.http.post<InviteCodeValidation>(url, { code })
+      );
+    } catch (error) {
+      console.error('Error validating invite code:', error);
+      return { valid: false };
+    }
+  }
+
+  /**
+   * @deprecated Use validateInviteCode() instead — direct table queries
+   * are now blocked by RLS. Kept for backward compatibility during migration.
    */
   async getInvitationByCode(code: string): Promise<Invitation | null> {
-    try {
-      const { data, error } = await this.supabase.client
-        .from('invitations')
-        .select('*')
-        .eq('invite_code', code)
-        .single();
-
-      if (error) throw error;
-
-      return data;
-    } catch (error) {
-      console.error('Error getting invitation:', error);
-      return null;
-    }
+    const result = await this.validateInviteCode(code);
+    if (!result.valid) return null;
+    // Return a partial Invitation with the fields we know
+    return {
+      id: '',
+      trainer_id: '',
+      email: '',
+      invite_code: code,
+      status: 'pending',
+      expires_at: '',
+      accepted_at: null,
+      accepted_by: null,
+      personal_message: null,
+      created_at: '',
+      updated_at: '',
+    };
   }
 
   /**

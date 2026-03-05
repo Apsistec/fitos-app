@@ -1,11 +1,13 @@
 """AI Coach endpoints - multi-agent coaching conversations"""
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends, Request
 from pydantic import BaseModel
 from typing import List, Dict, Any
 import logging
 
 from app.agents import build_coach_graph, ChatMessage, UserContext, ChatAction
+from app.core.auth import get_current_user_id
+from app.core.rate_limit import limiter
 
 logger = logging.getLogger("fitos-ai")
 router = APIRouter()
@@ -30,39 +32,32 @@ class ChatResponse(BaseModel):
 
 
 @router.post("/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest):
+@limiter.limit("60/minute")
+async def chat(
+    request: Request,
+    body: ChatRequest,
+    user_id: str = Depends(get_current_user_id),
+):
     """
     Multi-agent coaching conversation endpoint.
 
-    Handles:
-    - Workout programming questions
-    - Nutrition guidance (adherence-neutral)
-    - Recovery and HRV interpretation
-    - Motivation and accountability
-    - Escalation to human trainer when needed
+    Requires a valid Supabase JWT in the Authorization header.
+    The user_id is extracted server-side from the token — the client-provided
+    userContext.user_id is overwritten with the JWT-verified value.
 
-    Example Request:
-    ```json
-    {
-      "message": "How much protein should I eat?",
-      "conversationHistory": [],
-      "userContext": {
-        "user_id": "uuid",
-        "role": "client",
-        "goals": ["muscle_gain"],
-        "fitness_level": "intermediate"
-      }
-    }
-    ```
+    Rate limit: 60 requests/minute per user.
     """
     try:
-        logger.info(f"Processing chat for user {request.userContext.user_id}: {request.message[:50]}...")
+        # Override client-provided user_id with JWT-verified value
+        body.userContext.user_id = user_id
+
+        logger.info(f"Processing chat for user {user_id}: {body.message[:50]}...")
 
         # Prepare state
         initial_state = {
-            "message": request.message,
-            "user_context": request.userContext,
-            "conversation_history": request.conversationHistory,
+            "message": body.message,
+            "user_context": body.userContext,
+            "conversation_history": body.conversationHistory,
             "current_agent": None,
             "should_escalate": False,
             "response": None,
@@ -94,7 +89,11 @@ async def chat(request: ChatRequest):
 
 
 @router.post("/action")
-async def execute_action(action: ChatAction):
+async def execute_action(
+    request: Request,
+    action: ChatAction,
+    user_id: str = Depends(get_current_user_id),
+):
     """
     Execute a suggested action from the AI coach.
 

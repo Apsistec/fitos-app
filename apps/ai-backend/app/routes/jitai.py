@@ -8,13 +8,15 @@ interventions at optimal moments based on:
 - Opportunity (context allows action)
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends, Request
 from pydantic import BaseModel
 from typing import Literal
 import logging
 from datetime import datetime, timedelta
 import random
 
+from app.core.auth import get_current_user_id
+from app.core.rate_limit import limiter
 from app.core.llm import get_smart_llm
 from langchain_core.messages import HumanMessage, SystemMessage
 
@@ -40,7 +42,8 @@ class Intervention(BaseModel):
 
 
 @router.get("/context/{user_id}", response_model=JITAIContext)
-async def get_jitai_context(user_id: str):
+@limiter.limit("30/minute")
+async def get_jitai_context(request: Request, user_id: str, current_user_id: str = Depends(get_current_user_id)):
     """
     Calculate JITAI context scores for a user.
 
@@ -92,7 +95,8 @@ async def get_jitai_context(user_id: str):
 
 
 @router.post("/generate", response_model=Intervention)
-async def generate_intervention(user_id: str, context: JITAIContext):
+@limiter.limit("20/minute")
+async def generate_intervention(request: Request, user_id: str, context: JITAIContext, current_user_id: str = Depends(get_current_user_id)):
     """
     Generate a personalized intervention using AI.
 
@@ -191,10 +195,13 @@ Format as JSON:
 
 
 @router.post("/log-response")
+@limiter.limit("60/minute")
 async def log_intervention_response(
+    request: Request,
     intervention_id: str,
     user_id: str,
-    response: Literal["engaged", "dismissed", "ignored"]
+    response: Literal["engaged", "dismissed", "ignored"],
+    current_user_id: str = Depends(get_current_user_id),
 ):
     """
     Log user's response to intervention for learning.

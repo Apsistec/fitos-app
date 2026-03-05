@@ -1,7 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { SupabaseService } from './supabase.service';
+import { AuthService } from './auth.service';
 import { environment } from '../../../environments/environment';
 
 /**
@@ -103,8 +104,21 @@ interface ConversationRecord {
 })
 export class AICoachService {
   private supabase = inject(SupabaseService);
+  private auth = inject(AuthService);
   private http = inject(HttpClient);
   private readonly AI_BACKEND_URL = environment.aiBackendUrl || 'http://localhost:8000';
+
+  /**
+   * Build Authorization headers with the current Supabase JWT.
+   * All AI Backend calls must include this to pass server-side JWT validation.
+   */
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.auth.accessToken();
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token ?? ''}`,
+      'Content-Type': 'application/json',
+    });
+  }
 
   // State
   messages = signal<ChatMessage[]>([]);
@@ -112,6 +126,9 @@ export class AICoachService {
   error = signal<string | null>(null);
   currentAgent = signal<string | null>(null);
   conversationId = signal<string | null>(null);
+
+  /** True while the backend has rate-limited this user (429). Resets after Retry-After elapses. */
+  rateLimited = signal(false);
 
   /**
    * Load or create active conversation for user
@@ -272,7 +289,7 @@ export class AICoachService {
         sleep_hours: ('sleep_hours' in userContext) ? userContext.sleep_hours : null,
       };
 
-      // Call AI Backend (routing happens server-side)
+      // Call AI Backend (routing happens server-side, JWT validated server-side)
       const response = await firstValueFrom(
         this.http.post<AIBackendResponse>(
           `${this.AI_BACKEND_URL}/api/v1/coach/chat`,
@@ -280,7 +297,8 @@ export class AICoachService {
             message,
             conversationHistory: history,
             userContext: contextPayload,
-          }
+          },
+          { headers: this.getAuthHeaders() }
         )
       );
 
@@ -317,6 +335,15 @@ export class AICoachService {
 
       return assistantMessage;
     } catch (err) {
+      // Handle 429 Too Many Requests — disable send until Retry-After elapses
+      if (err instanceof HttpErrorResponse && err.status === 429) {
+        const retryAfter = parseInt(err.headers?.get('Retry-After') || '30', 10);
+        this.rateLimited.set(true);
+        this.error.set("You're sending messages too quickly. Please wait a moment.");
+        setTimeout(() => this.rateLimited.set(false), retryAfter * 1000);
+        throw new Error('Rate limited');
+      }
+
       const errorMessage = err instanceof Error ? err.message : 'Failed to get AI response';
       this.error.set(errorMessage);
       throw new Error(errorMessage);

@@ -7,8 +7,11 @@ Sprint 33: AI Workout Generation
 """
 
 from typing import Optional, Literal
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends, Request
 from pydantic import BaseModel, Field
+
+from app.core.auth import get_current_user_id
+from app.core.rate_limit import limiter
 
 from app.workout_gen.generator import (
     WorkoutGenerator,
@@ -108,8 +111,9 @@ class RPELoadRequest(BaseModel):
 # Endpoints
 
 
+@limiter.limit("20/minute")
 @router.post("/generate/text")
-async def generate_from_text(request: GenerateFromTextRequest):
+async def generate_from_text(request: Request, body: GenerateFromTextRequest, user_id: str = Depends(get_current_user_id)):
     """
     Generate workout program from natural language prompt.
 
@@ -124,8 +128,8 @@ async def generate_from_text(request: GenerateFromTextRequest):
     try:
         generator = get_workout_generator()
         program = await generator.generate_from_text(
-            prompt=request.prompt,
-            trainer_id=request.trainer_id,
+            prompt=body.prompt,
+            trainer_id=body.trainer_id,
         )
 
         return {
@@ -138,8 +142,9 @@ async def generate_from_text(request: GenerateFromTextRequest):
         raise HTTPException(status_code=500, detail=f"Generation failed: {str(e)}")
 
 
+@limiter.limit("20/minute")
 @router.post("/generate/config")
-async def generate_from_config(request: GenerateFromConfigRequest):
+async def generate_from_config(request: Request, body: GenerateFromConfigRequest, user_id: str = Depends(get_current_user_id)):
     """
     Generate workout program from structured configuration.
 
@@ -150,24 +155,24 @@ async def generate_from_config(request: GenerateFromConfigRequest):
     """
     try:
         config = GenerationConfig(
-            goal=request.goal,
-            experience_level=request.experience_level,
-            days_per_week=request.days_per_week,
-            duration_weeks=request.duration_weeks,
-            equipment_available=request.equipment_available,
-            injuries_limitations=request.injuries_limitations,
-            session_duration_minutes=request.session_duration_minutes,
-            include_deload=request.include_deload,
-            deload_frequency_weeks=request.deload_frequency_weeks,
-            specific_sport=request.specific_sport,
-            focus_muscle_groups=request.focus_muscle_groups,
-            avoid_exercises=request.avoid_exercises,
+            goal=body.goal,
+            experience_level=body.experience_level,
+            days_per_week=body.days_per_week,
+            duration_weeks=body.duration_weeks,
+            equipment_available=body.equipment_available,
+            injuries_limitations=body.injuries_limitations,
+            session_duration_minutes=body.session_duration_minutes,
+            include_deload=body.include_deload,
+            deload_frequency_weeks=body.deload_frequency_weeks,
+            specific_sport=body.specific_sport,
+            focus_muscle_groups=body.focus_muscle_groups,
+            avoid_exercises=body.avoid_exercises,
         )
 
         generator = get_workout_generator()
         program = await generator.generate_from_config(
             config=config,
-            trainer_id=request.trainer_id,
+            trainer_id=body.trainer_id,
         )
 
         return {
@@ -180,8 +185,9 @@ async def generate_from_config(request: GenerateFromConfigRequest):
         raise HTTPException(status_code=500, detail=f"Generation failed: {str(e)}")
 
 
+@limiter.limit("30/minute")
 @router.post("/periodization")
-async def create_periodization(request: PeriodizationRequest):
+async def create_periodization(request: Request, body: PeriodizationRequest, user_id: str = Depends(get_current_user_id)):
     """
     Create periodization blocks for a program.
 
@@ -199,31 +205,31 @@ async def create_periodization(request: PeriodizationRequest):
     try:
         periodizer = get_periodizer()
 
-        if request.model == PeriodizationModel.LINEAR:
+        if body.model == PeriodizationModel.LINEAR:
             blocks = periodizer.create_linear_periodization(
-                total_weeks=request.total_weeks,
-                deload_frequency=request.deload_frequency,
+                total_weeks=body.total_weeks,
+                deload_frequency=body.deload_frequency,
             )
-        elif request.model == PeriodizationModel.BLOCK:
+        elif body.model == PeriodizationModel.BLOCK:
             blocks = periodizer.create_block_periodization(
-                total_weeks=request.total_weeks,
-                goal=request.goal or "strength",
+                total_weeks=body.total_weeks,
+                goal=body.goal or "strength",
             )
-        elif request.model == PeriodizationModel.UNDULATING:
+        elif body.model == PeriodizationModel.UNDULATING:
             blocks = periodizer.create_undulating_periodization(
-                total_weeks=request.total_weeks,
+                total_weeks=body.total_weeks,
                 variation_frequency="weekly",
             )
         else:
             raise HTTPException(
                 status_code=400,
-                detail=f"Periodization model {request.model} not yet implemented",
+                detail=f"Periodization model {body.model} not yet implemented",
             )
 
         return {
             "success": True,
-            "model": request.model,
-            "total_weeks": request.total_weeks,
+            "model": body.model,
+            "total_weeks": body.total_weeks,
             "blocks": [
                 {
                     "block_number": b.block_number,
@@ -247,8 +253,9 @@ async def create_periodization(request: PeriodizationRequest):
         raise HTTPException(status_code=500, detail=f"Periodization failed: {str(e)}")
 
 
+@limiter.limit("30/minute")
 @router.post("/readiness")
-async def calculate_readiness(request: ReadinessRequest):
+async def calculate_readiness(request: Request, body: ReadinessRequest, user_id: str = Depends(get_current_user_id)):
     """
     Calculate training readiness score from recovery metrics.
 
@@ -266,13 +273,13 @@ async def calculate_readiness(request: ReadinessRequest):
         load_manager = get_load_manager()
 
         readiness = await load_manager.calculate_readiness(
-            hrv_score=request.hrv_score,
-            sleep_quality=request.sleep_quality,
-            sleep_duration_hours=request.sleep_duration_hours,
-            resting_heart_rate=request.resting_heart_rate,
-            subjective_readiness=request.subjective_readiness,
-            muscle_soreness=request.muscle_soreness,
-            baseline_rhr=request.baseline_rhr,
+            hrv_score=body.hrv_score,
+            sleep_quality=body.sleep_quality,
+            sleep_duration_hours=body.sleep_duration_hours,
+            resting_heart_rate=body.resting_heart_rate,
+            subjective_readiness=body.subjective_readiness,
+            muscle_soreness=body.muscle_soreness,
+            baseline_rhr=body.baseline_rhr,
         )
 
         return {
@@ -290,8 +297,9 @@ async def calculate_readiness(request: ReadinessRequest):
         )
 
 
+@limiter.limit("30/minute")
 @router.post("/adjust-workout")
-async def adjust_workout(request: AdjustWorkoutRequest):
+async def adjust_workout(request: Request, body: AdjustWorkoutRequest, user_id: str = Depends(get_current_user_id)):
     """
     Adjust planned workout based on readiness score.
 
@@ -304,19 +312,19 @@ async def adjust_workout(request: AdjustWorkoutRequest):
         load_manager = get_load_manager()
 
         # Create readiness object from score
-        readiness = ReadinessScore(composite_score=request.readiness_score)
+        readiness = ReadinessScore(composite_score=body.readiness_score)
 
         # Determine readiness level from score
-        if request.readiness_score >= 90:
+        if body.readiness_score >= 90:
             readiness.readiness_level = "very_high"
             readiness.recommended_adjustment = 1.10
-        elif request.readiness_score >= 75:
+        elif body.readiness_score >= 75:
             readiness.readiness_level = "high"
             readiness.recommended_adjustment = 1.0
-        elif request.readiness_score >= 60:
+        elif body.readiness_score >= 60:
             readiness.readiness_level = "moderate"
             readiness.recommended_adjustment = 0.90
-        elif request.readiness_score >= 40:
+        elif body.readiness_score >= 40:
             readiness.readiness_level = "low"
             readiness.recommended_adjustment = 0.70
         else:
@@ -324,18 +332,18 @@ async def adjust_workout(request: AdjustWorkoutRequest):
             readiness.recommended_adjustment = 0.50
 
         adjusted_sets, adjusted_reps, adjusted_rpe = load_manager.adjust_workout_load(
-            planned_sets=request.planned_sets,
-            planned_reps=request.planned_reps,
-            planned_rpe=request.planned_rpe,
+            planned_sets=body.planned_sets,
+            planned_reps=body.planned_reps,
+            planned_rpe=body.planned_rpe,
             readiness=readiness,
         )
 
         return {
             "success": True,
             "planned": {
-                "sets": request.planned_sets,
-                "reps": request.planned_reps,
-                "rpe": request.planned_rpe,
+                "sets": body.planned_sets,
+                "reps": body.planned_reps,
+                "rpe": body.planned_rpe,
             },
             "adjusted": {
                 "sets": adjusted_sets,
@@ -352,8 +360,9 @@ async def adjust_workout(request: AdjustWorkoutRequest):
         )
 
 
+@limiter.limit("30/minute")
 @router.post("/rpe-load")
-async def calculate_rpe_load(request: RPELoadRequest):
+async def calculate_rpe_load(request: Request, body: RPELoadRequest, user_id: str = Depends(get_current_user_id)):
     """
     Calculate load adjustment based on RPE feedback.
 
@@ -366,18 +375,18 @@ async def calculate_rpe_load(request: RPELoadRequest):
         load_manager = get_load_manager()
 
         recommended_load = load_manager.calculate_rpe_based_load(
-            target_rpe=request.target_rpe,
-            actual_rpe=request.actual_rpe,
-            current_load_kg=request.current_load_kg,
+            target_rpe=body.target_rpe,
+            actual_rpe=body.actual_rpe,
+            current_load_kg=body.current_load_kg,
         )
 
-        rpe_diff = request.actual_rpe - request.target_rpe
-        load_change = recommended_load - request.current_load_kg
-        load_change_percent = (load_change / request.current_load_kg) * 100
+        rpe_diff = body.actual_rpe - body.target_rpe
+        load_change = recommended_load - body.current_load_kg
+        load_change_percent = (load_change / body.current_load_kg) * 100
 
         return {
             "success": True,
-            "current_load_kg": request.current_load_kg,
+            "current_load_kg": body.current_load_kg,
             "recommended_load_kg": recommended_load,
             "load_change_kg": round(load_change, 1),
             "load_change_percent": round(load_change_percent, 1),

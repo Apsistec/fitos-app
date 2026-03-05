@@ -4,10 +4,12 @@ Coach Brain API Routes
 Endpoints for trainer methodology-based AI coaching responses.
 """
 
-from fastapi import APIRouter, HTTPException, Header
+from fastapi import APIRouter, HTTPException, Header, Depends, Request
 from pydantic import BaseModel, Field
 from typing import Optional
 
+from app.core.auth import get_current_user_id
+from app.core.rate_limit import limiter
 from ..agents.coach_brain import (
     CoachBrainAgent,
     generate_and_store_embedding,
@@ -85,9 +87,12 @@ class BatchEmbeddingsResponse(BaseModel):
 
 
 @router.post("/respond", response_model=CoachBrainResponse)
+@limiter.limit("30/minute")
 async def generate_coach_response(
-    request: CoachBrainRequest,
-    authorization: str = Header(None)
+    request: Request,
+    body: CoachBrainRequest,
+    user_id: str = Depends(get_current_user_id),
+    authorization: str = Header(None),
 ) -> CoachBrainResponse:
     """
     Generate AI coaching response using trainer's methodology.
@@ -105,9 +110,9 @@ async def generate_coach_response(
         agent = CoachBrainAgent()
 
         result = await agent.run(
-            trainer_id=request.trainer_id,
-            query=request.query,
-            client_id=request.client_id
+            trainer_id=body.trainer_id,
+            query=body.query,
+            client_id=body.client_id
         )
 
         return CoachBrainResponse(
@@ -124,9 +129,12 @@ async def generate_coach_response(
 
 
 @router.post("/add-training-data", status_code=201)
+@limiter.limit("20/minute")
 async def add_training_data(
-    request: AddTrainingDataRequest,
-    authorization: str = Header(None)
+    request: Request,
+    body: AddTrainingDataRequest,
+    user_id: str = Depends(get_current_user_id),
+    authorization: str = Header(None),
 ) -> dict:
     """
     Add content to trainer's training data for methodology learning.
@@ -147,10 +155,10 @@ async def add_training_data(
     """
     try:
         success = await generate_and_store_embedding(
-            trainer_id=request.trainer_id,
-            content=request.content,
-            input_type=request.input_type,
-            source_id=request.source_id
+            trainer_id=body.trainer_id,
+            content=body.content,
+            input_type=body.input_type,
+            source_id=body.source_id
         )
 
         if not success:
@@ -174,9 +182,12 @@ async def add_training_data(
 
 
 @router.post("/batch-embeddings", response_model=BatchEmbeddingsResponse)
+@limiter.limit("10/minute")
 async def batch_process_embeddings(
-    request: BatchEmbeddingsRequest,
-    authorization: str = Header(None)
+    request: Request,
+    body: BatchEmbeddingsRequest,
+    user_id: str = Depends(get_current_user_id),
+    authorization: str = Header(None),
 ) -> BatchEmbeddingsResponse:
     """
     Batch process embeddings for existing training data.
@@ -191,7 +202,7 @@ async def batch_process_embeddings(
         Count of processed and failed items
     """
     try:
-        result = await batch_generate_embeddings(request.trainer_id)
+        result = await batch_generate_embeddings(body.trainer_id)
 
         return BatchEmbeddingsResponse(
             processed=result['processed'],

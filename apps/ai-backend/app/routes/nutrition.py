@@ -1,6 +1,6 @@
 """Nutrition AI endpoints - photo recognition and natural language parsing"""
 
-from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi import APIRouter, HTTPException, UploadFile, File, Depends, Request
 from pydantic import BaseModel
 from typing import List
 import logging
@@ -9,10 +9,36 @@ from io import BytesIO
 from PIL import Image
 
 from app.core.llm import get_smart_llm
+from app.core.auth import get_current_user_id
+from app.core.rate_limit import limiter
 from langchain_core.messages import HumanMessage
 
 logger = logging.getLogger("fitos-ai")
 router = APIRouter()
+
+# --- Image validation constants ---
+MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024  # 5 MB decoded
+ALLOWED_IMAGE_FORMATS = {"jpeg", "jpg", "png", "webp"}
+
+
+def _validate_image(image_base64: str, fmt: str) -> None:
+    """Validate image format and decoded size before any AI processing."""
+    if fmt.lower() not in ALLOWED_IMAGE_FORMATS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported image type: {fmt}. Use JPEG, PNG, or WebP.",
+        )
+    try:
+        decoded = base64.b64decode(image_base64, validate=True)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid base64 image data.")
+
+    if len(decoded) > MAX_IMAGE_SIZE_BYTES:
+        mb = len(decoded) // (1024 * 1024)
+        raise HTTPException(
+            status_code=413,
+            detail=f"Image too large ({mb}MB). Maximum is 5MB.",
+        )
 
 
 class RecognizedFood(BaseModel):
@@ -41,21 +67,22 @@ class NaturalLanguageRequest(BaseModel):
 
 
 @router.post("/recognize", response_model=FoodRecognitionResult)
+@limiter.limit("20/minute")
 async def recognize_food_from_photo(
+    request: Request,
     image: str,  # Base64 encoded
-    format: str = "jpeg"
+    format: str = "jpeg",
+    user_id: str = Depends(get_current_user_id),
 ):
     """
     Recognize food items from a photo using vision-capable LLM.
 
-    Uses Claude or GPT-4 Vision to:
-    1. Identify all visible food items
-    2. Estimate portion sizes
-    3. Calculate nutritional values
-    4. Return transparent breakdown (user can edit each item)
-
-    Returns list of foods with confidence scores.
+    Rate limit: 20 requests/minute per user.
+    Validates image size (max 5MB) and format (JPEG, PNG, WebP).
     """
+    # S62.4: Validate image before any AI processing
+    _validate_image(image, format)
+
     try:
         logger.info("Processing food recognition request")
 
@@ -136,31 +163,38 @@ Be conservative with portions. If unsure, note lower confidence.
         logger.info(f"Recognized {len(mock_result.foods)} food items")
         return mock_result
 
+    except HTTPException:
+        raise  # Re-raise validation errors
     except Exception as e:
         logger.error(f"Error in food recognition: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to recognize food")
 
 
 @router.post("/parse", response_model=FoodRecognitionResult)
-async def parse_natural_language(request: NaturalLanguageRequest):
+@limiter.limit("20/minute")
+async def parse_natural_language(
+    request: Request,
+    body: NaturalLanguageRequest,
+    user_id: str = Depends(get_current_user_id),
+):
     """
     Parse natural language food descriptions.
+
+    Rate limit: 20 requests/minute per user.
 
     Examples:
     - "two eggs and toast with butter"
     - "chicken salad with ranch"
     - "protein shake with banana"
-
-    Uses Nutritionix NLP API or LLM-based parsing.
     """
     try:
-        logger.info(f"Parsing natural language: {request.text}")
+        logger.info(f"Parsing natural language: {body.text}")
 
         llm = get_smart_llm()
 
         prompt = f"""Parse this food description into structured nutrition data:
 
-"{request.text}"
+"{body.text}"
 
 Identify each food item and estimate:
 1. Portion size (use common serving sizes)
@@ -238,24 +272,19 @@ Use USDA nutrition database knowledge.
 
 
 @router.post("/verify")
-async def verify_food(original: RecognizedFood, correction: RecognizedFood | None = None):
+@limiter.limit("30/minute")
+async def verify_food(
+    request: Request,
+    original: RecognizedFood,
+    correction: RecognizedFood | None = None,
+    user_id: str = Depends(get_current_user_id),
+):
     """
     Verify or correct AI-suggested food entries.
 
-    Allows users to:
-    1. Confirm AI suggestions
-    2. Adjust portions
-    3. Correct misidentified foods
-    4. Add missing items
-
-    This feedback improves future recognition accuracy.
+    Rate limit: 30 requests/minute per user.
     """
     try:
-        # In production, this would:
-        # 1. Log user corrections for model improvement
-        # 2. Fetch verified nutrition data from database
-        # 3. Return corrected values
-
         if correction:
             logger.info(f"User corrected {original.name} to {correction.name}")
             return correction

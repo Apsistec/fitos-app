@@ -8,8 +8,11 @@ Sprint 34: HRV Recovery System
 
 from typing import Optional
 from datetime import datetime
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends, Request
 from pydantic import BaseModel, Field
+
+from app.core.auth import get_current_user_id
+from app.core.rate_limit import limiter
 
 from app.recovery.hrv_analyzer import (
     HRVAnalyzer,
@@ -103,7 +106,8 @@ class OvertTrainingCheckRequest(BaseModel):
 
 
 @router.post("/hrv/analyze")
-async def analyze_hrv_trend(request: HRVTrendRequest):
+@limiter.limit("30/minute")
+async def analyze_hrv_trend(request: Request, body: HRVTrendRequest, user_id: str = Depends(get_current_user_id)):
     """
     Analyze HRV trend and determine recovery state.
 
@@ -117,10 +121,10 @@ async def analyze_hrv_trend(request: HRVTrendRequest):
 
         # Convert request data to HRVDataPoint objects
         current = HRVDataPoint(
-            timestamp=request.current_hrv.timestamp,
-            rmssd_ms=request.current_hrv.rmssd_ms,
-            sdnn_ms=request.current_hrv.sdnn_ms,
-            quality_score=request.current_hrv.quality_score,
+            timestamp=body.current_hrv.timestamp,
+            rmssd_ms=body.current_hrv.rmssd_ms,
+            sdnn_ms=body.current_hrv.sdnn_ms,
+            quality_score=body.current_hrv.quality_score,
         )
 
         historical = [
@@ -130,7 +134,7 @@ async def analyze_hrv_trend(request: HRVTrendRequest):
                 sdnn_ms=h.sdnn_ms,
                 quality_score=h.quality_score,
             )
-            for h in request.historical_data
+            for h in body.historical_data
         ]
 
         # Analyze trend
@@ -170,7 +174,8 @@ async def analyze_hrv_trend(request: HRVTrendRequest):
 
 
 @router.post("/score")
-async def calculate_recovery_score(request: RecoveryScoreRequest):
+@limiter.limit("30/minute")
+async def calculate_recovery_score(request: Request, body: RecoveryScoreRequest, user_id: str = Depends(get_current_user_id)):
     """
     Calculate comprehensive recovery score from multiple metrics.
 
@@ -191,10 +196,10 @@ async def calculate_recovery_score(request: RecoveryScoreRequest):
         current_hrv = None
         hrv_history = None
 
-        if request.current_hrv_rmssd and request.hrv_history:
+        if body.current_hrv_rmssd and body.hrv_history:
             current_hrv = HRVDataPoint(
                 timestamp=datetime.now(),
-                rmssd_ms=request.current_hrv_rmssd,
+                rmssd_ms=body.current_hrv_rmssd,
             )
             hrv_history = [
                 HRVDataPoint(
@@ -203,19 +208,19 @@ async def calculate_recovery_score(request: RecoveryScoreRequest):
                     sdnn_ms=h.sdnn_ms,
                     quality_score=h.quality_score,
                 )
-                for h in request.hrv_history
+                for h in body.hrv_history
             ]
 
         # Calculate score
         score = await calculator.calculate(
             current_hrv=current_hrv,
             hrv_history=hrv_history,
-            sleep_quality=request.sleep_quality,
-            sleep_duration_hours=request.sleep_duration_hours,
-            resting_heart_rate=request.resting_heart_rate,
-            baseline_rhr=request.baseline_rhr,
-            subjective_readiness=request.subjective_readiness,
-            historical_scores=request.historical_scores,
+            sleep_quality=body.sleep_quality,
+            sleep_duration_hours=body.sleep_duration_hours,
+            resting_heart_rate=body.resting_heart_rate,
+            baseline_rhr=body.baseline_rhr,
+            subjective_readiness=body.subjective_readiness,
+            historical_scores=body.historical_scores,
         )
 
         return {
@@ -253,7 +258,8 @@ async def calculate_recovery_score(request: RecoveryScoreRequest):
 
 
 @router.post("/adjust-workout")
-async def adjust_workout(request: WorkoutAdjustmentRequest):
+@limiter.limit("30/minute")
+async def adjust_workout(request: Request, body: WorkoutAdjustmentRequest, user_id: str = Depends(get_current_user_id)):
     """
     Auto-adjust workout based on recovery state.
 
@@ -271,7 +277,7 @@ async def adjust_workout(request: WorkoutAdjustmentRequest):
         adjuster = get_intensity_adjuster()
 
         # Parse workout from dict
-        workout_dict = request.workout
+        workout_dict = body.workout
         workout = Workout(
             day_number=workout_dict.get("day_number", 1),
             week_number=workout_dict.get("week_number", 1),
@@ -298,10 +304,10 @@ async def adjust_workout(request: WorkoutAdjustmentRequest):
         from app.recovery.recovery_score import RecoveryScore, RecoveryCategory
 
         recovery_score = RecoveryScore(
-            composite_score=request.recovery_score,
-            category=RecoveryCategory(request.recovery_category),
-            hrv_rmssd=request.hrv_rmssd,
-            hrv_percent_from_baseline=request.hrv_percent_from_baseline,
+            composite_score=body.recovery_score,
+            category=RecoveryCategory(body.recovery_category),
+            hrv_rmssd=body.hrv_rmssd,
+            hrv_percent_from_baseline=body.hrv_percent_from_baseline,
         )
 
         # Adjust workout
@@ -357,7 +363,8 @@ async def adjust_workout(request: WorkoutAdjustmentRequest):
 
 
 @router.post("/overtraining/check")
-async def check_overtraining(request: OvertTrainingCheckRequest):
+@limiter.limit("30/minute")
+async def check_overtraining(request: Request, body: OvertTrainingCheckRequest, user_id: str = Depends(get_current_user_id)):
     """
     Check for overtraining markers.
 
@@ -382,7 +389,7 @@ async def check_overtraining(request: OvertTrainingCheckRequest):
                 sdnn_ms=h.sdnn_ms,
                 quality_score=h.quality_score,
             )
-            for h in request.hrv_history
+            for h in body.hrv_history
         ]
 
         # Check for markers

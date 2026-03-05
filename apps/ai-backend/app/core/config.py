@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     # Database
     SUPABASE_URL: str = "http://localhost:54321"
     SUPABASE_SERVICE_ROLE_KEY: str | None = None
+    SUPABASE_JWT_SECRET: str | None = None
 
     # Food Recognition
     PASSIO_API_KEY: str | None = None
