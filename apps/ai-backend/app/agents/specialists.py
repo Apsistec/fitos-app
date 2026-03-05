@@ -5,6 +5,7 @@ import logging
 from langchain_core.messages import HumanMessage, SystemMessage
 from app.agents.state import AgentState, ChatAction
 from app.core.llm import get_smart_llm, get_routine_llm
+from app.core.usage_tracker import log_usage
 
 logger = logging.getLogger("fitos-ai")
 
@@ -52,6 +53,17 @@ If the user asks about pain or injury, respond empathetically but clearly state 
 
     # Generate response
     response = llm.invoke(messages)
+
+    # Log token usage and estimated cost
+    usage = getattr(response, "usage_metadata", {}) or {}
+    log_usage(
+        user_id=user_context.user_id,
+        agent_source="workout",
+        model_used=llm.model,
+        input_tokens=usage.get("input_tokens", 0),
+        output_tokens=usage.get("output_tokens", 0),
+        complexity=complexity,
+    )
 
     state["response"] = response.content
     state["agent_source"] = "workout"
@@ -115,6 +127,17 @@ NEVER provide medical nutrition therapy - escalate medical concerns to trainer.
 
     response = llm.invoke(messages)
 
+    # Log token usage and estimated cost
+    usage = getattr(response, "usage_metadata", {}) or {}
+    log_usage(
+        user_id=user_context.user_id,
+        agent_source="nutrition",
+        model_used=llm.model,
+        input_tokens=usage.get("input_tokens", 0),
+        output_tokens=usage.get("output_tokens", 0),
+        complexity=complexity,
+    )
+
     state["response"] = response.content
     state["agent_source"] = "nutrition"
     state["confidence"] = 0.85
@@ -172,6 +195,17 @@ Keep responses practical and encouraging (<150 words).
 
     response = llm.invoke(messages)
 
+    # Log token usage and estimated cost
+    usage = getattr(response, "usage_metadata", {}) or {}
+    log_usage(
+        user_id=user_context.user_id,
+        agent_source="recovery",
+        model_used=llm.model,
+        input_tokens=usage.get("input_tokens", 0),
+        output_tokens=usage.get("output_tokens", 0),
+        complexity=complexity,
+    )
+
     state["response"] = response.content
     state["agent_source"] = "recovery"
     state["confidence"] = 0.80
@@ -217,6 +251,17 @@ Be warm, genuine, and action-oriented (<150 words).
     messages.append(HumanMessage(content=state["message"]))
 
     response = llm.invoke(messages)
+
+    # Log token usage and estimated cost
+    usage = getattr(response, "usage_metadata", {}) or {}
+    log_usage(
+        user_id=user_context.user_id,
+        agent_source="motivation",
+        model_used=llm.model,
+        input_tokens=usage.get("input_tokens", 0),
+        output_tokens=usage.get("output_tokens", 0),
+        complexity=complexity,
+    )
 
     state["response"] = response.content
     state["agent_source"] = "motivation"
@@ -267,6 +312,17 @@ If unsure, suggest the user contact their trainer directly.
     messages.append(HumanMessage(content=state["message"]))
 
     response = llm.invoke(messages)
+
+    # Log token usage and estimated cost
+    usage = getattr(response, "usage_metadata", {}) or {}
+    log_usage(
+        user_id=state["user_context"].user_id,
+        agent_source="general",
+        model_used=llm.model,
+        input_tokens=usage.get("input_tokens", 0),
+        output_tokens=usage.get("output_tokens", 0),
+        complexity=complexity,
+    )
 
     state["response"] = response.content
     state["agent_source"] = "general"

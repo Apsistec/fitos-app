@@ -20,7 +20,7 @@ FitOS is an AI-powered fitness coaching platform for solo trainers. Monorepo str
 | TypeScript | TypeScript | 5.9.x | Latest stable with Angular 21 |
 | Node.js | Node.js | 22.12.x | Required for latest Angular/Capacitor CLI |
 | Backend | Supabase | Latest | PostgreSQL + pgvector + Auth + Realtime |
-| AI Backend | LangGraph | Latest | Python on Cloud Run |
+| AI Backend | LangGraph | Latest | Python on Cloud Run (Haiku routing for cost optimization) |
 | Voice AI | Deepgram | Nova-3/Aura-2 | Real-time transcription |
 | Payments | Stripe Connect | Latest | Trainer payouts |
 | Wearables | Terra API | Latest | Multi-platform health data |
@@ -358,8 +358,11 @@ docs/                   # ALL documentation
 - User can edit each identified food
 - Falls back to manual for low confidence
 
-### AI Coaching
-- Multi-agent architecture (workout, nutrition, recovery, motivation)
+### AI Coaching (Server-Side Only)
+- API key lives server-side only (Cloud Run) — mobile app calls AI Backend via HTTP
+- Multi-agent architecture (workout, nutrition, recovery, motivation, general)
+- Complexity-based model routing: Haiku (simple/moderate) vs Sonnet (complex) — ~60% cost reduction
+- Per-call token usage and cost logging via `usage_tracker.py`
 - Trainer methodology learning
 - JITAI proactive interventions
 
@@ -411,8 +414,8 @@ STRIPE_PUBLISHABLE_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_THIN_WE
 # Terra (Wearables)
 TERRA_API_KEY, TERRA_DEV_ID, TERRA_WEBHOOK_SECRET
 
-# AI Providers
-ANTHROPIC_API_KEY, DEEPGRAM_API_KEY
+# AI Providers (server-side only — never exposed to mobile client)
+ANTHROPIC_API_KEY, OPENAI_API_KEY, DEEPGRAM_API_KEY
 
 # Nutrition
 USDA_API_KEY
