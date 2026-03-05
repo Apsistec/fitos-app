@@ -1192,7 +1192,7 @@ Sprint 54 is the hard prerequisite for everything. Sprints 60 and 61 can run in 
 
 ## Related Documentation
 
-- `docs/compass_artifact_wf-b19dff0b-c464-4308-bc4a-c25f33615af1_text_markdown.md` — Source Mindbody teardown
+- `docs/MINDBODY_SCHEDULING_TEARDOWN.md` — Source Mindbody teardown
 - `docs/PHASE1_BACKLOG.md` — MVP features (Sprints 0-8)
 - `docs/PHASE2_BACKLOG.md` — AI features (Sprints 7-16)
 - `docs/archive/sprints/SPRINTS_27-45_ROADMAP.md` — Phase 3 roadmap
