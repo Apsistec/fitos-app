@@ -301,7 +301,7 @@ export class FoodRecognitionService {
 
     // Send to AI backend for recognition
     const result = await this.http.post<FoodRecognitionResult>(
-      `${environment.aiApiUrl}/nutrition/recognize`,
+      `${environment.aiBackendUrl}/nutrition/recognize`,
       {
         image: photo.base64String,
         format: photo.format
@@ -314,7 +314,7 @@ export class FoodRecognitionService {
   // Natural language parsing (Nutritionix NLP)
   async parseNaturalLanguage(description: string): Promise<FoodRecognitionResult> {
     const result = await this.http.post<FoodRecognitionResult>(
-      `${environment.aiApiUrl}/nutrition/parse`,
+      `${environment.aiBackendUrl}/nutrition/parse`,
       { text: description }
     ).toPromise();
 
@@ -324,7 +324,7 @@ export class FoodRecognitionService {
   // Verify/correct AI suggestions using verified database
   async verifyFood(food: RecognizedFood, correction?: Partial<RecognizedFood>): Promise<RecognizedFood> {
     const result = await this.http.post<RecognizedFood>(
-      `${environment.aiApiUrl}/nutrition/verify`,
+      `${environment.aiBackendUrl}/nutrition/verify`,
       { original: food, correction }
     ).toPromise();
 
@@ -396,7 +396,7 @@ export class AICoachService {
         actions?: ChatAction[];
         shouldEscalate?: boolean;
       }>(
-        `${environment.aiApiUrl}/coach/chat`,
+        `${environment.aiBackendUrl}/coach/chat`,
         {
           message: content,
           conversationHistory: this._messages().slice(-10),
@@ -423,7 +423,7 @@ export class AICoachService {
 
   async executeAction(action: ChatAction): Promise<void> {
     await this.http.post(
-      `${environment.aiApiUrl}/coach/action`,
+      `${environment.aiBackendUrl}/coach/action`,
       { action }
     ).toPromise();
     
@@ -491,7 +491,7 @@ export class InterventionService {
     try {
       // Get JITAI context from backend
       const context = await this.http.get<JITAIContext>(
-        `${environment.aiApiUrl}/jitai/context/${userId}`
+        `${environment.aiBackendUrl}/jitai/context/${userId}`
       ).toPromise();
 
       // Goldilocks principle: intervene at the right moment
@@ -501,7 +501,7 @@ export class InterventionService {
 
       // Generate personalized intervention
       const intervention = await this.http.post<Intervention>(
-        `${environment.aiApiUrl}/jitai/generate`,
+        `${environment.aiBackendUrl}/jitai/generate`,
         { userId, context }
       ).toPromise();
 
@@ -645,7 +645,7 @@ export const environment = {
   supabaseAnonKey: 'YOUR_SUPABASE_ANON_KEY',
   
   // AI Services
-  aiApiUrl: 'http://localhost:8000/api/v1',
+  aiBackendUrl: 'http://localhost:8000',
   deepgramApiKey: 'YOUR_DEEPGRAM_KEY',
   
   // Feature Flags
