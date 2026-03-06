@@ -11,8 +11,9 @@
  *   negative  = client owes money (outstanding debt)
  */
 
-import { Injectable, signal, computed, inject } from '@angular/core';
+import { Injectable, signal, computed, inject, isDevMode } from '@angular/core';
 import { SupabaseService } from './supabase.service';
+import { AuthService } from './auth.service';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -55,6 +56,7 @@ export interface AddLedgerEntryDto {
 @Injectable({ providedIn: 'root' })
 export class ClientLedgerService {
   private supabase = inject(SupabaseService);
+  private auth = inject(AuthService);
 
   // ── State ──────────────────────────────────────────────────────────────────
 
@@ -78,8 +80,12 @@ export class ClientLedgerService {
 
   /**
    * Load all ledger entries for a client, newest first.
+   * Scoped to the authenticated trainer's entries.
    */
   async getHistory(clientId: string, limit = 50): Promise<LedgerEntry[]> {
+    const userId = this.auth.user()?.id;
+    if (!userId) return [];
+
     this.isLoading.set(true);
     this.error.set(null);
 
@@ -87,12 +93,14 @@ export class ClientLedgerService {
       .from('client_ledger')
       .select('*')
       .eq('client_id', clientId)
+      .eq('trainer_id', userId)
       .order('created_at', { ascending: false })
       .limit(limit);
 
     this.isLoading.set(false);
 
     if (error) {
+      if (isDevMode()) console.error('Error loading ledger history:', error);
       this.error.set(error.message);
       return [];
     }
@@ -103,21 +111,22 @@ export class ClientLedgerService {
   }
 
   /**
-   * Compute current balance for a client without updating local signal state.
+   * Compute current balance for a client via server-side RPC.
    * Useful for inline display without a full history load.
    */
-  async getBalance(clientId: string): Promise<number> {
+  async getBalance(clientId: string, trainerId?: string): Promise<number> {
     const { data, error } = await this.supabase.client
-      .from('client_ledger')
-      .select('entry_type, amount')
-      .eq('client_id', clientId);
+      .rpc('get_client_ledger_balance', {
+        p_client_id: clientId,
+        p_trainer_id: trainerId ?? null,
+      });
 
-    if (error || !data) return 0;
+    if (error) {
+      if (isDevMode()) console.error('Error fetching ledger balance:', error);
+      return 0;
+    }
 
-    return (data as { entry_type: LedgerEntryType; amount: number }[]).reduce(
-      (acc, e) => (e.entry_type === 'credit' ? acc + e.amount : acc - e.amount),
-      0,
-    );
+    return (data as number) ?? 0;
   }
 
   // ── Mutations ──────────────────────────────────────────────────────────────
@@ -138,15 +147,33 @@ export class ClientLedgerService {
 
   /**
    * Generic entry insertion. Updates local signal on success.
+   * Validates ownership (trainer_id must match auth user) and amount bounds.
    */
   async addEntry(dto: AddLedgerEntryDto): Promise<LedgerEntry | null> {
     this.error.set(null);
+
+    // Auth check: only the trainer can add ledger entries for their clients
+    const userId = this.auth.user()?.id;
+    if (!userId) {
+      this.error.set('Not authenticated');
+      return null;
+    }
+    if (dto.trainer_id !== userId) {
+      this.error.set('Unauthorized: trainer_id does not match authenticated user');
+      return null;
+    }
+
+    // Amount validation: positive, finite, max 100,000
+    if (!Number.isFinite(dto.amount) || dto.amount <= 0 || dto.amount > 100_000) {
+      this.error.set('Invalid amount: must be between 0.01 and 100,000');
+      return null;
+    }
 
     const { data, error } = await this.supabase.client
       .from('client_ledger')
       .insert({
         client_id:               dto.client_id,
-        trainer_id:              dto.trainer_id,
+        trainer_id:              userId,
         entry_type:              dto.entry_type,
         amount:                  dto.amount,
         reason:                  dto.reason,
@@ -158,6 +185,7 @@ export class ClientLedgerService {
       .single();
 
     if (error || !data) {
+      if (isDevMode()) console.error('Error adding ledger entry:', error);
       this.error.set(error?.message ?? 'Insert failed');
       return null;
     }

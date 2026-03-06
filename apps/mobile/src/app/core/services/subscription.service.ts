@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed, isDevMode } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
 import { Database } from '@fitos/shared';
@@ -67,17 +67,9 @@ export class SubscriptionService {
     ).length;
   });
 
-  readonly monthlyRevenue = computed(() => {
-    return this._subscriptions()
-      .filter(s => s.status === 'active')
-      .reduce((total, sub) => {
-        // Normalize to monthly
-        let monthlyAmount = sub.amount_cents;
-        if (sub.interval === 'week') monthlyAmount *= 4;
-        if (sub.interval === 'year') monthlyAmount /= 12;
-        return total + monthlyAmount;
-      }, 0);
-  });
+  /** MRR computed server-side via get_trainer_mrr RPC */
+  private _monthlyRevenue = signal(0);
+  readonly monthlyRevenue = this._monthlyRevenue.asReadonly();
 
   /**
    * Load trainer's subscriptions (all clients who subscribe to this trainer)
@@ -107,12 +99,31 @@ export class SubscriptionService {
       if (error) throw error;
 
       this._subscriptions.set(data || []);
+
+      // Load MRR server-side
+      await this.loadMrr();
     } catch (error) {
-      console.error('Error loading subscriptions:', error);
+      if (isDevMode()) console.error('Error loading subscriptions:', error);
       this._error.set((error as Error).message);
     } finally {
       this._loading.set(false);
     }
+  }
+
+  /** Load MRR from server-side RPC (normalizes weekly/yearly to monthly) */
+  private async loadMrr(): Promise<void> {
+    const trainerId = this.authService.user()?.id;
+    if (!trainerId) return;
+
+    const { data, error } = await this.supabase.client
+      .rpc('get_trainer_mrr', { p_trainer_id: trainerId });
+
+    if (error) {
+      if (isDevMode()) console.error('Error loading MRR:', error);
+      return;
+    }
+
+    this._monthlyRevenue.set((data as number) ?? 0);
   }
 
   /**
@@ -144,7 +155,7 @@ export class SubscriptionService {
 
       this._clientSubscription.set(data as SubscriptionWithTrainer || null);
     } catch (error) {
-      console.error('Error loading client subscription:', error);
+      if (isDevMode()) console.error('Error loading client subscription:', error);
       this._error.set((error as Error).message);
     } finally {
       this._loading.set(false);
@@ -240,7 +251,7 @@ export class SubscriptionService {
 
       this._trainerPricing.set(data.prices || []);
     } catch (error) {
-      console.error('Error loading pricing:', error);
+      if (isDevMode()) console.error('Error loading pricing:', error);
       this._error.set((error as Error).message);
     } finally {
       this._loading.set(false);

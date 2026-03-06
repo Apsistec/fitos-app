@@ -387,12 +387,9 @@ export class PayrollReportPage implements OnInit {
   }
 
   async generate(): Promise<void> {
-    const trainerId = this.auth.user()?.id;
-    if (!trainerId) return;
-
     const { from, to } = this.getDateRange();
     this.isLoading.set(true);
-    await this.payrollService.getPayrollSummary(trainerId, from, to);
+    await this.payrollService.getPayrollSummary(from, to);
     this.isLoading.set(false);
   }
 

@@ -9,8 +9,9 @@
  * - markProcessed(): bulk-marks visits as payroll_processed = true
  */
 
-import { Injectable, signal, computed, inject } from '@angular/core';
+import { Injectable, signal, computed, inject, isDevMode } from '@angular/core';
 import { SupabaseService } from './supabase.service';
+import { AuthService } from './auth.service';
 import {
   TrainerPayRate,
   TrainerPayPolicy,
@@ -24,6 +25,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class PayrollService {
   private supabase = inject(SupabaseService);
+  private auth = inject(AuthService);
 
   // ── Signals ────────────────────────────────────────────────────────────────
 
@@ -107,12 +109,17 @@ export class PayrollService {
   }
 
   async deletePayRate(rateId: string): Promise<boolean> {
+    const userId = this.auth.user()?.id;
+    if (!userId) { this.error.set('Not authenticated'); return false; }
+
     const { error } = await this.supabase.client
       .from('trainer_pay_rates')
       .delete()
-      .eq('id', rateId);
+      .eq('id', rateId)
+      .eq('trainer_id', userId);
 
     if (error) {
+      if (isDevMode()) console.error('Error deleting pay rate:', error);
       this.error.set(error.message);
       return false;
     }
@@ -160,17 +167,23 @@ export class PayrollService {
 
   // ── Payroll Report ─────────────────────────────────────────────────────────
 
+  /**
+   * Get payroll summary with server-side computed totals.
+   * Trainer ID derived from auth session — never caller-supplied.
+   */
   async getPayrollSummary(
-    trainerId: string,
     dateFrom: Date,
     dateTo: Date,
   ): Promise<PayrollSummary | null> {
+    const userId = this.auth.user()?.id;
+    if (!userId) { this.error.set('Not authenticated'); return null; }
+
     this.isLoading.set(true);
     this.error.set(null);
 
     const { data, error } = await this.supabase.client
-      .rpc('get_payroll_report', {
-        p_trainer_id: trainerId,
+      .rpc('get_payroll_summary', {
+        p_trainer_id: userId,
         p_date_from:  dateFrom.toISOString(),
         p_date_to:    dateTo.toISOString(),
       });
@@ -178,31 +191,15 @@ export class PayrollService {
     this.isLoading.set(false);
 
     if (error || !data) {
+      if (isDevMode()) console.error('Error fetching payroll summary:', error);
       this.error.set(error?.message ?? 'Report failed');
       return null;
     }
 
-    const rows = (data as PayrollReportRow[]);
-
-    const summary: PayrollSummary = {
-      date_from:           dateFrom.toISOString(),
-      date_to:             dateTo.toISOString(),
-      total_sessions:      rows.length,
-      total_completed:     rows.filter(r => r.appointment_status === 'completed').length,
-      total_no_shows:      rows.filter(r => r.appointment_status === 'no_show').length,
-      total_cancellations: rows.filter(r =>
-        r.appointment_status === 'late_cancel' ||
-        r.appointment_status === 'early_cancel'
-      ).length,
-      total_gross_revenue: rows.reduce((s, r) => s + r.service_price, 0),
-      total_trainer_pay:   rows.reduce((s, r) => s + r.trainer_pay_amount, 0),
-      total_tips:          rows.reduce((s, r) => s + r.tip_amount, 0),
-      total_commissions:   rows.reduce((s, r) => s + r.commission_amount, 0),
-      rows,
-    };
-
-    this.payrollSummary.set(summary);
-    return summary;
+    // Server returns pre-computed totals — use them directly
+    const serverSummary = data as PayrollSummary;
+    this.payrollSummary.set(serverSummary);
+    return serverSummary;
   }
 
   /** Mark a batch of visits as payroll-processed */

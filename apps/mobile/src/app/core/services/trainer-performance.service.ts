@@ -1,5 +1,6 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed, isDevMode } from '@angular/core';
 import { SupabaseService } from './supabase.service';
+import { AuthService } from './auth.service';
 
 /**
  * Trainer performance metrics
@@ -103,6 +104,7 @@ export interface RevenueByTrainer {
 })
 export class TrainerPerformanceService {
   private supabase = inject(SupabaseService);
+  private auth = inject(AuthService);
 
   // State
   trainerMetrics = signal<TrainerMetrics[]>([]);
@@ -135,15 +137,17 @@ export class TrainerPerformanceService {
    * Get trainer performance metrics for a period
    */
   async getTrainerMetrics(
-    gymOwnerId: string,
     startDate: string,
     endDate: string
   ): Promise<TrainerMetrics[]> {
+    const gymOwnerId = this.auth.user()?.id;
+    if (!gymOwnerId) { this.error.set('Not authenticated'); return []; }
+
     this.loading.set(true);
     this.error.set(null);
 
     try {
-      // Get all trainers under this gym owner
+      // Get all trainers under the authenticated gym owner
       const { data: trainers, error: trainersError } = await this.supabase.client
         .from('profiles')
         .select('id, full_name')
@@ -173,7 +177,7 @@ export class TrainerPerformanceService {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to load trainer metrics';
       this.error.set(errorMessage);
-      console.error('Error getting trainer metrics:', err);
+      if (isDevMode()) console.error('Error getting trainer metrics:', err);
       return [];
     } finally {
       this.loading.set(false);
@@ -288,7 +292,7 @@ export class TrainerPerformanceService {
         period_end: endDate,
       };
     } catch (err) {
-      console.error('Error calculating trainer metrics:', err);
+      if (isDevMode()) console.error('Error calculating trainer metrics:', err);
       return null;
     }
   }
@@ -297,7 +301,6 @@ export class TrainerPerformanceService {
    * Get facility-wide aggregate metrics
    */
   async getFacilityMetrics(
-    gymOwnerId: string,
     startDate: string,
     endDate: string
   ): Promise<FacilityMetrics | null> {
@@ -305,7 +308,7 @@ export class TrainerPerformanceService {
       // Get trainer metrics first
       const trainerMetrics = this.trainerMetrics().length > 0
         ? this.trainerMetrics()
-        : await this.getTrainerMetrics(gymOwnerId, startDate, endDate);
+        : await this.getTrainerMetrics(startDate, endDate);
 
       if (trainerMetrics.length === 0) {
         return null;
@@ -353,7 +356,7 @@ export class TrainerPerformanceService {
       this.facilityMetrics.set(metrics);
       return metrics;
     } catch (err) {
-      console.error('Error getting facility metrics:', err);
+      if (isDevMode()) console.error('Error getting facility metrics:', err);
       return null;
     }
   }
@@ -409,7 +412,6 @@ export class TrainerPerformanceService {
    * Calculate period-over-period comparison
    */
   async getPeriodComparison(
-    gymOwnerId: string,
     currentStart: string,
     currentEnd: string,
     previousStart: string,
@@ -424,12 +426,12 @@ export class TrainerPerformanceService {
     };
   }> {
     // Get current period
-    const current = await this.getFacilityMetrics(gymOwnerId, currentStart, currentEnd);
+    const current = await this.getFacilityMetrics(currentStart, currentEnd);
 
     // Get previous period (simplified - would cache in production)
-    const previousMetrics = await this.getTrainerMetrics(gymOwnerId, previousStart, previousEnd);
+    const previousMetrics = await this.getTrainerMetrics(previousStart, previousEnd);
     const previous = previousMetrics.length > 0
-      ? await this.getFacilityMetrics(gymOwnerId, previousStart, previousEnd)
+      ? await this.getFacilityMetrics(previousStart, previousEnd)
       : null;
 
     // Calculate changes

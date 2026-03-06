@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, isDevMode } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
 
@@ -83,7 +83,11 @@ export class DigitalProductService {
       .order('created_at', { ascending: false });
 
     this.isLoading.set(false);
-    if (error) { this.error.set(error.message); return; }
+    if (error) {
+      if (isDevMode()) console.error('Error loading products:', error);
+      this.error.set(error.message);
+      return;
+    }
     this.myProducts.set((data ?? []) as DigitalProduct[]);
   }
 
@@ -115,6 +119,7 @@ export class DigitalProductService {
           });
 
         if (stripeError) {
+          if (isDevMode()) console.error('Stripe product creation error:', stripeError);
           this.error.set(`Stripe error: ${stripeError.message}`);
           return null;
         }
@@ -142,7 +147,11 @@ export class DigitalProductService {
         .select()
         .single();
 
-      if (dbError) { this.error.set(dbError.message); return null; }
+      if (dbError) {
+        if (isDevMode()) console.error('Error creating product:', dbError);
+        this.error.set(dbError.message);
+        return null;
+      }
 
       const product = record as DigitalProduct;
       this.myProducts.update((prev) => [product, ...prev]);
@@ -158,12 +167,20 @@ export class DigitalProductService {
     productId: string,
     updates: Partial<Pick<DigitalProduct, 'title' | 'description' | 'thumbnail_url' | 'preview_url' | 'file_urls'>>,
   ): Promise<boolean> {
+    const trainerId = this.auth.user()?.id;
+    if (!trainerId) { this.error.set('Not authenticated'); return false; }
+
     const { error } = await this.supabase.client
       .from('digital_products')
       .update({ ...updates })
-      .eq('id', productId);
+      .eq('id', productId)
+      .eq('trainer_id', trainerId);
 
-    if (error) { this.error.set(error.message); return false; }
+    if (error) {
+      if (isDevMode()) console.error('Error updating product:', error);
+      this.error.set(error.message);
+      return false;
+    }
 
     this.myProducts.update((prev) =>
       prev.map((p) => (p.id === productId ? { ...p, ...updates } : p))
@@ -173,12 +190,20 @@ export class DigitalProductService {
 
   /** Toggle a product between draft and published. */
   async setPublished(productId: string, published: boolean): Promise<boolean> {
+    const trainerId = this.auth.user()?.id;
+    if (!trainerId) { this.error.set('Not authenticated'); return false; }
+
     const { error } = await this.supabase.client
       .from('digital_products')
       .update({ is_published: published })
-      .eq('id', productId);
+      .eq('id', productId)
+      .eq('trainer_id', trainerId);
 
-    if (error) { this.error.set(error.message); return false; }
+    if (error) {
+      if (isDevMode()) console.error('Error setting published:', error);
+      this.error.set(error.message);
+      return false;
+    }
 
     this.myProducts.update((prev) =>
       prev.map((p) => (p.id === productId ? { ...p, is_published: published } : p))
@@ -188,13 +213,21 @@ export class DigitalProductService {
 
   /** Delete a draft product (cannot delete published products with purchases). */
   async deleteProduct(productId: string): Promise<boolean> {
+    const trainerId = this.auth.user()?.id;
+    if (!trainerId) { this.error.set('Not authenticated'); return false; }
+
     const { error } = await this.supabase.client
       .from('digital_products')
       .delete()
       .eq('id', productId)
+      .eq('trainer_id', trainerId)
       .eq('is_published', false); // Guard: only drafts can be deleted
 
-    if (error) { this.error.set(error.message); return false; }
+    if (error) {
+      if (isDevMode()) console.error('Error deleting product:', error);
+      this.error.set(error.message);
+      return false;
+    }
 
     this.myProducts.update((prev) => prev.filter((p) => p.id !== productId));
     return true;
@@ -217,7 +250,11 @@ export class DigitalProductService {
     );
     this.isLoading.set(false);
 
-    if (error) { this.error.set(error.message); return; }
+    if (error) {
+      if (isDevMode()) console.error('Error loading trainer products:', error);
+      this.error.set(error.message);
+      return;
+    }
     this.trainerProducts.set((data ?? []) as DigitalProductWithTrainer[]);
   }
 
@@ -225,27 +262,38 @@ export class DigitalProductService {
    * Load purchases made by the current client.
    */
   async getMyPurchases(): Promise<void> {
+    const clientId = this.auth.user()?.id;
+    if (!clientId) return;
+
     const { data, error } = await this.supabase.client
       .from('digital_product_purchases')
       .select('*')
+      .eq('client_id', clientId)
       .order('purchased_at', { ascending: false });
 
-    if (!error) this.purchases.set((data ?? []) as ProductPurchase[]);
+    if (error) {
+      if (isDevMode()) console.error('Error loading purchases:', error);
+      this.error.set(error.message);
+      return;
+    }
+    this.purchases.set((data ?? []) as ProductPurchase[]);
   }
 
   /**
    * Purchase a product.
-   * For paid products, calls `create-marketplace-payment-intent` Edge Function.
+   * For paid products, calls `create-marketplace-payment-intent` Edge Function
+   * and returns the client_secret for the caller to confirm payment (3DS).
+   * The purchase record is created by the webhook after payment succeeds.
    * For free products, inserts the purchase record directly.
    */
-  async purchaseProduct(product: DigitalProduct | DigitalProductWithTrainer): Promise<boolean> {
+  async purchaseProduct(
+    product: DigitalProduct | DigitalProductWithTrainer,
+  ): Promise<{ success: boolean; clientSecret?: string }> {
     const clientId = this.auth.user()?.id;
-    if (!clientId) return false;
+    if (!clientId) return { success: false };
 
     this.isLoading.set(true);
     try {
-      let paymentIntentId: string | null = null;
-
       // ── Paid product: create PaymentIntent via Edge Function ──────────
       if (product.price_cents > 0) {
         const { data: piData, error: piError } = await this.supabase.client
@@ -255,45 +303,67 @@ export class DigitalProductService {
               product_id: product.id,
               stripe_price_id: product.stripe_price_id,
               trainer_id: product.trainer_id,
-              client_id: clientId,
             },
           });
 
-        if (piError) { this.error.set(piError.message); return false; }
+        if (piError) {
+          if (isDevMode()) console.error('Error creating payment intent:', piError);
+          this.error.set(piError.message);
+          return { success: false };
+        }
 
-        // In a full implementation, we'd handle 3DS confirmation here.
-        // For now, we record the payment intent and mark as purchased.
-        paymentIntentId = (piData as { payment_intent_id: string }).payment_intent_id;
+        const result = piData as { client_secret: string; payment_intent_id: string };
+        // Return client_secret for the caller to confirm via Stripe.js.
+        // Purchase record will be created by the Stripe webhook after payment succeeds.
+        return { success: true, clientSecret: result.client_secret };
       }
 
-      // ── Insert purchase record ─────────────────────────────────────────
+      // ── Free product: insert purchase record directly ──────────────────
       const { error: dbError } = await this.supabase.client
         .from('digital_product_purchases')
         .insert({
           client_id: clientId,
           product_id: product.id,
-          stripe_payment_intent_id: paymentIntentId,
+          stripe_payment_intent_id: null,
         });
 
-      if (dbError) { this.error.set(dbError.message); return false; }
+      if (dbError) {
+        if (isDevMode()) console.error('Error purchasing free product:', dbError);
+        this.error.set(dbError.message);
+        return { success: false };
+      }
 
       // ── Mark as purchased in local state ──────────────────────────────
       this.trainerProducts.update((prev) =>
         prev.map((p) => (p.id === product.id ? { ...p, is_purchased: true } : p))
       );
-      return true;
+      return { success: true };
 
     } finally {
       this.isLoading.set(false);
     }
   }
 
-  /** Increment download count when a client downloads a purchased file. */
-  async incrementDownloadCount(purchaseId: string): Promise<void> {
-    await this.supabase.client
-      .from('digital_product_purchases')
-      .update({ download_count: (this.purchases().find((p) => p.id === purchaseId)?.download_count ?? 0) + 1 })
-      .eq('id', purchaseId);
+  /**
+   * Atomically increment download count via server-side RPC.
+   * The RPC verifies ownership via auth.uid().
+   */
+  async incrementDownloadCount(purchaseId: string): Promise<number | null> {
+    const { data, error } = await this.supabase.client
+      .rpc('increment_download_count', { p_purchase_id: purchaseId });
+
+    if (error) {
+      if (isDevMode()) console.error('Error incrementing download count:', error);
+      this.error.set(error.message);
+      return null;
+    }
+
+    const newCount = data as number;
+    // Update local state
+    this.purchases.update((prev) =>
+      prev.map((p) => (p.id === purchaseId ? { ...p, download_count: newCount } : p))
+    );
+    return newCount;
   }
 
   /** Check if the current client has purchased a given product. */

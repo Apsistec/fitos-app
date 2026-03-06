@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed, isDevMode } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
 import type {
@@ -38,7 +38,7 @@ export class CancellationPolicyService {
   // ── Load ─────────────────────────────────────────────────────────────────
 
   async loadPolicies(trainerId?: string): Promise<void> {
-    const tid = trainerId ?? this.auth.profile()?.id;
+    const tid = trainerId ?? this.auth.user()?.id;
     if (!tid) return;
 
     this.isLoading.set(true);
@@ -63,13 +63,20 @@ export class CancellationPolicyService {
   // ── CRUD ─────────────────────────────────────────────────────────────────
 
   async createPolicy(dto: CreatePolicyDto): Promise<CancellationPolicy | null> {
+    const userId = this.auth.user()?.id;
+    if (!userId) { this.error.set('Not authenticated'); return null; }
+
+    // Ensure trainer_id matches authenticated user
+    const safeDto = { ...dto, trainer_id: userId };
+
     const { data, error } = await this.supabase.client
       .from('cancellation_policies')
-      .insert(dto)
+      .insert(safeDto)
       .select()
       .single();
 
     if (error) {
+      if (isDevMode()) console.error('Error creating policy:', error);
       this.error.set(error.message);
       return null;
     }
@@ -80,14 +87,19 @@ export class CancellationPolicyService {
   }
 
   async updatePolicy(id: string, updates: Partial<CreatePolicyDto>): Promise<void> {
+    const userId = this.auth.user()?.id;
+    if (!userId) { this.error.set('Not authenticated'); return; }
+
     const { data, error } = await this.supabase.client
       .from('cancellation_policies')
       .update(updates)
       .eq('id', id)
+      .eq('trainer_id', userId)
       .select()
       .single();
 
     if (error) {
+      if (isDevMode()) console.error('Error updating policy:', error);
       this.error.set(error.message);
       return;
     }
@@ -97,12 +109,17 @@ export class CancellationPolicyService {
   }
 
   async deletePolicy(id: string): Promise<void> {
+    const userId = this.auth.user()?.id;
+    if (!userId) { this.error.set('Not authenticated'); return; }
+
     const { error } = await this.supabase.client
       .from('cancellation_policies')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('trainer_id', userId);
 
     if (error) {
+      if (isDevMode()) console.error('Error deleting policy:', error);
       this.error.set(error.message);
       return;
     }
@@ -242,39 +259,49 @@ export class CancellationPolicyService {
 
   async getLedgerBalance(clientId: string, trainerId: string): Promise<number> {
     const { data, error } = await this.supabase.client
-      .from('client_ledger')
-      .select('entry_type, amount')
-      .eq('client_id', clientId)
-      .eq('trainer_id', trainerId);
+      .rpc('get_client_ledger_balance', {
+        p_client_id: clientId,
+        p_trainer_id: trainerId,
+      });
 
-    if (error || !data) return 0;
+    if (error) {
+      if (isDevMode()) console.error('Error fetching ledger balance:', error);
+      return 0;
+    }
 
-    return (data as ClientLedgerEntry[]).reduce((balance, entry) => {
-      return entry.entry_type === 'debit'
-        ? balance - entry.amount
-        : balance + entry.amount;
-    }, 0);
+    return (data as number) ?? 0;
   }
 
-  async getLedgerEntries(clientId: string): Promise<ClientLedgerEntry[]> {
+  async getLedgerEntries(clientId: string, limit = 100): Promise<ClientLedgerEntry[]> {
+    const userId = this.auth.user()?.id;
+    if (!userId) return [];
+
     const { data, error } = await this.supabase.client
       .from('client_ledger')
       .select('*')
       .eq('client_id', clientId)
-      .order('created_at', { ascending: false });
+      .eq('trainer_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(limit);
 
-    if (error) return [];
+    if (error) {
+      if (isDevMode()) console.error('Error loading ledger entries:', error);
+      return [];
+    }
     return (data ?? []) as ClientLedgerEntry[];
   }
 
   // ── Seed default global policy for new trainers ───────────────────────────
 
-  async seedDefaultPolicy(trainerId: string): Promise<void> {
+  async seedDefaultPolicy(): Promise<void> {
+    const userId = this.auth.user()?.id;
+    if (!userId) return;
+
     const existing = this.policies().find(p => !p.service_type_id);
     if (existing) return;
 
     await this.createPolicy({
-      trainer_id: trainerId,
+      trainer_id: userId,
       service_type_id: undefined,
       late_cancel_window_minutes: 1440, // 24 hours
       late_cancel_fee_amount: 0,

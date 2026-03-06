@@ -725,7 +725,7 @@ export class PricingOptionsPage implements OnInit {
     if (!trainerId) return;
 
     await Promise.all([
-      this.pricingService.loadPricingOptions(trainerId),
+      this.pricingService.loadPricingOptions(),
       this.loadServiceTypes(trainerId),
     ]);
   }

@@ -479,15 +479,28 @@ export class ProductDetailPage implements OnInit {
     const p = this.product();
     if (!p) return;
 
-    const ok = await this.productService.purchaseProduct(p);
-    if (ok) {
-      const toast = await this.toastCtrl.create({
-        message: p.price_cents === 0 ? 'Added to your library!' : 'Purchase complete! Enjoy your product.',
-        duration: 2500,
-        color: 'success',
-        position: 'bottom',
-      });
-      await toast.present();
+    const result = await this.productService.purchaseProduct(p);
+    if (result.success) {
+      if (result.clientSecret) {
+        // Paid product: caller needs to confirm payment via Stripe.js
+        // TODO: Integrate Stripe.js confirmPayment with result.clientSecret
+        const toast = await this.toastCtrl.create({
+          message: 'Payment initiated. Please complete the payment confirmation.',
+          duration: 2500,
+          color: 'primary',
+          position: 'bottom',
+        });
+        await toast.present();
+      } else {
+        // Free product: already added
+        const toast = await this.toastCtrl.create({
+          message: 'Added to your library!',
+          duration: 2500,
+          color: 'success',
+          position: 'bottom',
+        });
+        await toast.present();
+      }
     } else {
       const toast = await this.toastCtrl.create({
         message: this.productService.error() ?? 'Purchase failed. Please try again.',

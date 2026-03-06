@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed, isDevMode } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
 import type { PricingOption, ClientService } from '@fitos/shared';
@@ -54,20 +54,24 @@ export class PricingOptionService {
 
   // ── Pricing Option CRUD ───────────────────────────────────────────────────
 
-  async loadPricingOptions(trainerId: string): Promise<void> {
+  async loadPricingOptions(): Promise<void> {
+    const userId = this.auth.user()?.id;
+    if (!userId) return;
+
     this.isLoading.set(true);
     this.error.set(null);
 
     const { data, error } = await this.supabase.client
       .from('pricing_options')
       .select('*')
-      .eq('trainer_id', trainerId)
+      .eq('trainer_id', userId)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true });
 
     this.isLoading.set(false);
 
     if (error) {
+      if (isDevMode()) console.error('Error loading pricing options:', error);
       this.error.set(error.message);
       return;
     }
@@ -76,12 +80,15 @@ export class PricingOptionService {
   }
 
   async createPricingOption(dto: CreatePricingOptionDto): Promise<PricingOption | null> {
+    const userId = this.auth.user()?.id;
+    if (!userId) { this.error.set('Not authenticated'); return null; }
+
     this.error.set(null);
 
     const { data, error } = await this.supabase.client
       .from('pricing_options')
       .insert({
-        trainer_id:           dto.trainer_id,
+        trainer_id:           userId,
         name:                 dto.name,
         option_type:          dto.option_type,
         price:                dto.price,
@@ -98,6 +105,7 @@ export class PricingOptionService {
       .single();
 
     if (error) {
+      if (isDevMode()) console.error('Error creating pricing option:', error);
       this.error.set(error.message);
       return null;
     }
@@ -108,16 +116,24 @@ export class PricingOptionService {
   }
 
   async updatePricingOption(id: string, dto: Partial<CreatePricingOptionDto>): Promise<void> {
+    const userId = this.auth.user()?.id;
+    if (!userId) { this.error.set('Not authenticated'); return; }
+
     this.error.set(null);
+
+    // Strip trainer_id from updates — cannot reassign ownership
+    const { trainer_id: _ignored, ...safeUpdates } = dto;
 
     const { data, error } = await this.supabase.client
       .from('pricing_options')
-      .update(dto)
+      .update(safeUpdates)
       .eq('id', id)
+      .eq('trainer_id', userId)
       .select()
       .single();
 
     if (error) {
+      if (isDevMode()) console.error('Error updating pricing option:', error);
       this.error.set(error.message);
       return;
     }
@@ -130,14 +146,19 @@ export class PricingOptionService {
 
   /** Soft-delete (archive) — preserves existing client_services referencing this option */
   async archivePricingOption(id: string): Promise<void> {
+    const userId = this.auth.user()?.id;
+    if (!userId) { this.error.set('Not authenticated'); return; }
+
     this.error.set(null);
 
     const { error } = await this.supabase.client
       .from('pricing_options')
       .update({ is_active: false })
-      .eq('id', id);
+      .eq('id', id)
+      .eq('trainer_id', userId);
 
     if (error) {
+      if (isDevMode()) console.error('Error archiving pricing option:', error);
       this.error.set(error.message);
       return;
     }
@@ -148,14 +169,19 @@ export class PricingOptionService {
   }
 
   async restorePricingOption(id: string): Promise<void> {
+    const userId = this.auth.user()?.id;
+    if (!userId) { this.error.set('Not authenticated'); return; }
+
     this.error.set(null);
 
     const { error } = await this.supabase.client
       .from('pricing_options')
       .update({ is_active: true })
-      .eq('id', id);
+      .eq('id', id)
+      .eq('trainer_id', userId);
 
     if (error) {
+      if (isDevMode()) console.error('Error restoring pricing option:', error);
       this.error.set(error.message);
       return;
     }
@@ -169,9 +195,13 @@ export class PricingOptionService {
 
   /**
    * Load all active client_services for a given client (trainer-side view).
+   * Scoped to the authenticated trainer's services.
    * Returns services joined with their pricing_option.
    */
   async getClientServices(clientId: string): Promise<ClientService[]> {
+    const userId = this.auth.user()?.id;
+    if (!userId) return [];
+
     const { data, error } = await this.supabase.client
       .from('client_services')
       .select(`
@@ -179,10 +209,12 @@ export class PricingOptionService {
         pricing_option:pricing_options(*)
       `)
       .eq('client_id', clientId)
+      .eq('trainer_id', userId)
       .eq('is_active', true)
       .order('expires_at', { ascending: true, nullsFirst: false });
 
     if (error) {
+      if (isDevMode()) console.error('Error loading client services:', error);
       this.error.set(error.message);
       return [];
     }
@@ -224,22 +256,27 @@ export class PricingOptionService {
       activateNow?: boolean;
     }
   ): Promise<ClientService | null> {
+    const userId = this.auth.user()?.id;
+    if (!userId) { this.error.set('Not authenticated'); return null; }
+
     this.error.set(null);
 
-    // Load the option to compute initial sessions and expiry
+    // Load the option — scoped to authenticated trainer
     const { data: optData, error: optErr } = await this.supabase.client
       .from('pricing_options')
       .select('*')
       .eq('id', pricingOptionId)
+      .eq('trainer_id', userId)
       .single();
 
     if (optErr || !optData) {
+      if (isDevMode() && optErr) console.error('Error loading pricing option:', optErr);
       this.error.set(optErr?.message ?? 'Option not found');
       return null;
     }
 
     const opt = optData as PricingOption;
-    const trainerId = opt.trainer_id;
+    const trainerId = userId;
 
     const now = new Date();
     const activatedAt = opts?.activateNow ? now.toISOString() : null;
@@ -280,6 +317,7 @@ export class PricingOptionService {
       .single();
 
     if (error) {
+      if (isDevMode()) console.error('Error selling to client:', error);
       this.error.set(error.message);
       return null;
     }
@@ -297,6 +335,7 @@ export class PricingOptionService {
       .rpc('decrement_sessions_remaining', { p_client_service_id: clientServiceId });
 
     if (error) {
+      if (isDevMode()) console.error('Error decrementing session:', error);
       this.error.set(error.message);
       throw new Error(error.message);
     }

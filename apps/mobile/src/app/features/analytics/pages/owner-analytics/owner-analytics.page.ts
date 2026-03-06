@@ -636,8 +636,8 @@ export class OwnerAnalyticsPage implements OnInit {
       const { startDate, endDate } = this.getDateRange();
 
       // Load trainer metrics and facility metrics
-      await this.service.getTrainerMetrics(user.id, startDate, endDate);
-      await this.service.getFacilityMetrics(user.id, startDate, endDate);
+      await this.service.getTrainerMetrics(startDate, endDate);
+      await this.service.getFacilityMetrics(startDate, endDate);
 
       // Update revenue breakdown
       this.revenueByTrainer.set(this.service.getRevenueByTrainer());

@@ -381,27 +381,26 @@ export class RevenueReportPage implements OnInit {
   // ── Data loading ──────────────────────────────────────────────────────────
 
   async generate(): Promise<void> {
-    const trainerId = this.auth.user()?.id;
-    if (!trainerId) return;
-
     this.isLoading.set(true);
     const { from, to } = this.getDateRange();
 
     await Promise.all([
-      this.loadRevenueRows(trainerId, from, to),
-      this.loadOutstandingBalances(trainerId),
+      this.loadRevenueRows(from, to),
+      this.loadOutstandingBalances(),
     ]);
 
     this.isLoading.set(false);
   }
 
-  private async loadRevenueRows(trainerId: string, from: Date, to: Date): Promise<void> {
-    const data = await this.saleService.getRevenueReport(trainerId, from, to);
+  private async loadRevenueRows(from: Date, to: Date): Promise<void> {
+    const fromStr = from.toISOString().split('T')[0];
+    const toStr = to.toISOString().split('T')[0];
+    const data = await this.saleService.getRevenueReport(fromStr, toStr);
     this.dailyRows.set(data as DailyRevenueSummary[]);
   }
 
-  private async loadOutstandingBalances(trainerId: string): Promise<void> {
-    const balances = await this.saleService.getOutstandingBalances(trainerId);
+  private async loadOutstandingBalances(): Promise<void> {
+    const balances = await this.saleService.getOutstandingBalances();
     // Filter to only clients who OWE money (negative balance)
     const owing = (balances as OutstandingClient[]).filter(b => b.balance < 0);
     this.outstandingClients.set(owing);
