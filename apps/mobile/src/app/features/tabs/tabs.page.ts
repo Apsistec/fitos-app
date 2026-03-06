@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, computed, ChangeDetectionStrategy } from '@angular/core';
 import {
   IonTabs,
   IonTabBar,
@@ -21,9 +21,11 @@ import {
   ellipsisHorizontalOutline, ellipsisHorizontal,
   calendarOutline, calendar,
   storefrontOutline, storefront,
+  cloudOfflineOutline,
 } from 'ionicons/icons';
 import { TabConfigService } from '../../core/services/tab-config.service';
 import { MessagingService } from '../../core/services/messaging.service';
+import { SyncService } from '../../core/services/sync.service';
 
 @Component({
   selector: 'app-tabs',
@@ -39,6 +41,20 @@ import { MessagingService } from '../../core/services/messaging.service';
   ],
   template: `
     <ion-tabs>
+      <!-- Sprint 65: Offline indicator banner -->
+      @if (showOfflineBanner()) {
+        <div class="offline-banner">
+          <ion-icon name="cloud-offline-outline"></ion-icon>
+          <span>
+            @if (syncService.hasPendingChanges()) {
+              Offline — {{ syncService.pendingCount() }} change{{ syncService.pendingCount() > 1 ? 's' : '' }} will sync when reconnected
+            } @else {
+              Offline — data will sync when reconnected
+            }
+          </span>
+        </div>
+      }
+
       <ion-tab-bar slot="bottom">
         @for (tab of tabConfig.tabs(); track tab.route) {
           <ion-tab-button [tab]="tab.route">
@@ -54,6 +70,26 @@ import { MessagingService } from '../../core/services/messaging.service';
     </ion-tabs>
   `,
   styles: [`
+    /* ── Sprint 65: Offline banner ────────────────────────── */
+    .offline-banner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--fitos-bg-secondary, #171717);
+      border-top: 1px solid rgba(245, 158, 11, 0.25);
+      color: #F59E0B;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+
+      ion-icon {
+        font-size: 16px;
+        flex-shrink: 0;
+      }
+    }
+
     ion-tab-bar {
       --background: var(--fitos-bg-primary, #0D0D0D);
       border-top: 1px solid rgba(255, 255, 255, 0.06);
@@ -95,8 +131,12 @@ import { MessagingService } from '../../core/services/messaging.service';
 export class TabsPage {
   readonly tabConfig = inject(TabConfigService);
   private messagingService = inject(MessagingService);
+  syncService = inject(SyncService); // Public for template
 
   readonly unreadCount = this.messagingService.totalUnreadSignal;
+
+  /** Show banner when offline; auto-dismiss when back online */
+  showOfflineBanner = computed(() => !this.syncService.isOnline());
 
   constructor() {
     addIcons({
@@ -111,7 +151,8 @@ export class TabsPage {
       briefcaseOutline, briefcase,
       ellipsisHorizontalOutline, ellipsisHorizontal,
       calendarOutline, calendar,
-      storefrontOutline, storefront,   // Sprint 65: Shop tab
+      storefrontOutline, storefront,
+      cloudOfflineOutline,
     });
 
     // Load conversations for unread count

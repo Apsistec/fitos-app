@@ -1,6 +1,8 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
+import { SyncService } from './sync.service';
+import { db, type LocalNutritionLog } from '../database/fitos.db';
 import type { Tables } from '@fitos/shared';
 
 export interface NutritionSummary {
@@ -27,6 +29,7 @@ export interface NutritionLogWithEntries {
 export class NutritionService {
   private supabase = inject(SupabaseService);
   private auth = inject(AuthService);
+  private syncService = inject(SyncService);
 
   // State signals
   dailySummarySignal = signal<NutritionSummary | null>(null);
@@ -206,7 +209,11 @@ export class NutritionService {
   }
 
   /**
-   * Add a nutrition entry to a log
+   * Add a nutrition entry — offline-aware (Sprint 65)
+   *
+   * 1. Write to IndexedDB immediately.
+   * 2. If online, also write to Supabase.
+   * 3. If offline, queue sync operation.
    */
   async addEntry(
     logId: string,
@@ -221,26 +228,66 @@ export class NutritionService {
       meal_type?: string;
     }
   ): Promise<Tables<'nutrition_entries'> | null> {
+    const localId = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const userId = this.auth.user()?.id ?? '';
+
+    // 1. Write to IndexedDB immediately
+    const localEntry: LocalNutritionLog = {
+      id: localId,
+      user_id: userId,
+      meal_type: entry.meal_type ?? 'snack',
+      food_name: entry.custom_name ?? '',
+      calories: entry.calories,
+      protein: entry.protein_g,
+      carbs: entry.carbs_g,
+      fat: entry.fat_g,
+      serving_size: String(entry.servings),
+      logged_at: now,
+      created_at: now,
+      updated_at: now,
+      synced_at: null,
+    };
+
     try {
-      const { data, error } = await this.supabase
-        .from('nutrition_entries')
-        .insert({
-          log_id: logId,
-          ...entry,
-          logged_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Error adding nutrition entry:', error);
-      return null;
+      await db.nutrition_logs.put(localEntry);
+    } catch (dbErr) {
+      console.error('IndexedDB nutrition write failed:', dbErr);
     }
+
+    // 2. Try Supabase if online
+    if (this.syncService.isOnline()) {
+      try {
+        const { data, error } = await this.supabase
+          .from('nutrition_entries')
+          .insert({
+            log_id: logId,
+            ...entry,
+            logged_at: now,
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        // Mark local copy as synced
+        await db.nutrition_logs.update(localId, { synced_at: now });
+
+        return data;
+      } catch (err) {
+        console.warn('Supabase addEntry failed, queuing for sync:', err);
+      }
+    }
+
+    // 3. Queue for sync
+    await this.syncService.queueOperation('CREATE', 'nutrition_entries', localId, {
+      log_id: logId,
+      ...entry,
+      logged_at: now,
+    });
+
+    // Return a synthetic result so the UI stays responsive
+    return { id: localId, log_id: logId, ...entry, logged_at: now } as Tables<'nutrition_entries'>;
   }
 
   /**
@@ -248,16 +295,28 @@ export class NutritionService {
    */
   async updateEntry(
     entryId: string,
-    updates: Partial<Tables<'nutrition_entries'>>
+    updates: Partial<Tables<'nutrition_entries'>>,
+    lastUpdatedAt?: string
   ): Promise<boolean> {
     try {
-      const { error } = await this.supabase
+      let query = this.supabase
         .from('nutrition_entries')
-        .update(updates)
+        .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', entryId);
+
+      // Optimistic locking: only update if updated_at matches last known value
+      if (lastUpdatedAt) {
+        query = query.eq('updated_at', lastUpdatedAt);
+      }
+
+      const { data, error } = await query.select('id');
 
       if (error) {
         throw error;
+      }
+
+      if (lastUpdatedAt && (!data || data.length === 0)) {
+        throw new Error('STALE_DATA: This entry was modified by another session. Please refresh and try again.');
       }
 
       return true;

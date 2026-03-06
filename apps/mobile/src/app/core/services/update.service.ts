@@ -1,4 +1,5 @@
-import { Injectable, inject, ApplicationRef } from '@angular/core';
+import { Injectable, inject, ApplicationRef, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 import { filter, first, concat, interval } from 'rxjs';
 import { AlertController } from '@ionic/angular/standalone';
@@ -8,6 +9,7 @@ export class UpdateService {
   private swUpdate = inject(SwUpdate);
   private alertCtrl = inject(AlertController);
   private appRef = inject(ApplicationRef);
+  private destroyRef = inject(DestroyRef);
 
   /**
    * Initialize update checking
@@ -24,7 +26,7 @@ export class UpdateService {
     const everySixHours$ = interval(6 * 60 * 60 * 1000); // 6 hours
     const everySixHoursOnceAppIsStable$ = concat(appIsStable$, everySixHours$);
 
-    everySixHoursOnceAppIsStable$.subscribe(async () => {
+    everySixHoursOnceAppIsStable$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(async () => {
       try {
         const updateFound = await this.swUpdate.checkForUpdate();
         console.log('[Update Service] Update check:', updateFound ? 'Update available' : 'No update');
@@ -35,14 +37,17 @@ export class UpdateService {
 
     // Listen for version updates
     this.swUpdate.versionUpdates
-      .pipe(filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY'))
+      .pipe(
+        filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY'),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe(async (evt) => {
         console.log('[Update Service] New version available:', evt.latestVersion);
         await this.promptUser();
       });
 
     // Handle unrecoverable state
-    this.swUpdate.unrecoverable.subscribe((event) => {
+    this.swUpdate.unrecoverable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
       console.error('[Update Service] Unrecoverable state:', event.reason);
       this.promptReload('An error occurred that requires a reload.');
     });

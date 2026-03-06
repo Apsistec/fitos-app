@@ -1,6 +1,7 @@
 import {  Component, OnInit, signal, inject , ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { ScrollingModule, CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import {
   IonContent,
   IonHeader,
@@ -18,7 +19,6 @@ import {
   IonCardContent,
   IonBadge,
   IonIcon,
-  IonList,
   RefresherCustomEvent,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -43,6 +43,7 @@ addIcons({ barbellOutline, timeOutline, calendarOutline, trophyOutline });
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    ScrollingModule,
     IonContent,
     IonHeader,
     IonTitle,
@@ -59,8 +60,7 @@ addIcons({ barbellOutline, timeOutline, calendarOutline, trophyOutline });
     IonCardContent,
     IonBadge,
     IonIcon,
-    IonList
-],
+  ],
   template: `
     <ion-header class="ion-no-border">
       <ion-toolbar>
@@ -105,68 +105,63 @@ addIcons({ barbellOutline, timeOutline, calendarOutline, trophyOutline });
               </div>
             </div>
 
-            <ion-list lines="none">
-              @for (workout of workouts(); track workout.id) {
-                <ion-card button (click)="viewWorkout(workout.id)">
-                  <ion-card-header>
-                    <div class="card-header">
-                      <ion-card-title>{{ workout.template?.name || 'Workout' }}</ion-card-title>
-                      @if (workout.rating) {
-                        <ion-badge color="primary">
-                          {{ workout.rating }}/5
-                        </ion-badge>
-                      }
-                    </div>
-                  </ion-card-header>
+            <cdk-virtual-scroll-viewport
+              itemSize="140"
+              class="workout-viewport"
+              (scrolledIndexChange)="onScrollIndexChange($event)"
+            >
+              <ion-card
+                *cdkVirtualFor="let workout of workouts(); trackBy: trackWorkout"
+                button
+                (click)="viewWorkout(workout.id)"
+              >
+                <ion-card-header>
+                  <div class="card-header">
+                    <ion-card-title>{{ workout.template?.name || 'Workout' }}</ion-card-title>
+                    @if (workout.rating) {
+                      <ion-badge color="primary">
+                        {{ workout.rating }}/5
+                      </ion-badge>
+                    }
+                  </div>
+                </ion-card-header>
 
-                  <ion-card-content>
-                    <div class="workout-details">
+                <ion-card-content>
+                  <div class="workout-details">
+                    <div class="detail-item">
+                      <ion-icon name="calendar-outline"></ion-icon>
+                      <span>{{ workout.completed_at ? formatDate(workout.completed_at) : '-' }}</span>
+                    </div>
+
+                    @if (workout.started_at && workout.completed_at) {
                       <div class="detail-item">
-                        <ion-icon name="calendar-outline"></ion-icon>
-                        <span>{{ workout.completed_at ? formatDate(workout.completed_at) : '-' }}</span>
-                      </div>
-
-                      @if (workout.started_at && workout.completed_at) {
-                        <div class="detail-item">
-                          <ion-icon name="time-outline"></ion-icon>
-                          <span>{{ calculateDuration(workout.started_at, workout.completed_at) }}</span>
-                        </div>
-                      }
-
-                      @if (workout.template?.estimated_duration_minutes) {
-                        <div class="detail-item">
-                          <ion-icon name="barbell-outline"></ion-icon>
-                          <span>{{ workout.template?.estimated_duration_minutes }} min planned</span>
-                        </div>
-                      }
-                    </div>
-
-                    @if (workout.notes) {
-                      <div class="workout-notes">
-                        <p>{{ workout.notes }}</p>
+                        <ion-icon name="time-outline"></ion-icon>
+                        <span>{{ calculateDuration(workout.started_at, workout.completed_at) }}</span>
                       </div>
                     }
-                  </ion-card-content>
-                </ion-card>
-              }
-            </ion-list>
 
-            @if (hasMore()) {
-              <div class="load-more">
-                <ion-button
-                  expand="block"
-                  fill="outline"
-                  (click)="loadMore()"
-                  [disabled]="loadingMore()"
-                >
-                  @if (loadingMore()) {
-                    <ion-spinner name="crescent"></ion-spinner>
-                  } @else {
-                    Load More
+                    @if (workout.template?.estimated_duration_minutes) {
+                      <div class="detail-item">
+                        <ion-icon name="barbell-outline"></ion-icon>
+                        <span>{{ workout.template?.estimated_duration_minutes }} min planned</span>
+                      </div>
+                    }
+                  </div>
+
+                  @if (workout.notes) {
+                    <div class="workout-notes">
+                      <p>{{ workout.notes }}</p>
+                    </div>
                   }
-                </ion-button>
-              </div>
-            }
+                </ion-card-content>
+              </ion-card>
+
+              @if (loadingMore()) {
+                <div class="loading-more">
+                  <ion-spinner name="crescent"></ion-spinner>
+                </div>
+              }
+            </cdk-virtual-scroll-viewport>
           }
         </div>
       }
@@ -228,6 +223,20 @@ addIcons({ barbellOutline, timeOutline, calendarOutline, trophyOutline });
     }
 
     .history-container {
+      padding: 16px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .workout-viewport {
+      flex: 1;
+      min-height: 0;
+    }
+
+    .loading-more {
+      display: flex;
+      justify-content: center;
       padding: 16px;
     }
 
@@ -336,18 +345,6 @@ addIcons({ barbellOutline, timeOutline, calendarOutline, trophyOutline });
       font-style: italic;
     }
 
-    .load-more {
-      margin-top: 16px;
-      padding: 0;
-    }
-
-    .load-more ion-button {
-      margin: 0;
-      --border-radius: 8px;
-      --border-color: rgba(255, 255, 255, 0.1);
-      --color: var(--fitos-text-primary, #F5F5F5);
-      font-weight: 600;
-    }
   `]
 })
 export class WorkoutHistoryPage implements OnInit {
@@ -366,6 +363,18 @@ export class WorkoutHistoryPage implements OnInit {
 
   ngOnInit() {
     this.loadHistory();
+  }
+
+  trackWorkout(_index: number, workout: WorkoutWithTemplate): string {
+    return workout.id;
+  }
+
+  /** Load more workouts when user scrolls near the end of the list */
+  onScrollIndexChange(index: number): void {
+    const total = this.workouts().length;
+    if (index > total - 5 && this.hasMore() && !this.loadingMore()) {
+      this.loadMore();
+    }
   }
 
   async loadHistory() {

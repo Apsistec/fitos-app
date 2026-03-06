@@ -35,6 +35,7 @@ import {
   flameOutline,
   closeCircleOutline,
   createOutline,
+  cloudOfflineOutline,
 } from 'ionicons/icons';
 
 import { BarcodeScannerService, BarcodeFoodResult } from '../../../../core/services/barcode-scanner.service';
@@ -42,6 +43,7 @@ import { FoodService } from '../../../../core/services/food.service';
 import { NutritionService } from '../../../../core/services/nutrition.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { HapticService } from '../../../../core/services/haptic.service';
+import { SyncService } from '../../../../core/services/sync.service';
 import { BarcodeResultComponent, BarcodeLogRequest } from '../../components/barcode-result/barcode-result.component';
 
 @Component({
@@ -79,8 +81,17 @@ import { BarcodeResultComponent, BarcodeLogRequest } from '../../components/barc
     </ion-header>
 
     <ion-content>
-      <!-- Found food: show confirmation card -->
-      @if (foundFood()) {
+      @if (!syncService.isOnline()) {
+        <!-- Offline placeholder -->
+        <div class="offline-placeholder">
+          <div class="offline-icon-ring">
+            <ion-icon name="cloud-offline-outline"></ion-icon>
+          </div>
+          <h2>Available When Online</h2>
+          <p>Barcode scanning requires an internet connection to look up product information.</p>
+          <p class="offline-hint">You can still log food manually from the nutrition page.</p>
+        </div>
+      } @else if (foundFood()) {
         <app-barcode-result
           [food]="foundFood()!"
           (log)="onConfirmLog($event)"
@@ -435,11 +446,61 @@ import { BarcodeResultComponent, BarcodeLogRequest } from '../../components/barc
       margin-top: 12px;
       --border-radius: 10px;
     }
+
+    /* ── Offline placeholder ─────────────────────────────────── */
+    .offline-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 24px;
+      gap: 12px;
+      text-align: center;
+    }
+
+    .offline-icon-ring {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: rgba(245, 158, 11, 0.1);
+      border: 2px solid rgba(245, 158, 11, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    .offline-icon-ring ion-icon {
+      font-size: 48px;
+      color: #F59E0B;
+    }
+
+    .offline-placeholder h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
+      margin: 0;
+    }
+
+    .offline-placeholder p {
+      font-size: 14px;
+      color: var(--fitos-text-secondary, #A3A3A3);
+      margin: 0;
+      line-height: 1.5;
+      max-width: 320px;
+    }
+
+    .offline-hint {
+      font-size: 13px !important;
+      color: var(--fitos-text-tertiary, #737373) !important;
+      margin-top: 8px !important;
+    }
   `],
 })
 export class BarcodeScanPage implements OnInit {
   // ─── Services ────────────────────────────────────────────────────────────
   scanner          = inject(BarcodeScannerService);
+  syncService      = inject(SyncService);
   private food     = inject(FoodService);
   private nutrition = inject(NutritionService);
   private auth     = inject(AuthService);
@@ -466,7 +527,7 @@ export class BarcodeScanPage implements OnInit {
 
   // ─── Lifecycle ───────────────────────────────────────────────────────────
   async ngOnInit(): Promise<void> {
-    addIcons({ barcodeOutline, scanOutline, timeOutline, flameOutline, closeCircleOutline, createOutline });
+    addIcons({ barcodeOutline, scanOutline, timeOutline, flameOutline, closeCircleOutline, createOutline, cloudOfflineOutline });
 
     // Check native support
     this.supported.set(await this.scanner.isSupported());

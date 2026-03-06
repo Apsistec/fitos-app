@@ -160,20 +160,35 @@ export class ProgramAssignmentService {
 
   async updateStatus(
     assignmentId: string,
-    status: AssignmentStatus
+    status: AssignmentStatus,
+    lastUpdatedAt?: string
   ): Promise<boolean> {
     try {
-      const updates: Record<string, unknown> = { status };
+      const updates: Record<string, unknown> = {
+        status,
+        updated_at: new Date().toISOString(),
+      };
       if (status === 'completed') {
         updates['completed_at'] = new Date().toISOString();
       }
 
-      const { error } = await this.supabase.client
+      let query = this.supabase.client
         .from('program_assignments')
         .update(updates)
         .eq('id', assignmentId);
 
+      // Optimistic locking: only update if updated_at matches last known value
+      if (lastUpdatedAt) {
+        query = query.eq('updated_at', lastUpdatedAt);
+      }
+
+      const { data, error } = await query.select('id');
+
       if (error) throw error;
+
+      if (lastUpdatedAt && (!data || data.length === 0)) {
+        throw new Error('STALE_DATA: This assignment was modified by another session. Please refresh and try again.');
+      }
 
       // Optimistic update on client-side signal
       this.myAssignments.update((list) =>

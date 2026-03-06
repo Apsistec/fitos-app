@@ -1,4 +1,4 @@
-import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, output, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
@@ -40,11 +40,11 @@ export interface UpcomingWorkout {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UpcomingWorkoutsListComponent {
+  private router = inject(Router);
+
   workouts = input<UpcomingWorkout[]>();
   loading = input<boolean>(false);
   workoutClicked = output<UpcomingWorkout>();
-
-  constructor(private router: Router) {}
 
   onWorkoutClick(workout: UpcomingWorkout): void {
     this.workoutClicked.emit(workout);

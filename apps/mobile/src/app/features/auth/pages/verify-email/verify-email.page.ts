@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
@@ -27,6 +27,7 @@ import { AuthService } from '../../../../core/services/auth.service';
     IonIcon,
     IonSpinner,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ion-header class="ion-no-border">
       <ion-toolbar>

@@ -1,4 +1,4 @@
-import { Component, input, inject } from '@angular/core';
+import { Component, input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonHeader,
@@ -50,6 +50,7 @@ addIcons({
     IonChip,
     IonLabel
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ion-header>
       <ion-toolbar>

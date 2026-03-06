@@ -4,7 +4,7 @@
  * Sprint 42: Local SEO Automation
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
@@ -95,9 +95,8 @@ export interface SchemaMarkup {
   providedIn: 'root',
 })
 export class SeoService {
+  private http = inject(HttpClient);
   private apiUrl = `${environment.supabaseUrl}/functions/v1`;
-
-  constructor(private http: HttpClient) {}
 
   /**
    * Get SEO dashboard statistics

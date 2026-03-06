@@ -10,11 +10,11 @@
  * Sprint 40: Multi-Location Management
  */
 
-import { Component, OnInit, OnDestroy, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
 import { FranchiseService } from '../../services/franchise.service';
 import {
   Organization,
@@ -31,10 +31,10 @@ import {
   imports: [CommonModule, IonicModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class FranchiseDashboardComponent implements OnInit, OnDestroy {
+export class FranchiseDashboardComponent implements OnInit {
   private franchiseService = inject(FranchiseService);
   private router = inject(Router);
-  private destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
 
   // Signals for reactive state
   organization = signal<Organization | null>(null);
@@ -63,11 +63,6 @@ export class FranchiseDashboardComponent implements OnInit, OnDestroy {
     this.loadDashboardData();
   }
 
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
   /**
    * Load all dashboard data
    */
@@ -90,7 +85,7 @@ export class FranchiseDashboardComponent implements OnInit, OnDestroy {
       // Load locations
       this.franchiseService
         .listOrganizationLocations(org.id)
-        .pipe(takeUntil(this.destroy$))
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: (locations) => {
             this.locations.set(locations);
@@ -154,7 +149,7 @@ export class FranchiseDashboardComponent implements OnInit, OnDestroy {
   private loadOverduePayments(organizationId: string) {
     this.franchiseService
       .getOverdueRoyalties(organizationId)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
           this.overduePayments.set(response.overdue_payments || []);

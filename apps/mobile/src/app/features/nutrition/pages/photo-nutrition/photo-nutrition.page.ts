@@ -9,16 +9,18 @@ import {
   IonBackButton,
   IonButtons,
   IonButton,
+  IonIcon,
   ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { arrowBackOutline } from 'ionicons/icons';
+import { arrowBackOutline, cloudOfflineOutline } from 'ionicons/icons';
 import { PhotoCaptureComponent } from '../../components/photo-capture/photo-capture.component';
 import { FoodIdentificationResultsComponent } from '../../components/food-identification-results/food-identification-results.component';
 import { IdentifiedFood } from '../../../../core/services/photo-nutrition.service';
 import { NutritionService } from '../../../../core/services/nutrition.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { HapticService } from '../../../../core/services/haptic.service';
+import { SyncService } from '../../../../core/services/sync.service';
 
 /**
  * PhotoNutritionPage - Photo-to-nutrition AI flow
@@ -42,6 +44,7 @@ import { HapticService } from '../../../../core/services/haptic.service';
     IonBackButton,
     IonButtons,
     IonButton,
+    IonIcon,
     PhotoCaptureComponent,
     FoodIdentificationResultsComponent,
   ],
@@ -65,21 +68,33 @@ import { HapticService } from '../../../../core/services/haptic.service';
 
     <ion-content [fullscreen]="true">
       <div class="photo-nutrition-page">
-        <!-- Step 1: Photo Capture -->
-        @if (identifiedFoods().length === 0) {
-          <app-photo-capture
-            (foodsIdentified)="onFoodsIdentified($event)"
-          ></app-photo-capture>
-        }
+        @if (!syncService.isOnline()) {
+          <!-- Offline placeholder -->
+          <div class="offline-placeholder">
+            <div class="offline-icon-ring">
+              <ion-icon name="cloud-offline-outline"></ion-icon>
+            </div>
+            <h2>Available When Online</h2>
+            <p>Photo food logging requires an internet connection to analyze images with AI.</p>
+            <p class="offline-hint">You can still log food manually from the nutrition page.</p>
+          </div>
+        } @else {
+          <!-- Step 1: Photo Capture -->
+          @if (identifiedFoods().length === 0) {
+            <app-photo-capture
+              (foodsIdentified)="onFoodsIdentified($event)"
+            ></app-photo-capture>
+          }
 
-        <!-- Step 2: Results & Editing -->
-        @if (identifiedFoods().length > 0) {
-          <app-food-identification-results
-            [foods]="identifiedFoods()"
-            (foodsConfirmed)="onFoodsConfirmed($event)"
-            (foodRemoved)="onFoodRemoved($event)"
-            (foodEdited)="onFoodEdited($event)"
-          ></app-food-identification-results>
+          <!-- Step 2: Results & Editing -->
+          @if (identifiedFoods().length > 0) {
+            <app-food-identification-results
+              [foods]="identifiedFoods()"
+              (foodsConfirmed)="onFoodsConfirmed($event)"
+              (foodRemoved)="onFoodRemoved($event)"
+              (foodEdited)="onFoodEdited($event)"
+            ></app-food-identification-results>
+          }
         }
       </div>
     </ion-content>
@@ -99,6 +114,54 @@ import { HapticService } from '../../../../core/services/haptic.service';
     .photo-nutrition-page {
       min-height: 100%;
     }
+
+    .offline-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 24px;
+      gap: 12px;
+      text-align: center;
+    }
+
+    .offline-icon-ring {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: rgba(245, 158, 11, 0.1);
+      border: 2px solid rgba(245, 158, 11, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    .offline-icon-ring ion-icon {
+      font-size: 48px;
+      color: #F59E0B;
+    }
+
+    .offline-placeholder h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
+      margin: 0;
+    }
+
+    .offline-placeholder p {
+      font-size: 14px;
+      color: var(--fitos-text-secondary, #A3A3A3);
+      margin: 0;
+      line-height: 1.5;
+      max-width: 320px;
+    }
+
+    .offline-hint {
+      font-size: 13px !important;
+      color: var(--fitos-text-tertiary, #737373) !important;
+      margin-top: 8px !important;
+    }
   `],
 })
 export class PhotoNutritionPage {
@@ -107,13 +170,14 @@ export class PhotoNutritionPage {
   private authService = inject(AuthService);
   private haptic = inject(HapticService);
   private toastCtrl = inject(ToastController);
+  syncService = inject(SyncService);
 
   // State
   identifiedFoods = signal<IdentifiedFood[]>([]);
   isLogging = signal(false);
 
   constructor() {
-    addIcons({ arrowBackOutline });
+    addIcons({ arrowBackOutline, cloudOfflineOutline });
   }
 
   /**

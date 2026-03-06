@@ -4,6 +4,7 @@ import {
   signal,
   computed,
   inject,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -100,7 +101,8 @@ interface JourneyStats {
     IonRadioGroup,
     IonRadio,
     IonSpinner
-],
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ion-header class="ion-no-border">
       <ion-toolbar>

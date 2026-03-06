@@ -193,7 +193,8 @@ export class WorkoutService {
     id: string,
     name: string,
     description: string | null,
-    exercises: ExerciseConfiguration[]
+    exercises: ExerciseConfiguration[],
+    lastUpdatedAt?: string
   ): Promise<WorkoutTemplateWithExercises | null> {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
@@ -204,8 +205,8 @@ export class WorkoutService {
 
       const estimatedDuration = this.calculateEstimatedDuration(exercises);
 
-      // Update template metadata
-      const { error: templateError } = await this.supabase.client
+      // Update template metadata with optimistic locking
+      let query = this.supabase.client
         .from('workout_templates')
         .update({
           name,
@@ -216,7 +217,18 @@ export class WorkoutService {
         .eq('id', id)
         .eq('trainer_id', userId);
 
+      // Optimistic locking: only update if updated_at matches last known value
+      if (lastUpdatedAt) {
+        query = query.eq('updated_at', lastUpdatedAt);
+      }
+
+      const { data: updatedRows, error: templateError } = await query.select('id');
+
       if (templateError) throw templateError;
+
+      if (lastUpdatedAt && (!updatedRows || updatedRows.length === 0)) {
+        throw new Error('STALE_DATA: This template was modified by another session. Please refresh and try again.');
+      }
 
       // Delete existing exercises
       const { error: deleteError } = await this.supabase.client

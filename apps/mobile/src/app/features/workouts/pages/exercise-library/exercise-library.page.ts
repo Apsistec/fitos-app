@@ -1,6 +1,7 @@
 import {  Component, OnInit, signal, computed, inject , ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import {
   IonContent,
   IonHeader,
@@ -19,14 +20,8 @@ import {
   IonChip,
   IonFab,
   IonFabButton,
-  IonGrid,
-  IonRow,
-  IonCol,
-  IonInfiniteScroll,
-  IonInfiniteScrollContent,
   ModalController,
   RefresherCustomEvent,
-  InfiniteScrollCustomEvent,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { filterOutline, addOutline, closeCircle } from 'ionicons/icons';
@@ -47,6 +42,7 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
   imports: [
 
     FormsModule,
+    ScrollingModule,
     IonContent,
     IonHeader,
     IonTitle,
@@ -64,11 +60,6 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
     IonChip,
     IonFab,
     IonFabButton,
-    IonGrid,
-    IonRow,
-    IonCol,
-    IonInfiniteScroll,
-    IonInfiniteScrollContent,
     ExerciseCardComponent
   ],
   template: `
@@ -198,30 +189,20 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
               <p>{{ exerciseService.filteredExercises().length }} exercises</p>
             </div>
 
-            <ion-grid>
-              <ion-row>
-                @for (exercise of visibleExercises(); track exercise.id) {
-                  <ion-col size="12" sizeMd="6" sizeLg="4" sizeXl="3">
-                    <app-exercise-card
-                      [exercise]="exercise"
-                      [showAddButton]="selectionMode()"
-                      (detailClick)="onExerciseDetail($event)"
-                      (videoClick)="onExerciseVideo($event)"
-                      (editClick)="editExercise($event)"
-                      (addClick)="onExerciseAdd($event)"
-                    ></app-exercise-card>
-                  </ion-col>
-                }
-              </ion-row>
-            </ion-grid>
-
-            <!-- Infinite scroll for progressive rendering -->
-            <ion-infinite-scroll
-              [disabled]="visibleExercises().length >= exerciseService.filteredExercises().length"
-              (ionInfinite)="loadMoreExercises($event)"
+            <cdk-virtual-scroll-viewport
+              itemSize="88"
+              class="exercise-viewport"
             >
-              <ion-infinite-scroll-content loadingSpinner="crescent"></ion-infinite-scroll-content>
-            </ion-infinite-scroll>
+              <app-exercise-card
+                *cdkVirtualFor="let exercise of exerciseService.filteredExercises(); trackBy: trackExercise"
+                [exercise]="exercise"
+                [showAddButton]="selectionMode()"
+                (detailClick)="onExerciseDetail($event)"
+                (videoClick)="onExerciseVideo($event)"
+                (editClick)="editExercise($event)"
+                (addClick)="onExerciseAdd($event)"
+              ></app-exercise-card>
+            </cdk-virtual-scroll-viewport>
           }
         </div>
       }
@@ -312,6 +293,14 @@ type Exercise = Database['public']['Tables']['exercises']['Row'];
 
     .exercises-container {
       padding: 16px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .exercise-viewport {
+      flex: 1;
+      min-height: 0;
     }
 
     .results-count {
@@ -346,26 +335,16 @@ export class ExerciseLibraryPage implements OnInit {
   showFilters = signal(false);
   selectionMode = signal(false); // For use in workout builder
 
-  // Progressive rendering: show 20 items initially, load more on scroll
-  private readonly PAGE_SIZE = 20;
-  displayCount = signal(this.PAGE_SIZE);
-
-  visibleExercises = computed(() =>
-    this.exerciseService.filteredExercises().slice(0, this.displayCount())
-  );
-
   ngOnInit() {
     this.loadExercises();
   }
 
   async loadExercises() {
-    this.displayCount.set(this.PAGE_SIZE);
     await this.exerciseService.loadExercises();
   }
 
-  loadMoreExercises(event: InfiniteScrollCustomEvent): void {
-    this.displayCount.update(count => count + this.PAGE_SIZE);
-    setTimeout(() => event.target.complete(), 100);
+  trackExercise(_index: number, exercise: Exercise): string {
+    return exercise.id;
   }
 
   async handleRefresh(event: RefresherCustomEvent) {
@@ -383,7 +362,6 @@ export class ExerciseLibraryPage implements OnInit {
   }
 
   applyFilters() {
-    this.displayCount.set(this.PAGE_SIZE);
     this.exerciseService.setFilters({
       searchQuery: this.searchQuery || undefined,
       category: this.selectedCategory || undefined,

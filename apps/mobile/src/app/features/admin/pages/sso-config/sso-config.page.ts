@@ -5,7 +5,7 @@
  * Sprint 41: Enterprise Single Sign-On
  */
 
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IonicModule, AlertController, ToastController } from '@ionic/angular';
@@ -61,6 +61,7 @@ interface DirectorySyncConfig {
   styleUrls: ['./sso-config.page.scss'],
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, IonicModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SSOConfigPage implements OnInit {
   private fb = inject(FormBuilder);

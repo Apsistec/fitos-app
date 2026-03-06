@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { MilestoneCardComponent } from './features/clients/components/milestone-card/milestone-card.component';
@@ -112,6 +113,7 @@ export class AppComponent implements OnInit {
     // Track screen views on route navigation (Firebase Analytics)
     this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      takeUntilDestroyed(),
     ).subscribe((event) => {
       this.firebaseService.trackScreenView(event.urlAfterRedirects);
     });

@@ -1,4 +1,4 @@
-import { enableProdMode, ErrorHandler, Injectable, Injector, provideZoneChangeDetection } from '@angular/core';
+import { enableProdMode, ErrorHandler, inject, Injectable, Injector, provideZoneChangeDetection } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import {
@@ -71,9 +71,8 @@ class IdlePreloadStrategy implements PreloadingStrategy {
  */
 @Injectable()
 class GlobalErrorHandler implements ErrorHandler {
+  private injector = inject(Injector);
   private firebaseService: FirebaseService | null = null;
-
-  constructor(private injector: Injector) {}
 
   handleError(error: unknown): void {
     // Log to console in all environments

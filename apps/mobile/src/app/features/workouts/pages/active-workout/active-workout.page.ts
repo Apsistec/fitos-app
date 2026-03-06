@@ -32,6 +32,8 @@ import { WorkoutSessionService, SetLog } from '../../../../core/services/workout
 import { AssignmentService } from '../../../../core/services/assignment.service';
 import { WorkoutService } from '../../../../core/services/workout.service';
 import { SupabaseService } from '../../../../core/services/supabase.service';
+import { SyncService } from '../../../../core/services/sync.service';
+import { db } from '../../../../core/database/fitos.db';
 import { RestTimerComponent } from '../../../../shared/components/rest-timer/rest-timer.component';
 import { HapticService } from '../../../../core/services/haptic.service';
 import { CelebrationService } from '../../../../core/services/celebration.service';
@@ -117,6 +119,11 @@ interface ExerciseProgress {
           <ion-text color="medium">
             <small>Exercise {{ currentExerciseIndex() + 1 }} of {{ exercises().length }}</small>
           </ion-text>
+          @if (syncService.hasPendingChanges()) {
+            <ion-badge color="warning" class="sync-badge">
+              Syncing… ({{ syncService.pendingCount() }})
+            </ion-badge>
+          }
           <ion-text color="primary">
             <small>{{ formatDuration(elapsedTime()) }}</small>
           </ion-text>
@@ -327,8 +334,16 @@ interface ExerciseProgress {
     .workout-progress {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       padding: 8px 16px;
       font-size: 13px;
+    }
+
+    .sync-badge {
+      font-size: 11px;
+      --padding-start: 8px;
+      --padding-end: 8px;
+      border-radius: 4px;
     }
 
     .workout-container {
@@ -583,6 +598,7 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
   private assignmentService = inject(AssignmentService);
   private workoutService = inject(WorkoutService);
   private supabase = inject(SupabaseService);
+  syncService = inject(SyncService); // Public for template sync badge
   private alertController = inject(AlertController);
   private toastController = inject(ToastController);
   private celebration = inject(CelebrationService);
@@ -632,107 +648,185 @@ export class ActiveWorkoutPage implements OnInit, OnDestroy {
     this.stopTimer();
   }
 
+  /**
+   * Load workout — offline-aware (Sprint 65)
+   *
+   * Online: load from Supabase, cache to IndexedDB.
+   * Offline: load from IndexedDB cache.
+   */
   async loadWorkout() {
     this.loading.set(true);
 
     try {
       if (!this.assignedWorkoutId) return;
 
-      // Load the workout record with its template
-      const { data: workout, error: workoutError } = await this.supabase.client
-        .from('workouts')
-        .select('*, template:workout_templates(*, exercises:workout_template_exercises(*, exercise:exercises(*)))')
-        .eq('id', this.assignedWorkoutId)
-        .single();
+      let exerciseProgress: ExerciseProgress[] = [];
+      let workoutStatus = '';
+      let loadedFromCache = false;
 
-      if (workoutError || !workout) {
-        this.showToast('Failed to load workout', 'danger');
-        return;
-      }
+      if (this.syncService.isOnline()) {
+        // ── Online path ─────────────────────────────────────
+        const result = await this.loadWorkoutFromServer();
+        if (result) {
+          exerciseProgress = result.exercises;
+          workoutStatus = result.status;
+          this.workoutName.set(result.name);
 
-      this.workoutName.set(workout.name || workout.template?.name || 'Workout');
-
-      // Build exercise list from template exercises
-      const templateExercises = workout.template?.exercises || [];
-
-      // Sort by order_index
-      templateExercises.sort((a: TemplateExerciseRow, b: TemplateExerciseRow) => (a.order_index ?? 0) - (b.order_index ?? 0));
-
-      const exerciseProgress: ExerciseProgress[] = templateExercises.map((te: TemplateExerciseRow) => ({
-        exerciseId: te.id, // workout_template_exercise ID for set logging
-        exerciseName: te.exercise?.name || 'Unknown Exercise',
-        targetSets: te.sets || 3,
-        targetReps: te.reps_min && te.reps_max
-          ? (te.reps_min === te.reps_max ? `${te.reps_min}` : `${te.reps_min}-${te.reps_max}`)
-          : `${te.reps_min || te.reps_max || 10}`,
-        restSeconds: te.rest_seconds || 90,
-        completedSets: 0,
-        currentSet: 1,
-        sets: []
-      }));
-
-      // If no template exercises, try loading from workout_exercises table
-      if (exerciseProgress.length === 0) {
-        const { data: workoutExercises } = await this.supabase.client
-          .from('workout_exercises')
-          .select('*, exercise:exercises(*)')
-          .eq('workout_id', this.assignedWorkoutId)
-          .order('order_index');
-
-        if (workoutExercises && workoutExercises.length > 0) {
-          workoutExercises.forEach((we: WorkoutExerciseRow) => {
-            exerciseProgress.push({
-              exerciseId: we.id,
-              exerciseName: we.exercise?.name || 'Unknown Exercise',
-              targetSets: we.prescribed_sets || 3,
-              targetReps: we.prescribed_reps_min && we.prescribed_reps_max
-                ? `${we.prescribed_reps_min}-${we.prescribed_reps_max}`
-                : `${we.prescribed_reps || 10}`,
-              restSeconds: we.rest_seconds || 90,
-              completedSets: 0,
-              currentSet: 1,
-              sets: []
-            });
+          // Cache for offline use
+          await db.active_workout_cache.put({
+            id: this.assignedWorkoutId,
+            workout_name: result.name,
+            exercises_json: JSON.stringify(exerciseProgress),
+            status: workoutStatus,
+            cached_at: new Date().toISOString(),
           });
+        } else {
+          this.showToast('Failed to load workout', 'danger');
+          return;
+        }
+      } else {
+        // ── Offline path ────────────────────────────────────
+        const cached = await db.active_workout_cache.get(this.assignedWorkoutId);
+        if (cached) {
+          exerciseProgress = JSON.parse(cached.exercises_json);
+          workoutStatus = cached.status;
+          this.workoutName.set(cached.workout_name);
+          loadedFromCache = true;
+        } else {
+          this.showToast('Workout not available offline', 'warning');
+          return;
         }
       }
 
       this.exercises.set(exerciseProgress);
 
-      // Load any previously logged sets (for resumed workouts)
-      if (workout.status === 'in_progress') {
-        const { data: existingSets } = await this.supabase.client
-          .from('workout_sets')
-          .select('*')
-          .eq('workout_id', this.assignedWorkoutId)
-          .order('set_number');
-
-        if (existingSets && existingSets.length > 0) {
-          this.exercises.update(exercises => {
-            const updated = [...exercises];
-            for (const set of existingSets) {
-              const exerciseIdx = updated.findIndex(e => e.exerciseId === set.workout_exercise_id);
-              if (exerciseIdx >= 0) {
-                updated[exerciseIdx].sets.push({
-                  exerciseId: set.workout_exercise_id,
-                  setNumber: set.set_number,
-                  reps: set.reps_completed || 0,
-                  weight: set.weight_used || undefined,
-                  rpe: set.rpe || undefined,
-                });
-                updated[exerciseIdx].completedSets = updated[exerciseIdx].sets.length;
-                updated[exerciseIdx].currentSet = updated[exerciseIdx].completedSets + 1;
-              }
-            }
-            return updated;
-          });
-        }
+      // Load previously logged sets (for resumed workouts)
+      if (workoutStatus === 'in_progress') {
+        await this.loadExistingSets(loadedFromCache);
       }
     } catch (error) {
       console.error('Error loading workout:', error);
       this.showToast('Error loading workout', 'danger');
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  /**
+   * Fetch workout + template + exercises from Supabase.
+   */
+  private async loadWorkoutFromServer(): Promise<{
+    name: string;
+    status: string;
+    exercises: ExerciseProgress[];
+  } | null> {
+    if (!this.assignedWorkoutId) return null;
+
+    const { data: workout, error: workoutError } = await this.supabase.client
+      .from('workouts')
+      .select('*, template:workout_templates(*, exercises:workout_template_exercises(*, exercise:exercises(*)))')
+      .eq('id', this.assignedWorkoutId)
+      .single();
+
+    if (workoutError || !workout) return null;
+
+    const name = workout.name || workout.template?.name || 'Workout';
+    const templateExercises = workout.template?.exercises || [];
+    templateExercises.sort((a: TemplateExerciseRow, b: TemplateExerciseRow) =>
+      (a.order_index ?? 0) - (b.order_index ?? 0),
+    );
+
+    const exerciseProgress: ExerciseProgress[] = templateExercises.map((te: TemplateExerciseRow) => ({
+      exerciseId: te.id,
+      exerciseName: te.exercise?.name || 'Unknown Exercise',
+      targetSets: te.sets || 3,
+      targetReps: te.reps_min && te.reps_max
+        ? (te.reps_min === te.reps_max ? `${te.reps_min}` : `${te.reps_min}-${te.reps_max}`)
+        : `${te.reps_min || te.reps_max || 10}`,
+      restSeconds: te.rest_seconds || 90,
+      completedSets: 0,
+      currentSet: 1,
+      sets: [],
+    }));
+
+    // Fallback: workout_exercises table
+    if (exerciseProgress.length === 0) {
+      const { data: workoutExercises } = await this.supabase.client
+        .from('workout_exercises')
+        .select('*, exercise:exercises(*)')
+        .eq('workout_id', this.assignedWorkoutId)
+        .order('order_index');
+
+      if (workoutExercises && workoutExercises.length > 0) {
+        workoutExercises.forEach((we: WorkoutExerciseRow) => {
+          exerciseProgress.push({
+            exerciseId: we.id,
+            exerciseName: we.exercise?.name || 'Unknown Exercise',
+            targetSets: we.prescribed_sets || 3,
+            targetReps: we.prescribed_reps_min && we.prescribed_reps_max
+              ? `${we.prescribed_reps_min}-${we.prescribed_reps_max}`
+              : `${we.prescribed_reps || 10}`,
+            restSeconds: we.rest_seconds || 90,
+            completedSets: 0,
+            currentSet: 1,
+            sets: [],
+          });
+        });
+      }
+    }
+
+    return { name, status: workout.status, exercises: exerciseProgress };
+  }
+
+  /**
+   * Restore logged sets from Supabase or IndexedDB.
+   */
+  private async loadExistingSets(fromCache: boolean): Promise<void> {
+    if (!this.assignedWorkoutId) return;
+
+    let sets: { workout_exercise_id: string; set_number: number; reps_completed: number; weight_used?: number | null; rpe?: number | null }[] = [];
+
+    if (!fromCache && this.syncService.isOnline()) {
+      const { data } = await this.supabase.client
+        .from('workout_sets')
+        .select('*')
+        .eq('workout_id', this.assignedWorkoutId)
+        .order('set_number');
+      sets = data || [];
+    } else {
+      // Load from IndexedDB
+      const localSets = await db.workout_sets
+        .where('workout_id')
+        .equals(this.assignedWorkoutId)
+        .toArray();
+      sets = localSets.map(s => ({
+        workout_exercise_id: s.workout_exercise_id,
+        set_number: s.set_number,
+        reps_completed: s.reps_completed ?? 0,
+        weight_used: s.weight_used,
+        rpe: s.rpe,
+      }));
+    }
+
+    if (sets.length > 0) {
+      this.exercises.update(exercises => {
+        const updated = [...exercises];
+        for (const set of sets) {
+          const idx = updated.findIndex(e => e.exerciseId === set.workout_exercise_id);
+          if (idx >= 0) {
+            updated[idx].sets.push({
+              exerciseId: set.workout_exercise_id,
+              setNumber: set.set_number,
+              reps: set.reps_completed || 0,
+              weight: set.weight_used || undefined,
+              rpe: set.rpe || undefined,
+            });
+            updated[idx].completedSets = updated[idx].sets.length;
+            updated[idx].currentSet = updated[idx].completedSets + 1;
+          }
+        }
+        return updated;
+      });
     }
   }
 

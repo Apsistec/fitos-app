@@ -10,11 +10,11 @@
  * Sprint 40: Multi-Location Management
  */
 
-import { Component, OnInit, OnDestroy, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { IonicModule, AlertController } from '@ionic/angular';
 import { Router, ActivatedRoute } from '@angular/router';
-import { Subject } from 'rxjs';
 import { FranchiseService } from '../../services/franchise.service';
 import { Location, LocationAnalytics } from '../../models/franchise.models';
 
@@ -26,12 +26,12 @@ import { Location, LocationAnalytics } from '../../models/franchise.models';
   imports: [CommonModule, IonicModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LocationDetailPage implements OnInit, OnDestroy {
+export class LocationDetailPage implements OnInit {
   private franchiseService = inject(FranchiseService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private alertController = inject(AlertController);
-  private destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
 
   // State
   location = signal<Location | null>(null);
@@ -72,11 +72,6 @@ export class LocationDetailPage implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
   /**
    * Load location details and analytics
    */
@@ -85,7 +80,7 @@ export class LocationDetailPage implements OnInit, OnDestroy {
     this.error.set(null);
 
     // Load location info
-    this.franchiseService.getLocation(locationId).subscribe({
+    this.franchiseService.getLocation(locationId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (location) => {
         this.location.set(location);
         this.loadLocationAnalytics(locationId);

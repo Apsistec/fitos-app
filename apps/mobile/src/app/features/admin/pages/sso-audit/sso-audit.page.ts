@@ -5,7 +5,7 @@
  * Sprint 41: Enterprise Single Sign-On
  */
 
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
@@ -33,6 +33,7 @@ interface AuditEvent {
   styleUrls: ['./sso-audit.page.scss'],
   standalone: true,
   imports: [CommonModule, IonicModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SSOAuditPage implements OnInit {
   private http = inject(HttpClient);

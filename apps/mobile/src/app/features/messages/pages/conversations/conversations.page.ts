@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import {
   IonContent,
   IonHeader,
@@ -48,6 +49,7 @@ import { AuthService } from '../../../../core/services/auth.service';
   imports: [
     RouterLink,
     DatePipe,
+    ScrollingModule,
     IonContent,
     IonHeader,
     IonTitle,
@@ -112,39 +114,39 @@ import { AuthService } from '../../../../core/services/auth.service';
         <!-- ── Clients tab (or single list for clients) ── -->
         @if (!loading() && activeTab() === 'clients') {
           @if (displayConversations().length > 0) {
-            <ion-list lines="full">
-              @for (conv of displayConversations(); track conv.otherUserId) {
-                <ion-item
-                  button
-                  [routerLink]="['/tabs/messages/chat', conv.otherUserId]"
-                  detail="false"
-                >
-                  <ion-avatar slot="start">
-                    @if (conv.otherUserAvatar) {
-                      <img [src]="conv.otherUserAvatar" [alt]="conv.otherUserName" />
-                    } @else {
-                      <ion-icon name="person-circle-outline"></ion-icon>
-                    }
-                  </ion-avatar>
-
-                  <ion-label>
-                    <h2>{{ conv.otherUserName }}</h2>
-                    @if (conv.lastMessage) {
-                      <p class="last-message">
-                        {{ truncate(conv.lastMessage.content, 50) }}
-                      </p>
-                    }
-                    <ion-note class="message-time">
-                      {{ formatTime(conv.lastMessage?.created_at) }}
-                    </ion-note>
-                  </ion-label>
-
-                  @if (conv.unreadCount > 0) {
-                    <ion-badge slot="end" color="primary">{{ conv.unreadCount }}</ion-badge>
+            <cdk-virtual-scroll-viewport itemSize="72" class="conversations-viewport">
+              <ion-item
+                *cdkVirtualFor="let conv of displayConversations(); trackBy: trackConversation"
+                lines="full"
+                button
+                [routerLink]="['/tabs/messages/chat', conv.otherUserId]"
+                detail="false"
+              >
+                <ion-avatar slot="start">
+                  @if (conv.otherUserAvatar) {
+                    <img [src]="conv.otherUserAvatar" [alt]="conv.otherUserName" />
+                  } @else {
+                    <ion-icon name="person-circle-outline"></ion-icon>
                   }
-                </ion-item>
-              }
-            </ion-list>
+                </ion-avatar>
+
+                <ion-label>
+                  <h2>{{ conv.otherUserName }}</h2>
+                  @if (conv.lastMessage) {
+                    <p class="last-message">
+                      {{ truncate(conv.lastMessage.content, 50) }}
+                    </p>
+                  }
+                  <ion-note class="message-time">
+                    {{ formatTime(conv.lastMessage?.created_at) }}
+                  </ion-note>
+                </ion-label>
+
+                @if (conv.unreadCount > 0) {
+                  <ion-badge slot="end" color="primary">{{ conv.unreadCount }}</ion-badge>
+                }
+              </ion-item>
+            </cdk-virtual-scroll-viewport>
           } @else {
             <div class="empty-state">
               <ion-icon name="chatbubble-outline"></ion-icon>
@@ -299,6 +301,14 @@ import { AuthService } from '../../../../core/services/auth.service';
     .conversations-container {
       max-width: 800px;
       margin: 0 auto;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .conversations-viewport {
+      flex: 1;
+      min-height: 0;
     }
 
     .section-header {
@@ -484,6 +494,10 @@ export class ConversationsPage implements OnInit {
       admin_assistant: 'Admin Assistant',
     };
     return labels[role] ?? role;
+  }
+
+  trackConversation(_index: number, conv: Conversation): string {
+    return conv.otherUserId;
   }
 
   truncate(text: string | null | undefined, length: number): string {

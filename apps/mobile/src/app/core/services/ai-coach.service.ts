@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, timeout, retry, timer } from 'rxjs';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
 import { environment } from '../../../environments/environment';
@@ -130,6 +130,26 @@ export class AICoachService {
   /** True while the backend has rate-limited this user (429). Resets after Retry-After elapses. */
   rateLimited = signal(false);
 
+  /** True when AI backend is unreachable after multiple consecutive failures. Resets after 60s. */
+  aiUnavailable = signal(false);
+
+  /** Track consecutive failures for circuit breaker pattern */
+  private consecutiveFailures = 0;
+  private readonly CIRCUIT_BREAKER_THRESHOLD = 3;
+  private readonly REQUEST_TIMEOUT_MS = 30_000;
+
+  /** Message IDs that failed to persist and are pending sync */
+  pendingMessages = signal<Set<string>>(new Set());
+
+  /** Queue of messages awaiting retry */
+  private pendingQueue: { conversationId: string; message: ChatMessage }[] = [];
+
+  /** Page size for conversation history pagination */
+  private readonly PAGE_SIZE = 50;
+
+  /** Whether there are older messages available to load */
+  hasEarlierMessages = signal(false);
+
   /**
    * Load or create active conversation for user
    */
@@ -153,12 +173,13 @@ export class AICoachService {
         const conversation = conversations[0] as ConversationRecord;
         this.conversationId.set(conversation.id);
 
-        // Load messages for this conversation
-        const { data: msgData, error: msgError } = await this.supabase.client
+        // Load last PAGE_SIZE messages (paginated — newest first, then reverse for display)
+        const { data: msgData, error: msgError, count } = await this.supabase.client
           .from('ai_conversation_messages')
-          .select('*')
+          .select('*', { count: 'exact' })
           .eq('conversation_id', conversation.id)
-          .order('created_at', { ascending: true });
+          .order('created_at', { ascending: false })
+          .range(0, this.PAGE_SIZE - 1);
 
         if (msgError) {
           console.error('Error loading messages:', msgError);
@@ -166,7 +187,8 @@ export class AICoachService {
         }
 
         if (msgData && msgData.length > 0) {
-          const messages: ChatMessage[] = msgData.map((m: Record<string, unknown>) => ({
+          // Reverse to chronological order for display
+          const messages: ChatMessage[] = msgData.reverse().map((m: Record<string, unknown>) => ({
             id: m.id as string,
             role: m.role as ChatMessage['role'],
             content: m.content as string,
@@ -176,6 +198,9 @@ export class AICoachService {
           }));
           this.messages.set(messages);
 
+          // Track if there are older messages to load
+          this.hasEarlierMessages.set((count ?? 0) > this.PAGE_SIZE);
+
           // Restore last agent
           if (conversation.last_agent) {
             this.currentAgent.set(conversation.last_agent);
@@ -184,6 +209,51 @@ export class AICoachService {
       }
     } catch (err) {
       console.error('Error in loadConversation:', err);
+    }
+  }
+
+  /**
+   * Load earlier messages for the current conversation (pagination).
+   * Prepends older messages to the beginning of the message list.
+   */
+  async loadEarlierMessages(): Promise<void> {
+    const convId = this.conversationId();
+    if (!convId || !this.hasEarlierMessages()) return;
+
+    const currentMessages = this.messages();
+    const currentCount = currentMessages.length;
+
+    try {
+      const { data: msgData, error: msgError, count } = await this.supabase.client
+        .from('ai_conversation_messages')
+        .select('*', { count: 'exact' })
+        .eq('conversation_id', convId)
+        .order('created_at', { ascending: false })
+        .range(currentCount, currentCount + this.PAGE_SIZE - 1);
+
+      if (msgError) {
+        console.error('Error loading earlier messages:', msgError);
+        return;
+      }
+
+      if (msgData && msgData.length > 0) {
+        // Reverse to chronological order and prepend
+        const olderMessages: ChatMessage[] = msgData.reverse().map((m: Record<string, unknown>) => ({
+          id: m.id as string,
+          role: m.role as ChatMessage['role'],
+          content: m.content as string,
+          timestamp: m.created_at as string,
+          agent: (m.agent as ChatMessage['agent']) || undefined,
+          confidence: (m.confidence as number) || undefined,
+        }));
+
+        this.messages.set([...olderMessages, ...currentMessages]);
+        this.hasEarlierMessages.set((count ?? 0) > currentCount + msgData.length);
+      } else {
+        this.hasEarlierMessages.set(false);
+      }
+    } catch (err) {
+      console.error('Error in loadEarlierMessages:', err);
     }
   }
 
@@ -214,24 +284,91 @@ export class AICoachService {
   }
 
   /**
-   * Persist a message to Supabase
+   * Persist a message to Supabase with retry on failure.
+   * On first failure: retries once after 2 seconds.
+   * On second failure: marks message as "pending sync" for manual retry.
    */
   private async persistMessage(
     conversationId: string,
     message: ChatMessage
   ): Promise<void> {
+    const payload = {
+      conversation_id: conversationId,
+      role: message.role,
+      content: message.content,
+      agent: message.agent || null,
+      confidence: message.confidence || null,
+    };
+
     try {
-      await this.supabase.client
+      const { error } = await this.supabase.client
         .from('ai_conversation_messages')
-        .insert({
-          conversation_id: conversationId,
-          role: message.role,
-          content: message.content,
-          agent: message.agent || null,
-          confidence: message.confidence || null,
+        .insert(payload);
+      if (error) throw error;
+    } catch (firstErr) {
+      console.warn('[AICoachService] Message persist failed, retrying in 2s:', firstErr);
+
+      // Wait 2 seconds then retry once
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      try {
+        const { error } = await this.supabase.client
+          .from('ai_conversation_messages')
+          .insert(payload);
+        if (error) throw error;
+      } catch (secondErr) {
+        console.error('[AICoachService] Message persist retry failed:', secondErr);
+        // Mark as pending sync
+        this.markMessagePending(message.id);
+        this.pendingQueue.push({ conversationId, message });
+      }
+    }
+  }
+
+  /**
+   * Mark a message as pending sync (failed to persist)
+   */
+  private markMessagePending(messageId: string): void {
+    this.pendingMessages.update(pending => {
+      const updated = new Set(pending);
+      updated.add(messageId);
+      return updated;
+    });
+  }
+
+  /**
+   * Retry persisting all pending messages in FIFO order.
+   * Call this on reconnection or when the user taps "Retry".
+   */
+  async retryPendingMessages(): Promise<void> {
+    const queue = [...this.pendingQueue];
+    this.pendingQueue = [];
+
+    for (const item of queue) {
+      try {
+        const { error } = await this.supabase.client
+          .from('ai_conversation_messages')
+          .insert({
+            conversation_id: item.conversationId,
+            role: item.message.role,
+            content: item.message.content,
+            agent: item.message.agent || null,
+            confidence: item.message.confidence || null,
+          });
+
+        if (error) throw error;
+
+        // Remove from pending set on success
+        this.pendingMessages.update(pending => {
+          const updated = new Set(pending);
+          updated.delete(item.message.id);
+          return updated;
         });
-    } catch (err) {
-      console.error('Error persisting message:', err);
+      } catch (err) {
+        console.error('[AICoachService] Retry failed for message:', item.message.id, err);
+        // Put back in queue
+        this.pendingQueue.push(item);
+      }
     }
   }
 
@@ -289,7 +426,13 @@ export class AICoachService {
         sleep_hours: ('sleep_hours' in userContext) ? userContext.sleep_hours : null,
       };
 
+      // Circuit breaker: fail fast if backend is known to be down
+      if (this.aiUnavailable()) {
+        throw Object.assign(new Error('Coach is temporarily unavailable. Please try again shortly.'), { name: 'CircuitOpen' });
+      }
+
       // Call AI Backend (routing happens server-side, JWT validated server-side)
+      // 30s timeout per attempt, exponential backoff retry (max 2 retries)
       const response = await firstValueFrom(
         this.http.post<AIBackendResponse>(
           `${this.AI_BACKEND_URL}/api/v1/coach/chat`,
@@ -299,8 +442,17 @@ export class AICoachService {
             userContext: contextPayload,
           },
           { headers: this.getAuthHeaders() }
+        ).pipe(
+          timeout(this.REQUEST_TIMEOUT_MS),
+          retry({ count: 2, delay: (_err, attempt) => timer(Math.pow(2, attempt) * 1000) }),
         )
       );
+
+      // Reset circuit breaker on success
+      this.consecutiveFailures = 0;
+      if (this.aiUnavailable()) {
+        this.aiUnavailable.set(false);
+      }
 
       const assistantContent = response.message || 'I apologize, but I had trouble processing that. Could you rephrase?';
       const agent = response.agentSource as ChatMessage['agent'] || 'general';
@@ -334,7 +486,7 @@ export class AICoachService {
       }
 
       return assistantMessage;
-    } catch (err) {
+    } catch (err: unknown) {
       // Handle 429 Too Many Requests — disable send until Retry-After elapses
       if (err instanceof HttpErrorResponse && err.status === 429) {
         const retryAfter = parseInt(err.headers?.get('Retry-After') || '30', 10);
@@ -344,9 +496,32 @@ export class AICoachService {
         throw new Error('Rate limited');
       }
 
-      const errorMessage = err instanceof Error ? err.message : 'Failed to get AI response';
-      this.error.set(errorMessage);
-      throw new Error(errorMessage);
+      // Circuit breaker already open — don't increment
+      if ((err as Error)?.name === 'CircuitOpen') {
+        this.error.set('Coach is temporarily unavailable. Please try again shortly.');
+        throw err;
+      }
+
+      // Track consecutive failures for circuit breaker
+      this.consecutiveFailures++;
+      if (this.consecutiveFailures >= this.CIRCUIT_BREAKER_THRESHOLD) {
+        this.aiUnavailable.set(true);
+        setTimeout(() => {
+          this.aiUnavailable.set(false);
+          this.consecutiveFailures = 0;
+        }, 60_000);
+      }
+
+      // Timeout-specific message
+      if ((err as Error)?.name === 'TimeoutError') {
+        this.error.set('AI is taking longer than usual, please try again.');
+      } else if (this.aiUnavailable()) {
+        this.error.set('Coach is temporarily unavailable. Please try again shortly.');
+      } else {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to get AI response';
+        this.error.set(errorMessage);
+      }
+      throw err;
     } finally {
       this.isProcessing.set(false);
     }

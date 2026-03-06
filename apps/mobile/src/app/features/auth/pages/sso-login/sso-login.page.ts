@@ -5,7 +5,7 @@
  * Sprint 41: Enterprise SSO
  */
 
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
@@ -18,6 +18,7 @@ import { SSOService } from '../../../../core/services/sso.service';
   styleUrls: ['./sso-login.page.scss'],
   standalone: true,
   imports: [CommonModule, FormsModule, IonicModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SSOLoginPage implements OnInit {
   private ssoService = inject(SSOService);

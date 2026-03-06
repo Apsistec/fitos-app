@@ -2,6 +2,8 @@ import { Injectable, signal, computed, inject } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
 import { LiveActivityService } from './live-activity.service';
+import { SyncService } from './sync.service';
+import { db, type LocalWorkoutSet } from '../database/fitos.db';
 import { Database } from '@fitos/shared';
 
 type WorkoutSession = Database['public']['Tables']['workouts']['Row'];
@@ -39,6 +41,7 @@ export class WorkoutSessionService {
   private supabase = inject(SupabaseService);
   private auth = inject(AuthService);
   private liveActivity = inject(LiveActivityService);
+  private syncService = inject(SyncService);
 
   // Computed values
   activeSession = computed(() => this.activeSessionSignal());
@@ -46,7 +49,7 @@ export class WorkoutSessionService {
   error = computed(() => this.errorSignal());
 
   /**
-   * Start a new workout session
+   * Start a new workout session — offline-aware (Sprint 65)
    */
   async startSession(assignedWorkoutId: string): Promise<WorkoutSession | null> {
     this.loadingSignal.set(true);
@@ -56,38 +59,50 @@ export class WorkoutSessionService {
       const userId = this.auth.user()?.id;
       if (!userId) throw new Error('User not authenticated');
 
-      // Update the existing workout to mark it as started
-      const { data, error } = await this.supabase.client
-        .from('workouts')
-        .update({
-          started_at: new Date().toISOString(),
-          status: 'in_progress'
-        })
-        .eq('id', assignedWorkoutId)
-        .select()
-        .single();
+      const now = new Date().toISOString();
+      let data: WorkoutSession | null = null;
 
-      if (error) throw error;
+      if (this.syncService.isOnline()) {
+        // Online — update Supabase directly
+        const { data: serverData, error } = await this.supabase.client
+          .from('workouts')
+          .update({ started_at: now, status: 'in_progress' })
+          .eq('id', assignedWorkoutId)
+          .select()
+          .single();
 
-      // Update assignment status to in_progress
-      await this.supabase.client
-        .from('assigned_workouts')
-        .update({ status: 'in_progress' })
-        .eq('id', assignedWorkoutId);
+        if (error) throw error;
+        data = serverData;
 
-      this.activeSessionSignal.set({
-        session: data,
-        loggedSets: []
-      });
+        // Update assignment status
+        await this.supabase.client
+          .from('assigned_workouts')
+          .update({ status: 'in_progress' })
+          .eq('id', assignedWorkoutId);
+      } else {
+        // Offline — update IndexedDB and queue sync
+        await db.workouts.update(assignedWorkoutId, {
+          started_at: now,
+          status: 'in_progress',
+          updated_at: now,
+        });
+
+        await this.syncService.queueOperation('UPDATE', 'workouts', assignedWorkoutId, {
+          started_at: now,
+          status: 'in_progress',
+        });
+
+        // Build a minimal WorkoutSession from IndexedDB
+        const cached = await db.workouts.get(assignedWorkoutId);
+        data = (cached ?? { id: assignedWorkoutId, started_at: now, status: 'in_progress' }) as unknown as WorkoutSession;
+      }
+
+      this.activeSessionSignal.set({ session: data!, loggedSets: [] });
       this.sessionStartTime.set(new Date());
 
       // Sprint 49 — Start Dynamic Island live activity
-      const workoutName = (data as WorkoutSession & { template?: { name?: string } }).template?.name ?? 'Workout';
-      await this.liveActivity.startWorkoutActivity(
-        workoutName,
-        0,          // totalSets unknown at start; updated as sets are logged
-        'Starting…',
-      );
+      const workoutName = (data as WorkoutSession & { template?: { name?: string } })?.template?.name ?? 'Workout';
+      await this.liveActivity.startWorkoutActivity(workoutName, 0, 'Starting…');
 
       return data;
     } catch (error) {
@@ -136,7 +151,11 @@ export class WorkoutSessionService {
   }
 
   /**
-   * Log a set
+   * Log a set — offline-aware (Sprint 65)
+   *
+   * 1. Write to IndexedDB immediately (optimistic).
+   * 2. If online, also write to Supabase.
+   * 3. If offline (or Supabase fails), queue a sync operation.
    */
   async logSet(setLog: SetLog): Promise<LoggedSet | null> {
     const session = this.activeSessionSignal();
@@ -145,51 +164,104 @@ export class WorkoutSessionService {
       return null;
     }
 
+    const localId = crypto.randomUUID();
+    const now = new Date().toISOString();
+
+    // 1. Write to IndexedDB immediately
+    const localSet: LocalWorkoutSet = {
+      id: localId,
+      workout_id: session.session.id,
+      workout_exercise_id: setLog.exerciseId,
+      set_number: setLog.setNumber,
+      reps_completed: setLog.reps,
+      weight_used: setLog.weight || null,
+      rpe: setLog.rpe || null,
+      notes: setLog.notes || null,
+      created_at: now,
+      synced_at: null,
+    };
+
     try {
-      const setData: LoggedSetInsert = {
+      await db.workout_sets.put(localSet);
+    } catch (dbErr) {
+      console.error('IndexedDB write failed:', dbErr);
+    }
+
+    // 2. Try Supabase if online
+    let serverData: LoggedSet | null = null;
+
+    if (this.syncService.isOnline()) {
+      try {
+        const setData: LoggedSetInsert = {
+          workout_exercise_id: setLog.exerciseId,
+          set_number: setLog.setNumber,
+          reps_completed: setLog.reps,
+          weight_used: setLog.weight || null,
+          rpe: setLog.rpe || null,
+          notes: setLog.notes || null,
+        };
+
+        const { data, error } = await this.supabase.client
+          .from('workout_sets')
+          .insert(setData)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        serverData = data;
+
+        // Mark local copy as synced
+        await db.workout_sets.update(localId, {
+          id: data.id,           // replace temp ID with server ID
+          synced_at: now,
+        });
+      } catch (err) {
+        console.warn('Supabase logSet failed, queuing for sync:', err);
+        // Fall through to queue sync below
+      }
+    }
+
+    // 3. If no server data, queue for sync
+    if (!serverData) {
+      await this.syncService.queueOperation('CREATE', 'workout_sets', localId, {
         workout_exercise_id: setLog.exerciseId,
         set_number: setLog.setNumber,
         reps_completed: setLog.reps,
         weight_used: setLog.weight || null,
         rpe: setLog.rpe || null,
-        notes: setLog.notes || null
-      };
-
-      const { data, error } = await this.supabase.client
-        .from('workout_sets')
-        .insert(setData)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Update local state
-      this.activeSessionSignal.update(s => {
-        if (!s) return s;
-        return {
-          ...s,
-          loggedSets: [...s.loggedSets, data]
-        };
+        notes: setLog.notes || null,
       });
-
-      // Sprint 49 — Update Dynamic Island with current set info
-      const session = this.activeSessionSignal();
-      const elapsedSecs = this.sessionStartTime()
-        ? Math.floor((Date.now() - this.sessionStartTime()!.getTime()) / 1000)
-        : 0;
-      await this.liveActivity.updateActivity(
-        /* exerciseName */ `Set ${setLog.setNumber}`,
-        setLog.setNumber,
-        null,       // not in rest period immediately after logging
-        elapsedSecs,
-      );
-
-      return data;
-    } catch (error) {
-      console.error('Error logging set:', error);
-      this.errorSignal.set(error instanceof Error ? error.message : 'Failed to log set');
-      return null;
     }
+
+    // 4. Update in-memory state (works regardless of online/offline)
+    const resultSet = serverData ?? ({
+      id: localId,
+      workout_exercise_id: setLog.exerciseId,
+      set_number: setLog.setNumber,
+      reps_completed: setLog.reps,
+      weight_used: setLog.weight || null,
+      rpe: setLog.rpe || null,
+      notes: setLog.notes || null,
+    } as LoggedSet);
+
+    this.activeSessionSignal.update(s => {
+      if (!s) return s;
+      return { ...s, loggedSets: [...s.loggedSets, resultSet] };
+    });
+
+    // Sprint 49 — Update Dynamic Island
+    const elapsedSecs = this.sessionStartTime()
+      ? Math.floor((Date.now() - this.sessionStartTime()!.getTime()) / 1000)
+      : 0;
+    await this.liveActivity.updateActivity(
+      `Set ${setLog.setNumber}`,
+      setLog.setNumber,
+      null,
+      elapsedSecs,
+    );
+
+    return resultSet;
   }
 
   /**
@@ -271,7 +343,7 @@ export class WorkoutSessionService {
   }
 
   /**
-   * Complete the workout session
+   * Complete the workout session — offline-aware (Sprint 65)
    */
   async completeSession(rating?: number, notes?: string): Promise<boolean> {
     const session = this.activeSessionSignal();
@@ -284,24 +356,33 @@ export class WorkoutSessionService {
 
     try {
       const completedAt = new Date().toISOString();
-      const startedAt = session.session.started_at;
-      const _duration = startedAt ? Math.floor(
-        (new Date(completedAt).getTime() - new Date(startedAt).getTime()) / 1000
-      ) : null;
+      const updatePayload = {
+        completed_at: completedAt,
+        status: 'completed' as const,
+        rating: rating || null,
+        notes: notes || null,
+      };
 
-      const { error: sessionError } = await this.supabase.client
-        .from('workouts')
-        .update({
-          completed_at: completedAt,
-          status: 'completed',
-          rating: rating || null,
-          notes: notes || null
-        })
-        .eq('id', session.session.id);
+      if (this.syncService.isOnline()) {
+        const { error: sessionError } = await this.supabase.client
+          .from('workouts')
+          .update(updatePayload)
+          .eq('id', session.session.id);
 
-      if (sessionError) throw sessionError;
+        if (sessionError) throw sessionError;
+      } else {
+        // Offline — update IndexedDB and queue sync
+        await db.workouts.update(session.session.id, {
+          ...updatePayload,
+          updated_at: completedAt,
+        });
 
-      // Update assignment status to completed
+        await this.syncService.queueOperation('UPDATE', 'workouts', session.session.id, updatePayload);
+      }
+
+      // Clean up active workout cache
+      await db.active_workout_cache.delete(session.session.id).catch(() => {});
+
       this.activeSessionSignal.set(null);
       this.sessionStartTime.set(null);
 

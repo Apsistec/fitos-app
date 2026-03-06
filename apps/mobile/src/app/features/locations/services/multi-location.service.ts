@@ -4,7 +4,7 @@
  * Sprint 40: Multi-Location Management (Deferred to Sprint 41)
  */
 
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
@@ -54,10 +54,11 @@ interface CheckInRecord {
   providedIn: 'root',
 })
 export class MultiLocationService {
+  private http = inject(HttpClient);
   private currentLocationId = signal<string | null>(null);
   private apiUrl = `${environment.supabaseUrl}/rest/v1`;
 
-  constructor(private http: HttpClient) {
+  constructor() {
     this.loadCurrentLocation();
   }
 

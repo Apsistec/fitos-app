@@ -1,4 +1,4 @@
-import {  Component, output, effect, signal, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
+import { Component, output, effect, signal, inject, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonButton,
@@ -19,9 +19,11 @@ import {
   checkmarkCircle,
   createOutline,
   trashOutline,
+  cloudOfflineOutline,
 } from 'ionicons/icons';
 import { VoiceService } from '../../../../core/services/voice.service';
 import { NutritionParserService, ParsedFood } from '../../../../core/services/nutrition-parser.service';
+import { SyncService } from '../../../../core/services/sync.service';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 /**
@@ -59,8 +61,17 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
 ],
   template: `
     <div class="voice-nutrition">
-      <!-- Voice Input Section -->
-      @if (!parsedFoods().length) {
+      @if (!syncService.isOnline()) {
+        <!-- Offline placeholder -->
+        <div class="offline-placeholder">
+          <div class="offline-icon-ring">
+            <ion-icon name="cloud-offline-outline"></ion-icon>
+          </div>
+          <h2>Available When Online</h2>
+          <p>Voice food logging requires an internet connection for speech recognition.</p>
+          <p class="offline-hint">You can still log food manually from the nutrition page.</p>
+        </div>
+      } @else if (!parsedFoods().length) {
         <div class="voice-section">
           <!-- Mic Button -->
           <div class="mic-container">
@@ -558,6 +569,55 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
       }
     }
 
+    /* ── Offline placeholder ─────────────────────────────── */
+    .offline-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      gap: 12px;
+      text-align: center;
+    }
+
+    .offline-icon-ring {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: rgba(245, 158, 11, 0.1);
+      border: 2px solid rgba(245, 158, 11, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    .offline-icon-ring ion-icon {
+      font-size: 48px;
+      color: #F59E0B;
+    }
+
+    .offline-placeholder h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--fitos-text-primary, #F5F5F5);
+      margin: 0;
+    }
+
+    .offline-placeholder p {
+      font-size: 14px;
+      color: var(--fitos-text-secondary, #A3A3A3);
+      margin: 0;
+      line-height: 1.5;
+      max-width: 320px;
+    }
+
+    .offline-hint {
+      font-size: 13px !important;
+      color: var(--fitos-text-tertiary, #737373) !important;
+      margin-top: 8px !important;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .ripple,
       .pulse,
@@ -573,6 +633,8 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
   `],
 })
 export class VoiceNutritionComponent implements OnDestroy {
+  syncService = inject(SyncService);
+
   // Outputs
   foodsConfirmed = output<ParsedFood[]>();
 
@@ -589,7 +651,7 @@ export class VoiceNutritionComponent implements OnDestroy {
     public voiceService: VoiceService,
     public nutritionParser: NutritionParserService
   ) {
-    addIcons({ micOutline, mic, closeCircle, checkmarkCircle, createOutline, trashOutline });
+    addIcons({ micOutline, mic, closeCircle, checkmarkCircle, createOutline, trashOutline, cloudOfflineOutline });
 
     // Auto-parse when voice transcript is finalized
     effect(() => {
