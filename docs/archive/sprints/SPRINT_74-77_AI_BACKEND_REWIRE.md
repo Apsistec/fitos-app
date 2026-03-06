@@ -2,12 +2,12 @@
 
 ## Context & Decision Summary
 
-> **Sprint Numbering Note**: These are numbered 68–71 as the next available slots after the
-> existing sprint plan (Sprints 61–67 are planned for RBAC, Admin Assistant, Notifications,
-> Waivers, AI Workout Builder, No-Show Policy, and Hydration). However, Sprint 68 (Rewire)
+> **Sprint Renumbering Note (March 2026):** Originally numbered 68–71, renumbered to 74–77
+> to resolve overlap with Phase 6A Client Experience (Sprints 62–69, complete) and
+> Phase 6B Platform Hardening (Sprints 70–73, planned). Sprint 74 (Rewire)
 > fixes a **security vulnerability** (API key exposed client-side) and corrects a broken
-> architecture. Consider prioritizing it ahead of Sprints 65–67 (P1 improvements) or even
-> running it in parallel with Sprint 61–64 (P0 blockers) since the AI rewire touches
+> architecture. Consider prioritizing it ahead of later sprints or even
+> running it in parallel with Sprints 70–73 since the AI rewire touches
 > completely different files.
 
 FitOS currently has **two parallel paths** for AI features that overlap and conflict. After a full codebase audit, the decision is to **use Path B (AI Backend on FastAPI/LangGraph)** as the single AI layer, and **rewire Path A's frontend (mobile app) to call Path B instead of calling Anthropic directly**.
@@ -42,7 +42,7 @@ The mobile app **never** touches the Anthropic API key. All AI calls go through 
 
 ---
 
-## Sprint 68: Rewire Frontend to AI Backend
+## Sprint 74: Rewire Frontend to AI Backend
 
 ### Task 68.1: Refactor `ai-coach.service.ts` to Call AI Backend
 
@@ -196,7 +196,7 @@ Either delete these (they contain incorrect information about Claude Max API bil
 
 ---
 
-## Sprint 69: Cost Optimization — Smart Model Routing
+## Sprint 75: Cost Optimization — Smart Model Routing
 
 ### Problem
 
@@ -337,7 +337,7 @@ def get_smart_llm(**kwargs: Any):
 
 ---
 
-## Sprint 70: API Key Setup & Backend Deployment
+## Sprint 76: API Key Setup & Backend Deployment
 
 ### Task 70.1: Create and Configure Anthropic Console API Key
 
@@ -389,7 +389,7 @@ Ensure `ANTHROPIC_API_KEY` is NOT set as a shell env var (only in `.env` file). 
 
 ---
 
-## Sprint 71: Integration Testing & Monitoring
+## Sprint 77: Integration Testing & Monitoring
 
 ### Task 71.1: End-to-End Test
 
