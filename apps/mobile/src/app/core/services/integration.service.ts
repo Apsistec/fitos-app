@@ -1,5 +1,6 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed, isDevMode } from '@angular/core';
 import { SupabaseService } from './supabase.service';
+import { AuthService } from './auth.service';
 
 /**
  * Integration types
@@ -35,13 +36,18 @@ export interface Integration {
   updated_at: string;
 }
 
+/**
+ * UserIntegration — client-side view.
+ * SECURITY: access_token and refresh_token are NEVER returned to the client.
+ * Token exchange and storage is handled server-side via Edge Functions.
+ * RLS policy on user_integrations should exclude token columns from SELECT.
+ */
 export interface UserIntegration {
   id: string;
   user_id: string;
   integration_id: string;
   status: IntegrationStatus;
-  access_token?: string;
-  refresh_token?: string;
+  // access_token / refresh_token intentionally excluded — server-side only
   token_expires_at?: string;
   config: Record<string, unknown>;
   auto_sync: boolean;
@@ -118,6 +124,14 @@ export interface ConnectIntegrationInput {
 })
 export class IntegrationService {
   private supabase = inject(SupabaseService);
+  private auth = inject(AuthService);
+
+  /** Derive user ID from authenticated session (never from caller) */
+  private get userId(): string {
+    const id = this.auth.user()?.id;
+    if (!id) throw new Error('Not authenticated');
+    return id;
+  }
 
   // State
   availableIntegrations = signal<Integration[]>([]);
@@ -175,7 +189,7 @@ export class IntegrationService {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to load integrations';
       this.error.set(errorMessage);
-      console.error('Error getting integrations:', err);
+      if (isDevMode()) console.error('Error getting integrations:', err);
       return [];
     } finally {
       this.loading.set(false);
@@ -183,17 +197,20 @@ export class IntegrationService {
   }
 
   /**
-   * Get user's connected integrations
+   * Get user's connected integrations.
+   * Identity derived from authenticated session — no userId parameter.
+   * Token columns excluded from select to prevent client-side exposure.
    */
-  async getUserIntegrations(userId: string): Promise<UserIntegration[]> {
+  async getUserIntegrations(): Promise<UserIntegration[]> {
     this.loading.set(true);
     this.error.set(null);
 
     try {
+      // Exclude access_token and refresh_token — select only safe columns
       const { data, error } = await this.supabase.client
         .from('user_integrations')
-        .select('*')
-        .eq('user_id', userId)
+        .select('id,user_id,integration_id,status,token_expires_at,config,auto_sync,sync_frequency,last_sync_at,next_sync_at,error_count,last_error,last_error_at,connected_at,disconnected_at,created_at,updated_at')
+        .eq('user_id', this.userId)
         .order('connected_at', { ascending: false });
 
       if (error) throw error;
@@ -204,7 +221,7 @@ export class IntegrationService {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to load user integrations';
       this.error.set(errorMessage);
-      console.error('Error getting user integrations:', err);
+      if (isDevMode()) console.error('Error getting user integrations:', err);
       return [];
     } finally {
       this.loading.set(false);
@@ -214,28 +231,28 @@ export class IntegrationService {
   /**
    * Get integration summary for user
    */
-  async getIntegrationSummary(userId: string): Promise<IntegrationSummary | null> {
+  async getIntegrationSummary(): Promise<IntegrationSummary | null> {
     try {
       const { data, error } = await this.supabase.client
         .rpc('get_user_integration_summary', {
-          p_user_id: userId,
+          p_user_id: this.userId,
         });
 
       if (error) throw error;
 
       return data?.[0] || null;
     } catch (err) {
-      console.error('Error getting integration summary:', err);
+      if (isDevMode()) console.error('Error getting integration summary:', err);
       return null;
     }
   }
 
   /**
-   * Connect a new integration
-   * Note: This initiates OAuth flow - actual token exchange happens server-side
+   * Connect a new integration.
+   * Identity derived from authenticated session — no userId parameter.
+   * Note: This initiates OAuth flow — actual token exchange happens server-side.
    */
   async connectIntegration(
-    userId: string,
     input: ConnectIntegrationInput
   ): Promise<UserIntegration | null> {
     this.loading.set(true);
@@ -245,13 +262,13 @@ export class IntegrationService {
       const { data, error } = await this.supabase.client
         .from('user_integrations')
         .insert({
-          user_id: userId,
+          user_id: this.userId,
           integration_id: input.integration_id,
           status: 'pending',
           config: input.config || {},
           sync_frequency: input.sync_frequency || 'daily',
         })
-        .select()
+        .select('id,user_id,integration_id,status,token_expires_at,config,auto_sync,sync_frequency,last_sync_at,next_sync_at,error_count,last_error,last_error_at,connected_at,disconnected_at,created_at,updated_at')
         .single();
 
       if (error) throw error;
@@ -265,69 +282,34 @@ export class IntegrationService {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to connect integration';
       this.error.set(errorMessage);
-      console.error('Error connecting integration:', err);
+      if (isDevMode()) console.error('Error connecting integration:', err);
       return null;
     } finally {
       this.loading.set(false);
     }
   }
 
-  /**
-   * Update integration tokens (after OAuth callback)
-   */
-  async updateIntegrationTokens(
-    userIntegrationId: string,
-    accessToken: string,
-    refreshToken?: string,
-    expiresIn?: number
-  ): Promise<boolean> {
-    try {
-      const expiresAt = expiresIn
-        ? new Date(Date.now() + expiresIn * 1000).toISOString()
-        : undefined;
-
-      const { error } = await this.supabase.client
-        .from('user_integrations')
-        .update({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-          token_expires_at: expiresAt,
-          status: 'active',
-        })
-        .eq('id', userIntegrationId);
-
-      if (error) throw error;
-
-      // Update local state
-      const current = this.userIntegrations();
-      const updated = current.map((i) =>
-        i.id === userIntegrationId
-          ? { ...i, status: 'active' as IntegrationStatus, token_expires_at: expiresAt }
-          : i
-      );
-      this.userIntegrations.set(updated);
-
-      return true;
-    } catch (err) {
-      console.error('Error updating tokens:', err);
-      return false;
-    }
-  }
+  // updateIntegrationTokens() REMOVED — Sprint 81 security hardening.
+  // Token exchange and storage is handled exclusively server-side via Edge Functions.
+  // The client NEVER receives or writes access_token / refresh_token.
 
   /**
-   * Disconnect integration
+   * Disconnect integration.
+   * Ownership enforced: only the authenticated user's integrations can be updated.
+   * Token nulling handled server-side — client only updates status.
    */
   async disconnectIntegration(userIntegrationId: string): Promise<boolean> {
     try {
+      // Client sets status only — token nulling handled server-side by Edge Function / trigger.
+      // Ownership enforced: must match both id AND user_id.
       const { error } = await this.supabase.client
         .from('user_integrations')
         .update({
           status: 'disconnected',
           disconnected_at: new Date().toISOString(),
-          access_token: null,
-          refresh_token: null,
         })
-        .eq('id', userIntegrationId);
+        .eq('id', userIntegrationId)
+        .eq('user_id', this.userId);
 
       if (error) throw error;
 
@@ -342,7 +324,7 @@ export class IntegrationService {
 
       return true;
     } catch (err) {
-      console.error('Error disconnecting integration:', err);
+      if (isDevMode()) console.error('Error disconnecting integration:', err);
       return false;
     }
   }
@@ -365,13 +347,15 @@ export class IntegrationService {
 
       if (scheduleError) throw scheduleError;
 
+      // Ownership enforced: must match both id AND user_id
       const { error } = await this.supabase.client
         .from('user_integrations')
         .update({
           auto_sync: autoSync,
           sync_frequency: frequency,
         })
-        .eq('id', userIntegrationId);
+        .eq('id', userIntegrationId)
+        .eq('user_id', this.userId);
 
       if (error) throw error;
 
@@ -386,7 +370,7 @@ export class IntegrationService {
 
       return true;
     } catch (err) {
-      console.error('Error updating sync settings:', err);
+      if (isDevMode()) console.error('Error updating sync settings:', err);
       return false;
     }
   }
@@ -398,18 +382,20 @@ export class IntegrationService {
     try {
       // This would typically call a Supabase Edge Function
       // For now, just update the next_sync_at to trigger it
+      // Ownership enforced: must match both id AND user_id
       const { error } = await this.supabase.client
         .from('user_integrations')
         .update({
           next_sync_at: new Date().toISOString(),
         })
-        .eq('id', userIntegrationId);
+        .eq('id', userIntegrationId)
+        .eq('user_id', this.userId);
 
       if (error) throw error;
 
       return true;
     } catch (err) {
-      console.error('Error triggering sync:', err);
+      if (isDevMode()) console.error('Error triggering sync:', err);
       return false;
     }
   }
@@ -434,7 +420,7 @@ export class IntegrationService {
       this.syncLogs.set(data || []);
       return data || [];
     } catch (err) {
-      console.error('Error getting sync history:', err);
+      if (isDevMode()) console.error('Error getting sync history:', err);
       return [];
     }
   }
@@ -453,7 +439,7 @@ export class IntegrationService {
 
       return data || false;
     } catch (err) {
-      console.error('Error checking token refresh:', err);
+      if (isDevMode()) console.error('Error checking token refresh:', err);
       return false;
     }
   }
@@ -479,7 +465,7 @@ export class IntegrationService {
 
       return data;
     } catch (err) {
-      console.error('Error getting data mapping:', err);
+      if (isDevMode()) console.error('Error getting data mapping:', err);
       return null;
     }
   }
@@ -509,7 +495,7 @@ export class IntegrationService {
 
       return true;
     } catch (err) {
-      console.error('Error creating data mapping:', err);
+      if (isDevMode()) console.error('Error creating data mapping:', err);
       return false;
     }
   }

@@ -576,9 +576,6 @@ export class IntegrationsPage implements OnInit {
   }
 
   async connectIntegration(integration: Integration): Promise<void> {
-    const user = this.authService.user();
-    if (!user) return;
-
     const alert = await this.alertCtrl.create({
       header: `Connect ${integration.name}`,
       message: integration.setup_instructions || `Connect your ${integration.name} account to sync data automatically.`,
@@ -590,16 +587,16 @@ export class IntegrationsPage implements OnInit {
         {
           text: 'Connect',
           handler: async () => {
-            const result = await this.service.connectIntegration(user.id, {
+            // Identity derived from session — no userId param needed
+            const result = await this.service.connectIntegration({
               integration_id: integration.id,
             });
 
             if (result) {
               await this.showToast(`${integration.name} connected successfully`, 'success');
-
-              // In production, this would redirect to OAuth flow
-              // For now, just update status to active
-              await this.service.updateIntegrationTokens(result.id, 'dummy_token');
+              // Token exchange handled server-side via Edge Function OAuth callback.
+              // Client status will update when getUserIntegrations() is refreshed.
+              await this.service.getUserIntegrations();
             } else {
               await this.showToast(`Failed to connect ${integration.name}`, 'danger');
             }

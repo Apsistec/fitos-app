@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed, isDevMode } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { SupabaseService } from './supabase.service';
 import { firstValueFrom } from 'rxjs';
@@ -163,7 +163,8 @@ export interface UserChronotype {
 export class ChronotypeService {
   private readonly http = inject(HttpClient);
   private readonly supabase = inject(SupabaseService);
-  private readonly API_URL = environment.aiBackendUrl || 'http://localhost:8000';
+  // SECURITY: No localhost fallback — aiBackendUrl must be configured in environment
+  private readonly API_URL = environment.aiBackendUrl;
 
   // State
   private readonly userChronotypeSignal = signal<UserChronotype | null>(null);
@@ -199,7 +200,7 @@ export class ChronotypeService {
       this.assessmentQuestionsSignal.set(response.questions);
       return response.questions;
     } catch (error) {
-      console.error('Error fetching chronotype questions:', error);
+      if (isDevMode()) console.error('Error fetching chronotype questions:', error);
       throw error;
     } finally {
       this.loadingSignal.set(false);
@@ -219,7 +220,7 @@ export class ChronotypeService {
       );
       return result;
     } catch (error) {
-      console.error('Error calculating chronotype:', error);
+      if (isDevMode()) console.error('Error calculating chronotype:', error);
       throw error;
     } finally {
       this.loadingSignal.set(false);
@@ -255,7 +256,7 @@ export class ChronotypeService {
       this.userChronotypeSignal.set(data);
       return data;
     } catch (error) {
-      console.error('Error saving user chronotype:', error);
+      if (isDevMode()) console.error('Error saving user chronotype:', error);
       throw error;
     }
   }
@@ -280,7 +281,7 @@ export class ChronotypeService {
       this.userChronotypeSignal.set(data);
       return data;
     } catch (error) {
-      console.error('Error loading user chronotype:', error);
+      if (isDevMode()) console.error('Error loading user chronotype:', error);
       return null;
     } finally {
       this.loadingSignal.set(false);
@@ -309,7 +310,7 @@ export class ChronotypeService {
       );
       return response;
     } catch (error) {
-      console.error('Error getting optimal window:', error);
+      if (isDevMode()) console.error('Error getting optimal window:', error);
       throw error;
     }
   }
@@ -326,7 +327,7 @@ export class ChronotypeService {
       );
       return response;
     } catch (error) {
-      console.error('Error getting daily schedule:', error);
+      if (isDevMode()) console.error('Error getting daily schedule:', error);
       throw error;
     }
   }
@@ -347,7 +348,7 @@ export class ChronotypeService {
       );
       return response;
     } catch (error) {
-      console.error('Error getting workout template:', error);
+      if (isDevMode()) console.error('Error getting workout template:', error);
       throw error;
     }
   }

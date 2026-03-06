@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, isDevMode } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -57,8 +57,8 @@ export interface JITAIIntervention {
 export class JITAIService {
   private http = inject(HttpClient);
 
-  // AI Backend URL
-  private readonly AI_BACKEND_URL = environment.aiBackendUrl || 'http://localhost:8000';
+  // SECURITY: No localhost fallback — aiBackendUrl must be configured in environment
+  private readonly AI_BACKEND_URL = environment.aiBackendUrl;
 
   // State
   interventions = signal<JITAIIntervention[]>([]);
@@ -183,7 +183,7 @@ export class JITAIService {
         )
       );
     } catch (err) {
-      console.error('Error recording intervention response:', err);
+      if (isDevMode()) console.error('Error recording intervention response:', err);
     }
   }
 

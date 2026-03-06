@@ -1,6 +1,7 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, isDevMode } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
+import { environment } from '../../../environments/environment';
 import type { SupportTicketPayload, SupportTicketResponse } from '@fitos/libs';
 
 export interface SupportTicket {
@@ -50,7 +51,7 @@ export class SupportService {
         const response = await this.submitViaBackendAPI(payload);
         return response;
       } catch (apiError) {
-        console.warn('Backend API unavailable, falling back to direct Supabase insert:', apiError);
+        if (isDevMode()) console.warn('Backend API unavailable, falling back to direct Supabase insert:', apiError);
 
         // Fall back to direct Supabase insert
         const { data, error } = await this.supabase.client
@@ -97,8 +98,8 @@ export class SupportService {
       throw new Error('No active session');
     }
 
-    // TODO: Get actual backend URL from environment
-    const backendUrl = 'http://localhost:8000'; // Development URL
+    const backendUrl = environment.aiBackendUrl;
+    if (!backendUrl) throw new Error('AI backend URL not configured');
 
     const response = await fetch(`${backendUrl}/api/support/ticket`, {
       method: 'POST',

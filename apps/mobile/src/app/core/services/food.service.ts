@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, isDevMode } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { SupabaseService } from './supabase.service';
 
@@ -61,8 +61,8 @@ export class FoodService {
   private readonly CACHE_SIZE = 100;
 
   // USDA API configuration
+  // SECURITY: API key is NOT used client-side — all USDA calls go through Edge Function proxy.
   private readonly USDA_BASE_URL = 'https://api.nal.usda.gov/fdc/v1';
-  private readonly API_KEY = environment.usdaApiKey;
 
   /**
    * Search for foods using USDA FoodData Central API
@@ -85,15 +85,14 @@ export class FoodService {
         return cachedFoods;
       }
 
-      // If not in cache, query USDA API
-      const url = `${this.USDA_BASE_URL}/foods/search?api_key=${this.API_KEY}&query=${encodeURIComponent(query)}&pageSize=${pageSize}&dataType=Foundation,SR Legacy,Branded`;
+      // If not in cache, query USDA API via Edge Function proxy (API key stays server-side)
+      const { data: proxyData, error: proxyError } = await this.supabase.client.functions.invoke<USDASearchResult>(
+        'usda-search',
+        { body: { query, pageSize, dataType: 'Foundation,SR Legacy,Branded' } }
+      );
 
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`USDA API error: ${response.statusText}`);
-      }
-
-      const data: USDASearchResult = await response.json();
+      if (proxyError) throw proxyError;
+      const data: USDASearchResult = proxyData!;
 
       // Transform USDA foods to our simplified format
       const foods = data.foods.map((usdaFood) => this.transformUSDAFood(usdaFood));
@@ -106,7 +105,7 @@ export class FoodService {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to search foods';
       this.error.set(errorMessage);
-      console.error('Error searching foods:', err);
+      if (isDevMode()) console.error('Error searching foods:', err);
       return [];
     } finally {
       this.loading.set(false);
@@ -135,30 +134,29 @@ export class FoodService {
 
       if (data) {
         const food = this.transformCachedFood(data);
-        this.foodCache.set(fdcId, food);
+        this.addToMemoryCache(food);
         return food;
       }
 
-      // Not in cache, fetch from USDA API
-      const url = `${this.USDA_BASE_URL}/food/${fdcId}?api_key=${this.API_KEY}`;
+      // Not in cache, fetch from USDA API via Edge Function proxy (API key stays server-side)
+      const { data: proxyData, error: proxyError } = await this.supabase.client.functions.invoke<USDAFood>(
+        'usda-food',
+        { body: { fdcId } }
+      );
 
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`USDA API error: ${response.statusText}`);
-      }
-
-      const usdaFood: USDAFood = await response.json();
+      if (proxyError) throw proxyError;
+      const usdaFood: USDAFood = proxyData!;
       const food = this.transformUSDAFood(usdaFood);
 
       // Cache it
       await this.cacheFoods([food]);
-      this.foodCache.set(fdcId, food);
+      this.addToMemoryCache(food);
 
       return food;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to get food details';
       this.error.set(errorMessage);
-      console.error('Error getting food:', err);
+      if (isDevMode()) console.error('Error getting food:', err);
       return null;
     } finally {
       this.loading.set(false);
@@ -170,17 +168,20 @@ export class FoodService {
    */
   private async searchCachedFoods(query: string, limit: number): Promise<Food[]> {
     try {
+      // Escape SQL wildcard characters to prevent injection via ilike
+      const sanitized = query.replace(/[%_\\]/g, '\\$&');
+
       const { data, error } = await this.supabase.client
         .from('cached_foods')
         .select('*')
-        .or(`name.ilike.%${query}%,brand.ilike.%${query}%`)
+        .or(`name.ilike.%${sanitized}%,brand.ilike.%${sanitized}%`)
         .limit(limit);
 
       if (error) throw error;
 
       return (data || []).map((row) => this.transformCachedFood(row));
     } catch (err) {
-      console.error('Error searching cached foods:', err);
+      if (isDevMode()) console.error('Error searching cached foods:', err);
       return [];
     }
   }
@@ -211,10 +212,10 @@ export class FoodService {
         .upsert(rows, { onConflict: 'fdc_id' });
 
       if (error) {
-        console.error('Error caching foods:', error);
+        if (isDevMode()) console.error('Error caching foods:', error);
       }
     } catch (err) {
-      console.error('Error caching foods:', err);
+      if (isDevMode()) console.error('Error caching foods:', err);
     }
   }
 
@@ -383,11 +384,24 @@ export class FoodService {
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Barcode lookup failed';
       this.error.set(msg);
-      console.error('[FoodService] lookupBarcode error:', err);
+      if (isDevMode()) console.error('[FoodService] lookupBarcode error:', err);
       return null;
     } finally {
       this.loading.set(false);
     }
+  }
+
+  /**
+   * Add a food to the in-memory cache with size eviction.
+   * When the cache exceeds CACHE_SIZE, the oldest entry is evicted (FIFO).
+   */
+  private addToMemoryCache(food: Food): void {
+    if (this.foodCache.size >= this.CACHE_SIZE) {
+      // Evict oldest entry (Map iterates in insertion order)
+      const firstKey = this.foodCache.keys().next().value;
+      if (firstKey !== undefined) this.foodCache.delete(firstKey);
+    }
+    this.foodCache.set(food.id, food);
   }
 
   /**

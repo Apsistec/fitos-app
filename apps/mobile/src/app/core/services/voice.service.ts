@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed, isDevMode } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 
 /**
@@ -199,7 +199,7 @@ export class VoiceService {
       stream.getTracks().forEach(track => track.stop());
       return true;
     } catch (err) {
-      console.error('Microphone permission denied:', err);
+      if (isDevMode()) console.error('Microphone permission denied:', err);
       this._error.set('Microphone permission denied');
       return false;
     }
@@ -241,7 +241,7 @@ export class VoiceService {
       this._isListening.set(true);
       this._isProcessing.set(false);
     } catch (err) {
-      console.error('Error starting voice input:', err);
+      if (isDevMode()) console.error('Error starting voice input:', err);
       this._error.set('Failed to start voice input');
       this._isProcessing.set(false);
       this.cleanup();
@@ -399,7 +399,7 @@ export class VoiceService {
 
     this.socket.onmessage = (event) => this.handleDeepgramMessage(event);
     this.socket.onerror = (err) => {
-      console.error('Deepgram WebSocket error:', err);
+      if (isDevMode()) console.error('Deepgram WebSocket error:', err);
       this._error.set('Voice recognition connection error');
     };
     this.socket.onclose = () => {
@@ -431,7 +431,7 @@ export class VoiceService {
       // Reconnect with new context keyterms (reuse existing stream)
       await this.connectDeepgram();
     } catch (err) {
-      console.error('Error reconnecting with new context:', err);
+      if (isDevMode()) console.error('Error reconnecting with new context:', err);
     }
   }
 
@@ -459,7 +459,7 @@ export class VoiceService {
         }
       }
     } catch (err) {
-      console.error('Error parsing Deepgram message:', err);
+      if (isDevMode()) console.error('Error parsing Deepgram message:', err);
     }
   }
 
@@ -485,27 +485,25 @@ export class VoiceService {
   /**
    * Get Deepgram API key from backend Edge Function
    */
+  /**
+   * Get Deepgram API key from backend Edge Function.
+   * SECURITY: The Edge Function should return a scoped/temporary key, not the master key.
+   * Throws on failure — callers must handle the error to prevent connecting with no auth.
+   */
   private async getDeepgramApiKey(): Promise<string> {
-    try {
-      const response = await this.supabase.client.functions.invoke('deepgram-key');
+    const response = await this.supabase.client.functions.invoke('deepgram-key');
 
-      if (response.error) {
-        console.error('Failed to get Deepgram API key:', response.error);
-        throw new Error('Failed to retrieve API key');
-      }
-
-      if (!response.data?.key) {
-        console.error('No API key in response');
-        throw new Error('No API key returned');
-      }
-
-      return response.data.key;
-    } catch (err) {
-      console.error('Error getting Deepgram API key:', err);
-      // Return empty string to allow graceful degradation
-      // The connection will fail but won't crash the app
-      return '';
+    if (response.error) {
+      if (isDevMode()) console.error('Failed to get Deepgram API key:', response.error);
+      throw new Error('Failed to retrieve voice recognition credentials');
     }
+
+    if (!response.data?.key) {
+      if (isDevMode()) console.error('No API key in response');
+      throw new Error('Voice recognition credentials unavailable');
+    }
+
+    return response.data.key;
   }
 
   /**

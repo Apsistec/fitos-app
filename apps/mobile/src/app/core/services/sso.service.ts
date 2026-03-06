@@ -5,7 +5,7 @@
  * Sprint 41: Enterprise Single Sign-On
  */
 
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, isDevMode } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, from } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
@@ -54,6 +54,9 @@ export class SSOService {
   private currentSessionSubject = new BehaviorSubject<SSOSession | null>(null);
   public currentSession$ = this.currentSessionSubject.asObservable();
 
+  /** Handle for auto-refresh timer so it can be cleared on logout */
+  private refreshTimerHandle: ReturnType<typeof setTimeout> | null = null;
+
   constructor() {
     this.loadStoredSession();
     this.setupDeepLinkListener();
@@ -67,10 +70,10 @@ export class SSOService {
       tap(async (response) => {
         // Store state/nonce for validation
         if (response.state) {
-          localStorage.setItem('sso_state', response.state);
+          sessionStorage.setItem('sso_state', response.state);
         }
         if (response.nonce) {
-          localStorage.setItem('sso_nonce', response.nonce);
+          sessionStorage.setItem('sso_nonce', response.nonce);
         }
 
         // Open IdP login page
@@ -125,6 +128,7 @@ export class SSOService {
       { session_id: session.sessionId }
     ).pipe(
       tap(async (response) => {
+        this.cancelAutoRefresh();
         this.clearSession();
 
         // If IdP logout URL provided, open it
@@ -162,7 +166,7 @@ export class SSOService {
    */
   private setSession(session: SSOSession): void {
     this.currentSessionSubject.next(session);
-    localStorage.setItem('sso_session', JSON.stringify(session));
+    sessionStorage.setItem('sso_session', JSON.stringify(session));
   }
 
   /**
@@ -170,14 +174,14 @@ export class SSOService {
    */
   private clearSession(): void {
     this.currentSessionSubject.next(null);
-    localStorage.removeItem('sso_session');
+    sessionStorage.removeItem('sso_session');
   }
 
   /**
-   * Load stored session from localStorage
+   * Load stored session from sessionStorage
    */
   private loadStoredSession(): void {
-    const stored = localStorage.getItem('sso_session');
+    const stored = sessionStorage.getItem('sso_session');
     if (stored) {
       try {
         const session = JSON.parse(stored) as SSOSession;
@@ -190,7 +194,7 @@ export class SSOService {
           this.clearSession();
         }
       } catch (e) {
-        console.error('Error loading stored SSO session:', e);
+        if (isDevMode()) console.error('Error loading stored SSO session:', e);
         this.clearSession();
       }
     }
@@ -200,8 +204,8 @@ export class SSOService {
    * Clear stored state/nonce
    */
   private clearStoredState(): void {
-    localStorage.removeItem('sso_state');
-    localStorage.removeItem('sso_nonce');
+    sessionStorage.removeItem('sso_state');
+    sessionStorage.removeItem('sso_nonce');
   }
 
   /**
@@ -213,14 +217,23 @@ export class SSOService {
 
       // Check if this is an SSO callback
       if (url.pathname.includes('/auth/callback')) {
+        // CSRF validation: verify the returned state matches what we stored
+        const returnedState = url.searchParams.get('state');
+        const storedState = sessionStorage.getItem('sso_state');
+        if (storedState && returnedState !== storedState) {
+          if (isDevMode()) console.error('SSO callback state mismatch — possible CSRF');
+          this.clearStoredState();
+          return;
+        }
+
         const sessionId = url.searchParams.get('session');
         if (sessionId) {
           this.handleCallback(sessionId).subscribe({
             next: () => {
-              console.log('SSO login successful');
+              if (isDevMode()) console.log('SSO login successful');
             },
             error: (error) => {
-              console.error('SSO callback error:', error);
+              if (isDevMode()) console.error('SSO callback error:', error);
             },
           });
         }
@@ -251,6 +264,9 @@ export class SSOService {
    * Auto-refresh OIDC session before expiration
    */
   setupAutoRefresh(): void {
+    // Clear any previous refresh timer to prevent stacking
+    this.cancelAutoRefresh();
+
     const session = this.currentSessionSubject.value;
     if (!session || session.providerType !== 'oidc') return;
 
@@ -262,17 +278,27 @@ export class SSOService {
     const refreshIn = msUntilExpiry - 5 * 60 * 1000;
 
     if (refreshIn > 0) {
-      setTimeout(() => {
+      this.refreshTimerHandle = setTimeout(() => {
         this.refreshSession(session.sessionId).subscribe({
           next: () => {
-            console.log('SSO session refreshed');
+            if (isDevMode()) console.log('SSO session refreshed');
             this.setupAutoRefresh(); // Setup next refresh
           },
           error: (error) => {
-            console.error('Failed to refresh SSO session:', error);
+            if (isDevMode()) console.error('Failed to refresh SSO session:', error);
           },
         });
       }, refreshIn);
+    }
+  }
+
+  /**
+   * Cancel auto-refresh timer (e.g., on logout)
+   */
+  private cancelAutoRefresh(): void {
+    if (this.refreshTimerHandle !== null) {
+      clearTimeout(this.refreshTimerHandle);
+      this.refreshTimerHandle = null;
     }
   }
 }

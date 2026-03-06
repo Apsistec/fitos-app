@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, isDevMode } from '@angular/core';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { environment } from '../../../environments/environment';
 
@@ -9,19 +9,27 @@ export class SupabaseService {
   private supabase: SupabaseClient;
 
   constructor() {
+    // Build auth config — NavigatorLock is only disabled in development.
+    // In production, NavigatorLock prevents concurrent tab token refresh races.
+    const authConfig: Record<string, unknown> = {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+      storageKey: 'fitos-auth',
+    };
+
+    // Dev-only: bypass NavigatorLock which may error in HMR / SSR contexts
+    if (!environment.production) {
+      authConfig['lock'] = async (_name: string, _acquireTimeout: number, fn: () => Promise<unknown>) => {
+        return await fn();
+      };
+      if (isDevMode()) console.log('[SupabaseService] NavigatorLock bypassed (dev mode)');
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.supabase = createClient(environment.supabaseUrl, environment.supabaseAnonKey, {
-      auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: true,
-        storageKey: 'fitos-auth',
-        // Use a no-op lock function to avoid NavigatorLock errors in development
-        lock: async (name, acquireTimeout, fn) => {
-          // Simply execute the function without locking
-          return await fn();
-        },
-      },
-    });
+      auth: authConfig,
+    } as any);
   }
 
   get client(): SupabaseClient {
