@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, computed, NgZone } from '@angular/core';
+import { Injectable, inject, signal, computed, NgZone, isDevMode, effect, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastController } from '@ionic/angular/standalone';
 import { SupabaseService } from './supabase.service';
@@ -31,6 +31,14 @@ export class AuthService {
   private router = inject(Router);
   private toastController = inject(ToastController);
   private ngZone = inject(NgZone);
+  private injector = inject(Injector);
+
+  /** Dev-only logging helper. All console calls route through here. */
+  private log(level: 'log' | 'warn' | 'error', ...args: unknown[]): void {
+    if (isDevMode()) {
+      console[level](...args);
+    }
+  }
 
   private readonly RETURN_URL_KEY = 'fitos_return_url';
   private readonly MFA_SKIPPED_KEY = 'fitos_mfa_skipped';
@@ -103,8 +111,7 @@ export class AuthService {
 
     return new Promise((resolve) => {
       const timeoutId = setTimeout(() => {
-        clearInterval(checkInterval);
-        console.error('Auth initialization timed out after 10 seconds');
+        this.log('error', 'Auth initialization timed out after 10 seconds');
         // Force initialized state to prevent app lockout
         this._state.update((s) => ({
           ...s,
@@ -114,13 +121,13 @@ export class AuthService {
         resolve();
       }, 10000);
 
-      const checkInterval = setInterval(() => {
+      const effectRef = effect(() => {
         if (this._state().initialized) {
-          clearInterval(checkInterval);
           clearTimeout(timeoutId);
+          effectRef.destroy();
           resolve();
         }
-      }, 50);
+      }, { injector: this.injector });
     });
   }
 
@@ -137,7 +144,7 @@ export class AuthService {
       async (event: AuthChangeEvent, session: AuthSession | null) => {
         // Run inside Angular zone to ensure change detection
         this.ngZone.run(async () => {
-          console.log('Auth state changed:', event, session ? 'with session' : 'no session');
+          this.log('log', 'Auth state changed:', event, session ? 'with session' : 'no session');
 
           switch (event) {
             case 'SIGNED_IN':
@@ -170,11 +177,11 @@ export class AuthService {
               if (session) {
                 this.scheduleTokenRefresh(session);
               }
-              console.log('INITIAL_SESSION event - session handled by getSession()');
+              this.log('log','INITIAL_SESSION event - session handled by getSession()');
               break;
 
             default:
-              console.log('Unhandled auth event:', event);
+              this.log('log','Unhandled auth event:', event);
           }
         });
       }
@@ -196,7 +203,7 @@ export class AuthService {
   private async handleSignedIn(session: AuthSession | null): Promise<void> {
     if (!session?.user) return;
 
-    console.log('User signed in:', session.user.id);
+    this.log('log','User signed in:', session.user.id);
 
     this._state.update((s) => ({
       ...s,
@@ -218,7 +225,7 @@ export class AuthService {
    * Handle SIGNED_OUT event
    */
   private handleSignedOut(): void {
-    console.log('User signed out');
+    this.log('log','User signed out');
 
     // Clear token refresh timer
     this.clearTokenRefreshTimer();
@@ -247,7 +254,7 @@ export class AuthService {
   private handleTokenRefreshed(session: AuthSession | null): void {
     if (!session?.user) return;
 
-    console.log('Token refreshed for user:', session.user.id);
+    this.log('log','Token refreshed for user:', session.user.id);
 
     this._state.update((s) => ({
       ...s,
@@ -265,7 +272,7 @@ export class AuthService {
   private async handleUserUpdated(session: AuthSession | null): Promise<void> {
     if (!session?.user) return;
 
-    console.log('User updated:', session.user.id);
+    this.log('log','User updated:', session.user.id);
 
     this._state.update((s) => ({
       ...s,
@@ -281,7 +288,7 @@ export class AuthService {
    * Handle PASSWORD_RECOVERY event (user clicked password reset link)
    */
   private handlePasswordRecovery(session: AuthSession | null): void {
-    console.log('Password recovery flow initiated');
+    this.log('log','Password recovery flow initiated');
 
     this._state.update((s) => ({
       ...s,
@@ -302,7 +309,7 @@ export class AuthService {
   private async handleMfaChallengeVerified(session: AuthSession | null): Promise<void> {
     if (!session?.user) return;
 
-    console.log('MFA challenge verified for user:', session.user.id);
+    this.log('log','MFA challenge verified for user:', session.user.id);
 
     this._state.update((s) => ({
       ...s,
@@ -332,12 +339,12 @@ export class AuthService {
 
     if (delay <= 0) {
       // Token is about to expire or already expired, refresh immediately
-      console.log('Token expiring soon, refreshing immediately...');
+      this.log('log','Token expiring soon, refreshing immediately...');
       this.refreshToken();
       return;
     }
 
-    console.log(`Scheduling token refresh in ${Math.round(delay / 1000)}s (expires at ${new Date(expiresAt).toISOString()})`);
+    this.log('log',`Scheduling token refresh in ${Math.round(delay / 1000)}s (expires at ${new Date(expiresAt).toISOString()})`);
 
     this.tokenRefreshTimer = setTimeout(() => {
       this.ngZone.run(() => {
@@ -361,18 +368,18 @@ export class AuthService {
    */
   private async refreshToken(): Promise<void> {
     if (this.isRefreshing) {
-      console.log('Token refresh already in progress, skipping...');
+      this.log('log','Token refresh already in progress, skipping...');
       return;
     }
 
     this.isRefreshing = true;
 
     try {
-      console.log('Proactively refreshing token...');
+      this.log('log','Proactively refreshing token...');
       const { data: { session }, error } = await this.supabase.auth.refreshSession();
 
       if (error) {
-        console.error('Error refreshing token:', error);
+        this.log('error','Error refreshing token:', error);
         // If refresh fails with invalid token, sign out
         if (error.message?.includes('invalid') || error.message?.includes('expired')) {
           await this.handleSessionExpired();
@@ -381,7 +388,7 @@ export class AuthService {
       }
 
       if (session) {
-        console.log('Token refreshed successfully');
+        this.log('log','Token refreshed successfully');
         this._state.update((s) => ({
           ...s,
           session,
@@ -390,7 +397,7 @@ export class AuthService {
         this.scheduleTokenRefresh(session);
       }
     } catch (error) {
-      console.error('Error in refreshToken:', error);
+      this.log('error','Error in refreshToken:', error);
     } finally {
       this.isRefreshing = false;
     }
@@ -400,7 +407,7 @@ export class AuthService {
    * Handle session expiration
    */
   private async handleSessionExpired(): Promise<void> {
-    console.log('Session expired, signing out...');
+    this.log('log','Session expired, signing out...');
 
     const toast = await this.toastController.create({
       message: 'Your session has expired. Please sign in again.',
@@ -440,23 +447,23 @@ export class AuthService {
           throw error;
         }
 
-        console.log('getSession result:', session ? 'Session exists' : 'No session');
+        this.log('log','getSession result:', session ? 'Session exists' : 'No session');
 
         if (session?.user) {
           // Check if token is expired or about to expire
           if (this.isTokenExpired(session)) {
-            console.log('Session token expired, attempting refresh...');
+            this.log('log','Session token expired, attempting refresh...');
             const refreshResult = await this.supabase.auth.refreshSession();
 
             if (refreshResult.error || !refreshResult.data.session) {
-              console.error('Failed to refresh expired session:', refreshResult.error);
+              this.log('error','Failed to refresh expired session:', refreshResult.error);
               await this.handleSessionExpired();
               return;
             }
 
             // Use the refreshed session
             const refreshedSession = refreshResult.data.session;
-            console.log('Session refreshed successfully');
+            this.log('log','Session refreshed successfully');
 
             this._state.update((s) => ({
               ...s,
@@ -469,7 +476,7 @@ export class AuthService {
             this.scheduleTokenRefresh(refreshedSession);
             await this.loadProfile(refreshedSession.user.id);
           } else {
-            console.log('Loading profile for user:', session.user.id);
+            this.log('log','Loading profile for user:', session.user.id);
 
             this._state.update((s) => ({
               ...s,
@@ -486,7 +493,7 @@ export class AuthService {
             await this.loadProfile(session.user.id);
           }
 
-          console.log('Profile loaded, initialized:', this._state().initialized);
+          this.log('log','Profile loaded, initialized:', this._state().initialized);
         } else {
           // No session - mark as initialized
           this._state.update((s) => ({
@@ -499,7 +506,7 @@ export class AuthService {
 
           // Redirect to login if not already on auth page
           const currentUrl = this.router.url;
-          console.log('No session, current URL:', currentUrl);
+          this.log('log','No session, current URL:', currentUrl);
           if (!currentUrl.startsWith('/auth')) {
             this.router.navigate(['/auth/login']);
           }
@@ -509,14 +516,14 @@ export class AuthService {
         return;
       } catch (error) {
         attempt++;
-        console.error(`Error getting session (attempt ${attempt}/${this.MAX_RETRY_ATTEMPTS}):`, error);
+        this.log('error',`Error getting session (attempt ${attempt}/${this.MAX_RETRY_ATTEMPTS}):`, error);
 
         if (attempt < this.MAX_RETRY_ATTEMPTS) {
           // Wait before retrying
           await this.delay(this.RETRY_DELAY_MS * attempt);
         } else {
           // All retries exhausted - mark as initialized so app doesn't hang
-          console.error('All session initialization attempts failed');
+          this.log('error','All session initialization attempts failed');
           this._state.update((s) => ({
             ...s,
             loading: false,
@@ -556,7 +563,7 @@ export class AuthService {
 
     document.addEventListener('visibilitychange', async () => {
       if (document.visibilityState === 'visible') {
-        console.log('App became visible, re-checking auth state...');
+        this.log('log','App became visible, re-checking auth state...');
         // Run inside Angular zone
         this.ngZone.run(async () => {
           await this.refreshAuthState();
@@ -566,7 +573,7 @@ export class AuthService {
 
     // Handle page focus (catches some cases visibility change misses)
     window.addEventListener('focus', async () => {
-      console.log('Window focused, checking auth state...');
+      this.log('log','Window focused, checking auth state...');
       this.ngZone.run(async () => {
         await this.refreshAuthState();
       });
@@ -575,7 +582,7 @@ export class AuthService {
     // Handle page show (bfcache restoration on iOS Safari)
     window.addEventListener('pageshow', async (event) => {
       if (event.persisted) {
-        console.log('Page restored from bfcache, refreshing auth state...');
+        this.log('log','Page restored from bfcache, refreshing auth state...');
         this.ngZone.run(async () => {
           await this.refreshAuthState();
         });
@@ -587,7 +594,7 @@ export class AuthService {
       import('@capacitor/app').then(({ App }) => {
         App.addListener('appStateChange', async ({ isActive }) => {
           if (isActive) {
-            console.log('Capacitor app became active, re-checking auth state...');
+            this.log('log','Capacitor app became active, re-checking auth state...');
             this.ngZone.run(async () => {
               await this.refreshAuthState();
             });
@@ -596,7 +603,7 @@ export class AuthService {
 
         // Handle URL open events (deep links, OAuth callbacks)
         App.addListener('appUrlOpen', async () => {
-          console.log('App URL opened, checking auth state...');
+          this.log('log','App URL opened, checking auth state...');
           this.ngZone.run(async () => {
             await this.refreshAuthState();
           });
@@ -616,7 +623,7 @@ export class AuthService {
     window.addEventListener('storage', (event) => {
       // Supabase stores session in localStorage with key containing 'supabase'
       if (event.key?.includes('supabase') && event.key?.includes('auth')) {
-        console.log('Auth storage changed in another tab, syncing...');
+        this.log('log','Auth storage changed in another tab, syncing...');
         this.ngZone.run(async () => {
           await this.refreshAuthState();
         });
@@ -631,7 +638,7 @@ export class AuthService {
     if (typeof window === 'undefined') return;
 
     window.addEventListener('online', async () => {
-      console.log('Network came online, refreshing auth state...');
+      this.log('log','Network came online, refreshing auth state...');
       this.ngZone.run(async () => {
         // When coming back online, verify session is still valid
         const currentState = this._state();
@@ -642,7 +649,7 @@ export class AuthService {
     });
 
     window.addEventListener('offline', () => {
-      console.log('Network went offline');
+      this.log('log','Network went offline');
       // Could show a toast here if needed
     });
   }
@@ -654,7 +661,7 @@ export class AuthService {
   private async refreshAuthState(): Promise<void> {
     // Prevent multiple simultaneous refreshes
     if (this.isRefreshing) {
-      console.log('Auth state refresh already in progress, skipping...');
+      this.log('log','Auth state refresh already in progress, skipping...');
       return;
     }
 
@@ -664,7 +671,7 @@ export class AuthService {
       const { data: { session }, error } = await this.supabase.auth.getSession();
 
       if (error) {
-        console.error('Error refreshing session:', error);
+        this.log('error','Error refreshing session:', error);
         // Check if it's an auth error that requires re-login
         if (error.message?.includes('invalid') || error.message?.includes('expired') || error.message?.includes('refresh_token')) {
           await this.handleSessionExpired();
@@ -677,11 +684,11 @@ export class AuthService {
       if (session?.user) {
         // Check if token needs refresh
         if (this.isTokenExpired(session)) {
-          console.log('Token expired during app resume, refreshing...');
+          this.log('log','Token expired during app resume, refreshing...');
           const refreshResult = await this.supabase.auth.refreshSession();
 
           if (refreshResult.error || !refreshResult.data.session) {
-            console.error('Failed to refresh session:', refreshResult.error);
+            this.log('error','Failed to refresh session:', refreshResult.error);
             await this.handleSessionExpired();
             return;
           }
@@ -700,7 +707,7 @@ export class AuthService {
           }
         } else if (!currentState.user || currentState.user.id !== session.user.id) {
           // User changed or wasn't set - reload profile
-          console.log('Session restored, reloading profile...');
+          this.log('log','Session restored, reloading profile...');
           this._state.update((s) => ({
             ...s,
             session,
@@ -721,11 +728,11 @@ export class AuthService {
         }
       } else if (currentState.user) {
         // Had a user but now no session - handle session loss
-        console.log('Session lost during app resume');
+        this.log('log','Session lost during app resume');
         await this.handleSessionExpired();
       }
     } catch (error) {
-      console.error('Error in refreshAuthState:', error);
+      this.log('error','Error in refreshAuthState:', error);
     } finally {
       this.isRefreshing = false;
     }
@@ -767,18 +774,38 @@ export class AuthService {
         loading: false,
         initialized: true,
       }));
-    } catch (error) {
-      console.error('Error loading profile:', error);
-      // If profile load fails, sign out to clear bad session
-      await this.signOut();
-      this._state.update((s) => ({
-        ...s,
-        user: null,
-        session: null,
-        profile: null,
-        loading: false,
-        initialized: true,
-      }));
+    } catch (error: unknown) {
+      this.log('error', 'Error loading profile:', error);
+
+      // Distinguish network errors from auth/data errors:
+      // Network errors should NOT sign the user out (they may be offline).
+      const isNetworkError =
+        error instanceof TypeError || // fetch failed (offline)
+        (error instanceof Error && (
+          error.message.includes('Failed to fetch') ||
+          error.message.includes('NetworkError') ||
+          error.message.includes('net::ERR_')
+        ));
+
+      if (isNetworkError) {
+        // Keep user signed in — mark initialized so app doesn't hang
+        this._state.update((s) => ({
+          ...s,
+          loading: false,
+          initialized: true,
+        }));
+      } else {
+        // Auth or data error — sign out to clear bad session
+        await this.signOut();
+        this._state.update((s) => ({
+          ...s,
+          user: null,
+          session: null,
+          profile: null,
+          loading: false,
+          initialized: true,
+        }));
+      }
     }
   }
 
@@ -796,14 +823,19 @@ export class AuthService {
 
     if (linkReturnPath) {
       sessionStorage.removeItem(this.LINK_IDENTITY_RETURN_KEY);
-      console.log('handlePostLogin: identity linking return, navigating to:', linkReturnPath);
-      this.router.navigateByUrl(linkReturnPath);
+      if (this.isSafeReturnUrl(linkReturnPath)) {
+        this.log('log', 'handlePostLogin: identity linking return, navigating to:', linkReturnPath);
+        this.router.navigateByUrl(linkReturnPath);
+      } else {
+        this.log('warn', 'handlePostLogin: unsafe linkReturnPath blocked:', linkReturnPath);
+        this.router.navigate(['/tabs/dashboard']);
+      }
       return;
     }
 
     // Also stay on page if already on MFA setup or settings (direct redirect worked)
     if (currentPath.includes('/auth/mfa-setup') || currentPath.includes('/tabs/settings')) {
-      console.log('handlePostLogin: identity linking return, staying on:', currentPath);
+      this.log('log','handlePostLogin: identity linking return, staying on:', currentPath);
       return;
     }
 
@@ -818,7 +850,12 @@ export class AuthService {
 
     if (returnUrl) {
       sessionStorage.removeItem(this.RETURN_URL_KEY);
-      this.router.navigateByUrl(returnUrl);
+      if (this.isSafeReturnUrl(returnUrl)) {
+        this.router.navigateByUrl(returnUrl);
+      } else {
+        this.log('warn', 'handlePostLogin: unsafe returnUrl blocked:', returnUrl);
+        this.router.navigate(['/tabs/dashboard']);
+      }
     } else {
       this.router.navigate(['/tabs/dashboard']);
     }
@@ -829,7 +866,24 @@ export class AuthService {
    * Called by auth guard when redirecting to login
    */
   setReturnUrl(url: string): void {
-    sessionStorage.setItem(this.RETURN_URL_KEY, url);
+    if (this.isSafeReturnUrl(url)) {
+      sessionStorage.setItem(this.RETURN_URL_KEY, url);
+    }
+  }
+
+  /**
+   * Validates a return URL is a safe relative path (no external redirects).
+   * Blocks protocol-relative URLs (//evil.com), absolute URLs (https://evil.com),
+   * and javascript: URIs.
+   */
+  private isSafeReturnUrl(url: string): boolean {
+    if (!url) return false;
+    // Must start with / and must NOT start with // (protocol-relative)
+    if (!url.startsWith('/') || url.startsWith('//')) return false;
+    // Block javascript: and data: URIs embedded via URL encoding
+    const decoded = decodeURIComponent(url).toLowerCase();
+    if (decoded.includes('javascript:') || decoded.includes('data:')) return false;
+    return true;
   }
 
   /**
@@ -844,9 +898,9 @@ export class AuthService {
     try {
       this._state.update((s) => ({ ...s, loading: true }));
 
-      console.log('[AuthService] Starting signUp:', { email, role, fullName });
-      console.log('[AuthService] Supabase client initialized:', !!this.supabase);
-      console.log('[AuthService] Environment origin:', window.location.origin);
+      this.log('log','[AuthService] Starting signUp:', { email, role, fullName });
+      this.log('log','[AuthService] Supabase client initialized:', !!this.supabase);
+      this.log('log','[AuthService] Environment origin:', window.location.origin);
 
       const { data, error } = await this.supabase.auth.signUp({
         email,
@@ -860,19 +914,19 @@ export class AuthService {
         },
       });
 
-      console.log('[AuthService] SignUp response:', { data, error });
-      console.log('[AuthService] Session exists?:', !!data?.session);
-      console.log('[AuthService] User exists?:', !!data?.user);
-      console.log('[AuthService] User ID:', data?.user?.id);
-      console.log('[AuthService] User email:', data?.user?.email);
-      console.log('[AuthService] User confirmed?:', data?.user?.confirmed_at);
+      this.log('log','[AuthService] SignUp response:', { data, error });
+      this.log('log','[AuthService] Session exists?:', !!data?.session);
+      this.log('log','[AuthService] User exists?:', !!data?.user);
+      this.log('log','[AuthService] User ID:', data?.user?.id);
+      this.log('log','[AuthService] User email:', data?.user?.email);
+      this.log('log','[AuthService] User confirmed?:', data?.user?.confirmed_at);
 
       // First, check if there was an error from Supabase
       if (error) {
-        console.error('[AuthService] SignUp error:', error);
-        console.error('[AuthService] Error message:', error.message);
-        console.error('[AuthService] Error status:', (error as unknown as Record<string, unknown>).status);
-        console.error('[AuthService] Full error:', JSON.stringify(error, null, 2));
+        this.log('error','[AuthService] SignUp error:', error);
+        this.log('error','[AuthService] Error message:', error.message);
+        this.log('error','[AuthService] Error status:', (error as unknown as Record<string, unknown>).status);
+        this.log('error','[AuthService] Full error:', JSON.stringify(error, null, 2));
         throw error;
       }
 
@@ -881,12 +935,12 @@ export class AuthService {
 
       if (!userCreatedSuccessfully) {
         // No error but also no user - this can happen during maintenance or connectivity issues
-        console.error('[AuthService] SignUp failed: No user returned from API');
-        console.error('[AuthService] Data received:', JSON.stringify(data, null, 2));
+        this.log('error','[AuthService] SignUp failed: No user returned from API');
+        this.log('error','[AuthService] Data received:', JSON.stringify(data, null, 2));
         throw new Error('Failed to create account. Please try again.');
       }
 
-      console.log('[AuthService] User created successfully with ID:', data.user?.id);
+      this.log('log','[AuthService] User created successfully with ID:', data.user?.id);
 
       // Track if we hit rate limiting (for future use if needed)
       const wasRateLimited = false;
@@ -894,12 +948,12 @@ export class AuthService {
       // Check if user was auto-confirmed (should NOT happen in production)
       const session = data.session;
       if (session) {
-        console.warn('[AuthService] ⚠️ User was auto-confirmed! Session detected.');
-        console.warn('[AuthService] This should NOT happen if email confirmation is enabled in Supabase.');
-        console.warn('[AuthService] Signing out to force email verification...');
+        this.log('warn','[AuthService] ⚠️ User was auto-confirmed! Session detected.');
+        this.log('warn','[AuthService] This should NOT happen if email confirmation is enabled in Supabase.');
+        this.log('warn','[AuthService] Signing out to force email verification...');
         // Sign out immediately to prevent auto-login without email verification
         await this.supabase.auth.signOut();
-        console.log('[AuthService] User signed out successfully.');
+        this.log('log','[AuthService] User signed out successfully.');
 
         // Clear any auth state
         this._state.update((s) => ({
@@ -920,7 +974,7 @@ export class AuthService {
 
       return { error: null, rateLimited: wasRateLimited };
     } catch (error) {
-      console.error('[AuthService] SignUp catch block:', error);
+      this.log('error','[AuthService] SignUp catch block:', error);
       this._state.update((s) => ({ ...s, loading: false }));
       return { error: error as Error, rateLimited: false };
     }
@@ -1036,7 +1090,9 @@ export class AuthService {
       const { error } = await this.supabase.auth.signInWithOtp({
         email,
         options: {
-          shouldCreateUser: true,
+          // Prevent account enumeration: do NOT create new users via OTP sign-in.
+          // Users must register through the sign-up flow first.
+          shouldCreateUser: false,
         },
       });
       if (error) throw error;
@@ -1247,7 +1303,7 @@ export class AuthService {
       // Navigate to login
       await this.router.navigate(['/auth/login']);
     } catch (error) {
-      console.error('Sign out error:', error);
+      this.log('error','Sign out error:', error);
 
       // Show error toast
       const toast = await this.toastController.create({
@@ -1301,20 +1357,11 @@ export class AuthService {
   }
 
   /**
-   * Update password
+   * Update password — delegates to changePassword() to avoid duplicate logic.
+   * @deprecated Use changePassword() instead.
    */
   async updatePassword(newPassword: string): Promise<{ error: Error | null }> {
-    try {
-      const { error } = await this.supabase.auth.updateUser({
-        password: newPassword,
-      });
-
-      if (error) throw error;
-
-      return { error: null };
-    } catch (error) {
-      return { error: error as Error };
-    }
+    return this.changePassword(newPassword);
   }
 
   /**
@@ -1369,7 +1416,7 @@ export class AuthService {
 
       // Check if token is expired or about to expire
       if (this.isTokenExpired(session)) {
-        console.log('Token expired, refreshing before operation...');
+        this.log('log','Token expired, refreshing before operation...');
         const refreshResult = await this.supabase.auth.refreshSession();
 
         if (refreshResult.error || !refreshResult.data.session) {
@@ -1388,7 +1435,7 @@ export class AuthService {
 
       return { valid: true };
     } catch (error) {
-      console.error('Error ensuring valid session:', error);
+      this.log('error','Error ensuring valid session:', error);
       return { valid: false, error: error as Error };
     }
   }
@@ -1418,11 +1465,11 @@ export class AuthService {
    * User can still set up MFA later from settings.
    */
   skipMfaSetup(): void {
-    console.log('[AuthService] skipMfaSetup called');
+    this.log('log','[AuthService] skipMfaSetup called');
     this._mfaSkipped.set(true);
     if (typeof sessionStorage !== 'undefined') {
       sessionStorage.setItem(this.MFA_SKIPPED_KEY, 'true');
-      console.log('[AuthService] MFA skipped flag set in sessionStorage');
+      this.log('log','[AuthService] MFA skipped flag set in sessionStorage');
     }
   }
 
@@ -1471,7 +1518,7 @@ export class AuthService {
 
       return { error: null };
     } catch (error) {
-      console.error('Error forcing session refresh:', error);
+      this.log('error','Error forcing session refresh:', error);
       return { error: error as Error };
     }
   }

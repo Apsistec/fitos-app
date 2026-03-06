@@ -1123,8 +1123,8 @@ export class DashboardPage implements OnInit {
       // Load client stats and today's schedule in parallel
       const [clientStats, todaySchedule, recentActivity] = await Promise.all([
         this.clientService.getClientStats(trainerId),
-        this.assignmentService.getTodaySchedule(trainerId),
-        this.assignmentService.getRecentActivity(trainerId, 24),
+        this.assignmentService.getTodaySchedule(),
+        this.assignmentService.getRecentActivity(24),
       ]);
 
       // Load subscription data for revenue

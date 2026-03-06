@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
+import { Injectable, signal, computed, inject, isDevMode } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
 import { Database } from '@fitos/shared';
@@ -73,7 +73,7 @@ export class AssignmentService {
 
       return data;
     } catch (error) {
-      console.error('Error assigning workout:', error);
+      if (isDevMode()) console.error('Error assigning workout:', error);
       this.errorSignal.set(error instanceof Error ? error.message : 'Failed to assign workout');
       return null;
     } finally {
@@ -110,7 +110,7 @@ export class AssignmentService {
 
       return true;
     } catch (error) {
-      console.error('Error assigning workouts:', error);
+      if (isDevMode()) console.error('Error assigning workouts:', error);
       this.errorSignal.set(error instanceof Error ? error.message : 'Failed to assign workouts');
       return false;
     } finally {
@@ -119,13 +119,17 @@ export class AssignmentService {
   }
 
   /**
-   * Load assignments for a specific client
+   * Load assignments for a specific client.
+   * Scoped to the authenticated trainer's own assignments.
    */
   async loadClientAssignments(clientId: string): Promise<void> {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
     try {
+      const userId = this.auth.user()?.id;
+      if (!userId) throw new Error('User not authenticated');
+
       const { data, error } = await this.supabase.client
         .from('assigned_workouts')
         .select(`
@@ -137,13 +141,14 @@ export class AssignmentService {
           )
         `)
         .eq('client_id', clientId)
+        .eq('assigned_by', userId)
         .order('scheduled_date', { ascending: true });
 
       if (error) throw error;
 
       this.assignmentsSignal.set((data as unknown as AssignedWorkoutWithDetails[]) || []);
     } catch (error) {
-      console.error('Error loading assignments:', error);
+      if (isDevMode()) console.error('Error loading assignments:', error);
       this.errorSignal.set(error instanceof Error ? error.message : 'Failed to load assignments');
     } finally {
       this.loadingSignal.set(false);
@@ -178,7 +183,7 @@ export class AssignmentService {
 
       this.assignmentsSignal.set((data as unknown as AssignedWorkoutWithDetails[]) || []);
     } catch (error) {
-      console.error('Error loading assignments:', error);
+      if (isDevMode()) console.error('Error loading assignments:', error);
       this.errorSignal.set(error instanceof Error ? error.message : 'Failed to load assignments');
     } finally {
       this.loadingSignal.set(false);
@@ -186,23 +191,29 @@ export class AssignmentService {
   }
 
   /**
-   * Update assignment status
+   * Update assignment status.
+   * Scoped to the authenticated user's own assignments.
    */
   async updateAssignmentStatus(
     assignmentId: string,
     status: 'pending' | 'in_progress' | 'completed' | 'skipped'
   ): Promise<boolean> {
     try {
+      const userId = this.auth.user()?.id;
+      if (!userId) throw new Error('User not authenticated');
+
+      // Defense-in-depth: scope update to assignments owned by the authenticated user
       const { error } = await this.supabase.client
         .from('assigned_workouts')
         .update({ status })
-        .eq('id', assignmentId);
+        .eq('id', assignmentId)
+        .eq('assigned_by', userId);
 
       if (error) throw error;
 
       return true;
     } catch (error) {
-      console.error('Error updating assignment:', error);
+      if (isDevMode()) console.error('Error updating assignment:', error);
       return false;
     }
   }
@@ -225,7 +236,7 @@ export class AssignmentService {
 
       return true;
     } catch (error) {
-      console.error('Error deleting assignment:', error);
+      if (isDevMode()) console.error('Error deleting assignment:', error);
       return false;
     }
   }
@@ -240,11 +251,14 @@ export class AssignmentService {
   }
 
   /**
-   * Get today's schedule for trainer dashboard
-   * Returns all workouts scheduled for today with client details
+   * Get today's schedule for trainer dashboard.
+   * Trainer ID derived from auth session — never caller-supplied.
    */
-  async getTodaySchedule(trainerId: string): Promise<AssignedWorkoutWithDetails[]> {
+  async getTodaySchedule(): Promise<AssignedWorkoutWithDetails[]> {
     try {
+      const userId = this.auth.user()?.id;
+      if (!userId) return [];
+
       const today = new Date().toISOString().split('T')[0];
 
       const { data, error } = await this.supabase.client
@@ -254,7 +268,7 @@ export class AssignmentService {
           template:workout_templates(*),
           client:profiles!workouts_client_id_fkey(*)
         `)
-        .eq('trainer_id', trainerId)
+        .eq('trainer_id', userId)
         .eq('scheduled_date', today)
         .in('status', ['scheduled', 'in_progress'])
         .order('scheduled_time', { ascending: true, nullsFirst: false });
@@ -263,17 +277,20 @@ export class AssignmentService {
 
       return (data as unknown as AssignedWorkoutWithDetails[]) || [];
     } catch (error) {
-      console.error('Error fetching today\'s schedule:', error);
+      if (isDevMode()) console.error('Error fetching today\'s schedule:', error);
       return [];
     }
   }
 
   /**
-   * Get recent client activity for trainer dashboard
-   * Returns workouts completed in the last N hours
+   * Get recent client activity for trainer dashboard.
+   * Trainer ID derived from auth session — never caller-supplied.
    */
-  async getRecentActivity(trainerId: string, hours = 24): Promise<RecentActivity[]> {
+  async getRecentActivity(hours = 24): Promise<RecentActivity[]> {
     try {
+      const userId = this.auth.user()?.id;
+      if (!userId) return [];
+
       const cutoffTime = new Date();
       cutoffTime.setHours(cutoffTime.getHours() - hours);
       const cutoffTimeStr = cutoffTime.toISOString();
@@ -284,7 +301,7 @@ export class AssignmentService {
           *,
           client:profiles!workouts_client_id_fkey(full_name, avatar_url)
         `)
-        .eq('trainer_id', trainerId)
+        .eq('trainer_id', userId)
         .eq('status', 'completed')
         .not('completed_at', 'is', null)
         .gte('completed_at', cutoffTimeStr)
@@ -303,7 +320,7 @@ export class AssignmentService {
 
       return activities;
     } catch (error) {
-      console.error('Error fetching recent activity:', error);
+      if (isDevMode()) console.error('Error fetching recent activity:', error);
       return [];
     }
   }

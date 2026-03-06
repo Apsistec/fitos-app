@@ -350,9 +350,8 @@ export class AIChatComponent {
   messageText = signal('');
   AGENT_CONFIG = AGENT_CONFIG;
 
-  // User context (should be passed from parent)
-  userContext: UserContext = {
-    user_id: 'test-user',
+  // User context (user_id derived from auth session by the service)
+  userContext: Omit<UserContext, 'user_id'> = {
     role: 'client',
     goals: ['muscle_gain'],
     fitness_level: 'intermediate',

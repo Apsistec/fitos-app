@@ -52,13 +52,14 @@ export class AppointmentService {
   // ── Calendar loading ─────────────────────────────────────────
 
   /**
-   * Loads appointments for a trainer within the given date range.
+   * Loads appointments for the authenticated trainer within the given date range.
+   * Trainer ID is derived from the auth session — never caller-supplied.
    * Also subscribes to realtime changes on the appointments table.
    */
-  async loadAppointments(
-    trainerId: string,
-    range: AppointmentDateRange,
-  ): Promise<void> {
+  async loadAppointments(range: AppointmentDateRange): Promise<void> {
+    const user = this.auth.user();
+    if (!user) return;
+
     this.isLoading.set(true);
     this.error.set(null);
 
@@ -69,7 +70,7 @@ export class AppointmentService {
         service_type:service_types(id, name, duration_minutes, base_price, color, buffer_after_minutes, travel_buffer_minutes),
         client:profiles!appointments_client_id_fkey(id, full_name, avatar_url)
       `)
-      .eq('trainer_id', trainerId)
+      .eq('trainer_id', user.id)
       .gte('start_at', range.start.toISOString())
       .lte('start_at', range.end.toISOString())
       .order('start_at', { ascending: true });
@@ -82,13 +83,17 @@ export class AppointmentService {
     }
 
     this.appointments.set((data ?? []) as unknown as Appointment[]);
-    this.subscribeToRealtime(trainerId);
+    this.subscribeToRealtime(user.id);
   }
 
   /**
-   * Loads upcoming appointments for a client.
+   * Loads upcoming appointments for the authenticated client.
+   * Client ID is derived from the auth session — never caller-supplied.
    */
-  async getClientAppointments(clientId: string, limit = 20): Promise<Appointment[]> {
+  async getClientAppointments(limit = 20): Promise<Appointment[]> {
+    const user = this.auth.user();
+    if (!user) return [];
+
     const { data, error } = await this.supabase.client
       .from('appointments')
       .select(`
@@ -96,7 +101,7 @@ export class AppointmentService {
         service_type:service_types(id, name, duration_minutes, color),
         trainer:profiles!appointments_trainer_id_fkey(id, full_name, avatar_url)
       `)
-      .eq('client_id', clientId)
+      .eq('client_id', user.id)
       .gte('start_at', new Date().toISOString())
       .not('status', 'in', '("early_cancel","late_cancel")')
       .order('start_at', { ascending: true })
@@ -113,6 +118,12 @@ export class AppointmentService {
    * Validates no conflict exists before inserting.
    */
   async createAppointment(dto: CreateAppointmentDto): Promise<{ data: Appointment | null; error: Error | null }> {
+    const user = this.auth.user();
+    if (!user) return { data: null, error: new Error('Not authenticated') };
+
+    // Override trainer_id from session — never trust caller-supplied value
+    const safeDto = { ...dto, trainer_id: user.id };
+
     try {
       // Look up service type to calculate end_at and check buffers
       const { data: st, error: stErr } = await this.supabase.client
@@ -123,13 +134,13 @@ export class AppointmentService {
 
       if (stErr || !st) throw new Error('Service type not found');
 
-      const startAt = new Date(dto.start_at);
+      const startAt = new Date(safeDto.start_at);
       const endAt   = new Date(startAt.getTime() + st.duration_minutes * 60_000);
 
       // Server-side conflict check (belt-and-suspenders on top of Edge Function availability check)
       const { data: conflict } = await this.supabase.client
         .rpc('check_appointment_conflict', {
-          p_trainer_id: dto.trainer_id,
+          p_trainer_id: safeDto.trainer_id,
           p_start_at:   startAt.toISOString(),
           p_end_at:     endAt.toISOString(),
         });
@@ -141,19 +152,19 @@ export class AppointmentService {
       const { data, error } = await this.supabase.client
         .from('appointments')
         .insert({
-          trainer_id:           dto.trainer_id,
-          client_id:            dto.client_id,
-          service_type_id:      dto.service_type_id,
-          facility_id:          dto.facility_id,
-          resource_id:          dto.resource_id,
+          trainer_id:           safeDto.trainer_id,
+          client_id:            safeDto.client_id,
+          service_type_id:      safeDto.service_type_id,
+          facility_id:          safeDto.facility_id,
+          resource_id:          safeDto.resource_id,
           start_at:             startAt.toISOString(),
           end_at:               endAt.toISOString(),
           duration_minutes:     st.duration_minutes,
-          notes:                dto.notes,
-          client_service_id:    dto.client_service_id,
-          is_recurring:         dto.is_recurring ?? false,
-          recurring_group_id:   dto.recurring_group_id,
-          gender_preference:    dto.gender_preference ?? 'none',
+          notes:                safeDto.notes,
+          client_service_id:    safeDto.client_service_id,
+          is_recurring:         safeDto.is_recurring ?? false,
+          recurring_group_id:   safeDto.recurring_group_id,
+          gender_preference:    safeDto.gender_preference ?? 'none',
           status:               'booked',
         })
         .select(`
@@ -186,11 +197,16 @@ export class AppointmentService {
     id: string,
     updates: Partial<Pick<Appointment, 'notes' | 'resource_id' | 'facility_id'>>,
   ): Promise<{ error: Error | null }> {
+    const user = this.auth.user();
+    if (!user) return { error: new Error('Not authenticated') };
+
     try {
+      // Defense-in-depth: scope update to trainer's own appointments
       const { error } = await this.supabase.client
         .from('appointments')
         .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq('id', id);
+        .eq('id', id)
+        .eq('trainer_id', user.id);
 
       if (error) throw new Error(error.message);
 
@@ -227,8 +243,22 @@ export class AppointmentService {
 
   /**
    * Gets the visit records for a given appointment.
+   * Scoped to appointments where the authenticated user is a party (trainer or client).
    */
   async getVisitsForAppointment(appointmentId: string): Promise<Visit[]> {
+    const user = this.auth.user();
+    if (!user) return [];
+
+    // First verify the user is a party on this appointment
+    const { data: appt } = await this.supabase.client
+      .from('appointments')
+      .select('id')
+      .eq('id', appointmentId)
+      .or(`trainer_id.eq.${user.id},client_id.eq.${user.id}`)
+      .single();
+
+    if (!appt) return [];
+
     const { data } = await this.supabase.client
       .from('visits')
       .select('*')
@@ -261,6 +291,17 @@ export class AppointmentService {
       .subscribe();
   }
 
+  /** Type guard for realtime payloads — ensures minimum required fields exist */
+  private isValidAppointment(record: unknown): record is Appointment {
+    if (!record || typeof record !== 'object') return false;
+    const r = record as Record<string, unknown>;
+    return typeof r['id'] === 'string' &&
+           typeof r['trainer_id'] === 'string' &&
+           typeof r['client_id'] === 'string' &&
+           typeof r['start_at'] === 'string' &&
+           typeof r['status'] === 'string';
+  }
+
   private handleRealtimeChange(payload: Record<string, unknown>): void {
     const eventType = payload['eventType'] as string;
     const newRecord = payload['new'] as Appointment | null;
@@ -268,7 +309,7 @@ export class AppointmentService {
 
     switch (eventType) {
       case 'INSERT':
-        if (newRecord) {
+        if (this.isValidAppointment(newRecord)) {
           this.appointments.update(list =>
             [...list, newRecord].sort(
               (a, b) => new Date(a.start_at).getTime() - new Date(b.start_at).getTime()
@@ -277,14 +318,14 @@ export class AppointmentService {
         }
         break;
       case 'UPDATE':
-        if (newRecord) {
+        if (this.isValidAppointment(newRecord)) {
           this.appointments.update(list =>
             list.map(a => a.id === newRecord.id ? { ...a, ...newRecord } : a)
           );
         }
         break;
       case 'DELETE':
-        if (oldRecord) {
+        if (oldRecord && typeof (oldRecord as Record<string, unknown>)['id'] === 'string') {
           this.appointments.update(list => list.filter(a => a.id !== oldRecord.id));
         }
         break;

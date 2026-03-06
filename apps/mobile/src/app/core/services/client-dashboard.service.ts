@@ -73,7 +73,7 @@ export class ClientDashboardService {
       const today = new Date().toISOString().split('T')[0];
 
       const [appointments, weeklyCount, streak, nutritionData, conversations] = await Promise.all([
-        this.appointmentService.getClientAppointments(userId, 1),
+        this.appointmentService.getClientAppointments(1),
         this.sessionService.getWorkoutCount(userId, 7),
         this.sessionService.getCurrentStreak(userId),
         this.nutritionService.getDailySummary(userId, today),

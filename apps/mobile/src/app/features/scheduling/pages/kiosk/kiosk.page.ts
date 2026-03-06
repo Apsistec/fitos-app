@@ -469,13 +469,10 @@ export class KioskPage implements OnInit, OnDestroy {
   });
 
   ngOnInit() {
-    const tid = this.auth.profile()?.id;
-    if (tid) {
-      this.appointmentService.loadAppointments(tid, {
-        start: new Date().toISOString().split('T')[0],
-        end: new Date().toISOString().split('T')[0],
-      });
-    }
+    this.appointmentService.loadAppointments({
+      start: new Date().toISOString().split('T')[0],
+      end: new Date().toISOString().split('T')[0],
+    });
 
     this.startInactivityTimer();
     this.refreshTimer = setInterval(() => this.refreshAppointments(), REFRESH_INTERVAL_MS);
@@ -585,13 +582,10 @@ export class KioskPage implements OnInit, OnDestroy {
   }
 
   private async refreshAppointments() {
-    const tid = this.auth.profile()?.id;
-    if (tid) {
-      await this.appointmentService.loadAppointments(tid, {
-        start: new Date().toISOString().split('T')[0],
-        end: new Date().toISOString().split('T')[0],
-      });
-    }
+    await this.appointmentService.loadAppointments({
+      start: new Date().toISOString().split('T')[0],
+      end: new Date().toISOString().split('T')[0],
+    });
     this.refreshTime = new Date();
     this.lastRefreshLabel.set('just now');
   }

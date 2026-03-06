@@ -504,11 +504,8 @@ export class ChatPage implements OnInit {
   }
 
   async ngOnInit() {
-    // Load conversation history from Supabase
-    const userId = this.auth.user()?.id;
-    if (userId) {
-      await this.aiCoach.loadConversation(userId);
-    }
+    // Load conversation history from Supabase (user derived from auth session)
+    await this.aiCoach.loadConversation();
   }
 
   /**
@@ -628,14 +625,12 @@ export class ChatPage implements OnInit {
   /**
    * Get user context for AI
    */
-  private getUserContext(): UserContext {
-    const user = this.auth.user();
+  private getUserContext(): Omit<UserContext, 'user_id'> {
     const profile = this.auth.profile();
 
-    // Return appropriate context based on user role
+    // Return appropriate context based on user role (user_id derived by service)
     if (profile?.role === 'trainer') {
       return {
-        user_id: user?.id || '',
         role: 'trainer',
         specializations: [],
         preferences: {},
@@ -644,7 +639,6 @@ export class ChatPage implements OnInit {
 
     // Default to client context
     return {
-      user_id: user?.id || '',
       role: 'client',
       goals: [],
       fitness_level: 'intermediate',

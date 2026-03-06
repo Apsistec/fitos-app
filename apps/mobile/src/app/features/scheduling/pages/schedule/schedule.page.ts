@@ -393,7 +393,7 @@ export class SchedulePage implements OnInit {
   ngOnInit() {
     const tid = this.trainerId();
     if (tid) {
-      this.appointmentService.loadAppointments(tid, {
+      this.appointmentService.loadAppointments({
         start: this.parseDate(this.weekStart()),
         end: this.parseDate(this.weekEnd()),
       });

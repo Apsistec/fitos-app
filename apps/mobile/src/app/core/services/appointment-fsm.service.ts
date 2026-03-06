@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, isDevMode } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
 import { NotificationService } from './notification.service';
@@ -10,6 +10,21 @@ import type {
   APPOINTMENT_TRANSITIONS,
 } from '@fitos/shared';
 import { APPOINTMENT_TERMINAL_STATES } from '@fitos/shared';
+
+/**
+ * Appointment with joined service_type and client data.
+ * Replaces `as any` casts throughout the FSM.
+ */
+interface AppointmentWithServiceType extends Appointment {
+  service_type?: {
+    cancel_window_minutes?: number;
+    num_sessions_deducted?: number;
+    base_price?: number;
+  };
+  client?: {
+    full_name?: string;
+  };
+}
 
 /**
  * AppointmentFsmService
@@ -102,7 +117,7 @@ export class AppointmentFsmService {
   resolveCancelStatus(appointment: Appointment, meta: TransitionMetadata = {}): AppointmentStatus {
     if (meta.forceLateCancel) return 'late_cancel';
     // Fetch cancel_window_minutes from joined service_type if available
-    const windowMinutes = (appointment as any).service_type?.cancel_window_minutes ?? 1440;
+    const windowMinutes = (appointment as AppointmentWithServiceType).service_type?.cancel_window_minutes ?? 1440;
     return this.isLateCancel(appointment, windowMinutes) ? 'late_cancel' : 'early_cancel';
   }
 
@@ -124,6 +139,18 @@ export class AppointmentFsmService {
     this.isTransitioning.set(true);
 
     try {
+      // Guard: caller must be the trainer or client on this appointment
+      const user = this.auth.user();
+      if (!user) throw new Error('Not authenticated');
+      if (user.id !== appointment.trainer_id && user.id !== appointment.client_id) {
+        throw new Error('You are not authorized to modify this appointment');
+      }
+
+      // Guard: clients cannot mark appointments as completed (trainer action only)
+      if (toStatus === 'completed' && user.id !== appointment.trainer_id) {
+        throw new Error('Only the trainer can mark an appointment as completed');
+      }
+
       // Guard: terminal states cannot transition
       if (this.isTerminal(appointment.status)) {
         throw new Error(`Appointment is already in terminal state: ${appointment.status}`);
@@ -155,17 +182,18 @@ export class AppointmentFsmService {
         if (meta.cancelReason) updates['cancel_reason'] = meta.cancelReason;
       }
 
-      // Write to DB
+      // Write to DB — defense-in-depth: scope to trainer_id from session
       const { data: updated, error: updateError } = await this.supabase.client
         .from('appointments')
         .update(updates)
         .eq('id', appointment.id)
+        .eq('trainer_id', appointment.trainer_id)
         .select('*, service_type:service_types(*), client:profiles!appointments_client_id_fkey(*)')
         .single();
 
       if (updateError) throw new Error(updateError.message);
 
-      const updatedAppointment = updated as Appointment;
+      const updatedAppointment = updated as AppointmentWithServiceType;
 
       // Create visit record on terminal states
       let visit: Visit | undefined;
@@ -174,24 +202,33 @@ export class AppointmentFsmService {
       }
 
       // ── Charge cancellation fee for late_cancel / no_show ─────────────────
-      // chargeFee() is fire-and-forget from the FSM's perspective:
-      // a card decline creates a ledger debit instead of blocking the transition.
       if (toStatus === 'late_cancel' || toStatus === 'no_show') {
         const penalty = this.cancellationSvc.calculatePenalty(
           updatedAppointment,
           toStatus as 'late_cancel' | 'no_show',
         );
         if (penalty.feeAmount > 0) {
-          // Non-blocking: don't await — fee failure is surfaced separately
-          this.cancellationSvc.chargeFee(appointment.id, toStatus as 'late_cancel' | 'no_show')
-            .then(result => {
-              if (!result.success) {
-                console.warn(
-                  `[AppointmentFsmService] Fee charge failed for ${appointment.id}:`,
-                  result.error,
-                );
+          // Await the fee charge — failures are written to client_ledger as a debit
+          const feeResult = await this.cancellationSvc.chargeFee(
+            appointment.id,
+            toStatus as 'late_cancel' | 'no_show',
+          );
+          if (!feeResult.success) {
+            // Write failure to client_ledger for reconciliation
+            await this.supabase.client.from('client_ledger').insert({
+              client_id: appointment.client_id,
+              trainer_id: appointment.trainer_id,
+              appointment_id: appointment.id,
+              amount: penalty.feeAmount,
+              type: 'debit',
+              description: `Cancellation fee charge failed: ${feeResult.error ?? 'unknown error'}`,
+              status: 'pending',
+            }).then(({ error: ledgerErr }) => {
+              if (ledgerErr && isDevMode()) {
+                console.warn('[AppointmentFsmService] Ledger write failed:', ledgerErr.message);
               }
             });
+          }
         }
       }
 
@@ -222,11 +259,15 @@ export class AppointmentFsmService {
   async deny(appointmentId: string): Promise<{ success: boolean; error?: string }> {
     this.isTransitioning.set(true);
     try {
+      const user = this.auth.user();
+      if (!user) throw new Error('Not authenticated');
+
       const { error } = await this.supabase.client
         .from('appointments')
         .delete()
         .eq('id', appointmentId)
-        .eq('status', 'requested'); // safety: only delete if still requested
+        .eq('status', 'requested') // safety: only delete if still requested
+        .eq('trainer_id', user.id); // ownership: only trainer can deny their own appointments
 
       if (error) throw new Error(error.message);
       return { success: true };
@@ -254,7 +295,7 @@ export class AppointmentFsmService {
     appointment: Appointment,
     terminalStatus: AppointmentStatus,
   ): Promise<Visit> {
-    const serviceType = (appointment as any).service_type;
+    const serviceType = (appointment as AppointmentWithServiceType).service_type;
     const sessionsDeducted =
       terminalStatus === 'completed' || terminalStatus === 'no_show' || terminalStatus === 'late_cancel'
         ? (serviceType?.num_sessions_deducted ?? 1)
@@ -278,7 +319,7 @@ export class AppointmentFsmService {
       .single();
 
     if (error) {
-      console.error('[AppointmentFsmService] Failed to create visit record:', error.message);
+      if (isDevMode()) console.error('[AppointmentFsmService] Failed to create visit record:', error.message);
       // Don't throw — visit creation failure shouldn't roll back the status update
     }
 
@@ -289,7 +330,7 @@ export class AppointmentFsmService {
     appointment: Appointment,
     toStatus: AppointmentStatus,
   ): Promise<void> {
-    const clientName = (appointment as any).client?.full_name ?? 'Client';
+    const clientName = (appointment as AppointmentWithServiceType).client?.full_name ?? 'Client';
 
     switch (toStatus) {
       case 'booked':

@@ -106,7 +106,12 @@ export class AICoachService {
   private supabase = inject(SupabaseService);
   private auth = inject(AuthService);
   private http = inject(HttpClient);
-  private readonly AI_BACKEND_URL = environment.aiBackendUrl || 'http://localhost:8000';
+  private readonly AI_BACKEND_URL = (() => {
+    if (!environment.aiBackendUrl) {
+      throw new Error('AI Backend URL is not configured. Set aiBackendUrl in environment.');
+    }
+    return environment.aiBackendUrl;
+  })();
 
   /**
    * Build Authorization headers with the current Supabase JWT.
@@ -151,9 +156,14 @@ export class AICoachService {
   hasEarlierMessages = signal(false);
 
   /**
-   * Load or create active conversation for user
+   * Load or create active conversation for the authenticated user.
+   * User ID is derived from the auth session — never caller-supplied.
    */
-  async loadConversation(userId: string): Promise<void> {
+  async loadConversation(): Promise<void> {
+    const sessionUser = this.auth.user();
+    if (!sessionUser) return;
+    const userId = sessionUser.id;
+
     try {
       // Try to find an active conversation
       const { data: conversations, error } = await this.supabase.client
@@ -258,14 +268,17 @@ export class AICoachService {
   }
 
   /**
-   * Create a new conversation
+   * Create a new conversation for the authenticated user.
    */
-  private async createConversation(userId: string): Promise<string | null> {
+  private async createConversation(): Promise<string | null> {
+    const sessionUser = this.auth.user();
+    if (!sessionUser) return null;
+
     try {
       const { data, error } = await this.supabase.client
         .from('ai_conversations')
         .insert({
-          user_id: userId,
+          user_id: sessionUser.id,
           is_active: true,
         })
         .select('id')
@@ -373,16 +386,20 @@ export class AICoachService {
   }
 
   /**
-   * Send message to AI coach via AI Backend
+   * Send message to AI coach via AI Backend.
+   * User identity is derived from auth session — userContext.user_id is overridden.
    */
-  async sendMessage(message: string, userContext: UserContext): Promise<ChatMessage> {
+  async sendMessage(message: string, userContext: Omit<UserContext, 'user_id'>): Promise<ChatMessage> {
+    const sessionUser = this.auth.user();
+    if (!sessionUser) throw new Error('User not authenticated');
+
     this.isProcessing.set(true);
     this.error.set(null);
 
     try {
       // Ensure we have a conversation
       if (!this.conversationId()) {
-        const newId = await this.createConversation(userContext.user_id);
+        const newId = await this.createConversation();
         if (newId) {
           this.conversationId.set(newId);
         }
@@ -411,9 +428,9 @@ export class AICoachService {
           content: msg.content,
         }));
 
-      // Build user context payload for AI Backend
+      // Build user context payload for AI Backend — always use session user ID
       const contextPayload = {
-        user_id: userContext.user_id,
+        user_id: sessionUser.id,
         role: userContext.role,
         goals: ('goals' in userContext) ? userContext.goals : [],
         fitness_level: ('fitness_level' in userContext) ? userContext.fitness_level : 'intermediate',
@@ -444,7 +461,16 @@ export class AICoachService {
           { headers: this.getAuthHeaders() }
         ).pipe(
           timeout(this.REQUEST_TIMEOUT_MS),
-          retry({ count: 2, delay: (_err, attempt) => timer(Math.pow(2, attempt) * 1000) }),
+          retry({
+            count: 2,
+            delay: (err, attempt) => {
+              // Don't retry 4xx client errors (except 429 which is rate limiting)
+              if (err instanceof HttpErrorResponse && err.status >= 400 && err.status < 500 && err.status !== 429) {
+                throw err;
+              }
+              return timer(Math.pow(2, attempt) * 1000);
+            },
+          }),
         )
       );
 
@@ -479,7 +505,7 @@ export class AICoachService {
       const shouldEscalate = response.shouldEscalate || this.checkEscalation(message, assistantContent);
       if (shouldEscalate) {
         await this.createEscalation(
-          userContext.user_id,
+          sessionUser.id,
           'AI coaching escalation',
           message
         );
@@ -606,10 +632,10 @@ export class AICoachService {
   }
 
   /**
-   * Generate unique message ID
+   * Generate unique message ID using cryptographically secure randomness.
    */
   private generateId(): string {
-    return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `msg_${crypto.randomUUID()}`;
   }
 
   /**
@@ -623,19 +649,21 @@ export class AICoachService {
    * Collect a trainer message as potential training data for Coach Brain.
    * Stores the message text in trainer_notes with source='message' for
    * future fine-tuning / methodology learning. Fire-and-forget safe.
+   * Trainer ID is derived from the authenticated session.
    *
-   * @param trainerId - The trainer's user ID
    * @param content   - The message text (caller ensures >= 20 chars)
    * @param source    - Origin of the content ('message' | 'note' | 'session')
    */
   async collectTrainingData(
-    trainerId: string,
     content: string,
     source: 'message' | 'note' | 'session' = 'message'
   ): Promise<void> {
+    const sessionUser = this.auth.user();
+    if (!sessionUser) return;
+
     try {
       await this.supabase.client.from('trainer_notes').insert({
-        trainer_id: trainerId,
+        trainer_id: sessionUser.id,
         content,
         source,
         created_at: new Date().toISOString(),

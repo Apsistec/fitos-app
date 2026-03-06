@@ -302,13 +302,10 @@ export class AppointmentRequestQueueComponent implements OnInit {
   readonly pendingCount = computed(() => this.requestedAppointments().length);
 
   ngOnInit() {
-    const tid = this.auth.profile()?.id;
-    if (tid) {
-      this.appointmentService.loadAppointments(tid, {
-        start: new Date(),
-        end: this.parseDateString(this.futureDate(60)),
-      });
-    }
+    this.appointmentService.loadAppointments({
+      start: new Date(),
+      end: this.parseDateString(this.futureDate(60)),
+    });
   }
 
   async approve(appt: Appointment) {
