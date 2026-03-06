@@ -1,7 +1,9 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable, inject, signal, computed, isDevMode } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { SupabaseService } from './supabase.service';
+import { AuthService } from './auth.service';
 
 /**
  * Wellness & Mental Health Service
@@ -127,6 +129,8 @@ export interface CrisisResourceRecommendations {
 })
 export class WellnessService {
   private readonly http = inject(HttpClient);
+  private readonly supabase = inject(SupabaseService);
+  private readonly auth = inject(AuthService);
   private readonly baseUrl = `${environment.aiBackendUrl}/wellness`;
 
   // State
@@ -155,6 +159,95 @@ export class WellnessService {
   });
 
   // =====================================================================
+  // AUTH HELPER
+  // =====================================================================
+
+  /**
+   * Build HTTP headers with Bearer token from the authenticated session.
+   * All AI-backend calls must include auth for identity verification.
+   */
+  private getAuthHeaders(): { headers: HttpHeaders } {
+    const token = this.auth.accessToken();
+    return {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      }),
+    };
+  }
+
+  // =====================================================================
+  // SCREENING HISTORY (persistent)
+  // =====================================================================
+
+  /**
+   * Load screening history from the database (wellness_screenings table).
+   */
+  async loadScreeningHistory(): Promise<void> {
+    const userId = this.auth.user()?.id;
+    if (!userId) return;
+
+    const { data, error } = await this.supabase.client
+      .from('wellness_screenings')
+      .select('*')
+      .eq('user_id', userId)
+      .order('screened_at', { ascending: false })
+      .limit(20);
+
+    if (error) {
+      if (isDevMode()) console.error('[Wellness] Error loading screening history:', error);
+      return;
+    }
+
+    // Map DB rows to ScreeningResult shape
+    const results: ScreeningResult[] = (data ?? []).map((row: Record<string, unknown>) => ({
+      screening_type: row['screening_type'] as ScreeningType,
+      score: row['score'] as number,
+      severity: row['severity'] as ScreeningSeverity,
+      description: '',
+      needs_followup: row['needs_followup'] as boolean,
+      needs_professional_referral: row['needs_professional_referral'] as boolean,
+      crisis_concern: row['crisis_concern'] as boolean,
+      recommendations: (row['recommendations'] as string[]) ?? [],
+      exercise_interventions: (row['exercise_interventions'] as string[]) ?? [],
+      professional_resources: (row['professional_resources'] as string[]) ?? [],
+      screened_at: row['screened_at'] as string,
+      notes: (row['notes'] as string[]) ?? [],
+    }));
+
+    this._screeningHistory.set(results);
+  }
+
+  /**
+   * Persist a screening result to the wellness_screenings table.
+   */
+  private async persistScreening(result: ScreeningResult): Promise<void> {
+    const userId = this.auth.user()?.id;
+    if (!userId) return;
+
+    const { error } = await this.supabase.client
+      .from('wellness_screenings')
+      .insert({
+        user_id: userId,
+        screening_type: result.screening_type,
+        score: result.score,
+        severity: result.severity,
+        needs_followup: result.needs_followup,
+        needs_professional_referral: result.needs_professional_referral,
+        crisis_concern: result.crisis_concern,
+        responses: {}, // Responses stored as part of the AI assessment
+        recommendations: result.recommendations,
+        exercise_interventions: result.exercise_interventions,
+        professional_resources: result.professional_resources,
+        notes: result.notes,
+      });
+
+    if (error) {
+      if (isDevMode()) console.error('[Wellness] Error persisting screening:', error);
+    }
+  }
+
+  // =====================================================================
   // SCREENING
   // =====================================================================
 
@@ -173,9 +266,11 @@ export class WellnessService {
         screening_type: ScreeningType;
         questions: ScreeningQuestion[];
         disclaimer: string;
-      }>(`${this.baseUrl}/screening/questions`, {
-        screening_type: screeningType,
-      })
+      }>(
+        `${this.baseUrl}/screening/questions`,
+        { screening_type: screeningType },
+        this.getAuthHeaders(),
+      )
     );
   }
 
@@ -187,18 +282,24 @@ export class WellnessService {
     responses: Record<string, number>
   ): Promise<ScreeningResult> {
     const result = await firstValueFrom(
-      this.http.post<ScreeningResult>(`${this.baseUrl}/screening/assess`, {
-        screening_type: screeningType,
-        responses,
-      })
+      this.http.post<ScreeningResult>(
+        `${this.baseUrl}/screening/assess`,
+        { screening_type: screeningType, responses },
+        this.getAuthHeaders(),
+      )
     );
 
     // Update state
     this._currentScreening.set(result);
 
-    // Add to history
+    // Add to local history
     const history = this._screeningHistory();
     this._screeningHistory.set([result, ...history]);
+
+    // Persist to database (fire-and-forget)
+    this.persistScreening(result).catch((err) => {
+      if (isDevMode()) console.error('[Wellness] Screening persist failed:', err);
+    });
 
     return result;
   }
@@ -224,12 +325,16 @@ export class WellnessService {
     preferences?: string[]
   ): Promise<WorkoutPlan> {
     const plan = await firstValueFrom(
-      this.http.post<WorkoutPlan>(`${this.baseUrl}/workouts/recommend`, {
-        screening_severity: screeningSeverity,
-        screening_type: screeningType,
-        current_activity_level: currentActivityLevel,
-        preferences,
-      })
+      this.http.post<WorkoutPlan>(
+        `${this.baseUrl}/workouts/recommend`,
+        {
+          screening_severity: screeningSeverity,
+          screening_type: screeningType,
+          current_activity_level: currentActivityLevel,
+          preferences,
+        },
+        this.getAuthHeaders(),
+      )
     );
 
     // Update state
@@ -259,10 +364,8 @@ export class WellnessService {
     return firstValueFrom(
       this.http.post<CrisisResourceRecommendations>(
         `${this.baseUrl}/resources/crisis`,
-        {
-          urgency_level: urgencyLevel,
-          population,
-        }
+        { urgency_level: urgencyLevel, population },
+        this.getAuthHeaders(),
       )
     );
   }
@@ -276,7 +379,8 @@ export class WellnessService {
   }> {
     return firstValueFrom(
       this.http.get<{ resources: CrisisResource[]; count: number }>(
-        `${this.baseUrl}/resources/all-crisis`
+        `${this.baseUrl}/resources/all-crisis`,
+        this.getAuthHeaders(),
       )
     );
   }
@@ -290,7 +394,8 @@ export class WellnessService {
   }> {
     return firstValueFrom(
       this.http.get<{ resources: CrisisResource[]; count: number }>(
-        `${this.baseUrl}/resources/professional`
+        `${this.baseUrl}/resources/professional`,
+        this.getAuthHeaders(),
       )
     );
   }
@@ -304,7 +409,8 @@ export class WellnessService {
   }> {
     return firstValueFrom(
       this.http.get<{ resources: CrisisResource[]; count: number }>(
-        `${this.baseUrl}/resources/support-groups`
+        `${this.baseUrl}/resources/support-groups`,
+        this.getAuthHeaders(),
       )
     );
   }
@@ -423,7 +529,8 @@ export class WellnessService {
   }
 
   /**
-   * Log crisis resource access (for safety monitoring)
+   * Log crisis resource access to the crisis_resource_access_log table.
+   * Persisted for safety monitoring (fire-and-forget).
    */
   async logCrisisResourceAccess(
     resourceType: ResourceType,
@@ -431,15 +538,24 @@ export class WellnessService {
     urgencyLevel: UrgencyLevel,
     screeningId?: string
   ): Promise<void> {
-    // This would typically call a backend endpoint to log the access
-    // For now, just console log
-    console.log('Crisis resource accessed:', {
-      resourceType,
-      resourceName,
-      urgencyLevel,
-      screeningId,
-      timestamp: new Date().toISOString(),
-    });
+    const userId = this.auth.user()?.id;
+    if (!userId) return;
+
+    const { error } = await this.supabase.client
+      .from('crisis_resource_access_log')
+      .insert({
+        user_id: userId,
+        resource_type: resourceType,
+        resource_name: resourceName,
+        context: {
+          urgency_level: urgencyLevel,
+          screening_id: screeningId ?? null,
+        },
+      });
+
+    if (error && isDevMode()) {
+      console.error('[Wellness] Error logging crisis resource access:', error);
+    }
   }
 
   /**

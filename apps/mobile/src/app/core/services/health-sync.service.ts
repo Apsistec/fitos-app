@@ -1,4 +1,4 @@
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, signal, inject, isDevMode } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import { HealthKitService } from './healthkit.service';
 import { SupabaseService } from './supabase.service';
@@ -84,11 +84,40 @@ export class HealthSyncService {
     return authorized;
   }
 
+  // ─── Consent ─────────────────────────────────────────────────
+
+  /**
+   * Check if the user has granted explicit consent for health data processing.
+   * Reads from `user_data_consents.health_data_sync`.
+   */
+  async hasHealthDataConsent(): Promise<boolean> {
+    const userId = this.auth.user()?.id;
+    if (!userId) return false;
+
+    try {
+      const { data, error } = await this.supabase.client
+        .from('user_data_consents')
+        .select('health_data_sync')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (error) {
+        if (isDevMode()) console.error('[HealthSync] Consent check error:', error);
+        return false;
+      }
+
+      return data?.health_data_sync === true;
+    } catch {
+      return false;
+    }
+  }
+
   // ─── Sync Operations ─────────────────────────────────────────
 
   /**
    * Full foreground sync — reads last 7 days of health data.
    * Called when user opens the wearables page or manually triggers sync.
+   * Requires explicit health_data_sync consent.
    */
   async syncAll(): Promise<HealthSyncResult> {
     const userId = this.auth.user()?.id;
@@ -98,6 +127,12 @@ export class HealthSyncService {
 
     if (!this.isAuthorized()) {
       return { success: false, recordsSynced: 0, dataTypesSynced: [], errorMessage: 'Health access not authorized' };
+    }
+
+    // HIPAA: require explicit data processing consent before syncing health data
+    const hasConsent = await this.hasHealthDataConsent();
+    if (!hasConsent) {
+      return { success: false, recordsSynced: 0, dataTypesSynced: [], errorMessage: 'Health data processing consent required' };
     }
 
     this.isSyncing.set(true);
@@ -187,6 +222,12 @@ export class HealthSyncService {
     const userId = this.auth.user()?.id;
     if (!userId || !this.isAuthorized()) {
       return { success: false, recordsSynced: 0, dataTypesSynced: [] };
+    }
+
+    // HIPAA: require explicit data processing consent
+    const hasConsent = await this.hasHealthDataConsent();
+    if (!hasConsent) {
+      return { success: false, recordsSynced: 0, dataTypesSynced: [], errorMessage: 'Consent required' };
     }
 
     const startTime = Date.now();

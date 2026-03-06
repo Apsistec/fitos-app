@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, isDevMode } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, Router, UrlTree } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
@@ -56,7 +56,7 @@ export class HipaaAccessGuard implements CanActivate {
       switchMap((user) => {
         // Check 1: User must be authenticated
         if (!user) {
-          console.warn('[HIPAA Guard] Access denied: User not authenticated');
+          if (isDevMode()) console.warn('[HIPAA Guard] Access denied: User not authenticated');
           return of(this.router.createUrlTree(['/login'], {
             queryParams: { returnUrl: route.url.join('/') },
           }));
@@ -64,7 +64,7 @@ export class HipaaAccessGuard implements CanActivate {
 
         // Check 2: MFA required for sensitive PHI
         if (requiresMfa && !user.mfa_enabled) {
-          console.warn('[HIPAA Guard] Access denied: MFA required for', resourceType);
+          if (isDevMode()) console.warn('[HIPAA Guard] Access denied: MFA required for', resourceType);
           return of(this.router.createUrlTree(['/settings/security'], {
             queryParams: {
               mfa_required: true,
@@ -87,7 +87,7 @@ export class HipaaAccessGuard implements CanActivate {
         return of(true);
       }),
       catchError((error) => {
-        console.error('[HIPAA Guard] Error checking access:', error);
+        if (isDevMode()) console.error('[HIPAA Guard] Error checking access:', error);
         return of(this.router.createUrlTree(['/error'], {
           queryParams: { message: 'Unable to verify access permissions' },
         }));
@@ -113,10 +113,10 @@ export class HipaaAccessGuard implements CanActivate {
   }
 
   /**
-   * Log PHI access for HIPAA compliance
+   * Log PHI access for HIPAA compliance (fire-and-forget with internal retry)
    */
   private logPhiAccess(
-    userId: string,
+    _userId: string,
     resourceType: string,
     resourceId: string,
     data: HipaaAccessData
@@ -124,7 +124,8 @@ export class HipaaAccessGuard implements CanActivate {
     // Determine PHI categories
     const phiCategories = data.phiCategories || this.inferPhiCategories(resourceType);
 
-    // Log the access
+    // Fire-and-forget — AuditLogService handles retry internally.
+    // Identity is derived from the authenticated session, not the userId param.
     this.auditLogService
       .logPhiAccess({
         action: 'read',
@@ -134,14 +135,16 @@ export class HipaaAccessGuard implements CanActivate {
         phi_categories: phiCategories,
         access_reason: data.accessReason || 'treatment',
       })
-      .subscribe({
-        next: () => {
+      .then(() => {
+        if (isDevMode()) {
           console.debug('[HIPAA Guard] PHI access logged:', resourceType, resourceId);
-        },
-        error: (err) => {
+        }
+      })
+      .catch((err) => {
+        if (isDevMode()) {
           console.error('[HIPAA Guard] Failed to log PHI access:', err);
-          // Don't block access if logging fails, but log the error
-        },
+        }
+        // Don't block access if logging fails
       });
   }
 

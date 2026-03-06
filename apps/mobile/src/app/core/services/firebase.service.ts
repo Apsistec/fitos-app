@@ -1,4 +1,4 @@
-import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject, isDevMode } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../environments/environment';
 
@@ -54,8 +54,12 @@ export class FirebaseService {
   }
 
   /**
-   * Initialize Firebase app, analytics, and performance monitoring.
+   * Initialize Firebase app and performance monitoring.
    * Only runs in browser context (not SSR/prerender).
+   *
+   * Analytics is NOT initialized here — it requires explicit user consent
+   * via enableAnalytics(). All tracking methods are no-ops until consent
+   * is verified and enableAnalytics() is called.
    */
   private async initializeFirebase(): Promise<void> {
     if (this.initialized) return;
@@ -64,23 +68,47 @@ export class FirebaseService {
       // Initialize Firebase app from environment config
       this.app = initializeApp(environment.firebase);
 
-      // Analytics: check if supported (incognito mode, ad-blockers, etc.)
-      const analyticsSupported = await isAnalyticsSupported();
-      if (analyticsSupported) {
-        this.analytics = getAnalytics(this.app);
-        console.log('[FirebaseService] Analytics initialized');
-      } else {
-        console.warn('[FirebaseService] Analytics not supported in this environment');
-      }
-
       // Performance Monitoring (automatic HTTP traces + custom traces)
+      // Performance monitoring is functional/technical, not marketing — no consent needed
       this.performance = getPerformance(this.app);
-      console.log('[FirebaseService] Performance monitoring initialized');
+      if (isDevMode()) console.log('[FirebaseService] Performance monitoring initialized');
 
       this.initialized = true;
     } catch (e) {
-      console.warn('[FirebaseService] Initialization failed:', e);
+      if (isDevMode()) console.warn('[FirebaseService] Initialization failed:', e);
     }
+  }
+
+  /**
+   * Enable analytics after user has granted analytics_tracking consent.
+   * Called by auth/consent flow after verifying user_data_consents.analytics_tracking = true.
+   *
+   * All tracking methods remain no-ops until this is called.
+   */
+  async enableAnalytics(): Promise<void> {
+    if (this.analytics) return; // Already enabled
+    if (!this.app) return; // Firebase not initialized
+
+    try {
+      const analyticsSupported = await isAnalyticsSupported();
+      if (analyticsSupported) {
+        this.analytics = getAnalytics(this.app);
+        if (isDevMode()) console.log('[FirebaseService] Analytics enabled (consent granted)');
+      } else {
+        if (isDevMode()) console.warn('[FirebaseService] Analytics not supported in this environment');
+      }
+    } catch (e) {
+      if (isDevMode()) console.warn('[FirebaseService] enableAnalytics failed:', e);
+    }
+  }
+
+  /**
+   * Disable analytics when user revokes consent or logs out.
+   * Nulls out the analytics reference so all tracking methods become no-ops.
+   */
+  disableAnalytics(): void {
+    this.analytics = null;
+    if (isDevMode()) console.log('[FirebaseService] Analytics disabled');
   }
 
   // ─── Analytics Methods ────────────────────────────────────────────
@@ -97,7 +125,7 @@ export class FirebaseService {
     try {
       logEvent(this.analytics, eventName, params);
     } catch (e) {
-      console.warn('[FirebaseService] trackEvent failed:', e);
+      if (isDevMode()) console.warn('[FirebaseService] trackEvent failed:', e);
     }
   }
 
@@ -116,7 +144,7 @@ export class FirebaseService {
         firebase_screen_class: screenClass || screenName,
       });
     } catch (e) {
-      console.warn('[FirebaseService] trackScreenView failed:', e);
+      if (isDevMode()) console.warn('[FirebaseService] trackScreenView failed:', e);
     }
   }
 
@@ -132,8 +160,9 @@ export class FirebaseService {
   ): void {
     if (!this.analytics) return;
     try {
-      // Strip query params and hash for cleaner grouping
-      const cleanUrl = url.split('?')[0].split('#')[0];
+      // Strip query params, hash, and user-specific path segments for cleaner grouping
+      // Prevents user IDs / UUIDs from leaking into GA4 analytics
+      const cleanUrl = this.sanitizeApiUrl(url);
 
       logEvent(this.analytics, 'api_request', {
         api_url: cleanUrl,
@@ -143,7 +172,7 @@ export class FirebaseService {
         api_success: statusCode >= 200 && statusCode < 400,
       });
     } catch (e) {
-      console.warn('[FirebaseService] trackApiPerformance failed:', e);
+      if (isDevMode()) console.warn('[FirebaseService] trackApiPerformance failed:', e);
     }
   }
 
@@ -176,7 +205,7 @@ export class FirebaseService {
     try {
       setUserId(this.analytics, userId);
     } catch (e) {
-      console.warn('[FirebaseService] identifyUser failed:', e);
+      if (isDevMode()) console.warn('[FirebaseService] identifyUser failed:', e);
     }
   }
 
@@ -191,7 +220,7 @@ export class FirebaseService {
     try {
       setUserProperties(this.analytics, props);
     } catch (e) {
-      console.warn('[FirebaseService] setUserProps failed:', e);
+      if (isDevMode()) console.warn('[FirebaseService] setUserProps failed:', e);
     }
   }
 
@@ -213,7 +242,7 @@ export class FirebaseService {
         token_length: token.length, // avoid logging the actual token
       });
     } catch (e) {
-      console.warn('[FirebaseService] trackFcmRegistration failed:', e);
+      if (isDevMode()) console.warn('[FirebaseService] trackFcmRegistration failed:', e);
     }
   }
 
@@ -226,7 +255,7 @@ export class FirebaseService {
     try {
       logEvent(this.analytics, 'notification_received', { notification_type: type });
     } catch (e) {
-      console.warn('[FirebaseService] trackNotificationReceived failed:', e);
+      if (isDevMode()) console.warn('[FirebaseService] trackNotificationReceived failed:', e);
     }
   }
 
@@ -242,7 +271,7 @@ export class FirebaseService {
         action_taken: actionTaken ?? 'tap',
       });
     } catch (e) {
-      console.warn('[FirebaseService] trackNotificationOpened failed:', e);
+      if (isDevMode()) console.warn('[FirebaseService] trackNotificationOpened failed:', e);
     }
   }
 
@@ -255,7 +284,7 @@ export class FirebaseService {
     try {
       logEvent(this.analytics, 'geofence_entry', { gym_name: gymName });
     } catch (e) {
-      console.warn('[FirebaseService] trackGeofenceEntry failed:', e);
+      if (isDevMode()) console.warn('[FirebaseService] trackGeofenceEntry failed:', e);
     }
   }
 
@@ -283,13 +312,38 @@ export class FirebaseService {
           try {
             t.stop();
           } catch (e) {
-            console.warn('[FirebaseService] trace.stop failed:', e);
+            if (isDevMode()) console.warn('[FirebaseService] trace.stop failed:', e);
           }
         },
       };
     } catch (e) {
-      console.warn('[FirebaseService] startTrace failed:', e);
+      if (isDevMode()) console.warn('[FirebaseService] startTrace failed:', e);
       return { stop: () => { /* no-op on trace start failure */ } };
     }
+  }
+
+  // ─── Private Helpers ────────────────────────────────────────────
+
+  /**
+   * Sanitize API URLs for analytics logging.
+   * Strips query params, hash fragments, and replaces user-specific path segments
+   * (UUIDs, numeric IDs) with placeholders to prevent identity leakage into GA4.
+   *
+   * Example: /api/users/abc123-def456/health-data → /api/users/{id}/health-data
+   */
+  private sanitizeApiUrl(url: string): string {
+    // Strip query params and hash
+    let clean = url.split('?')[0].split('#')[0];
+
+    // Replace UUIDs (8-4-4-4-12 hex pattern)
+    clean = clean.replace(
+      /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi,
+      '{id}',
+    );
+
+    // Replace standalone numeric IDs in path segments (e.g., /users/12345/)
+    clean = clean.replace(/\/\d+(?=\/|$)/g, '/{id}');
+
+    return clean;
   }
 }

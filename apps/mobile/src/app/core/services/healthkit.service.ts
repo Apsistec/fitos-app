@@ -1,6 +1,7 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, isDevMode } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import type { HealthPlugin } from '@capgo/capacitor-health';
+import { environment } from '../../../environments/environment';
 
 /**
  * HealthKit workout data
@@ -144,7 +145,13 @@ export class HealthKitService {
     const dateStr = startDate.toISOString().split('T')[0];
 
     if (!plugin) {
-      // Return mock data for development / web
+      // In production without native plugin, return empty metrics (no mock data)
+      if (environment.production) {
+        const empty: HealthKitMetrics = { date: dateStr };
+        this.metrics.set(empty);
+        return empty;
+      }
+      // Development only: return mock data for web preview
       const mock: HealthKitMetrics = {
         resting_heart_rate: 58,
         hrv: 65,
@@ -285,28 +292,35 @@ export class HealthKitService {
 
   /**
    * Write a FitOS workout session to Health app.
+   *
+   * NOTE: Calorie burn is intentionally NOT written to HealthKit.
+   * FitOS policy: "never display calorie burn from wearables" due to
+   * research-demonstrated inaccuracy. Only workout duration is recorded.
    */
   async saveWorkout(workout: {
     type: string;
     start_date: Date;
     end_date: Date;
-    calories_burned?: number;
   }): Promise<void> {
     const plugin = await this.getPlugin();
     if (!plugin) {
-      console.warn('[HealthKit] saveWorkout — plugin not available');
+      if (isDevMode()) console.warn('[HealthKit] saveWorkout — plugin not available');
       return;
     }
 
     try {
-      if (workout.calories_burned !== undefined) {
-        await plugin.saveSample({
-          dataType: 'calories',
-          value: workout.calories_burned,
-          startDate: workout.start_date.toISOString(),
-          endDate: workout.end_date.toISOString(),
-        });
-      }
+      // Write workout duration only (not calories)
+      const durationMinutes = this.durationMins(
+        workout.start_date.toISOString(),
+        workout.end_date.toISOString(),
+      );
+
+      await plugin.saveSample({
+        dataType: 'workout',
+        value: durationMinutes,
+        startDate: workout.start_date.toISOString(),
+        endDate: workout.end_date.toISOString(),
+      });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to save workout';
       this.error.set(errorMessage);

@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, isDevMode } from '@angular/core';
 import { Router } from '@angular/router';
 import { fromEvent, merge, Subject, timer, Observable } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
@@ -45,6 +45,7 @@ export class IdleTimeoutService {
   private readonly WARNING_BEFORE_MS = 2 * 60 * 1000; // 2 minutes warning
 
   private destroy$ = new Subject<void>();
+  private timerReset$ = new Subject<void>(); // Cancels only timer subscriptions (not the whole service)
   private warningShown = signal(false);
   private countdownInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -52,7 +53,7 @@ export class IdleTimeoutService {
    * Start idle timeout monitoring
    */
   start(): void {
-    console.log('[HIPAA Idle] Starting idle timeout monitoring (15 minutes)');
+    if (isDevMode()) console.log('[IdleTimeout] Starting monitoring');
 
     // Listen for user activity events
     const userActivity$ = this.getUserActivityObservable();
@@ -75,10 +76,12 @@ export class IdleTimeoutService {
    * Stop idle timeout monitoring
    */
   stop(): void {
-    console.log('[HIPAA Idle] Stopping idle timeout monitoring');
+    if (isDevMode()) console.log('[IdleTimeout] Stopping monitoring');
+    this.timerReset$.next();
     this.destroy$.next();
     this.destroy$.complete();
     this.destroy$ = new Subject<void>(); // Reset for potential restart
+    this.timerReset$ = new Subject<void>();
 
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval);
@@ -106,21 +109,24 @@ export class IdleTimeoutService {
    * Reset idle timer
    */
   private resetIdleTimer(): void {
+    // Cancel any existing timer subscriptions (prevents timer stacking)
+    this.timerReset$.next();
+
     // Clear existing warning
     if (this.warningShown()) {
       this.dismissWarning();
     }
 
-    // Schedule warning
+    // Schedule warning — cancelled by timerReset$ OR destroy$
     timer(this.IDLE_TIMEOUT_MS - this.WARNING_BEFORE_MS)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(merge(this.destroy$, this.timerReset$)))
       .subscribe(() => {
         this.showIdleWarning();
       });
 
-    // Schedule logout
+    // Schedule logout — cancelled by timerReset$ OR destroy$
     timer(this.IDLE_TIMEOUT_MS)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(merge(this.destroy$, this.timerReset$)))
       .subscribe(() => {
         this.handleIdleTimeout();
       });
@@ -135,18 +141,18 @@ export class IdleTimeoutService {
     }
 
     this.warningShown.set(true);
-    console.warn('[HIPAA Idle] Warning: You will be logged out in 2 minutes due to inactivity');
+    if (isDevMode()) console.warn('[IdleTimeout] Showing inactivity warning');
 
     const alert = await this.alertController.create({
       header: 'Session Timeout Warning',
-      subHeader: 'HIPAA Security Requirement',
+      subHeader: 'Security Requirement',
       message: this.getWarningMessage(),
       buttons: [
         {
           text: 'Stay Logged In',
           role: 'cancel',
           handler: () => {
-            console.log('[HIPAA Idle] User chose to stay logged in');
+            if (isDevMode()) console.log('[IdleTimeout] User chose to stay logged in');
             this.resetIdleTimer();
             this.warningShown.set(false);
           },
@@ -155,7 +161,7 @@ export class IdleTimeoutService {
           text: 'Logout Now',
           role: 'destructive',
           handler: () => {
-            console.log('[HIPAA Idle] User chose to logout immediately');
+            if (isDevMode()) console.log('[IdleTimeout] User chose to logout');
             this.handleIdleTimeout();
           },
         },
@@ -175,8 +181,8 @@ export class IdleTimeoutService {
    */
   private getWarningMessage(): string {
     return `
-      <p>You have been inactive for 13 minutes.</p>
-      <p>For security and HIPAA compliance, you will be automatically logged out in <strong id="countdown-timer">2:00</strong>.</p>
+      <p>You have been inactive for a while.</p>
+      <p>For security, you will be automatically logged out in <strong id="countdown-timer">2:00</strong>.</p>
       <p>Click "Stay Logged In" to continue your session.</p>
     `;
   }
@@ -231,7 +237,7 @@ export class IdleTimeoutService {
    * Handle idle timeout - logout user
    */
   private handleIdleTimeout(): void {
-    console.log('[HIPAA Idle] Logging out due to inactivity (HIPAA requirement)');
+    if (isDevMode()) console.log('[IdleTimeout] Session timeout — logging out');
 
     // Clear countdown
     if (this.countdownInterval) {
@@ -245,16 +251,13 @@ export class IdleTimeoutService {
     // Logout user
     this.authService.logout().subscribe({
       next: () => {
-        // Navigate to login with reason
+        // Navigate to login with reason code only (no verbose messages in URL)
         this.router.navigate(['/login'], {
-          queryParams: {
-            reason: 'idle_timeout',
-            message: 'You were logged out due to 15 minutes of inactivity (HIPAA requirement)',
-          },
+          queryParams: { reason: 'idle_timeout' },
         });
       },
       error: (err) => {
-        console.error('[HIPAA Idle] Error during logout:', err);
+        if (isDevMode()) console.error('[IdleTimeout] Error during logout:', err);
         // Force navigation even if logout fails
         this.router.navigate(['/login'], {
           queryParams: { reason: 'idle_timeout' },
