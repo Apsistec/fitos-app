@@ -7,9 +7,10 @@
  * Also provides CSV export of client retention data
  * via the native Share sheet.
  */
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, isDevMode } from '@angular/core';
 import { Share } from '@capacitor/share';
 import { SupabaseService } from './supabase.service';
+import { AuthService } from './auth.service';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -42,6 +43,14 @@ export interface GrowthClientRow {
 @Injectable({ providedIn: 'root' })
 export class GrowthAnalyticsService {
   private supabase = inject(SupabaseService);
+  private auth     = inject(AuthService);
+
+  /** Session-derived trainer identity — prevents parameter-tampering. */
+  private get trainerId(): string {
+    const id = this.auth.user()?.id;
+    if (!id) throw new Error('Not authenticated');
+    return id;
+  }
 
   // ── Signals ────────────────────────────────────────────────────────────────
   analytics  = signal<GrowthAnalytics | null>(null);
@@ -55,13 +64,15 @@ export class GrowthAnalyticsService {
     this.error.set(null);
     try {
       const { data, error } = await this.supabase.client
-        .rpc('get_growth_analytics');
+        .rpc('get_growth_analytics', { p_trainer_id: this.trainerId });
       if (error) throw error;
       const result = data as GrowthAnalytics;
       this.analytics.set(result);
       return result;
-    } catch (err: any) {
-      this.error.set(err.message ?? 'Failed to load growth analytics');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load growth analytics';
+      this.error.set(errorMessage);
+      if (isDevMode()) console.error('Error loading growth analytics:', err);
       return null;
     } finally {
       this.isLoading.set(false);
@@ -74,7 +85,7 @@ export class GrowthAnalyticsService {
    */
   async exportCsv(): Promise<void> {
     try {
-      // Fetch raw client data
+      // Fetch raw client data — scoped to this trainer
       const { data: clients, error } = await this.supabase.client
         .from('trainer_clients')
         .select(`
@@ -88,27 +99,33 @@ export class GrowthAnalyticsService {
             status
           )
         `)
+        .eq('trainer_id', this.trainerId)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
 
       // Build CSV rows
-      const rows: GrowthClientRow[] = (clients ?? []).map((tc: any) => {
-        const completedSessions = (tc.appointments ?? []).filter(
-          (a: any) => a.status === 'completed',
-        );
+      const rows: GrowthClientRow[] = (clients ?? []).map((tc: Record<string, unknown>) => {
+        const appointments = (tc['appointments'] as { id: string; start_time: string; status: string }[]) ?? [];
+        const completedSessions = appointments.filter(a => a.status === 'completed');
         const lastActivity = completedSessions.length > 0
-          ? completedSessions.sort((a: any, b: any) =>
+          ? completedSessions.sort((a, b) =>
               new Date(b.start_time).getTime() - new Date(a.start_time).getTime()
             )[0].start_time
           : null;
 
+        // Supabase returns joined relations — extract full_name safely
+        const profilesRaw = tc['profiles'] as Record<string, unknown> | Record<string, unknown>[] | null;
+        const fullName = Array.isArray(profilesRaw)
+          ? (profilesRaw[0]?.['full_name'] as string ?? 'Unknown')
+          : ((profilesRaw as Record<string, unknown>)?.['full_name'] as string ?? 'Unknown');
+
         return {
-          full_name:          tc.profiles?.full_name ?? 'Unknown',
-          join_date:          tc.created_at.slice(0, 10),
+          full_name:          fullName,
+          join_date:          (tc['created_at'] as string).slice(0, 10),
           sessions_completed: completedSessions.length,
           last_activity:      lastActivity ? lastActivity.slice(0, 10) : null,
-          status:             tc.status,
+          status:             tc['status'] as string,
         };
       });
 
@@ -131,8 +148,10 @@ export class GrowthAnalyticsService {
         text:          csv,
         dialogTitle:   `Export ${filename}`,
       });
-    } catch (err: any) {
-      this.error.set(err.message ?? 'Export failed');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Export failed';
+      this.error.set(errorMessage);
+      if (isDevMode()) console.error('Error exporting CSV:', err);
     }
   }
 

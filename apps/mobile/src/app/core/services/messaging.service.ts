@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, computed, effect } from '@angular/core';
+import { Injectable, inject, signal, computed, effect, isDevMode } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
 import type { Tables } from '@fitos/shared';
@@ -38,6 +38,16 @@ export class MessagingService {
   private supabase = inject(SupabaseService);
   private auth = inject(AuthService);
 
+  /** Strict UUID v4 pattern — prevents injection in Realtime filter strings. */
+  private static readonly UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+  /** Validate a UUID before interpolating it into a Realtime filter. */
+  private assertUuid(value: string, label: string): void {
+    if (!MessagingService.UUID_RE.test(value)) {
+      throw new Error(`Invalid UUID for ${label}`);
+    }
+  }
+
   // ── State signals ─────────────────────────────────────────────
   conversationsSignal   = signal<Conversation[]>([]);
   currentMessagesSignal = signal<Message[]>([]);
@@ -74,6 +84,9 @@ export class MessagingService {
 
   private subscribeToMessages(userId: string): void {
     this.unsubscribe();
+
+    // Validate UUID before interpolating into Realtime filter string
+    this.assertUuid(userId, 'recipient_id');
 
     this.realtimeChannel = this.supabase.client
       .channel(`messages:${userId}`)
@@ -137,6 +150,9 @@ export class MessagingService {
       const userId = this.auth.user()?.id;
       if (!userId) throw new Error('User not authenticated');
 
+      // Validate UUID before interpolating into .or() filter
+      this.assertUuid(userId, 'userId');
+
       const { data: messages, error } = await this.supabase
         .from('messages')
         .select('*, sender:profiles!messages_sender_id_fkey(*), recipient:profiles!messages_recipient_id_fkey(*)')
@@ -152,14 +168,14 @@ export class MessagingService {
       for (const msg of messages || []) {
         const otherUserId = msg.sender_id === userId ? msg.recipient_id : msg.sender_id;
         const otherUser   = msg.sender_id === userId ? msg.recipient  : msg.sender;
-        const convType    = ((msg as any).conversation_type as ConversationType) ?? 'client_coaching';
+        const convType    = ((msg as Record<string, unknown>).conversation_type as ConversationType) ?? 'client_coaching';
         const key         = `${otherUserId}::${convType}`;
 
         if (!conversationMap.has(key)) {
           conversationMap.set(key, {
             otherUserId,
-            otherUserName:    (otherUser as any)?.full_name ?? 'Unknown',
-            otherUserAvatar:  (otherUser as any)?.avatar_url ?? null,
+            otherUserName:    (otherUser as Record<string, unknown>)?.['full_name'] as string ?? 'Unknown',
+            otherUserAvatar:  (otherUser as Record<string, unknown>)?.['avatar_url'] as string ?? null,
             lastMessage:      msg as Message,
             unreadCount:      0,
             conversationType: convType,
@@ -182,7 +198,7 @@ export class MessagingService {
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to load conversations';
       this.errorSignal.set(message);
-      console.error('Error loading conversations:', error);
+      if (isDevMode()) console.error('Error loading conversations:', error);
       return [];
     } finally {
       this.isLoadingSignal.set(false);
@@ -209,7 +225,7 @@ export class MessagingService {
       this.teamContactsSignal.set(contacts);
       return contacts;
     } catch (error) {
-      console.error('Error loading team contacts:', error);
+      if (isDevMode()) console.error('Error loading team contacts:', error);
       return [];
     }
   }
@@ -227,6 +243,10 @@ export class MessagingService {
       const userId = this.auth.user()?.id;
       if (!userId) throw new Error('User not authenticated');
 
+      // Validate UUIDs before interpolating into .or() filter
+      this.assertUuid(userId, 'userId');
+      this.assertUuid(otherUserId, 'otherUserId');
+
       const { data: messages, error } = await this.supabase
         .from('messages')
         .select('*, sender:profiles!messages_sender_id_fkey(*)')
@@ -243,7 +263,7 @@ export class MessagingService {
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to load messages';
       this.errorSignal.set(message);
-      console.error('Error loading messages:', error);
+      if (isDevMode()) console.error('Error loading messages:', error);
       return [];
     } finally {
       this.isLoadingSignal.set(false);
@@ -296,7 +316,7 @@ export class MessagingService {
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to send message';
       this.errorSignal.set(message);
-      console.error('Error sending message:', error);
+      if (isDevMode()) console.error('Error sending message:', error);
       return null;
     }
   }
@@ -320,7 +340,7 @@ export class MessagingService {
 
       await this.loadConversations();
     } catch (error) {
-      console.error('Error marking messages as read:', error);
+      if (isDevMode()) console.error('Error marking messages as read:', error);
     }
   }
 
@@ -343,7 +363,7 @@ export class MessagingService {
       this.currentMessagesSignal.update(msgs => msgs.filter(m => m.id !== messageId));
       return true;
     } catch (error) {
-      console.error('Error deleting message:', error);
+      if (isDevMode()) console.error('Error deleting message:', error);
       return false;
     }
   }

@@ -1,5 +1,6 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, isDevMode } from '@angular/core';
 import { SupabaseService } from './supabase.service';
+import { AuthService } from './auth.service';
 import {
   EmailTemplate,
   EmailSequence,
@@ -31,6 +32,24 @@ import {
 })
 export class EmailService {
   private supabase = inject(SupabaseService);
+  private auth     = inject(AuthService);
+
+  /** Session-derived trainer identity — prevents parameter-tampering. */
+  private get trainerId(): string {
+    const id = this.auth.user()?.id;
+    if (!id) throw new Error('Not authenticated');
+    return id;
+  }
+
+  /** HTML-escape a string to prevent XSS in rendered templates. */
+  private escapeHtml(str: string): string {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
 
   // State
   templates = signal<EmailTemplate[]>([]);
@@ -49,6 +68,7 @@ export class EmailService {
       const { data, error } = await this.supabase.client
         .from('email_templates')
         .select('*')
+        .eq('trainer_id', this.trainerId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -109,6 +129,7 @@ export class EmailService {
       const { data, error } = await this.supabase.client
         .from('email_sequences')
         .select('*')
+        .eq('trainer_id', this.trainerId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -194,18 +215,20 @@ export class EmailService {
         .from('email_templates')
         .select('*')
         .eq('id', templateId)
+        .eq('trainer_id', this.trainerId)
         .single();
 
       if (templateError) throw templateError;
 
-      // Replace variables in subject and body
+      // Replace variables in subject and body — HTML-escape values to prevent XSS
       let subject = template.subject;
       let bodyHtml = template.body_html;
 
       Object.entries(variables).forEach(([key, value]) => {
         const regex = new RegExp(`{{${key}}}`, 'g');
-        subject = subject.replace(regex, value);
-        bodyHtml = bodyHtml.replace(regex, value);
+        const escapedValue = this.escapeHtml(value);
+        subject = subject.replace(regex, escapedValue);
+        bodyHtml = bodyHtml.replace(regex, escapedValue);
       });
 
       // Send via Resend Edge Function
@@ -225,7 +248,7 @@ export class EmailService {
       );
 
       if (sendError) {
-        console.error('Resend Edge Function error:', sendError);
+        if (isDevMode()) console.error('Resend Edge Function error:', sendError);
         throw new Error(sendError.message || 'Email delivery failed');
       }
 
@@ -247,7 +270,7 @@ export class EmailService {
 
       if (error) throw error;
 
-      console.log('Email sent via Resend:', { subject, to: recipientEmail, resendId: sendResult?.id });
+      if (isDevMode()) console.log('Email sent via Resend:', { subject, to: recipientEmail, resendId: sendResult?.id });
 
       return data;
     } catch (err) {
@@ -263,7 +286,8 @@ export class EmailService {
     try {
       const { data, error } = await this.supabase.client
         .from('email_sends')
-        .select('opened_at, clicked_at, bounced_at, unsubscribed_at');
+        .select('opened_at, clicked_at, bounced_at, unsubscribed_at')
+        .eq('trainer_id', this.trainerId);
 
       if (error) throw error;
 
@@ -297,13 +321,15 @@ export class EmailService {
     try {
       const { data: templates, error: templateError } = await this.supabase.client
         .from('email_templates')
-        .select('id, name');
+        .select('id, name')
+        .eq('trainer_id', this.trainerId);
 
       if (templateError) throw templateError;
 
       const { data: sends, error: sendsError } = await this.supabase.client
         .from('email_sends')
-        .select('template_id, opened_at, clicked_at');
+        .select('template_id, opened_at, clicked_at')
+        .eq('trainer_id', this.trainerId);
 
       if (sendsError) throw sendsError;
 
@@ -343,7 +369,7 @@ export class EmailService {
         .eq('id', emailId)
         .is('opened_at', null); // Only update if not already opened
     } catch (err) {
-      console.error('Error tracking email open:', err);
+      if (isDevMode()) console.error('Error tracking email open:', err);
     }
   }
 
@@ -372,7 +398,7 @@ export class EmailService {
         .update(updates)
         .eq('id', emailId);
     } catch (err) {
-      console.error('Error tracking email click:', err);
+      if (isDevMode()) console.error('Error tracking email click:', err);
     }
   }
 

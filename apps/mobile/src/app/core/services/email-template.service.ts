@@ -1,5 +1,6 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed, isDevMode } from '@angular/core';
 import { SupabaseService } from './supabase.service';
+import { AuthService } from './auth.service';
 import type {
   EmailTemplate,
   EmailSequence,
@@ -123,6 +124,24 @@ export interface CreateTemplateInput {
 })
 export class EmailTemplateService {
   private supabase = inject(SupabaseService);
+  private auth     = inject(AuthService);
+
+  /** Session-derived trainer identity — prevents parameter-tampering. */
+  private get trainerId(): string {
+    const id = this.auth.user()?.id;
+    if (!id) throw new Error('Not authenticated');
+    return id;
+  }
+
+  /** HTML-escape a string to prevent XSS in rendered templates. */
+  private escapeHtml(str: string): string {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
 
   // State
   templates = signal<EmailTemplate[]>([]);
@@ -209,7 +228,7 @@ export class EmailTemplateService {
   /**
    * Get all templates for trainer
    */
-  async getTemplates(trainerId: string): Promise<EmailTemplate[]> {
+  async getTemplates(_trainerId?: string): Promise<EmailTemplate[]> {
     this.loading.set(true);
     this.error.set(null);
 
@@ -217,7 +236,7 @@ export class EmailTemplateService {
       const { data, error } = await this.supabase.client
         .from('email_templates')
         .select('*')
-        .eq('trainer_id', trainerId)
+        .eq('trainer_id', this.trainerId)
         .order('name', { ascending: true });
 
       if (error) throw error;
@@ -227,7 +246,7 @@ export class EmailTemplateService {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to get templates';
       this.error.set(errorMessage);
-      console.error('Error getting templates:', err);
+      if (isDevMode()) console.error('Error getting templates:', err);
       return [];
     } finally {
       this.loading.set(false);
@@ -238,7 +257,7 @@ export class EmailTemplateService {
    * Create email template
    */
   async createTemplate(
-    trainerId: string,
+    _trainerId: string,
     input: CreateTemplateInput
   ): Promise<EmailTemplate | null> {
     this.loading.set(true);
@@ -252,7 +271,7 @@ export class EmailTemplateService {
       const { data, error } = await this.supabase.client
         .from('email_templates')
         .insert({
-          trainer_id: trainerId,
+          trainer_id: this.trainerId,
           ...input,
           variables,
           is_active: true,
@@ -270,7 +289,7 @@ export class EmailTemplateService {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create template';
       this.error.set(errorMessage);
-      console.error('Error creating template:', err);
+      if (isDevMode()) console.error('Error creating template:', err);
       return null;
     } finally {
       this.loading.set(false);
@@ -294,10 +313,21 @@ export class EmailTemplateService {
         updates.variables = this.extractVariables(text);
       }
 
+      // Allowlist safe fields — prevent trainer_id reassignment
+      const safeFields: Record<string, unknown> = {};
+      if (updates.name !== undefined) safeFields['name'] = updates.name;
+      if (updates.subject !== undefined) safeFields['subject'] = updates.subject;
+      if (updates.body !== undefined) safeFields['body'] = updates.body;
+      if (updates.body_html !== undefined) safeFields['body_html'] = updates.body_html;
+      if (updates.category !== undefined) safeFields['category'] = updates.category;
+      if (updates.variables !== undefined) safeFields['variables'] = updates.variables;
+      if (updates.is_active !== undefined) safeFields['is_active'] = updates.is_active;
+
       const { error } = await this.supabase.client
         .from('email_templates')
-        .update(updates)
-        .eq('id', templateId);
+        .update(safeFields)
+        .eq('id', templateId)
+        .eq('trainer_id', this.trainerId);
 
       if (error) throw error;
 
@@ -312,7 +342,7 @@ export class EmailTemplateService {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update template';
       this.error.set(errorMessage);
-      console.error('Error updating template:', err);
+      if (isDevMode()) console.error('Error updating template:', err);
       return false;
     } finally {
       this.loading.set(false);
@@ -330,7 +360,8 @@ export class EmailTemplateService {
       const { error } = await this.supabase.client
         .from('email_templates')
         .delete()
-        .eq('id', templateId);
+        .eq('id', templateId)
+        .eq('trainer_id', this.trainerId);
 
       if (error) throw error;
 
@@ -342,7 +373,7 @@ export class EmailTemplateService {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete template';
       this.error.set(errorMessage);
-      console.error('Error deleting template:', err);
+      if (isDevMode()) console.error('Error deleting template:', err);
       return false;
     } finally {
       this.loading.set(false);
@@ -360,11 +391,12 @@ export class EmailTemplateService {
     // Use body_html as primary field, fall back to body alias
     let body = template.body_html || template.body || '';
 
-    // Replace all {variable_name} with values
+    // Replace all {variable_name} with HTML-escaped values to prevent XSS
     Object.entries(variables).forEach(([key, value]) => {
       const regex = new RegExp(`\\{${key}\\}`, 'g');
-      subject = subject.replace(regex, value);
-      body = body.replace(regex, value);
+      const escapedValue = this.escapeHtml(value);
+      subject = subject.replace(regex, escapedValue);
+      body = body.replace(regex, escapedValue);
     });
 
     return { subject, body };
@@ -411,17 +443,18 @@ export class EmailTemplateService {
    * Send email to lead using template
    */
   async sendEmail(
-    trainerId: string,
+    _trainerId: string,
     leadId: string,
     templateId: string,
     variables: Record<string, string>
   ): Promise<EmailSend | null> {
     try {
-      // Get template
+      // Get template — scoped to authenticated trainer
       const { data: template } = await this.supabase.client
         .from('email_templates')
         .select('*')
         .eq('id', templateId)
+        .eq('trainer_id', this.trainerId)
         .single();
 
       if (!template) {
@@ -440,7 +473,7 @@ export class EmailTemplateService {
       const { data, error } = await this.supabase.client
         .from('email_sends')
         .insert({
-          trainer_id: trainerId,
+          trainer_id: this.trainerId,
           lead_id: leadId,
           email_template_id: templateId,
           subject: rendered.subject,
@@ -454,12 +487,11 @@ export class EmailTemplateService {
       if (error) throw error;
 
       // In production, this would trigger actual email send via Edge Function
-      // For now, we just log the activity
-      console.log('Email sent:', data);
+      if (isDevMode()) console.log('Email sent:', data);
 
       return data;
     } catch (err) {
-      console.error('Error sending email:', err);
+      if (isDevMode()) console.error('Error sending email:', err);
       this.error.set('Failed to send email');
       return null;
     }
@@ -495,7 +527,7 @@ export class EmailTemplateService {
       if (error) throw error;
       return true;
     } catch (err) {
-      console.error('Error recording email open:', err);
+      if (isDevMode()) console.error('Error recording email open:', err);
       return false;
     }
   }
@@ -530,7 +562,7 @@ export class EmailTemplateService {
       if (error) throw error;
       return true;
     } catch (err) {
-      console.error('Error recording email click:', err);
+      if (isDevMode()) console.error('Error recording email click:', err);
       return false;
     }
   }
@@ -550,7 +582,7 @@ export class EmailTemplateService {
 
       return data ? data[0] : null;
     } catch (err) {
-      console.error('Error getting email stats:', err);
+      if (isDevMode()) console.error('Error getting email stats:', err);
       return null;
     }
   }
@@ -558,12 +590,12 @@ export class EmailTemplateService {
   /**
    * Get email sequences
    */
-  async getSequences(trainerId: string): Promise<EmailSequence[]> {
+  async getSequences(_trainerId?: string): Promise<EmailSequence[]> {
     try {
       const { data, error } = await this.supabase.client
         .from('email_sequences')
         .select('*')
-        .eq('trainer_id', trainerId)
+        .eq('trainer_id', this.trainerId)
         .order('name', { ascending: true });
 
       if (error) throw error;
@@ -571,7 +603,7 @@ export class EmailTemplateService {
       this.sequences.set(data || []);
       return data || [];
     } catch (err) {
-      console.error('Error getting sequences:', err);
+      if (isDevMode()) console.error('Error getting sequences:', err);
       return [];
     }
   }
@@ -580,14 +612,14 @@ export class EmailTemplateService {
    * Create email sequence
    */
   async createSequence(
-    trainerId: string,
+    _trainerId: string,
     input: CreateSequenceInput
   ): Promise<EmailSequence | null> {
     try {
       const { data, error } = await this.supabase.client
         .from('email_sequences')
         .insert({
-          trainer_id: trainerId,
+          trainer_id: this.trainerId,
           ...input,
           is_active: true,
         })
@@ -602,7 +634,7 @@ export class EmailTemplateService {
 
       return data;
     } catch (err) {
-      console.error('Error creating sequence:', err);
+      if (isDevMode()) console.error('Error creating sequence:', err);
       return null;
     }
   }
@@ -631,7 +663,7 @@ export class EmailTemplateService {
 
       return true;
     } catch (err) {
-      console.error('Error updating sequence:', err);
+      if (isDevMode()) console.error('Error updating sequence:', err);
       return false;
     }
   }
@@ -654,7 +686,7 @@ export class EmailTemplateService {
 
       return true;
     } catch (err) {
-      console.error('Error deleting sequence:', err);
+      if (isDevMode()) console.error('Error deleting sequence:', err);
       return false;
     }
   }
@@ -683,7 +715,7 @@ export class EmailTemplateService {
 
       return true;
     } catch (err) {
-      console.error('Error toggling sequence:', err);
+      if (isDevMode()) console.error('Error toggling sequence:', err);
       return false;
     }
   }
@@ -725,7 +757,7 @@ export class EmailTemplateService {
       if (error) throw error;
       return data;
     } catch (err) {
-      console.error('Error adding sequence step:', err);
+      if (isDevMode()) console.error('Error adding sequence step:', err);
       return null;
     }
   }
@@ -744,7 +776,7 @@ export class EmailTemplateService {
       if (error) throw error;
       return data || [];
     } catch (err) {
-      console.error('Error getting sequence steps:', err);
+      if (isDevMode()) console.error('Error getting sequence steps:', err);
       return [];
     }
   }
@@ -784,7 +816,7 @@ export class EmailTemplateService {
       if (error) throw error;
       return data;
     } catch (err) {
-      console.error('Error enrolling lead in sequence:', err);
+      if (isDevMode()) console.error('Error enrolling lead in sequence:', err);
       return null;
     }
   }
@@ -809,7 +841,7 @@ export class EmailTemplateService {
 
       return { total, active };
     } catch (err) {
-      console.error('Error getting sequence enrollment counts:', err);
+      if (isDevMode()) console.error('Error getting sequence enrollment counts:', err);
       return { total: 0, active: 0 };
     }
   }
@@ -827,7 +859,7 @@ export class EmailTemplateService {
       if (error) throw error;
       return true;
     } catch (err) {
-      console.error('Error pausing lead sequence:', err);
+      if (isDevMode()) console.error('Error pausing lead sequence:', err);
       return false;
     }
   }
@@ -845,7 +877,7 @@ export class EmailTemplateService {
       if (error) throw error;
       return true;
     } catch (err) {
-      console.error('Error resuming lead sequence:', err);
+      if (isDevMode()) console.error('Error resuming lead sequence:', err);
       return false;
     }
   }

@@ -130,11 +130,24 @@ export class CheckinService {
     id: string,
     updates: Partial<CreateTemplateDto & { is_active: boolean }>
   ): Promise<boolean> {
+    const user = this.auth.user();
+    if (!user) return false;
+
     try {
+      // Allowlist safe fields — prevent trainer_id reassignment
+      const safeFields: Record<string, unknown> = {};
+      if (updates.name !== undefined) safeFields['name'] = updates.name;
+      if (updates.questions !== undefined) safeFields['questions'] = updates.questions;
+      if (updates.send_day_of_week !== undefined) safeFields['send_day_of_week'] = updates.send_day_of_week;
+      if (updates.send_time !== undefined) safeFields['send_time'] = updates.send_time;
+      if (updates.assigned_client_ids !== undefined) safeFields['assigned_client_ids'] = updates.assigned_client_ids;
+      if (updates.is_active !== undefined) safeFields['is_active'] = updates.is_active;
+
       const { error } = await this.supabase.client
         .from('checkin_templates')
-        .update(updates)
-        .eq('id', id);
+        .update(safeFields)
+        .eq('id', id)
+        .eq('trainer_id', user.id);
 
       if (error) throw error;
 
@@ -148,11 +161,15 @@ export class CheckinService {
   }
 
   async deleteTemplate(id: string): Promise<boolean> {
+    const user = this.auth.user();
+    if (!user) return false;
+
     try {
       const { error } = await this.supabase.client
         .from('checkin_templates')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('trainer_id', user.id);
 
       if (error) throw error;
 
@@ -281,6 +298,9 @@ export class CheckinService {
           )
         : null;
 
+    const user = this.auth.user();
+    if (!user) return false;
+
     try {
       const { error } = await this.supabase.client
         .from('checkin_responses')
@@ -289,7 +309,8 @@ export class CheckinService {
           overall_mood: avgMood,
           responded_at: new Date().toISOString(),
         })
-        .eq('id', responseId);
+        .eq('id', responseId)
+        .eq('client_id', user.id);
 
       if (error) throw error;
 

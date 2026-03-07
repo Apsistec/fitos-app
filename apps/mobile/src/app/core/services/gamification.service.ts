@@ -1,5 +1,6 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed, isDevMode } from '@angular/core';
 import { SupabaseService } from './supabase.service';
+import { AuthService } from './auth.service';
 
 /**
  * Gamification types
@@ -129,6 +130,14 @@ export interface UserAchievement {
 })
 export class GamificationService {
   private supabase = inject(SupabaseService);
+  private auth     = inject(AuthService);
+
+  /** Session-derived user identity — prevents parameter-tampering. */
+  private get userId(): string {
+    const id = this.auth.user()?.id;
+    if (!id) throw new Error('Not authenticated');
+    return id;
+  }
 
   // State
   preferences = signal<GamificationPreferences | null>(null);
@@ -155,15 +164,17 @@ export class GamificationService {
   /**
    * Get or create user gamification preferences
    */
-  async getPreferences(userId: string): Promise<GamificationPreferences | null> {
+  async getPreferences(_userId?: string): Promise<GamificationPreferences | null> {
     this.loading.set(true);
     this.error.set(null);
 
     try {
+      const uid = this.userId;
+
       const { data, error } = await this.supabase.client
         .from('gamification_preferences')
         .select('*')
-        .eq('user_id', userId)
+        .eq('user_id', uid)
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') throw error;
@@ -173,7 +184,7 @@ export class GamificationService {
         const { data: newPrefs, error: insertError } = await this.supabase.client
           .from('gamification_preferences')
           .insert({
-            user_id: userId,
+            user_id: uid,
             leaderboard_opt_in: false,
             display_name_anonymized: false,
             show_in_global_leaderboards: false,
@@ -194,7 +205,7 @@ export class GamificationService {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to load preferences';
       this.error.set(errorMessage);
-      console.error('Error getting preferences:', err);
+      if (isDevMode()) console.error('Error getting preferences:', err);
       return null;
     } finally {
       this.loading.set(false);
@@ -205,23 +216,33 @@ export class GamificationService {
    * Update gamification preferences
    */
   async updatePreferences(
-    userId: string,
-    updates: Partial<Omit<GamificationPreferences, 'user_id' | 'created_at' | 'updated_at'>>
+    _userId?: string,
+    updates?: Partial<Omit<GamificationPreferences, 'user_id' | 'created_at' | 'updated_at'>>
   ): Promise<boolean> {
     try {
+      const uid = this.userId;
+
+      // Allowlist safe fields — prevent user_id reassignment
+      const safeFields: Record<string, unknown> = {};
+      if (updates?.leaderboard_opt_in !== undefined) safeFields['leaderboard_opt_in'] = updates.leaderboard_opt_in;
+      if (updates?.display_name_anonymized !== undefined) safeFields['display_name_anonymized'] = updates.display_name_anonymized;
+      if (updates?.display_name_override !== undefined) safeFields['display_name_override'] = updates.display_name_override;
+      if (updates?.show_in_global_leaderboards !== undefined) safeFields['show_in_global_leaderboards'] = updates.show_in_global_leaderboards;
+      if (updates?.show_in_facility_leaderboards !== undefined) safeFields['show_in_facility_leaderboards'] = updates.show_in_facility_leaderboards;
+
       const { error } = await this.supabase.client
         .from('gamification_preferences')
-        .update(updates)
-        .eq('user_id', userId);
+        .update(safeFields)
+        .eq('user_id', uid);
 
       if (error) throw error;
 
       // Refresh preferences
-      await this.getPreferences(userId);
+      await this.getPreferences();
 
       return true;
     } catch (err) {
-      console.error('Error updating preferences:', err);
+      if (isDevMode()) console.error('Error updating preferences:', err);
       return false;
     }
   }
@@ -263,13 +284,34 @@ export class GamificationService {
       if (error) throw error;
 
       // Enhance entries with user names and current user flag
-      const currentUser = await this.supabase.client.auth.getUser();
-      const currentUserId = currentUser.data.user?.id;
-      const entries: LeaderboardEntry[] = (data || []).map((entry: LeaderboardEntry & { profiles?: { full_name?: string } }) => ({
-        ...entry,
-        user_name: entry.profiles?.full_name || 'Unknown User',
-        is_current_user: entry.user_id === currentUserId,
-      }));
+      const currentUserId = this.userId;
+
+      // Fetch privacy preferences for all users on this leaderboard
+      const userIds = (data || []).map((e: LeaderboardEntry) => e.user_id);
+      const { data: privacyPrefs } = await this.supabase.client
+        .from('gamification_preferences')
+        .select('user_id, display_name_anonymized, display_name_override')
+        .in('user_id', userIds);
+
+      const privacyMap = new Map(
+        (privacyPrefs || []).map((p: { user_id: string; display_name_anonymized: boolean; display_name_override?: string }) => [p.user_id, p])
+      );
+
+      const entries: LeaderboardEntry[] = (data || []).map((entry: LeaderboardEntry & { profiles?: { full_name?: string } }) => {
+        const prefs = privacyMap.get(entry.user_id);
+        let displayName = entry.profiles?.full_name || 'Unknown User';
+
+        // Respect privacy: anonymize display name if user opted in
+        if (prefs?.display_name_anonymized && entry.user_id !== currentUserId) {
+          displayName = prefs.display_name_override || `User${entry.user_id.slice(0, 4)}`;
+        }
+
+        return {
+          ...entry,
+          user_name: displayName,
+          is_current_user: entry.user_id === currentUserId,
+        };
+      });
 
       this.leaderboardEntries.set(entries);
       return entries;
@@ -277,7 +319,7 @@ export class GamificationService {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to load leaderboard';
       this.error.set(errorMessage);
-      console.error('Error getting leaderboard:', err);
+      if (isDevMode()) console.error('Error getting leaderboard:', err);
       return [];
     } finally {
       this.loading.set(false);
@@ -288,8 +330,8 @@ export class GamificationService {
    * Get my rank in leaderboard
    */
   async getMyRank(
-    userId: string,
-    type: LeaderboardType,
+    _userId?: string,
+    type: LeaderboardType = 'weekly_steps',
     scope: LeaderboardScope = 'global',
     scopeId?: string
   ): Promise<LeaderboardEntry | null> {
@@ -299,7 +341,7 @@ export class GamificationService {
       let query = this.supabase.client
         .from('leaderboard_entries')
         .select('*')
-        .eq('user_id', userId)
+        .eq('user_id', this.userId)
         .eq('leaderboard_type', type)
         .eq('leaderboard_scope', scope)
         .eq('period_start', periodStart);
@@ -314,7 +356,7 @@ export class GamificationService {
 
       return data;
     } catch (err) {
-      console.error('Error getting my rank:', err);
+      if (isDevMode()) console.error('Error getting my rank:', err);
       return null;
     }
   }
@@ -348,7 +390,7 @@ export class GamificationService {
       this.activeChallenges.set(data || []);
       return data || [];
     } catch (err) {
-      console.error('Error getting challenges:', err);
+      if (isDevMode()) console.error('Error getting challenges:', err);
       return [];
     }
   }
@@ -356,13 +398,17 @@ export class GamificationService {
   /**
    * Join a challenge
    */
-  async joinChallenge(userId: string, challengeId: string): Promise<boolean> {
+  async joinChallenge(_userId?: string, challengeId?: string): Promise<boolean> {
     try {
+      if (!challengeId) return false;
+
+      const uid = this.userId;
+
       const { error } = await this.supabase.client
         .from('challenge_participants')
         .insert({
           challenge_id: challengeId,
-          user_id: userId,
+          user_id: uid,
           current_progress: 0,
           completed: false,
         });
@@ -370,11 +416,11 @@ export class GamificationService {
       if (error) throw error;
 
       // Refresh my challenges
-      await this.getMyChallenges(userId);
+      await this.getMyChallenges();
 
       return true;
     } catch (err) {
-      console.error('Error joining challenge:', err);
+      if (isDevMode()) console.error('Error joining challenge:', err);
       return false;
     }
   }
@@ -382,7 +428,7 @@ export class GamificationService {
   /**
    * Get my challenge participations
    */
-  async getMyChallenges(userId: string): Promise<ChallengeParticipant[]> {
+  async getMyChallenges(_userId?: string): Promise<ChallengeParticipant[]> {
     try {
       const { data, error } = await this.supabase.client
         .from('challenge_participants')
@@ -390,7 +436,7 @@ export class GamificationService {
           *,
           weekly_challenges!inner(*)
         `)
-        .eq('user_id', userId)
+        .eq('user_id', this.userId)
         .order('joined_at', { ascending: false });
 
       if (error) throw error;
@@ -398,7 +444,7 @@ export class GamificationService {
       this.myChallenges.set(data || []);
       return data || [];
     } catch (err) {
-      console.error('Error getting my challenges:', err);
+      if (isDevMode()) console.error('Error getting my challenges:', err);
       return [];
     }
   }
@@ -419,7 +465,7 @@ export class GamificationService {
       this.achievements.set(data || []);
       return data || [];
     } catch (err) {
-      console.error('Error getting achievements:', err);
+      if (isDevMode()) console.error('Error getting achievements:', err);
       return [];
     }
   }
@@ -427,7 +473,7 @@ export class GamificationService {
   /**
    * Get my unlocked achievements
    */
-  async getMyAchievements(userId: string): Promise<UserAchievement[]> {
+  async getMyAchievements(_userId?: string): Promise<UserAchievement[]> {
     try {
       const { data, error } = await this.supabase.client
         .from('user_achievements')
@@ -435,7 +481,7 @@ export class GamificationService {
           *,
           achievements!inner(*)
         `)
-        .eq('user_id', userId)
+        .eq('user_id', this.userId)
         .order('unlocked_at', { ascending: false });
 
       if (error) throw error;
@@ -443,7 +489,7 @@ export class GamificationService {
       this.myAchievements.set(data || []);
       return data || [];
     } catch (err) {
-      console.error('Error getting my achievements:', err);
+      if (isDevMode()) console.error('Error getting my achievements:', err);
       return [];
     }
   }

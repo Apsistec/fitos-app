@@ -1,5 +1,6 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed, isDevMode } from '@angular/core';
 import { SupabaseService } from './supabase.service';
+import { AuthService } from './auth.service';
 
 /**
  * Lead status in pipeline
@@ -182,6 +183,14 @@ export interface UpdateLeadInput {
 })
 export class LeadService {
   private supabase = inject(SupabaseService);
+  private auth     = inject(AuthService);
+
+  /** Session-derived trainer identity — prevents parameter-tampering. */
+  private get trainerId(): string {
+    const id = this.auth.user()?.id;
+    if (!id) throw new Error('Not authenticated');
+    return id;
+  }
 
   // State
   leads = signal<LeadWithExtras[]>([]);
@@ -238,7 +247,7 @@ export class LeadService {
   /**
    * Get all leads for trainer
    */
-  async getLeads(trainerId: string, includeArchived = false): Promise<LeadWithExtras[]> {
+  async getLeads(_trainerId?: string, includeArchived = false): Promise<LeadWithExtras[]> {
     this.loading.set(true);
     this.error.set(null);
 
@@ -246,7 +255,7 @@ export class LeadService {
       let query = this.supabase.client
         .from('leads')
         .select('*')
-        .eq('trainer_id', trainerId)
+        .eq('trainer_id', this.trainerId)
         .order('created_at', { ascending: false });
 
       if (!includeArchived) {
@@ -267,7 +276,7 @@ export class LeadService {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to get leads';
       this.error.set(errorMessage);
-      console.error('Error getting leads:', err);
+      if (isDevMode()) console.error('Error getting leads:', err);
       return [];
     } finally {
       this.loading.set(false);
@@ -282,11 +291,12 @@ export class LeadService {
     this.error.set(null);
 
     try {
-      // Get lead
+      // Get lead — scoped to authenticated trainer
       const { data: lead, error: leadError } = await this.supabase.client
         .from('leads')
         .select('*')
         .eq('id', leadId)
+        .eq('trainer_id', this.trainerId)
         .single();
 
       if (leadError) throw leadError;
@@ -319,7 +329,7 @@ export class LeadService {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to get lead';
       this.error.set(errorMessage);
-      console.error('Error getting lead:', err);
+      if (isDevMode()) console.error('Error getting lead:', err);
       return null;
     } finally {
       this.loading.set(false);
@@ -329,7 +339,7 @@ export class LeadService {
   /**
    * Create new lead
    */
-  async createLead(trainerId: string, input: CreateLeadInput): Promise<Lead | null> {
+  async createLead(_trainerId: string, input: CreateLeadInput): Promise<Lead | null> {
     this.loading.set(true);
     this.error.set(null);
 
@@ -337,7 +347,7 @@ export class LeadService {
       const { data, error } = await this.supabase.client
         .from('leads')
         .insert({
-          trainer_id: trainerId,
+          trainer_id: this.trainerId,
           ...input,
           status: 'new',
           lead_score: 0,
@@ -348,13 +358,13 @@ export class LeadService {
       if (error) throw error;
 
       // Refresh leads
-      await this.getLeads(trainerId);
+      await this.getLeads();
 
       return data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create lead';
       this.error.set(errorMessage);
-      console.error('Error creating lead:', err);
+      if (isDevMode()) console.error('Error creating lead:', err);
       return null;
     } finally {
       this.loading.set(false);
@@ -369,10 +379,26 @@ export class LeadService {
     this.error.set(null);
 
     try {
+      // Allowlist safe fields — prevent trainer_id reassignment
+      const safeFields: Record<string, unknown> = {};
+      if (input.first_name !== undefined) safeFields['first_name'] = input.first_name;
+      if (input.last_name !== undefined) safeFields['last_name'] = input.last_name;
+      if (input.email !== undefined) safeFields['email'] = input.email;
+      if (input.phone !== undefined) safeFields['phone'] = input.phone;
+      if (input.status !== undefined) safeFields['status'] = input.status;
+      if (input.source !== undefined) safeFields['source'] = input.source;
+      if (input.source_details !== undefined) safeFields['source_details'] = input.source_details;
+      if (input.notes !== undefined) safeFields['notes'] = input.notes;
+      if (input.tags !== undefined) safeFields['tags'] = input.tags;
+      if (input.preferred_contact_method !== undefined) safeFields['preferred_contact_method'] = input.preferred_contact_method;
+      if (input.do_not_contact !== undefined) safeFields['do_not_contact'] = input.do_not_contact;
+      if (input.lost_reason !== undefined) safeFields['lost_reason'] = input.lost_reason;
+
       const { error } = await this.supabase.client
         .from('leads')
-        .update(input)
-        .eq('id', leadId);
+        .update(safeFields)
+        .eq('id', leadId)
+        .eq('trainer_id', this.trainerId);
 
       if (error) throw error;
 
@@ -389,7 +415,7 @@ export class LeadService {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update lead';
       this.error.set(errorMessage);
-      console.error('Error updating lead:', err);
+      if (isDevMode()) console.error('Error updating lead:', err);
       return false;
     } finally {
       this.loading.set(false);
@@ -424,7 +450,8 @@ export class LeadService {
       const { error } = await this.supabase.client
         .from('leads')
         .delete()
-        .eq('id', leadId);
+        .eq('id', leadId)
+        .eq('trainer_id', this.trainerId);
 
       if (error) throw error;
 
@@ -436,7 +463,7 @@ export class LeadService {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete lead';
       this.error.set(errorMessage);
-      console.error('Error deleting lead:', err);
+      if (isDevMode()) console.error('Error deleting lead:', err);
       return false;
     } finally {
       this.loading.set(false);
@@ -448,7 +475,7 @@ export class LeadService {
    */
   async addActivity(
     leadId: string,
-    trainerId: string,
+    _trainerId: string,
     activity: {
       activity_type: ActivityType;
       subject?: string;
@@ -461,7 +488,7 @@ export class LeadService {
         .from('lead_activities')
         .insert({
           lead_id: leadId,
-          trainer_id: trainerId,
+          trainer_id: this.trainerId,
           ...activity,
         })
         .select()
@@ -476,7 +503,7 @@ export class LeadService {
 
       return data;
     } catch (err) {
-      console.error('Error adding activity:', err);
+      if (isDevMode()) console.error('Error adding activity:', err);
       return null;
     }
   }
@@ -490,13 +517,14 @@ export class LeadService {
         .from('lead_activities')
         .select('*')
         .eq('lead_id', leadId)
+        .eq('trainer_id', this.trainerId)
         .order('created_at', { ascending: false })
         .limit(limit);
 
       if (error) throw error;
       return data || [];
     } catch (err) {
-      console.error('Error getting activities:', err);
+      if (isDevMode()) console.error('Error getting activities:', err);
       return [];
     }
   }
@@ -505,7 +533,7 @@ export class LeadService {
    * Create task for lead
    */
   async createTask(
-    trainerId: string,
+    _trainerId: string,
     leadId: string,
     task: {
       title: string;
@@ -520,7 +548,7 @@ export class LeadService {
       const { data, error } = await this.supabase.client
         .from('lead_tasks')
         .insert({
-          trainer_id: trainerId,
+          trainer_id: this.trainerId,
           lead_id: leadId,
           ...task,
         })
@@ -530,7 +558,7 @@ export class LeadService {
       if (error) throw error;
       return data;
     } catch (err) {
-      console.error('Error creating task:', err);
+      if (isDevMode()) console.error('Error creating task:', err);
       return null;
     }
   }
@@ -546,12 +574,13 @@ export class LeadService {
           completed: true,
           completed_at: new Date().toISOString(),
         })
-        .eq('id', taskId);
+        .eq('id', taskId)
+        .eq('trainer_id', this.trainerId);
 
       if (error) throw error;
       return true;
     } catch (err) {
-      console.error('Error completing task:', err);
+      if (isDevMode()) console.error('Error completing task:', err);
       return false;
     }
   }
@@ -559,7 +588,7 @@ export class LeadService {
   /**
    * Get upcoming tasks for trainer
    */
-  async getUpcomingTasks(trainerId: string, days = 7): Promise<LeadTask[]> {
+  async getUpcomingTasks(_trainerId?: string, days = 7): Promise<LeadTask[]> {
     try {
       const endDate = new Date();
       endDate.setDate(endDate.getDate() + days);
@@ -567,7 +596,7 @@ export class LeadService {
       const { data, error } = await this.supabase.client
         .from('lead_tasks')
         .select('*, lead:leads(first_name, last_name)')
-        .eq('trainer_id', trainerId)
+        .eq('trainer_id', this.trainerId)
         .eq('completed', false)
         .lte('due_date', endDate.toISOString().split('T')[0])
         .order('due_date', { ascending: true })
@@ -576,7 +605,7 @@ export class LeadService {
       if (error) throw error;
       return data || [];
     } catch (err) {
-      console.error('Error getting upcoming tasks:', err);
+      if (isDevMode()) console.error('Error getting upcoming tasks:', err);
       return [];
     }
   }
@@ -592,7 +621,7 @@ export class LeadService {
       if (error) throw error;
       return data || 0;
     } catch (err) {
-      console.error('Error calculating lead score:', err);
+      if (isDevMode()) console.error('Error calculating lead score:', err);
       return 0;
     }
   }
@@ -600,15 +629,15 @@ export class LeadService {
   /**
    * Get pipeline metrics
    */
-  async getPipelineMetrics(trainerId: string): Promise<PipelineMetrics[]> {
+  async getPipelineMetrics(_trainerId?: string): Promise<PipelineMetrics[]> {
     try {
       const { data, error } = await this.supabase.client
-        .rpc('get_pipeline_metrics', { p_trainer_id: trainerId });
+        .rpc('get_pipeline_metrics', { p_trainer_id: this.trainerId });
 
       if (error) throw error;
       return data || [];
     } catch (err) {
-      console.error('Error getting pipeline metrics:', err);
+      if (isDevMode()) console.error('Error getting pipeline metrics:', err);
       return [];
     }
   }
@@ -616,12 +645,12 @@ export class LeadService {
   /**
    * Get pipeline stages
    */
-  async getPipelineStages(trainerId: string): Promise<PipelineStage[]> {
+  async getPipelineStages(_trainerId?: string): Promise<PipelineStage[]> {
     try {
       const { data, error } = await this.supabase.client
         .from('pipeline_stages')
         .select('*')
-        .eq('trainer_id', trainerId)
+        .eq('trainer_id', this.trainerId)
         .order('display_order', { ascending: true});
 
       if (error) throw error;
@@ -630,7 +659,7 @@ export class LeadService {
       this.pipelineStages.set(stages);
       return stages;
     } catch (err) {
-      console.error('Error getting pipeline stages:', err);
+      if (isDevMode()) console.error('Error getting pipeline stages:', err);
       return [];
     }
   }
@@ -638,10 +667,11 @@ export class LeadService {
   /**
    * Create default pipeline stages for new trainer
    */
-  async createDefaultPipelineStages(trainerId: string): Promise<boolean> {
+  async createDefaultPipelineStages(_trainerId?: string): Promise<boolean> {
+    const tid = this.trainerId;
     const defaultStages = [
       {
-        trainer_id: trainerId,
+        trainer_id: tid,
         name: 'New Lead',
         description: 'Just entered the system',
         color: '#6B7280',
@@ -649,7 +679,7 @@ export class LeadService {
         maps_to_status: 'new' as LeadStatus,
       },
       {
-        trainer_id: trainerId,
+        trainer_id: tid,
         name: 'Contacted',
         description: 'Initial contact made',
         color: '#3B82F6',
@@ -657,7 +687,7 @@ export class LeadService {
         maps_to_status: 'contacted' as LeadStatus,
       },
       {
-        trainer_id: trainerId,
+        trainer_id: tid,
         name: 'Qualified',
         description: 'Determined to be a good fit',
         color: '#10B981',
@@ -665,7 +695,7 @@ export class LeadService {
         maps_to_status: 'qualified' as LeadStatus,
       },
       {
-        trainer_id: trainerId,
+        trainer_id: tid,
         name: 'Consultation',
         description: 'Meeting scheduled',
         color: '#8B5CF6',
@@ -673,7 +703,7 @@ export class LeadService {
         maps_to_status: 'consultation' as LeadStatus,
       },
       {
-        trainer_id: trainerId,
+        trainer_id: tid,
         name: 'Client',
         description: 'Converted to paying client',
         color: '#059669',
@@ -681,7 +711,7 @@ export class LeadService {
         maps_to_status: 'won' as LeadStatus,
       },
       {
-        trainer_id: trainerId,
+        trainer_id: tid,
         name: 'Lost',
         description: 'Did not convert',
         color: '#DC2626',
@@ -697,10 +727,10 @@ export class LeadService {
 
       if (error) throw error;
 
-      await this.getPipelineStages(trainerId);
+      await this.getPipelineStages();
       return true;
     } catch (err) {
-      console.error('Error creating default pipeline stages:', err);
+      if (isDevMode()) console.error('Error creating default pipeline stages:', err);
       return false;
     }
   }
@@ -713,10 +743,20 @@ export class LeadService {
     updates: Partial<PipelineStage>
   ): Promise<boolean> {
     try {
+      // Allowlist safe fields — prevent trainer_id reassignment
+      const safeFields: Record<string, unknown> = {};
+      if (updates.name !== undefined) safeFields['name'] = updates.name;
+      if (updates.description !== undefined) safeFields['description'] = updates.description;
+      if (updates.color !== undefined) safeFields['color'] = updates.color;
+      if (updates.display_order !== undefined) safeFields['display_order'] = updates.display_order;
+      if (updates.maps_to_status !== undefined) safeFields['maps_to_status'] = updates.maps_to_status;
+      if (updates.auto_move_after_days !== undefined) safeFields['auto_move_after_days'] = updates.auto_move_after_days;
+
       const { error } = await this.supabase.client
         .from('pipeline_stages')
-        .update(updates)
-        .eq('id', stageId);
+        .update(safeFields)
+        .eq('id', stageId)
+        .eq('trainer_id', this.trainerId);
 
       if (error) throw error;
 
@@ -729,7 +769,7 @@ export class LeadService {
 
       return true;
     } catch (err) {
-      console.error('Error updating pipeline stage:', err);
+      if (isDevMode()) console.error('Error updating pipeline stage:', err);
       return false;
     }
   }
@@ -739,29 +779,32 @@ export class LeadService {
    */
   async addTagsToLeads(leadIds: string[], tags: string[]): Promise<boolean> {
     try {
-      // Get current leads
+      // Get current leads — scoped to authenticated trainer
       const { data: leads } = await this.supabase.client
         .from('leads')
         .select('id, tags')
-        .in('id', leadIds);
+        .in('id', leadIds)
+        .eq('trainer_id', this.trainerId);
 
       if (!leads) return false;
 
-      // Update each lead
-      const updates = leads.map((lead) => {
+      // Update each lead individually with trainer scope
+      for (const lead of leads) {
         const currentTags = lead.tags || [];
         const newTags = Array.from(new Set([...currentTags, ...tags]));
-        return { id: lead.id, tags: newTags };
-      });
 
-      const { error } = await this.supabase.client
-        .from('leads')
-        .upsert(updates);
+        const { error } = await this.supabase.client
+          .from('leads')
+          .update({ tags: newTags })
+          .eq('id', lead.id)
+          .eq('trainer_id', this.trainerId);
 
-      if (error) throw error;
+        if (error) throw error;
+      }
+
       return true;
     } catch (err) {
-      console.error('Error adding tags to leads:', err);
+      if (isDevMode()) console.error('Error adding tags to leads:', err);
       return false;
     }
   }
@@ -774,12 +817,13 @@ export class LeadService {
       const { error } = await this.supabase.client
         .from('leads')
         .update({ status })
-        .in('id', leadIds);
+        .in('id', leadIds)
+        .eq('trainer_id', this.trainerId);
 
       if (error) throw error;
       return true;
     } catch (err) {
-      console.error('Error bulk updating status:', err);
+      if (isDevMode()) console.error('Error bulk updating status:', err);
       return false;
     }
   }

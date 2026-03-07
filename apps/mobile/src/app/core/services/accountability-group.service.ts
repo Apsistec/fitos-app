@@ -122,16 +122,28 @@ export class AccountabilityGroupService {
   }
 
   async updateGroup(id: string, updates: Partial<CreateGroupDto & { is_active: boolean }>): Promise<boolean> {
+    const user = this.auth.user();
+    if (!user) return false;
+
     try {
+      // Allowlist safe fields — prevent trainer_id / id / created_at reassignment
+      const safeFields: Record<string, unknown> = {};
+      if (updates.name !== undefined) safeFields['name'] = updates.name;
+      if (updates.description !== undefined) safeFields['description'] = updates.description;
+      if (updates.emoji !== undefined) safeFields['emoji'] = updates.emoji;
+      if (updates.max_members !== undefined) safeFields['max_members'] = updates.max_members;
+      if (updates.is_active !== undefined) safeFields['is_active'] = updates.is_active;
+
       const { error } = await this.supabase.client
         .from('accountability_groups')
-        .update(updates)
-        .eq('id', id);
+        .update(safeFields)
+        .eq('id', id)
+        .eq('trainer_id', user.id);
 
       if (error) throw error;
 
       this.groups.update((list) =>
-        list.map((g) => (g.id === id ? { ...g, ...updates } : g))
+        list.map((g) => (g.id === id ? { ...g, ...safeFields } : g))
       );
       return true;
     } catch {
@@ -140,11 +152,15 @@ export class AccountabilityGroupService {
   }
 
   async deleteGroup(id: string): Promise<boolean> {
+    const user = this.auth.user();
+    if (!user) return false;
+
     try {
       const { error } = await this.supabase.client
         .from('accountability_groups')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('trainer_id', user.id);
 
       if (error) throw error;
 
@@ -158,6 +174,9 @@ export class AccountabilityGroupService {
   // ─── Trainer: Member management ─────────────────────────────────────────────
 
   async getGroupMembers(groupId: string): Promise<void> {
+    // Verify trainer owns this group before exposing member PII
+    if (!(await this.verifyGroupOwnership(groupId))) return;
+
     try {
       const { data, error } = await this.supabase.client
         .from('accountability_group_members')
@@ -186,6 +205,9 @@ export class AccountabilityGroupService {
   }
 
   async addMember(groupId: string, clientId: string): Promise<boolean> {
+    // Verify trainer owns this group
+    if (!(await this.verifyGroupOwnership(groupId))) return false;
+
     // Check max_members constraint
     const group = this.groups().find((g) => g.id === groupId);
     if (group && (group.member_count ?? 0) >= group.max_members) {
@@ -213,6 +235,9 @@ export class AccountabilityGroupService {
   }
 
   async removeMember(groupId: string, clientId: string): Promise<boolean> {
+    // Verify trainer owns this group
+    if (!(await this.verifyGroupOwnership(groupId))) return false;
+
     try {
       const { error } = await this.supabase.client
         .from('accountability_group_members')
@@ -257,6 +282,21 @@ export class AccountabilityGroupService {
     } finally {
       this.isLoading.set(false);
     }
+  }
+
+  // ─── Ownership verification ────────────────────────────────────────────────
+
+  /** Verify the authenticated trainer owns this group before member operations. */
+  private async verifyGroupOwnership(groupId: string): Promise<boolean> {
+    const user = this.auth.user();
+    if (!user) return false;
+    const { data } = await this.supabase.client
+      .from('accountability_groups')
+      .select('id')
+      .eq('id', groupId)
+      .eq('trainer_id', user.id)
+      .maybeSingle();
+    return !!data;
   }
 
   // ─── Helpers ───────────────────────────────────────────────────────────────

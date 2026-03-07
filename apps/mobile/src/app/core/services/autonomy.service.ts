@@ -1,5 +1,6 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed, isDevMode } from '@angular/core';
 import { SupabaseService } from './supabase.service';
+import { AuthService } from './auth.service';
 
 /**
  * Knowledge category scores
@@ -185,6 +186,14 @@ export interface CreateGraduationInput {
 })
 export class AutonomyService {
   private supabase = inject(SupabaseService);
+  private auth = inject(AuthService);
+
+  /** Derive trainer ID from authenticated session — never from caller. */
+  private get trainerId(): string {
+    const id = this.auth.user()?.id;
+    if (!id) throw new Error('Not authenticated');
+    return id;
+  }
 
   // State
   assessments = signal<AutonomyAssessment[]>([]);
@@ -208,6 +217,7 @@ export class AutonomyService {
         .from('autonomy_assessments')
         .select('*')
         .eq('client_id', clientId)
+        .eq('trainer_id', this.trainerId)
         .order('assessed_at', { ascending: false })
         .limit(1)
         .single();
@@ -222,7 +232,7 @@ export class AutonomyService {
 
       return data;
     } catch (err) {
-      console.error('Error getting latest assessment:', err);
+      if (isDevMode()) console.error('Error getting latest assessment:', err);
       return null;
     }
   }
@@ -238,6 +248,7 @@ export class AutonomyService {
         .from('autonomy_assessments')
         .select('*')
         .eq('client_id', clientId)
+        .eq('trainer_id', this.trainerId)
         .order('assessed_at', { ascending: false });
 
       if (error) throw error;
@@ -245,7 +256,7 @@ export class AutonomyService {
       this.assessments.set(data || []);
       return data || [];
     } catch (err) {
-      console.error('Error getting client assessments:', err);
+      if (isDevMode()) console.error('Error getting client assessments:', err);
       this.error.set('Failed to load assessments');
       return [];
     }
@@ -255,7 +266,7 @@ export class AutonomyService {
    * Create autonomy assessment
    */
   async createAssessment(
-    trainerId: string,
+    _trainerId: string,
     input: CreateAssessmentInput
   ): Promise<AutonomyAssessment | null> {
     this.loading.set(true);
@@ -306,7 +317,7 @@ export class AutonomyService {
         .from('autonomy_assessments')
         .insert({
           client_id: input.client_id,
-          trainer_id: trainerId,
+          trainer_id: this.trainerId,
           workout_knowledge: workoutKnowledge,
           nutrition_knowledge: nutritionKnowledge,
           behavior_consistency: behaviorConsistency,
@@ -330,7 +341,7 @@ export class AutonomyService {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to create assessment';
       this.error.set(errorMessage);
-      console.error('Error creating assessment:', err);
+      if (isDevMode()) console.error('Error creating assessment:', err);
       return null;
     } finally {
       this.loading.set(false);
@@ -404,7 +415,7 @@ export class AutonomyService {
    * Graduate client to maintenance mode
    */
   async graduateClient(
-    trainerId: string,
+    _trainerId: string,
     input: CreateGraduationInput
   ): Promise<ClientGraduation | null> {
     this.loading.set(true);
@@ -418,7 +429,7 @@ export class AutonomyService {
         .from('client_graduations')
         .insert({
           client_id: input.client_id,
-          trainer_id: trainerId,
+          trainer_id: this.trainerId,
           graduation_type: input.graduation_type,
           status: 'active',
           check_in_frequency: input.check_in_frequency,
@@ -442,7 +453,7 @@ export class AutonomyService {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to graduate client';
       this.error.set(errorMessage);
-      console.error('Error graduating client:', err);
+      if (isDevMode()) console.error('Error graduating client:', err);
       return null;
     } finally {
       this.loading.set(false);
@@ -460,6 +471,7 @@ export class AutonomyService {
         .from('client_graduations')
         .select('*')
         .eq('client_id', clientId)
+        .eq('trainer_id', this.trainerId)
         .eq('status', 'active')
         .order('graduated_at', { ascending: false })
         .limit(1)
@@ -474,7 +486,7 @@ export class AutonomyService {
 
       return data;
     } catch (err) {
-      console.error('Error getting active graduation:', err);
+      if (isDevMode()) console.error('Error getting active graduation:', err);
       return null;
     }
   }
@@ -494,7 +506,8 @@ export class AutonomyService {
           reverted_at: new Date().toISOString(),
           revert_reason: reason,
         })
-        .eq('id', graduationId);
+        .eq('id', graduationId)
+        .eq('trainer_id', this.trainerId);
 
       if (error) throw error;
 
@@ -514,7 +527,7 @@ export class AutonomyService {
 
       return true;
     } catch (err) {
-      console.error('Error reverting graduation:', err);
+      if (isDevMode()) console.error('Error reverting graduation:', err);
       return false;
     }
   }
@@ -554,6 +567,7 @@ export class AutonomyService {
         .from('autonomy_milestones')
         .select('*')
         .eq('client_id', clientId)
+        .eq('trainer_id', this.trainerId)
         .order('achieved_at', { ascending: false });
 
       if (error) throw error;
@@ -561,7 +575,7 @@ export class AutonomyService {
       this.milestones.set(data || []);
       return data || [];
     } catch (err) {
-      console.error('Error getting client milestones:', err);
+      if (isDevMode()) console.error('Error getting client milestones:', err);
       return [];
     }
   }
@@ -570,7 +584,7 @@ export class AutonomyService {
    * Record autonomy milestone
    */
   async recordMilestone(
-    trainerId: string,
+    _trainerId: string,
     clientId: string,
     milestoneType: string,
     title: string,
@@ -586,7 +600,7 @@ export class AutonomyService {
         .from('autonomy_milestones')
         .insert({
           client_id: clientId,
-          trainer_id: trainerId,
+          trainer_id: this.trainerId,
           milestone_type: milestoneType,
           title,
           description: options?.description,
@@ -606,7 +620,7 @@ export class AutonomyService {
 
       return data;
     } catch (err) {
-      console.error('Error recording milestone:', err);
+      if (isDevMode()) console.error('Error recording milestone:', err);
       return null;
     }
   }
